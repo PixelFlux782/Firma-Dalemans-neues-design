@@ -1,0 +1,8 @@
+node_modules
+.next
+.vercel
+*.log
+tsconfig.tsbuildinfo
+Firma-Dalemans/
+.env
+.env.*

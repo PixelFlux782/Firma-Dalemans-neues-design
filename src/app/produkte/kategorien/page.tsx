@@ -1,11 +1,11 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
-import PageHero from "@/components/ui/PageHero";
-import CtaBanner from "@/components/ui/CtaBanner";
-import PremiumImagePlaceholder from "@/components/PremiumImagePlaceholder";
-import { categoryPlaceholders } from "@/lib/category-placeholders";
+import CategoryShowcaseCard from "@/components/home/CategoryShowcaseCard";
+import CinematicPageHero from "@/components/home/CinematicPageHero";
+import HomeSection from "@/components/home/HomeSection";
+import PremiumCtaSection from "@/components/home/PremiumCtaSection";
+import SectionHeader from "@/components/home/SectionHeader";
 import { productCategories } from "@/lib/product-categories";
-import { getProductsByCategory } from "@/lib/products";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
@@ -24,8 +24,8 @@ export const metadata: Metadata = buildMetadata({
 
 export default function ProductCategoriesPage() {
   return (
-    <div className="space-y-20 md:space-y-28">
-      <PageHero
+    <div className="page-stack">
+      <CinematicPageHero
         eyebrow="Kategorien"
         title="Das Sortiment nach Raumbedarf geordnet"
         lead="Wählen Sie den Bereich, der zu Ihrer Nutzung passt — von flexibler Bestuhlung bis zu festlichen Sälen und effizienter Logistik."
@@ -34,76 +34,43 @@ export default function ProductCategoriesPage() {
           { label: "Produkte", href: "/produkte" },
           { label: "Kategorien" },
         ]}
+        mediaAriaLabel="Produktkategorien — atmosphärische Raumkomposition"
+        mood="stone-arch"
         actions={
           <>
-            <Link href="/kontakt" className="btn-primary text-center">
+            <Link href="/kontakt" className="btn-hero-primary text-center">
               Beratung anfragen
             </Link>
-            <Link href="/produkte" className="btn-secondary text-center">
+            <Link href="/produkte" className="btn-hero-secondary text-center">
               Zur Produktübersicht
             </Link>
           </>
         }
       />
 
-      <section className="space-y-8">
-        {productCategories.map((category) => {
-          const categoryProducts = getProductsByCategory(category.id);
-          const placeholder = categoryPlaceholders[category.id];
+      <HomeSection variant="breathing">
+        <SectionHeader
+          eyebrow="Lösungswelten"
+          title="Vier Bereiche — ein durchdachtes Gesamtkonzept"
+          lead="Editorial inszeniert: jede Kategorie mit Nutzen, Einsatzbereichen und direktem Einstieg in die Modelle."
+          href="/produkte"
+          linkLabel="Zur Produktübersicht"
+          align="editorial"
+        />
 
-          return (
-            <article
+        <div className="section-grid-top grid gap-8 md:grid-cols-2 lg:gap-10">
+          {productCategories.map((category, index) => (
+            <CategoryShowcaseCard
               key={category.id}
-              className="premium-card premium-card-hover overflow-hidden"
-            >
-              <div className="grid lg:grid-cols-[minmax(280px,0.95fr)_1.05fr]">
-                <div className="image-zoom-hover overflow-hidden">
-                  <PremiumImagePlaceholder
-                    label={placeholder.label}
-                    todoNote={placeholder.todo}
-                    variant="editorial"
-                    className="min-h-[240px] rounded-none lg:min-h-full"
-                  />
-                </div>
+              category={category}
+              index={index}
+            />
+          ))}
+        </div>
+      </HomeSection>
 
-                <div className="flex flex-col p-8 md:p-10">
-                  <p className="section-eyebrow text-[0.65rem]">
-                    {categoryProducts.length} Produkte
-                  </p>
-                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-premium-ink md:text-3xl">
-                    {category.name}
-                  </h2>
-                  <p className="mt-4 flex-1 text-sm leading-7 text-premium-muted md:text-base md:leading-8">
-                    {category.description}
-                  </p>
-
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    {categoryProducts.slice(0, 4).map((product) => (
-                      <span
-                        key={product.slug}
-                        className="rounded-full border border-premium-beige/60 bg-premium-canvas/80 px-3 py-1.5 text-xs text-premium-muted"
-                      >
-                        {product.title}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-8">
-                    <Link
-                      href={`/produkte/kategorien/${category.id}`}
-                      className="btn-primary"
-                    >
-                      Kategorie öffnen
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </article>
-          );
-        })}
-      </section>
-
-      <CtaBanner
+      <PremiumCtaSection
+        eyebrow="Beratung"
         title="Unsicher, welche Kategorie passt?"
         lead="Beschreiben Sie Ihren Raum und Ihre Nutzung — wir empfehlen Modelle, Zubehör und ein stimmiges Gesamtkonzept."
         primaryHref="/kontakt"

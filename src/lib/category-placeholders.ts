@@ -1,23 +1,24 @@
 import type { ProductCategoryId } from "@/lib/products";
+import type { CinematicMood } from "@/components/CinematicMediaPlaceholder";
 
 export const categoryPlaceholders: Record<
   ProductCategoryId,
-  { label: string; todo: string }
+  { ariaLabel: string; mood: CinematicMood }
 > = {
   stapelstuehle: {
-    label: "Stapelstühle — Raum für Begegnung",
-    todo: "TODO: Premium-Bild für Stapelstühle",
+    ariaLabel: "Stapelstühle — atmosphärische Raumkomposition",
+    mood: "warm-hall",
   },
   klapptische: {
-    label: "Klapptische — flexible Flächen",
-    todo: "TODO: Premium-Bild für Klapptische",
+    ariaLabel: "Klapptische — flexible Raumflächen",
+    mood: "stone-arch",
   },
   "gemeindestuehle-bankettmoebel": {
-    label: "Gemeindestühle — festliche Atmosphäre",
-    todo: "TODO: Premium-Bild für Gemeindestühle",
+    ariaLabel: "Gemeindestühle — festliche Raumatmosphäre",
+    mood: "bronze-glow",
   },
   "transportwagen-zubehoer": {
-    label: "Lounge & Café — einladende Bereiche",
-    todo: "TODO: Premium-Bild für Lounge/Café Bereich",
+    ariaLabel: "Transportwagen und Zubehör — organisierte Veranstaltungslogistik",
+    mood: "espresso-lounge",
   },
 };

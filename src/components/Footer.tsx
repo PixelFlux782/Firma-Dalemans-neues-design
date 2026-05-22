@@ -37,7 +37,7 @@ export function Footer() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="transition hover:text-white"
+                className="transition hover:text-white focus-visible:outline-none focus-visible:text-white focus-visible:underline focus-visible:underline-offset-4"
               >
                 {link.label}
               </Link>
@@ -60,7 +60,7 @@ export function Footer() {
               <Link
                 key={category.id}
                 href={`/produkte/kategorien/${category.id}`}
-                className="transition hover:text-white"
+                className="transition hover:text-white focus-visible:outline-none focus-visible:text-white focus-visible:underline focus-visible:underline-offset-4"
               >
                 {category.name}
               </Link>

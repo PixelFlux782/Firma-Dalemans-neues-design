@@ -66,7 +66,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="de">
       <body>
         <Header />
-        <main className="min-h-screen py-8 md:py-12">
+        <main className="min-h-screen py-6 md:py-10 lg:py-12">
           <div className="container-premium">{children}</div>
         </main>
         <Footer />
@@ -74,4 +74,3 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     </html>
   );
 }
-

@@ -2,10 +2,10 @@
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import CategoryShowcaseCard from "@/components/home/CategoryShowcaseCard";
+import CinematicPageHero from "@/components/home/CinematicPageHero";
+import HomeSection from "@/components/home/HomeSection";
+import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
-import PageHero from "@/components/ui/PageHero";
-import CtaBanner from "@/components/ui/CtaBanner";
-import PremiumImagePlaceholder from "@/components/PremiumImagePlaceholder";
 import { productCategories } from "@/lib/product-categories";
 import { getProductsByCategory, products } from "@/lib/products";
 import { buildMetadata } from "@/lib/seo";
@@ -28,63 +28,79 @@ export const metadata: Metadata = buildMetadata({
 
 export default function ProductsPage() {
   return (
-    <div className="space-y-20 md:space-y-28">
-      <PageHero
+    <div className="page-stack">
+      <CinematicPageHero
         eyebrow="Produktübersicht"
         title="Möbel und Raumlösungen für flexible Begegnungsorte"
-        lead="Stapelstühle, Klapptische, Gemeindestühle und Zubehör — klar gegliedert, damit Sie schnell die passende Lösung für Nutzung, Raumgröße und Atmosphäre finden."
+        lead="Stapelstühle, Klapptische, Gemeindestühle und Zubehör — editorial inszeniert, damit Sie schnell die passende Lösung für Nutzung, Raumgröße und Atmosphäre finden."
         breadcrumbs={[{ label: "Start", href: "/" }, { label: "Produkte" }]}
+        mediaAriaLabel="Sortiment — atmosphärische Raumkomposition"
+        mood="stone-arch"
         actions={
           <>
-            <Link href="/produkte/kategorien" className="btn-primary text-center">
+            <Link href="/produkte/kategorien" className="btn-hero-primary text-center">
               Kategorien ansehen
             </Link>
-            <Link href="/kontakt" className="btn-secondary text-center">
+            <Link href="/kontakt" className="btn-hero-secondary text-center">
               Beratung anfragen
             </Link>
           </>
         }
-        visual={
-          <PremiumImagePlaceholder
-            label="Sortiment — Raumübersicht"
-            todoNote="TODO: Premium-Produktübersicht Bild"
-            variant="editorial"
-          />
-        }
       />
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {productCategories.map((category) => {
-          const count = getProductsByCategory(category.id).length;
+      <HomeSection>
+        <SectionHeader
+          eyebrow="Schnellwahl"
+          title="Vier Lösungswelten — ein Gesamtkonzept"
+          lead="Kompakte Orientierung nach Kategorie — mit direktem Einstieg in Modelle und Einsatzbereiche."
+          align="editorial"
+        />
 
-          return (
-            <Link
-              key={category.id}
-              href={`/produkte/kategorien/${category.id}`}
-              className="premium-card premium-card-hover p-6"
-            >
-              <p className="section-eyebrow text-[0.65rem]">{category.name}</p>
-              <p className="mt-3 text-sm leading-7 text-premium-muted">
-                {category.intro}
-              </p>
-              <p className="mt-5 font-mono text-[10px] uppercase tracking-wider text-premium-subtle">
-                {count} Modelle
-              </p>
-            </Link>
-          );
-        })}
-      </section>
+        <div className="section-grid-top grid gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+          {productCategories.map((category, index) => {
+            const count = getProductsByCategory(category.id).length;
 
-      <section className="space-y-10 md:space-y-12">
+            return (
+              <Link
+                key={category.id}
+                href={`/produkte/kategorien/${category.id}`}
+                className={[
+                  "premium-card premium-card-hover animate-fade-up p-7 md:p-8",
+                  index === 1 && "animate-fade-up-delay-1",
+                  index === 2 && "animate-fade-up-delay-2",
+                  index === 3 && "animate-fade-up-delay-3",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <span
+                  className="mb-4 block h-px w-8 bg-gradient-to-r from-premium-bronze/50 to-transparent"
+                  aria-hidden
+                />
+                <p className="section-eyebrow text-[0.65rem]">{category.name}</p>
+                <p className="mt-3 text-sm leading-[1.75] text-premium-muted">
+                  {category.intro}
+                </p>
+                <p className="mt-5 font-mono text-[10px] uppercase tracking-wider text-premium-subtle">
+                  {count} Modelle
+                </p>
+              </Link>
+            );
+          })}
+        </div>
+      </HomeSection>
+
+      <HomeSection variant="breathing">
         <SectionHeader
           eyebrow="Lösungswelten"
           title="Vier Bereiche — ein durchdachtes Gesamtkonzept"
           lead="Editorial inszeniert: jede Kategorie mit Nutzen, Einsatzbereichen und direktem Einstieg."
           href="/produkte/kategorien"
           linkLabel="Alle Kategorien"
+          align="editorial"
         />
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="section-grid-top grid gap-8 md:grid-cols-2 lg:gap-10">
           {productCategories.map((category, index) => (
             <CategoryShowcaseCard
               key={category.id}
@@ -93,30 +109,35 @@ export default function ProductsPage() {
             />
           ))}
         </div>
-      </section>
+      </HomeSection>
 
-      <section className="space-y-10 md:space-y-12">
+      <HomeSection variant="breathing">
         <SectionHeader
           eyebrow="Ausgewählte Lösungen"
           title="Produkte, die im Raum überzeugen"
           lead="Beispielmodelle aus dem Sortiment — mit Details, Einsatzgebieten und persönlicher Beratung."
         />
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.slug} product={product} />
+        <div className="section-grid-top grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+          {featuredProducts.map((product, i) => (
+            <div
+              key={product.slug}
+              className={`animate-fade-up ${i === 1 ? "animate-fade-up-delay-1" : i === 2 ? "animate-fade-up-delay-2" : i === 3 ? "animate-fade-up-delay-3" : i === 4 ? "animate-fade-up-delay-1" : i === 5 ? "animate-fade-up-delay-2" : ""}`}
+            >
+              <ProductCard product={product} />
+            </div>
           ))}
         </div>
-      </section>
+      </HomeSection>
 
-      <CtaBanner
+      <PremiumCtaSection
+        eyebrow="Beratung"
         title="Gemeinsam die passende Lösung für Ihren Raum finden"
         lead="Wir stimmen Produkte, Zubehör und Einsatzbereiche auf Ihre Nutzung ab — ruhig, persönlich und mit Blick auf Raumwirkung."
         primaryHref="/kontakt"
         primaryLabel="Projekt besprechen"
         secondaryHref="/produkte/kategorien"
         secondaryLabel="Kategorien öffnen"
-        dark={false}
       />
     </div>
   );

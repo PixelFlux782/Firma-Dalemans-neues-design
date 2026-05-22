@@ -64,21 +64,26 @@ export function Header() {
             href="/kontakt"
             className="btn-primary px-5 py-2.5"
           >
-            Anfrage senden
+            Beratung anfragen
           </Link>
         </div>
 
         <button
           type="button"
-          className="rounded-full border border-premium-beige/60 px-4 py-2 text-sm font-medium text-premium-charcoal lg:hidden"
+          className="rounded-full border border-premium-beige/60 px-4 py-2 text-sm font-medium text-premium-charcoal transition hover:border-premium-stone hover:bg-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/30 lg:hidden"
           onClick={() => setMenuOpen((value) => !value)}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-nav"
         >
-          Menü
+          {menuOpen ? "Schließen" : "Menü"}
         </button>
       </div>
 
       {menuOpen ? (
-        <div className="border-t border-premium-beige/60 bg-white lg:hidden">
+        <div
+          id="mobile-nav"
+          className="border-t border-premium-beige/60 bg-white lg:hidden"
+        >
           <div className="container-premium space-y-6 py-6">
             <nav className="grid gap-2">
               {primaryLinks.map((link) => {
@@ -88,10 +93,10 @@ export function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`rounded-2xl px-4 py-3 text-sm font-medium ${
+                    className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
                       active
                         ? "bg-premium-warm text-premium-ink"
-                        : "bg-premium-canvas text-premium-muted"
+                        : "bg-premium-canvas text-premium-muted hover:bg-white hover:text-premium-ink"
                     }`}
                     onClick={() => setMenuOpen(false)}
                   >
@@ -106,7 +111,7 @@ export function Header() {
               className="btn-primary"
               onClick={() => setMenuOpen(false)}
             >
-              Anfrage senden
+              Beratung anfragen
             </Link>
           </div>
         </div>

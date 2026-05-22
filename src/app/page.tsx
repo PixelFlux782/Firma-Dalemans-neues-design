@@ -1,10 +1,12 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
+import CinematicMediaPlaceholder from "@/components/CinematicMediaPlaceholder";
 import HeroSection from "@/components/home/HeroSection";
+import HomeSection from "@/components/home/HomeSection";
+import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
 import CategoryShowcaseCard from "@/components/home/CategoryShowcaseCard";
-import PremiumImagePlaceholder from "@/components/PremiumImagePlaceholder";
 import { productCategories } from "@/lib/product-categories";
 import { products } from "@/lib/products";
 import { buildMetadata } from "@/lib/seo";
@@ -61,17 +63,16 @@ const storyBlocks = [
 
 export default function HomePage() {
   return (
-    <div className="space-y-20 md:space-y-28 lg:space-y-32">
+    <div className="page-stack">
       <HeroSection />
 
-      {/* Vertrauen / Social Proof */}
-      <section className="animate-fade-up">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <HomeSection>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
           {trustMetrics.map((item, index) => (
             <article
               key={item.title}
               className={[
-                "premium-card animate-fade-up p-6 md:p-7",
+                "premium-card premium-card-hover animate-fade-up p-7 md:p-8",
                 index === 1 && "animate-fade-up-delay-1",
                 index === 2 && "animate-fade-up-delay-2",
                 index === 3 && "animate-fade-up-delay-3",
@@ -79,72 +80,78 @@ export default function HomePage() {
                 .filter(Boolean)
                 .join(" ")}
             >
-              <h2 className="text-lg font-semibold tracking-tight text-premium-ink">
+              <span
+                className="mb-4 block h-px w-8 bg-gradient-to-r from-premium-bronze/50 to-transparent"
+                aria-hidden
+              />
+              <h2 className="font-display text-xl font-medium tracking-[-0.02em] text-premium-ink">
                 {item.title}
               </h2>
-              <p className="mt-3 text-sm leading-7 text-premium-muted">
+              <p className="mt-3 text-sm leading-[1.75] text-premium-muted">
                 {item.text}
               </p>
             </article>
           ))}
         </div>
 
-        {/* TODO: Kundenlogos / Referenzen einfügen */}
-        <div className="mt-8 rounded-4xl border border-dashed border-premium-beige/80 bg-premium-warm/40 px-6 py-8 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-premium-subtle">
-            TODO: Kundenlogos & Referenzen
-          </p>
-          <p className="mt-2 text-sm text-premium-muted">
-            Platzhalter für spätere Partner aus Gemeinden, Kommunen, Vereinen
-            und Veranstaltungen
-          </p>
+        <div className="image-depth mt-10 overflow-hidden rounded-5xl md:mt-12">
+          <CinematicMediaPlaceholder
+            ariaLabel="Vertrauenspartner — editorial Fläche für Referenzen"
+            mood="soft-partners"
+            variant="strip"
+            className="min-h-[140px] md:min-h-[160px]"
+          />
         </div>
-      </section>
+      </HomeSection>
 
-      {/* Storytelling */}
-      <section className="space-y-12">
+      <HomeSection variant="breathing">
         <SectionHeader
           eyebrow="Raumdenken"
           title="Mehr als Möbel — Atmosphäre, die bleibt"
           lead="Wir unterstützen Gemeinden, Vereine und Veranstalter dabei, Räume zu schaffen, die einladend wirken und im Alltag zuverlässig funktionieren."
+          align="editorial"
         />
 
-        <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
-          <div className="space-y-10">
-            {storyBlocks.map((block) => (
-              <article key={block.title} className="max-w-lg">
-                <h3 className="text-xl font-semibold tracking-tight text-premium-ink">
+        <div className="section-grid-top grid gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16">
+          <div className="space-y-14 md:space-y-16">
+            {storyBlocks.map((block, i) => (
+              <article
+                key={block.title}
+                className={`max-w-lg animate-fade-up ${
+                  i === 1 ? "animate-fade-up-delay-1 md:pl-6" : i === 2 ? "animate-fade-up-delay-2" : ""
+                }`}
+              >
+                <h3 className="font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink">
                   {block.title}
                 </h3>
-                <p className="mt-3 text-sm leading-7 text-premium-muted md:text-base md:leading-8">
+                <p className="mt-4 text-sm leading-[1.8] text-premium-muted md:text-base">
                   {block.text}
                 </p>
               </article>
             ))}
           </div>
 
-          <div className="image-zoom-hover overflow-hidden rounded-5xl shadow-premium-lg">
-            <PremiumImagePlaceholder
-              label="Begegnungsraum — Editorial"
-              todoNote="TODO: Premium-Raumfoto für Storytelling"
-              variant="editorial"
-              className="min-h-[400px] lg:min-h-full"
+          <div className="image-depth overflow-hidden rounded-6xl shadow-premium-xl lg:sticky lg:top-28 lg:self-start">
+            <img
+              src={encodeURI("/pictures/Über uns/Realisierte-11.jpg")}
+              alt="Realisierte Bestuhlung in einem Begegnungsraum"
+              className="min-h-[420px] w-full object-cover lg:min-h-[520px]"
             />
           </div>
         </div>
-      </section>
+      </HomeSection>
 
-      {/* Kategorien */}
-      <section className="space-y-10 md:space-y-12">
+      <HomeSection variant="breathing">
         <SectionHeader
           eyebrow="Lösungswelten"
           title="Räume gestalten — Kategorie für Kategorie"
           lead="Editorial inszeniert statt Katalog: entdecken Sie Stapelstühle, Tische und ergänzende Lösungen für Ihre Nutzungssituation."
           href="/produkte/kategorien"
           linkLabel="Alle Kategorien"
+          align="editorial"
         />
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="section-grid-top grid gap-8 md:grid-cols-2 lg:gap-10">
           {productCategories.map((category, index) => (
             <CategoryShowcaseCard
               key={category.id}
@@ -153,39 +160,40 @@ export default function HomePage() {
             />
           ))}
         </div>
-      </section>
+      </HomeSection>
 
-      {/* Firmengeschichte */}
-      <section className="overflow-hidden rounded-5xl bg-premium-ink text-premium-canvas shadow-premium-lg">
+      <section className="relative overflow-hidden rounded-6xl bg-premium-espresso text-premium-canvas shadow-premium-xl">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_0%_50%,rgba(196,165,116,0.12),transparent_55%)]"
+          aria-hidden
+        />
         <div className="grid lg:grid-cols-2">
-          <div className="image-zoom-hover relative min-h-[320px] overflow-hidden lg:min-h-[480px]">
+          <div className="image-depth relative min-h-[360px] overflow-hidden lg:min-h-[520px]">
             <img
               src={encodeURI("/pictures/Über uns/Passbild_Stefan_F_edit.jpg")}
               alt="Stefan Dalemans — persönliche Beratung"
               className="absolute inset-0 h-full w-full object-cover object-top"
             />
             <div
-              className="absolute inset-0 bg-gradient-to-t from-premium-ink/60 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-premium-ink/40"
+              className="absolute inset-0 bg-gradient-to-t from-premium-espresso via-premium-espresso/20 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-premium-espresso/30 lg:to-premium-espresso"
               aria-hidden
             />
           </div>
 
-          <div className="flex flex-col justify-center px-8 py-12 md:px-12 md:py-16">
+          <div className="relative flex flex-col justify-center px-8 py-14 md:px-14 md:py-20 lg:px-16">
             <p className="section-eyebrow text-premium-sand">Familienunternehmen</p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight md:text-4xl">
+            <h2 className="font-display mt-5 text-3xl font-medium leading-[1.12] tracking-[-0.02em] md:text-4xl lg:text-[2.75rem]">
               Vertrauen, das man im Raum spürt
             </h2>
-            <p className="mt-5 max-w-lg text-sm leading-7 text-white/75 md:text-base md:leading-8">
+            <p className="mt-6 max-w-lg text-sm leading-[1.8] text-white/72 md:text-base">
               Dalemans verbindet generationsübergreifende Erfahrung mit einem
               klaren Blick für moderne Begegnungsorte. Persönlich, ehrlich und
               nah an der Praxis von Gemeinden, Vereinen und Veranstaltern.
             </p>
-            <p className="mt-4 max-w-lg text-sm leading-7 text-white/60">
-              Wir denken in Nutzungsszenarien — nicht in anonymen Listen. So
-              entstehen Lösungen, die Bestuhlung, Lagerung und Raumwirkung
-              zusammenbringen.
+            <p className="mt-4 max-w-lg text-sm leading-[1.8] text-white/55">
+              Wir denken in Nutzungsszenarien — nicht in anonymen Listen.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <Link href="/firma" className="btn-on-dark text-center">
                 Unsere Geschichte
               </Link>
@@ -197,8 +205,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="space-y-10 md:space-y-12">
+      <HomeSection variant="breathing">
         <SectionHeader
           eyebrow="Ausgewählte Lösungen"
           title="Produkte, die im Raum überzeugen"
@@ -207,27 +214,31 @@ export default function HomePage() {
           linkLabel="Gesamtes Sortiment"
         />
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.slug} product={product} />
+        <div className="section-grid-top grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+          {featuredProducts.map((product, i) => (
+            <div
+              key={product.slug}
+              className={`animate-fade-up ${i === 1 ? "animate-fade-up-delay-1" : i === 2 ? "animate-fade-up-delay-2" : ""}`}
+            >
+              <ProductCard product={product} />
+            </div>
           ))}
         </div>
-      </section>
+      </HomeSection>
 
-      {/* Sonderlösungen */}
-      <section className="overflow-hidden rounded-5xl border border-premium-beige/50 bg-gradient-to-br from-premium-warm via-premium-canvas to-white shadow-premium">
-        <div className="grid gap-10 p-8 md:p-12 lg:grid-cols-2 lg:gap-14">
-          <div className="flex flex-col justify-center">
+      <HomeSection variant="elevated">
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
+          <div className="flex flex-col justify-center lg:py-4">
             <p className="section-eyebrow">Sonderlösungen</p>
-            <h2 className="section-title mt-4">
+            <h2 className="section-title mt-5 text-balance">
               Wenn der Raum mehr verlangt als Standard
             </h2>
-            <p className="section-lead mt-5">
+            <p className="section-lead mt-6">
               CAD-Entwicklung, angepasste Formate und lösungsorientierte Planung
               — für Projekte, in denen Funktion, Ästhetik und Alltagstauglichkeit
               zusammenpassen müssen.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <Link href="/firma" className="btn-primary text-center">
                 Entwicklung & Firma
               </Link>
@@ -237,58 +248,40 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="image-zoom-hover overflow-hidden rounded-4xl shadow-premium sm:col-span-2">
-              <PremiumImagePlaceholder
-                label="CAD & Sonderentwicklung"
-                todoNote="TODO: Premium-Bild Sonderlösungen / CAD"
-                variant="editorial"
-                className="min-h-[200px]"
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="image-depth overflow-hidden rounded-5xl shadow-premium sm:col-span-2">
+              <img
+                src={encodeURI("/pictures/Über uns/Werkstatt-24.jpg")}
+                alt="Werkstatt und Fertigung bei Dalemans"
+                className="h-full min-h-[220px] w-full object-cover"
               />
             </div>
-            <div className="image-zoom-hover overflow-hidden rounded-4xl shadow-premium">
+            <div className="image-depth overflow-hidden rounded-5xl shadow-premium">
               <img
                 src={encodeURI("/pictures/Über uns/Technische-03.jpg")}
                 alt="Technische Entwicklung bei Dalemans"
-                className="h-full min-h-[200px] w-full object-cover"
+                className="h-full min-h-[220px] w-full object-cover"
               />
             </div>
-            <div className="image-zoom-hover overflow-hidden rounded-4xl shadow-premium">
+            <div className="image-depth overflow-hidden rounded-5xl shadow-premium">
               <img
                 src={encodeURI("/pictures/Über uns/CAD-Entwicklung1zu1.png")}
                 alt="CAD-Entwicklung bei Dalemans"
-                className="h-full min-h-[200px] w-full object-cover"
+                className="h-full min-h-[220px] w-full object-cover"
               />
             </div>
           </div>
         </div>
-      </section>
+      </HomeSection>
 
-      {/* Abschluss-CTA */}
-      <section className="relative overflow-hidden rounded-5xl bg-premium-charcoal px-8 py-14 text-center shadow-premium-lg md:px-14 md:py-20">
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-premium-sand/10 via-transparent to-premium-ink/30"
-          aria-hidden
-        />
-        <div className="relative mx-auto max-w-2xl">
-          <p className="section-eyebrow text-premium-sand">Gemeinsam planen</p>
-          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
-            Sie planen einen neuen Raum?
-          </h2>
-          <p className="mt-5 text-base leading-8 text-white/70 md:text-lg">
-            Wir helfen bei Bestuhlung, Möbelauswahl und Raumwirkung — ruhig,
-            persönlich und mit Blick auf Ihre Nutzung vor Ort.
-          </p>
-          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
-            <Link href="/kontakt" className="btn-on-dark">
-              Projekt besprechen
-            </Link>
-            <Link href="/produkte" className="btn-outline-dark">
-              Lösungen ansehen
-            </Link>
-          </div>
-        </div>
-      </section>
+      <PremiumCtaSection
+        title="Sie planen einen neuen Raum?"
+        lead="Wir helfen bei Bestuhlung, Möbelauswahl und Raumwirkung — ruhig, persönlich und mit Blick auf Ihre Nutzung vor Ort."
+        primaryHref="/kontakt"
+        primaryLabel="Projekt besprechen"
+        secondaryHref="/produkte"
+        secondaryLabel="Lösungen ansehen"
+      />
     </div>
   );
 }

@@ -5,8 +5,9 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const primaryLinks = [
-  { href: "/", label: "Start" },
   { href: "/produkte", label: "Produkte" },
+  { href: "/raumloesungen/gemeindesaal", label: "Raumlösungen" },
+  { href: "/sonderloesungen", label: "Sonderlösungen" },
   { href: "/firma", label: "Firma" },
   { href: "/kontakt", label: "Kontakt" },
 ] as const;
@@ -23,18 +24,22 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-premium-beige/40 bg-premium-canvas/90 backdrop-blur-md">
       <div className="container-premium flex items-center justify-between gap-6 py-4">
-        <Link href="/" className="flex items-center gap-4" onClick={() => setMenuOpen(false)}>
+        <Link
+          href="/"
+          className="min-w-0 flex items-center gap-4"
+          onClick={() => setMenuOpen(false)}
+        >
           <img
             src={encodeURI("/pictures/Über uns/dalemans_logo1.png")}
-            alt="Dalemans"
-            className="h-14 w-auto object-contain"
+            alt="DLMNS Stapelstühle & Klapptische"
+            className="h-12 w-auto shrink-0 object-contain sm:h-14"
           />
           <div className="hidden sm:block">
             <p className="text-xs font-medium uppercase tracking-[0.24em] text-premium-gold">
-              Dalemans
+              DLMNS
             </p>
             <p className="text-sm text-premium-muted">
-              Stapelstühle, Klapptische und Sonderlösungen
+              Stapelstühle & Klapptische
             </p>
           </div>
         </Link>
@@ -70,7 +75,7 @@ export function Header() {
 
         <button
           type="button"
-          className="rounded-full border border-premium-beige/60 px-4 py-2 text-sm font-medium text-premium-charcoal transition hover:border-premium-stone hover:bg-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/30 lg:hidden"
+          className="shrink-0 rounded-full border border-premium-beige/60 px-4 py-2 text-sm font-medium text-premium-charcoal transition hover:border-premium-stone hover:bg-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/30 lg:hidden"
           onClick={() => setMenuOpen((value) => !value)}
           aria-expanded={menuOpen}
           aria-controls="mobile-nav"
@@ -113,10 +118,18 @@ export function Header() {
             >
               Beratung anfragen
             </Link>
+            <div className="rounded-2xl border border-premium-beige/60 bg-premium-canvas p-4 text-sm leading-7 text-premium-muted">
+              <a href="tel:+499342915353" className="font-medium text-premium-ink">
+                +49 9342 9153-53
+              </a>
+              <br />
+              <a href="mailto:info@dalemans.de" className="font-medium text-premium-ink">
+                info@dalemans.de
+              </a>
+            </div>
           </div>
         </div>
       ) : null}
     </header>
   );
 }
-

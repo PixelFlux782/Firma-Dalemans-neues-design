@@ -28,8 +28,8 @@ export default function CinematicPageHero({
   visual,
 }: CinematicPageHeroProps) {
   const minHeight = visual
-    ? "min-h-[68vh] sm:min-h-[64vh] md:min-h-[62vh]"
-    : "min-h-[70vh] sm:min-h-[66vh] md:min-h-[64vh]";
+    ? "min-h-0 md:min-h-[62vh]"
+    : "min-h-[460px] sm:min-h-[520px] md:min-h-[64vh]";
 
   return (
     <section className="relative -mx-5 overflow-hidden sm:-mx-6 md:mx-0 md:rounded-6xl">
@@ -61,9 +61,9 @@ export default function CinematicPageHero({
           }`}
         >
           <div
-            className={`container-premium pointer-events-auto pb-11 pt-24 sm:pb-12 sm:pt-28 md:pb-16 md:pt-32 ${
+            className={`container-premium pointer-events-auto pb-10 pt-16 sm:pb-12 sm:pt-20 md:pb-16 md:pt-32 ${
               visual ? "lg:pb-16 lg:pr-8" : ""
-            }`}
+            } min-w-0`}
           >
             {breadcrumbs ? (
               <div className="animate-fade-up mb-6">
@@ -82,7 +82,7 @@ export default function CinematicPageHero({
               <p className="section-eyebrow text-premium-sand/90">{eyebrow}</p>
             </div>
 
-            <h1 className="hero-headline animate-fade-up animate-fade-up-delay-1 max-w-3xl text-balance text-[2rem] sm:text-4xl md:text-[2.85rem] lg:text-[3.1rem]">
+            <h1 className="hero-headline animate-fade-up animate-fade-up-delay-1 max-w-3xl text-balance text-[1.85rem] sm:text-4xl md:text-[2.85rem] lg:text-[3.1rem]">
               {title}
             </h1>
 
@@ -100,7 +100,7 @@ export default function CinematicPageHero({
           </div>
 
           {visual ? (
-            <div className="container-premium pointer-events-auto pb-10 lg:pb-16 lg:pl-4">
+            <div className="container-premium pointer-events-auto min-w-0 pb-10 lg:pb-16 lg:pl-4">
               <div className="animate-fade-up animate-fade-up-delay-2 image-depth overflow-hidden rounded-5xl shadow-premium-xl">
                 {visual}
               </div>

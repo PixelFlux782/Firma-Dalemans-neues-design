@@ -31,8 +31,8 @@ export default function ProductsPage() {
     <div className="page-stack">
       <CinematicPageHero
         eyebrow="Produktübersicht"
-        title="Möbel und Raumlösungen für flexible Begegnungsorte"
-        lead="Stapelstühle, Klapptische, Gemeindestühle und Zubehör — editorial inszeniert, damit Sie schnell die passende Lösung für Nutzung, Raumgröße und Atmosphäre finden."
+        title="Stapelstühle, Klapptische und Zubehör nach Einsatz geordnet"
+        lead="Finden Sie schnell passende Modelle für Gemeindesaal, Seminarraum, Verein oder Veranstaltung: mit Einsatzbereichen, Vorteilen und direktem Weg zur Beratung."
         breadcrumbs={[{ label: "Start", href: "/" }, { label: "Produkte" }]}
         mediaAriaLabel="Sortiment — atmosphärische Raumkomposition"
         mood="stone-arch"
@@ -94,7 +94,7 @@ export default function ProductsPage() {
         <SectionHeader
           eyebrow="Lösungswelten"
           title="Vier Bereiche — ein durchdachtes Gesamtkonzept"
-          lead="Editorial inszeniert: jede Kategorie mit Nutzen, Einsatzbereichen und direktem Einstieg."
+          lead="Jede Kategorie mit Nutzen, Einsatzbereichen und direktem Einstieg in passende Modelle."
           href="/produkte/kategorien"
           linkLabel="Alle Kategorien"
           align="editorial"

@@ -6,7 +6,16 @@ import { absoluteUrl, siteUrl } from "@/lib/seo";
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
-  const staticRoutes = ["/", "/produkte", "/produkte/kategorien", "/firma", "/kontakt"];
+  const staticRoutes = [
+    "/",
+    "/produkte",
+    "/produkte/kategorien",
+    "/raumloesungen/gemeindesaal",
+    "/beratung/stapelstuehle-kaufen",
+    "/sonderloesungen",
+    "/firma",
+    "/kontakt",
+  ];
 
   const staticEntries = staticRoutes.map((path) => ({
     url: absoluteUrl(path),

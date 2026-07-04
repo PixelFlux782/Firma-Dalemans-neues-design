@@ -11,22 +11,29 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div className="overflow-hidden">
         <img
           src={product.image}
-          alt={product.title}
+          alt={`${product.title} für ${product.suitableFor.slice(0, 2).join(" und ")}`}
           className="h-60 w-full object-cover md:h-64"
         />
       </div>
 
       <div className="flex flex-1 flex-col p-7 md:p-8">
         <p className="section-eyebrow text-[0.65rem]">{product.categoryName}</p>
-        <h3 className="font-display mt-3 text-xl font-medium tracking-[-0.02em] text-premium-ink md:text-2xl">
+        <h3 className="mt-3 font-display text-xl font-medium tracking-[-0.02em] text-premium-ink md:text-2xl">
           {product.title}
         </h3>
         <p className="mt-4 flex-1 text-sm leading-[1.75] text-premium-muted">
           {product.shortDescription}
         </p>
 
+        <p className="mt-5 text-xs font-medium uppercase tracking-[0.18em] text-premium-bronze">
+          Geeignet für
+        </p>
+        <p className="mt-2 text-sm leading-7 text-premium-charcoal/85">
+          {product.suitableFor.slice(0, 3).join(" · ")}
+        </p>
+
         <ul className="mt-5 space-y-2 border-t border-premium-warm pt-5 text-sm text-premium-charcoal/90">
-          {product.highlights.slice(0, 2).map((item) => (
+          {product.highlights.slice(0, 3).map((item) => (
             <li key={item} className="flex gap-2 leading-[1.75]">
               <span className="text-premium-sand" aria-hidden>
                 —
@@ -36,12 +43,18 @@ export default function ProductCard({ product }: ProductCardProps) {
           ))}
         </ul>
 
-        <div className="mt-7">
+        <div className="mt-7 flex flex-col gap-2 sm:flex-row">
           <Link
             href={`/produkte/${product.slug}`}
             className="btn-primary px-5 py-2.5 text-sm group-hover:shadow-premium-glow"
           >
-            Produkt ansehen
+            Details ansehen
+          </Link>
+          <Link
+            href="/kontakt"
+            className="btn-secondary px-5 py-2.5 text-sm"
+          >
+            Anfragen
           </Link>
         </div>
       </div>

@@ -52,7 +52,7 @@ export default function ProductCategoriesPage() {
         <SectionHeader
           eyebrow="Lösungswelten"
           title="Vier Bereiche — ein durchdachtes Gesamtkonzept"
-          lead="Editorial inszeniert: jede Kategorie mit Nutzen, Einsatzbereichen und direktem Einstieg in die Modelle."
+          lead="Jede Kategorie mit Nutzen, Einsatzbereichen und direktem Einstieg in die Modelle."
           href="/produkte"
           linkLabel="Zur Produktübersicht"
           align="editorial"

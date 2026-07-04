@@ -1,286 +1,366 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
-import CinematicMediaPlaceholder from "@/components/CinematicMediaPlaceholder";
+import { StructuredData } from "@/components/StructuredData";
 import HeroSection from "@/components/home/HeroSection";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
-import CategoryShowcaseCard from "@/components/home/CategoryShowcaseCard";
 import { productCategories } from "@/lib/product-categories";
 import { products } from "@/lib/products";
-import { buildMetadata } from "@/lib/seo";
+import { absoluteUrl, buildMetadata, siteName } from "@/lib/seo";
 
-const featuredProducts = products.slice(0, 3);
+const featuredProducts = [
+  "stapelstuhl-mod-1021c",
+  "klapptisch-310c",
+  "trapezklapptisch-310c",
+  "stuhltransportwagen",
+]
+  .map((slug) => products.find((product) => product.slug === slug))
+  .filter(Boolean)
+  .slice(0, 4);
 
 export const metadata: Metadata = buildMetadata({
-  title: "Stapelstühle, Klapptische und Lösungen für Gemeinde und Saal",
+  title: "DLMNS Stapelstühle & Klapptische für Gemeinden und Säle",
   description:
-    "Dalemans bietet Stapelstühle, Klapptische und durchdachte Raumlösungen für Gemeinden, Vereine, Säle und Veranstaltungsräume — mit persönlicher Beratung und langlebiger Qualität.",
+    "DLMNS Stapelstühle & Klapptische liefert robuste Stapelstühle, Klapptische, Zubehör und persönliche Beratung für Gemeinden, Säle, Vereine und flexible Räume.",
   path: "/",
   keywords: [
-    "Stapelstühle",
-    "Klapptische",
-    "Gemeindemobiliar",
+    "Stapelstühle für Gemeinden",
+    "Klapptische für Gemeinden",
+    "Gemeindestühle",
     "Saalmöbel",
-    "Veranstaltungsmobiliar",
+    "Transportwagen Stühle",
+    "DLMNS",
   ],
 });
 
-const trustMetrics = [
+const orientation = [
   {
-    title: "Persönliche Beratung",
-    text: "Vom ersten Gespräch bis zur Bestuhlung — mit Blick auf Nutzung, Raumwirkung und Budget.",
+    title: "Stapelstühle",
+    href: "/produkte/kategorien/stapelstuehle",
+    text: "Robuste Reihen- und Flächenbestuhlung für Gemeinden, Säle und Veranstaltungen.",
   },
   {
-    title: "Flexible Raumlösungen",
-    text: "Stapelbar, klapbar, kombinierbar: Möbel, die mit Ihren Räumen mitdenken.",
+    title: "Klapptische",
+    href: "/produkte/kategorien/klapptische",
+    text: "Flexible Tischlösungen für Seminare, Gemeindecafé, Buffet und Sondermaße.",
   },
   {
-    title: "Für Gemeinden, Kommunen & Veranstalter",
-    text: "Erfahrung aus Gottesdiensträumen, Sälen, Seminaren und festlichen Anlässen.",
+    title: "Gemeindestühle & Bankett",
+    href: "/produkte/kategorien/gemeindestuehle-bankettmoebel",
+    text: "Komfort und ein ruhiges Gesamtbild für Gottesdienste, Feiern und Bankette.",
   },
   {
-    title: "Langlebige Möbelkonzepte",
-    text: "Robuste Konstruktionen für häufige Nutzung — investiert in Jahrzehnte, nicht in Saisons.",
+    title: "Transportwagen & Zubehör",
+    href: "/produkte/kategorien/transportwagen-zubehoer",
+    text: "Zubehör, Reihenverbinder, Buchablagen und Wagen für klare Abläufe.",
   },
 ] as const;
 
-const storyBlocks = [
+const reasons = [
+  "langlebig statt billig",
+  "persönliche Beratung zu Nutzung, Bestand und Budget",
+  "Erfahrung mit Gemeinden, Sälen und Vereinen",
+  "Sonderlösungen mit Skizze, CAD und praktischer Umsetzung",
+  "Ersatzteile, Zubehör und Transportlogik mitgedacht",
+] as const;
+
+const finder = [
   {
-    title: "Begegnung im Mittelpunkt",
-    text: "Gute Räume laden ein zum Zuhören, Feiern und Zusammensein. Wir gestalten Bestuhlung und Mobiliar so, dass Atmosphäre und Funktion zusammenpassen.",
+    title: "Ich richte einen Gemeindesaal ein",
+    href: "/raumloesungen/gemeindesaal",
+    text: "Bestuhlung, Tische, Reihen, Wege und Lagerung gemeinsam planen.",
   },
   {
-    title: "Flexibel statt starr",
-    text: "Mehrzweckräume brauchen schnelle Umbauten. Stapelstühle, Klapptische und durchdachtes Zubehör halten Abläufe ruhig und übersichtlich.",
+    title: "Ich brauche flexible Tische",
+    href: "/produkte/kategorien/klapptische",
+    text: "Klapptische, Trapeztische und Sondermaße für wechselnde Nutzung.",
   },
   {
-    title: "Beratung mit Raumgefühl",
-    text: "Nicht nur Produkte liefern — sondern Konzepte: Reihenbild, Wegeführung, Lagerung und Wirkung im leeren wie im vollen Saal.",
+    title: "Ich brauche viele robuste Stühle",
+    href: "/produkte/kategorien/stapelstuehle",
+    text: "Stapelstühle für hohe Stückzahlen, häufige Umbauten und lange Nutzung.",
+  },
+  {
+    title: "Ich suche Zubehör oder Transportwagen",
+    href: "/produkte/kategorien/transportwagen-zubehoer",
+    text: "Transport, Reihenverbindung, Gleiter und Buchablagen passend zum Bestand.",
+  },
+  {
+    title: "Ich habe Sondermaße oder Sonderwünsche",
+    href: "/sonderloesungen",
+    text: "Von der Skizze über CAD bis zur umsetzbaren Sonderlösung.",
   },
 ] as const;
+
+const rooms = [
+  "Gemeindesaal",
+  "Seminarraum",
+  "Mehrzweckraum",
+  "Veranstaltungssaal",
+  "Kantine / Sozialraum",
+] as const;
+
+const homeStructuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "LocalBusiness",
+      "@id": absoluteUrl("/#business"),
+      name: siteName,
+      alternateName: "DLMNS Stapelstühle & Klapptische",
+      url: absoluteUrl("/"),
+      image: absoluteUrl("/pictures/Produkte/Stühle/1021c-01.jpg"),
+      logo: absoluteUrl("/pictures/Über uns/dalemans_logo1.png"),
+      description:
+        "Robuste Stapelstühle, Klapptische, Gemeindestühle, Zubehör und Beratung für Gemeinden, Säle, Vereine und flexible Räume.",
+      telephone: "+49 9342 9153-53",
+      email: "info@dalemans.de",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Bollenwaldstraße 108a",
+        postalCode: "63743",
+        addressLocality: "Aschaffenburg",
+        addressCountry: "DE",
+      },
+      areaServed: "DE",
+      knowsAbout: [
+        "Stapelstühle",
+        "Klapptische",
+        "Gemeindemobiliar",
+        "Transportwagen",
+        "Sonderlösungen",
+      ],
+    },
+    {
+      "@type": "ItemList",
+      "@id": absoluteUrl("/#categories"),
+      name: "Produktkategorien",
+      itemListElement: productCategories.map((category, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: category.name,
+        url: absoluteUrl(`/produkte/kategorien/${category.id}`),
+      })),
+    },
+  ],
+};
 
 export default function HomePage() {
   return (
     <div className="page-stack">
+      <StructuredData data={homeStructuredData} />
       <HeroSection />
 
       <HomeSection>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-          {trustMetrics.map((item, index) => (
-            <article
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {orientation.map((item) => (
+            <Link
               key={item.title}
-              className={[
-                "premium-card premium-card-hover animate-fade-up p-7 md:p-8",
-                index === 1 && "animate-fade-up-delay-1",
-                index === 2 && "animate-fade-up-delay-2",
-                index === 3 && "animate-fade-up-delay-3",
-              ]
-                .filter(Boolean)
-                .join(" ")}
+              href={item.href}
+              className="premium-card premium-card-hover p-6 md:p-7"
             >
-              <span
-                className="mb-4 block h-px w-8 bg-gradient-to-r from-premium-bronze/50 to-transparent"
-                aria-hidden
-              />
-              <h2 className="font-display text-xl font-medium tracking-[-0.02em] text-premium-ink">
+              <p className="section-eyebrow text-[0.65rem]">Direkt finden</p>
+              <h2 className="mt-3 font-display text-xl font-medium text-premium-ink">
                 {item.title}
               </h2>
-              <p className="mt-3 text-sm leading-[1.75] text-premium-muted">
+              <p className="mt-3 text-sm leading-7 text-premium-muted">
                 {item.text}
               </p>
-            </article>
-          ))}
-        </div>
-
-        <div className="image-depth mt-10 overflow-hidden rounded-5xl md:mt-12">
-          <CinematicMediaPlaceholder
-            ariaLabel="Vertrauenspartner — editorial Fläche für Referenzen"
-            mood="soft-partners"
-            variant="strip"
-            className="min-h-[140px] md:min-h-[160px]"
-          />
-        </div>
-      </HomeSection>
-
-      <HomeSection variant="breathing">
-        <SectionHeader
-          eyebrow="Raumdenken"
-          title="Mehr als Möbel — Atmosphäre, die bleibt"
-          lead="Wir unterstützen Gemeinden, Vereine und Veranstalter dabei, Räume zu schaffen, die einladend wirken und im Alltag zuverlässig funktionieren."
-          align="editorial"
-        />
-
-        <div className="section-grid-top grid gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16">
-          <div className="space-y-14 md:space-y-16">
-            {storyBlocks.map((block, i) => (
-              <article
-                key={block.title}
-                className={`max-w-lg animate-fade-up ${
-                  i === 1 ? "animate-fade-up-delay-1 md:pl-6" : i === 2 ? "animate-fade-up-delay-2" : ""
-                }`}
-              >
-                <h3 className="font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink">
-                  {block.title}
-                </h3>
-                <p className="mt-4 text-sm leading-[1.8] text-premium-muted md:text-base">
-                  {block.text}
-                </p>
-              </article>
-            ))}
-          </div>
-
-          <div className="image-depth overflow-hidden rounded-6xl shadow-premium-xl lg:sticky lg:top-28 lg:self-start">
-            <img
-              src={encodeURI("/pictures/Über uns/Realisierte-11.jpg")}
-              alt="Realisierte Bestuhlung in einem Begegnungsraum"
-              className="min-h-[420px] w-full object-cover lg:min-h-[520px]"
-            />
-          </div>
-        </div>
-      </HomeSection>
-
-      <HomeSection variant="breathing">
-        <SectionHeader
-          eyebrow="Lösungswelten"
-          title="Räume gestalten — Kategorie für Kategorie"
-          lead="Editorial inszeniert statt Katalog: entdecken Sie Stapelstühle, Tische und ergänzende Lösungen für Ihre Nutzungssituation."
-          href="/produkte/kategorien"
-          linkLabel="Alle Kategorien"
-          align="editorial"
-        />
-
-        <div className="section-grid-top grid gap-8 md:grid-cols-2 lg:gap-10">
-          {productCategories.map((category, index) => (
-            <CategoryShowcaseCard
-              key={category.id}
-              category={category}
-              index={index}
-            />
-          ))}
-        </div>
-      </HomeSection>
-
-      <section className="relative overflow-hidden rounded-6xl bg-premium-espresso text-premium-canvas shadow-premium-xl">
-        <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_0%_50%,rgba(196,165,116,0.12),transparent_55%)]"
-          aria-hidden
-        />
-        <div className="grid lg:grid-cols-2">
-          <div className="image-depth relative min-h-[360px] overflow-hidden lg:min-h-[520px]">
-            <img
-              src={encodeURI("/pictures/Über uns/Passbild_Stefan_F_edit.jpg")}
-              alt="Stefan Dalemans — persönliche Beratung"
-              className="absolute inset-0 h-full w-full object-cover object-top"
-            />
-            <div
-              className="absolute inset-0 bg-gradient-to-t from-premium-espresso via-premium-espresso/20 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-premium-espresso/30 lg:to-premium-espresso"
-              aria-hidden
-            />
-          </div>
-
-          <div className="relative flex flex-col justify-center px-8 py-14 md:px-14 md:py-20 lg:px-16">
-            <p className="section-eyebrow text-premium-sand">Familienunternehmen</p>
-            <h2 className="font-display mt-5 text-3xl font-medium leading-[1.12] tracking-[-0.02em] md:text-4xl lg:text-[2.75rem]">
-              Vertrauen, das man im Raum spürt
-            </h2>
-            <p className="mt-6 max-w-lg text-sm leading-[1.8] text-white/72 md:text-base">
-              Dalemans verbindet generationsübergreifende Erfahrung mit einem
-              klaren Blick für moderne Begegnungsorte. Persönlich, ehrlich und
-              nah an der Praxis von Gemeinden, Vereinen und Veranstaltern.
-            </p>
-            <p className="mt-4 max-w-lg text-sm leading-[1.8] text-white/55">
-              Wir denken in Nutzungsszenarien — nicht in anonymen Listen.
-            </p>
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Link href="/firma" className="btn-on-dark text-center">
-                Unsere Geschichte
-              </Link>
-              <Link href="/kontakt" className="btn-outline-dark text-center">
-                Persönlich anfragen
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <HomeSection variant="breathing">
-        <SectionHeader
-          eyebrow="Ausgewählte Lösungen"
-          title="Produkte, die im Raum überzeugen"
-          lead="Ein Einblick in bewährte Stapelstühle und Klapptische — mit direktem Weg zu Details und Beratung."
-          href="/produkte"
-          linkLabel="Gesamtes Sortiment"
-        />
-
-        <div className="section-grid-top grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-          {featuredProducts.map((product, i) => (
-            <div
-              key={product.slug}
-              className={`animate-fade-up ${i === 1 ? "animate-fade-up-delay-1" : i === 2 ? "animate-fade-up-delay-2" : ""}`}
-            >
-              <ProductCard product={product} />
-            </div>
+            </Link>
           ))}
         </div>
       </HomeSection>
 
       <HomeSection variant="elevated">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
-          <div className="flex flex-col justify-center lg:py-4">
-            <p className="section-eyebrow">Sonderlösungen</p>
+        <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <div>
+            <p className="section-eyebrow">Warum DLMNS</p>
             <h2 className="section-title mt-5 text-balance">
-              Wenn der Raum mehr verlangt als Standard
+              Praktische Ausstattung für Räume, die wirklich genutzt werden.
             </h2>
             <p className="section-lead mt-6">
-              CAD-Entwicklung, angepasste Formate und lösungsorientierte Planung
-              — für Projekte, in denen Funktion, Ästhetik und Alltagstauglichkeit
-              zusammenpassen müssen.
+              DLMNS Stapelstühle & Klapptische ist die praktische Wurzel der
+              Gruppe: langlebige Produkte, persönliche Beratung und Lösungen,
+              die Auf- und Abbau, Lagerung und Raumwirkung zusammendenken.
             </p>
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Link href="/firma" className="btn-primary text-center">
-                Entwicklung & Firma
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Link href="/kontakt" className="btn-primary text-center">
+                Beratung anfragen
               </Link>
-              <Link href="/kontakt" className="btn-secondary text-center">
-                Projekt besprechen
+              <Link href="/beratung/stapelstuehle-kaufen" className="btn-secondary text-center">
+                Kaufberatung lesen
               </Link>
             </div>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div className="image-depth overflow-hidden rounded-5xl shadow-premium sm:col-span-2">
-              <img
-                src={encodeURI("/pictures/Über uns/Werkstatt-24.jpg")}
-                alt="Werkstatt und Fertigung bei Dalemans"
-                className="h-full min-h-[220px] w-full object-cover"
-              />
-            </div>
-            <div className="image-depth overflow-hidden rounded-5xl shadow-premium">
-              <img
-                src={encodeURI("/pictures/Über uns/Technische-03.jpg")}
-                alt="Technische Entwicklung bei Dalemans"
-                className="h-full min-h-[220px] w-full object-cover"
-              />
-            </div>
-            <div className="image-depth overflow-hidden rounded-5xl shadow-premium">
-              <img
-                src={encodeURI("/pictures/Über uns/CAD-Entwicklung1zu1.png")}
-                alt="CAD-Entwicklung bei Dalemans"
-                className="h-full min-h-[220px] w-full object-cover"
-              />
-            </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {reasons.map((reason) => (
+              <div
+                key={reason}
+                className="rounded-3xl border border-premium-beige/60 bg-white/70 p-5 shadow-premium"
+              >
+                <span className="block h-px w-8 bg-premium-sand" aria-hidden />
+                <p className="mt-4 text-sm font-medium leading-7 text-premium-charcoal">
+                  {reason}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </HomeSection>
+
+      <HomeSection variant="breathing">
+        <SectionHeader
+          eyebrow="Produkt- und Raumfinder"
+          title="Welcher Einstieg passt zu Ihrem Vorhaben?"
+          lead="Schnell zur passenden Kategorie, Raumlösung oder Sonderberatung."
+          align="editorial"
+        />
+
+        <div className="section-grid-top grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          {finder.map((item) => (
+            <Link
+              key={item.title}
+              href={item.href}
+              className="premium-card premium-card-hover flex h-full flex-col p-6"
+            >
+              <h3 className="font-display text-xl font-medium tracking-[-0.02em] text-premium-ink">
+                {item.title}
+              </h3>
+              <p className="mt-4 flex-1 text-sm leading-7 text-premium-muted">
+                {item.text}
+              </p>
+              <span className="mt-6 text-sm font-medium text-premium-bronze">
+                Einstieg öffnen
+              </span>
+            </Link>
+          ))}
+        </div>
+      </HomeSection>
+
+      <HomeSection>
+        <SectionHeader
+          eyebrow="Ausgewählte Produkte"
+          title="Produkte, die im Raum überzeugen"
+          lead="Produktkarten mit Bild, Einsatzbereich, Vorteilen und direktem Weg zur Anfrage."
+          href="/produkte"
+          linkLabel="Alle Produkte"
+          align="editorial"
+        />
+
+        <div className="section-grid-top grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+          {featuredProducts.map((product) =>
+            product ? <ProductCard key={product.slug} product={product} /> : null,
+          )}
+        </div>
+      </HomeSection>
+
+      <HomeSection variant="breathing">
+        <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
+          <div>
+            <p className="section-eyebrow">Raumlösungen</p>
+            <h2 className="section-title mt-5 text-balance">
+              Ausstattung nach Nutzung statt nach Katalogseite.
+            </h2>
+            <p className="section-lead mt-6">
+              Ob Gemeindesaal, Seminarraum oder Sozialraum: Entscheidend ist,
+              wie Menschen den Raum nutzen, wie schnell umgebaut wird und wo
+              Stühle, Tische und Zubehör nachher sauber lagern.
+            </p>
+            <Link href="/raumloesungen/gemeindesaal" className="btn-primary mt-9 inline-flex">
+              Gemeindesaal planen
+            </Link>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {rooms.map((room) => (
+              <div key={room} className="premium-card p-6">
+                <p className="font-display text-xl font-medium text-premium-ink">
+                  {room}
+                </p>
+                <p className="mt-3 text-sm leading-7 text-premium-muted">
+                  Stühle, Tische, Wege, Lagerung und Zubehör passend zur realen
+                  Nutzung abstimmen.
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </HomeSection>
+
+      <section className="relative overflow-hidden rounded-6xl bg-premium-espresso text-premium-canvas shadow-premium-xl">
+        <div className="grid lg:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3 p-5 md:p-8">
+            <img
+              src={encodeURI("/pictures/Über uns/Skizze01.jpg")}
+              alt="Skizze einer Sonderlösung"
+              className="h-48 w-full rounded-4xl object-cover md:h-64"
+            />
+            <img
+              src={encodeURI("/pictures/Über uns/CAD-Entwicklung1zu1.png")}
+              alt="CAD Planung für Sonderlösung"
+              className="h-48 w-full rounded-4xl object-cover md:h-64"
+            />
+            <img
+              src={encodeURI("/pictures/Über uns/Werkstatt-24.jpg")}
+              alt="Umsetzung in Werkstatt und Fertigung"
+              className="col-span-2 h-56 w-full rounded-4xl object-cover md:h-72"
+            />
+          </div>
+
+          <div className="flex flex-col justify-center px-8 py-14 md:px-14 md:py-20">
+            <p className="section-eyebrow text-premium-sand">Sonderlösungen</p>
+            <h2 className="font-display mt-5 text-3xl font-medium leading-[1.12] tracking-[-0.02em] md:text-4xl">
+              Skizze, Planung, Umsetzung: wenn Standard nicht reicht.
+            </h2>
+            <p className="mt-6 max-w-lg text-sm leading-[1.8] text-white/72 md:text-base">
+              Sondermaße, besondere Tischformen, Zubehör oder Anpassungen an
+              vorhandene Bestände werden nicht als Randthema behandelt, sondern
+              als Teil der Beratung.
+            </p>
+            <Link href="/sonderloesungen" className="btn-on-dark mt-10 w-fit">
+              Sonderlösung besprechen
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <HomeSection variant="elevated">
+        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+          <div className="image-depth overflow-hidden rounded-5xl shadow-premium-lg">
+            <img
+              src={encodeURI("/pictures/Über uns/Passbild_Stefan_F_edit.jpg")}
+              alt="Stefan Dalemans als persönlicher Ansprechpartner"
+              className="h-full min-h-[320px] w-full object-cover object-top"
+            />
+          </div>
+          <div className="flex flex-col justify-center">
+            <p className="section-eyebrow">Familiengeschichte</p>
+            <h2 className="section-title mt-5 text-balance">
+              Gewachsen aus Beratung, Werkstatt und Gemeindepraxis.
+            </h2>
+            <p className="section-lead mt-6">
+              Die christlichen Gemeindewurzeln gehören ehrlich zur Geschichte:
+              nicht als lange Textwand, sondern als Grund dafür, warum DLMNS
+              Räume für Begegnung, Gottesdienst, Vereine und Veranstaltungen so
+              praktisch versteht.
+            </p>
+            <Link href="/firma" className="btn-secondary mt-9 w-fit">
+              Firma kennenlernen
+            </Link>
           </div>
         </div>
       </HomeSection>
 
       <PremiumCtaSection
-        title="Sie planen einen neuen Raum?"
-        lead="Wir helfen bei Bestuhlung, Möbelauswahl und Raumwirkung — ruhig, persönlich und mit Blick auf Ihre Nutzung vor Ort."
+        title="Sie planen Bestuhlung, Tische oder Zubehör?"
+        lead="Senden Sie Stückzahlen, Raumgröße oder ein Foto vom Raum. Wir helfen bei Auswahl, Varianten, Transport und Sonderlösungen."
         primaryHref="/kontakt"
-        primaryLabel="Projekt besprechen"
+        primaryLabel="Beratung anfragen"
         secondaryHref="/produkte"
-        secondaryLabel="Lösungen ansehen"
+        secondaryLabel="Produkte ansehen"
       />
     </div>
   );

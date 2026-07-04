@@ -7,11 +7,19 @@ const category = getProductCategoryById("transportwagen-zubehoer");
 
 export const metadata: Metadata = category
   ? buildMetadata({
-      title: `${category.name} kaufen`,
-      description: category.description,
+      title: "Transportwagen und Zubehör für Stühle und Tische",
+      description:
+        "Transportwagen für Stühle und Tische, Reihenverbinder, Buchablagen, Stuhlgleiter und Zubehör für Gemeinden, Säle und Veranstaltungslogistik.",
       path: "/produkte/kategorien/transportwagen-zubehoer",
       image: category.image,
-      keywords: [category.name, ...category.useCases],
+      keywords: [
+        "Transportwagen für Stühle",
+        "Transportwagen für Tische",
+        "Stuhltransportwagen",
+        "Tischtransportwagen",
+        "Reihenverbinder",
+        ...category.useCases,
+      ],
     })
   : {};
 

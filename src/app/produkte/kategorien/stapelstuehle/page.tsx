@@ -7,11 +7,18 @@ const category = getProductCategoryById("stapelstuehle");
 
 export const metadata: Metadata = category
   ? buildMetadata({
-      title: `${category.name} kaufen`,
-      description: category.description,
+      title: "Stapelstühle für Gemeinden, Kirchen und Säle kaufen",
+      description:
+        "Robuste Stapelstühle, Kirchenstühle und Gemeindestühle für Gemeindesaal, Saalbestuhlung und Veranstaltungen mit Zubehör und persönlicher Beratung.",
       path: "/produkte/kategorien/stapelstuehle",
       image: category.image,
-      keywords: [category.name, ...category.useCases],
+      keywords: [
+        "Stapelstühle für Gemeinden",
+        "Kirchenstuhl",
+        "Gemeindestuhl",
+        "Stapelstuhl Saal",
+        ...category.useCases,
+      ],
     })
   : {};
 

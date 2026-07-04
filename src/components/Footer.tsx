@@ -4,6 +4,9 @@ import { productCategories } from "@/lib/product-categories";
 const pageLinks = [
   { href: "/", label: "Start" },
   { href: "/produkte", label: "Produkte" },
+  { href: "/raumloesungen/gemeindesaal", label: "Raumlösungen" },
+  { href: "/sonderloesungen", label: "Sonderlösungen" },
+  { href: "/beratung/stapelstuehle-kaufen", label: "Kaufberatung" },
   { href: "/firma", label: "Firma" },
   { href: "/kontakt", label: "Kontakt" },
 ];
@@ -19,10 +22,17 @@ export function Footer() {
             className="h-14 w-auto object-contain brightness-0 invert"
           />
           <p className="mt-5 max-w-md text-sm leading-7 text-white/55">
-            Raumlösungen für Gemeinden, Vereine und Veranstaltungsorte —
-            Stapelstühle, Klapptische und persönliche Beratung aus
-            Familienhand.
+            DLMNS Stapelstühle & Klapptische: Ausstattung für Gemeinden, Säle
+            und flexible Räume — mit Produkten, Zubehör und persönlicher Beratung.
           </p>
+          <div className="mt-6 grid gap-2 text-sm">
+            <a href="tel:+499342915353" className="font-medium text-white transition hover:text-premium-sand">
+              +49 9342 9153-53
+            </a>
+            <a href="mailto:info@dalemans.de" className="font-medium text-white transition hover:text-premium-sand">
+              info@dalemans.de
+            </a>
+          </div>
           <Link href="/kontakt" className="btn-on-dark mt-6 inline-flex text-sm">
             Beratung anfragen
           </Link>

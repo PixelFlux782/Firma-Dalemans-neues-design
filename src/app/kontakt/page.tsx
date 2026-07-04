@@ -82,6 +82,16 @@ export default function KontaktPage() {
               <p className="section-eyebrow text-premium-sand">Direkt erreichbar</p>
               <div className="mt-5 space-y-5 text-sm leading-[1.75] text-white/75">
                 <p>
+                  Telefon
+                  <br />
+                  <a
+                    href="tel:+499342915353"
+                    className="font-medium text-white transition hover:text-premium-sand"
+                  >
+                    +49 9342 9153-53
+                  </a>
+                </p>
+                <p>
                   E-Mail
                   <br />
                   <a

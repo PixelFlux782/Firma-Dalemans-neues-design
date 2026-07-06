@@ -1,4 +1,5 @@
 ﻿import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { ContactForm } from "@/components/ContactForm";
 import CinematicPageHero from "@/components/home/CinematicPageHero";
@@ -135,9 +136,12 @@ export default function KontaktPage() {
             </article>
 
             <div className="image-depth hidden overflow-hidden rounded-5xl shadow-premium-lg sm:block">
-              <img
+              <Image
                 src={encodeURI("/pictures/Über uns/Werkstatt-24.jpg")}
                 alt="Dalemans Werkstatt und Fertigung"
+                width={720}
+                height={360}
+                sizes="(min-width: 1024px) 40vw, 100vw"
                 className="h-[200px] w-full object-cover md:h-[240px]"
               />
             </div>

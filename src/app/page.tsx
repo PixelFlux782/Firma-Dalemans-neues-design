@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import { StructuredData } from "@/components/StructuredData";
@@ -102,6 +103,15 @@ const rooms = [
   "Kantine / Sozialraum",
 ] as const;
 
+const planningTopics = [
+  "Raumgröße und Laufwege",
+  "Reihenbestuhlung und Sichtachsen",
+  "Stapelung und Lagerfläche",
+  "Transportwagen und Zubehör",
+  "Budget, Pflege und Ersatzteile",
+  "Auf- und Abbau mit Ehrenamtlichen",
+] as const;
+
 const homeStructuredData = {
   "@context": "https://schema.org",
   "@graph": [
@@ -154,12 +164,47 @@ export default function HomePage() {
       <HeroSection />
 
       <HomeSection>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-8 rounded-5xl border border-premium-sage/70 bg-premium-warm/70 p-6 shadow-premium md:p-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-12 lg:p-10">
+          <div className="flex flex-col justify-center">
+            <p className="section-eyebrow">Beratung zuerst</p>
+            <h2 className="section-title mt-4 text-balance">
+              Gemeindesaal planen, bevor Stühle und Tische einzeln entschieden
+              werden.
+            </h2>
+            <p className="section-lead mt-5">
+              Wir schauen früh auf Raumgröße, Reihenbestuhlung, Lagerung,
+              Transportwagen, Budget und Pflege. So entsteht eine Ausstattung,
+              die im Gottesdienst, beim Gemeindecafé und beim schnellen Umbau
+              funktioniert.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link href="/kontakt" className="btn-primary text-center">
+                Gemeindesaal planen
+              </Link>
+              <Link href="/produkte" className="btn-secondary text-center">
+                Produkte ansehen
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {planningTopics.map((topic) => (
+              <div
+                key={topic}
+                className="rounded-3xl border border-white/70 bg-white/62 px-5 py-4 text-sm font-medium leading-7 text-premium-charcoal shadow-inner-soft"
+              >
+                {topic}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {orientation.map((item) => (
             <Link
               key={item.title}
               href={item.href}
-              className="premium-card premium-card-hover p-6 md:p-7"
+              className="group border-t border-premium-sage/80 pt-5 transition hover:border-premium-forest"
             >
               <p className="section-eyebrow text-[0.65rem]">Direkt finden</p>
               <h2 className="mt-3 font-display text-xl font-medium text-premium-ink">
@@ -168,6 +213,9 @@ export default function HomePage() {
               <p className="mt-3 text-sm leading-7 text-premium-muted">
                 {item.text}
               </p>
+              <span className="mt-4 inline-flex text-sm font-medium text-premium-bronze transition group-hover:text-premium-forest">
+                Kategorie öffnen
+              </span>
             </Link>
           ))}
         </div>
@@ -293,19 +341,28 @@ export default function HomePage() {
       <section className="relative overflow-hidden rounded-6xl bg-premium-espresso text-premium-canvas shadow-premium-xl">
         <div className="grid lg:grid-cols-2">
           <div className="grid grid-cols-2 gap-3 p-5 md:p-8">
-            <img
+            <Image
               src={encodeURI("/pictures/Über uns/Skizze01.jpg")}
               alt="Skizze einer Sonderlösung"
+              width={420}
+              height={320}
+              sizes="(min-width: 1024px) 24vw, 50vw"
               className="h-48 w-full rounded-4xl object-cover md:h-64"
             />
-            <img
+            <Image
               src={encodeURI("/pictures/Über uns/CAD-Entwicklung1zu1.png")}
               alt="CAD Planung für Sonderlösung"
+              width={420}
+              height={320}
+              sizes="(min-width: 1024px) 24vw, 50vw"
               className="h-48 w-full rounded-4xl object-cover md:h-64"
             />
-            <img
+            <Image
               src={encodeURI("/pictures/Über uns/Werkstatt-24.jpg")}
               alt="Umsetzung in Werkstatt und Fertigung"
+              width={860}
+              height={420}
+              sizes="(min-width: 1024px) 48vw, 100vw"
               className="col-span-2 h-56 w-full rounded-4xl object-cover md:h-72"
             />
           </div>
@@ -330,9 +387,12 @@ export default function HomePage() {
       <HomeSection variant="elevated">
         <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
           <div className="image-depth overflow-hidden rounded-5xl shadow-premium-lg">
-            <img
+            <Image
               src={encodeURI("/pictures/Über uns/Passbild_Stefan_F_edit.jpg")}
               alt="Stefan Dalemans als persönlicher Ansprechpartner"
+              width={560}
+              height={640}
+              sizes="(min-width: 1024px) 32vw, 100vw"
               className="h-full min-h-[320px] w-full object-cover object-top"
             />
           </div>

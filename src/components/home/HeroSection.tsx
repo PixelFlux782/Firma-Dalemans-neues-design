@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const trustBadges = [
@@ -10,16 +11,16 @@ const trustBadges = [
 export default function HeroSection() {
   return (
     <section className="relative -mx-5 overflow-hidden bg-premium-ink text-white shadow-premium-xl sm:-mx-6 md:mx-0 md:rounded-6xl">
-      <div className="grid md:min-h-[72vh] lg:grid-cols-[1.03fr_0.97fr]">
-        <div className="relative z-10 min-w-0 flex flex-col justify-center px-5 py-12 sm:px-6 md:px-10 md:py-16 lg:px-12 xl:px-16">
+      <div className="grid md:min-h-[min(68vh,760px)] lg:grid-cols-[1.03fr_0.97fr]">
+        <div className="relative z-10 flex min-w-0 flex-col justify-center px-5 py-12 sm:px-6 md:px-10 md:py-16 lg:px-12 xl:px-16">
           <div className="max-w-full md:max-w-3xl">
             <p className="section-eyebrow text-premium-sand">
               DLMNS Stapelstühle & Klapptische
             </p>
-            <h1 className="hero-headline mt-6 max-w-[calc(100vw-2.5rem)] text-[1.7rem] sm:text-5xl md:text-[3.25rem] lg:text-[3.7rem] lg:leading-[1.04]">
+            <h1 className="hero-headline mt-6 max-w-full text-[1.62rem] sm:text-5xl md:text-[3.15rem] lg:text-[3.55rem] lg:leading-[1.04]">
               Stapelstühle & Klapptische für Gemeinden, Vereine und Säle.
             </h1>
-            <p className="mt-7 max-w-full break-words text-base leading-[1.8] text-white/74 md:max-w-2xl md:text-lg">
+            <p className="mt-7 max-w-full text-[0.95rem] leading-[1.78] text-white/74 md:max-w-2xl md:text-lg md:leading-[1.8]">
               Robuste Gemeindestühle, Kirchenstühle, Klapptische,
               Transportwagen und Sondermaße, persönlich geplant für Räume, die
               oft umgebaut und lange genutzt werden.
@@ -27,10 +28,10 @@ export default function HeroSection() {
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Link href="/kontakt" className="btn-hero-primary text-center">
-                Projekt besprechen
+                Beratung anfragen
               </Link>
               <Link href="/produkte" className="btn-hero-secondary text-center">
-                Produkte prüfen
+                Produkte ansehen
               </Link>
             </div>
 
@@ -54,11 +55,14 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <div className="relative min-h-[360px] min-w-0 overflow-hidden lg:min-h-full">
-          <img
+        <div className="relative min-h-[320px] min-w-0 overflow-hidden sm:min-h-[360px] lg:min-h-full">
+          <Image
             src={encodeURI("/pictures/Produkte/Stühle/1021c-01.jpg")}
             alt="Robuster Stapelstuhl für Gemeindesaal und Veranstaltungsraum"
-            className="absolute inset-0 h-full w-full object-cover"
+            fill
+            priority
+            sizes="(min-width: 1024px) 48vw, 100vw"
+            className="object-cover"
           />
           <div
             className="absolute inset-0 bg-gradient-to-t from-premium-ink via-premium-ink/20 to-transparent lg:bg-gradient-to-r lg:from-premium-ink/85 lg:via-premium-ink/18 lg:to-transparent"
@@ -69,8 +73,8 @@ export default function HeroSection() {
               Praktische Hauptsäule
             </p>
             <p className="mt-3 text-sm leading-7 text-white/74">
-              Ausstattung, Gemeindemobiliar, Sonderlösungen und Zubehör aus
-              einer Hand, geplant für echte Nutzung, Lagerung und Umbauwege.
+              Stapelstühle, Klapptische, Transportwagen und Zubehör aus einer
+              Hand, geplant für Raumgröße, Lagerung und Umbauwege.
             </p>
           </div>
         </div>

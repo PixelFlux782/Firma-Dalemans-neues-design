@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -29,9 +30,12 @@ export function Header() {
           className="min-w-0 flex items-center gap-4"
           onClick={() => setMenuOpen(false)}
         >
-          <img
+          <Image
             src={encodeURI("/pictures/Über uns/dalemans_logo1.png")}
             alt="DLMNS Stapelstühle & Klapptische"
+            width={160}
+            height={56}
+            priority
             className="h-12 w-auto shrink-0 object-contain sm:h-14"
           />
           <div className="hidden sm:block">

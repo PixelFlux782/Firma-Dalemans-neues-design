@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
 import { StructuredData } from "@/components/StructuredData";
 import CinematicPageHero from "@/components/home/CinematicPageHero";
@@ -182,7 +183,7 @@ export default function ProductCategoryOverview({
         actions={
           <>
             <Link href="/kontakt" className="btn-hero-primary text-center">
-              Diese Kategorie anfragen
+              Beratung anfragen
             </Link>
             <Link
               href="/produkte/kategorien"
@@ -193,9 +194,12 @@ export default function ProductCategoryOverview({
           </>
         }
         visual={
-          <img
+          <Image
             src={category.image}
             alt={`${category.name} für Gemeinden und Säle`}
+            width={720}
+            height={460}
+            sizes="(min-width: 1024px) 42vw, 100vw"
             className="min-h-[220px] w-full object-cover sm:min-h-[260px] md:min-h-[280px]"
           />
         }
@@ -266,7 +270,7 @@ export default function ProductCategoryOverview({
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/kontakt" className="btn-primary text-center">
-                Auswahl besprechen
+                Raum ausstatten lassen
               </Link>
               <a href="tel:+499342915353" className="btn-secondary text-center">
                 Direkt anrufen
@@ -352,11 +356,11 @@ export default function ProductCategoryOverview({
       <PremiumCtaSection
         eyebrow="Beratung"
         title={`Planen Sie mit ${category.name}?`}
-        lead="Wir helfen bei Modellauswahl, Stückzahlen, Zubehör, Varianten und Raumwirkung."
+        lead="Wir helfen bei Raumgröße, Stückzahlen, Reihenbestuhlung, Stapelung, Lagerung, Transportwagen, Budget und Pflege."
         primaryHref="/kontakt"
-        primaryLabel="Projekt besprechen"
+        primaryLabel="Beratung anfragen"
         secondaryHref="/produkte"
-        secondaryLabel="Weitere Produkte"
+        secondaryLabel="Produkte ansehen"
       />
     </div>
   );

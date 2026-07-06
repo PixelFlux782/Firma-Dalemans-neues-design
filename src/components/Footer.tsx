@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import { productCategories } from "@/lib/product-categories";
+import Image from "next/image";
 
 const pageLinks = [
   { href: "/", label: "Start" },
@@ -16,9 +17,11 @@ export function Footer() {
     <footer className="mt-24 border-t border-premium-charcoal/20 bg-premium-ink text-premium-canvas/80">
       <div className="container-premium grid gap-12 py-16 md:grid-cols-[1.2fr_0.8fr_0.8fr]">
         <div>
-          <img
+          <Image
             src={encodeURI("/pictures/Über uns/dalemans_logo1.png")}
             alt="Dalemans"
+            width={160}
+            height={56}
             className="h-14 w-auto object-contain brightness-0 invert"
           />
           <p className="mt-5 max-w-md text-sm leading-7 text-white/55">

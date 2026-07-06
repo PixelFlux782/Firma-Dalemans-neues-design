@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Product } from "@/lib/products";
 
 interface ProductCardProps {
@@ -8,11 +9,13 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   return (
     <article className="premium-card premium-card-hover image-depth group flex h-full flex-col">
-      <div className="overflow-hidden">
-        <img
+      <div className="relative h-60 overflow-hidden md:h-64">
+        <Image
           src={product.image}
           alt={`${product.title} für ${product.suitableFor.slice(0, 2).join(" und ")}`}
-          className="h-60 w-full object-cover md:h-64"
+          fill
+          sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw"
+          className="object-cover"
         />
       </div>
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { ProductCategory } from "@/lib/product-categories";
 
 interface CategoryShowcaseCardProps {
@@ -26,11 +27,13 @@ export default function CategoryShowcaseCard({
         index % 2 === 1 ? "md:mt-8" : ""
       }`}
     >
-      <div className="overflow-hidden">
-        <img
+      <div className="relative h-60 overflow-hidden md:h-64">
+        <Image
           src={category.image}
           alt={category.name}
-          className="h-60 w-full object-cover md:h-64"
+          fill
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          className="object-cover"
         />
       </div>
 

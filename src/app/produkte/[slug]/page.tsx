@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
@@ -183,9 +184,12 @@ export default async function ProductDetailPage({ params }: Props) {
           </>
         }
         visual={
-          <img
+          <Image
             src={product.image}
             alt={product.title}
+            width={720}
+            height={460}
+            sizes="(min-width: 1024px) 42vw, 100vw"
             className="min-h-[220px] w-full object-cover sm:min-h-[260px] md:min-h-[280px]"
           />
         }

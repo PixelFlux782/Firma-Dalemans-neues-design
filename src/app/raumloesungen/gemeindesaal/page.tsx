@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import { StructuredData } from "@/components/StructuredData";
@@ -77,9 +78,13 @@ export default function GemeindesaalPage() {
           </>
         }
         visual={
-          <img
+          <Image
             src={encodeURI("/pictures/Über uns/Realisierte-11.jpg")}
             alt="Realisierte Bestuhlung für Gemeindesaal"
+            width={760}
+            height={500}
+            priority
+            sizes="(min-width: 1024px) 42vw, 100vw"
             className="min-h-[240px] w-full object-cover md:min-h-[300px]"
           />
         }

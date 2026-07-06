@@ -20,13 +20,13 @@ export default function PremiumCtaSection({
   secondaryLabel,
 }: PremiumCtaSectionProps) {
   return (
-    <section className="relative overflow-hidden rounded-6xl bg-premium-charcoal px-8 py-16 text-center shadow-premium-xl md:px-16 md:py-24">
+    <section className="relative overflow-hidden rounded-6xl bg-premium-forest px-8 py-16 text-center shadow-premium-xl md:px-16 md:py-24">
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_80%_at_50%_0%,rgba(196,165,116,0.14),transparent_60%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_80%_at_50%_0%,rgba(201,213,191,0.20),transparent_60%)]"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-premium-espresso/50"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-premium-espresso/45"
         aria-hidden
       />
       <div className="relative mx-auto max-w-2xl">

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { StructuredData } from "@/components/StructuredData";
 import CinematicPageHero from "@/components/home/CinematicPageHero";
@@ -174,14 +175,20 @@ export default function FirmaPage() {
         }
         visual={
           <div className="grid gap-4 sm:grid-cols-2">
-            <img
+            <Image
               src={encodeURI("/pictures/Über uns/Passbild_Stefan_F_edit.jpg")}
               alt="Stefan Dalemans"
+              width={420}
+              height={360}
+              sizes="(min-width: 1024px) 22vw, 50vw"
               className="min-h-[200px] w-full object-cover object-top md:min-h-[240px]"
             />
-            <img
+            <Image
               src={encodeURI("/pictures/Über uns/Werkstatt-23.jpg")}
               alt="Werkstatt und Produktion bei Dalemans"
+              width={420}
+              height={360}
+              sizes="(min-width: 1024px) 22vw, 50vw"
               className="min-h-[200px] w-full object-cover md:min-h-[240px]"
             />
           </div>
@@ -235,16 +242,22 @@ export default function FirmaPage() {
             </p>
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               <div className="image-depth overflow-hidden rounded-4xl shadow-premium">
-                <img
+                <Image
                   src={encodeURI("/pictures/Über uns/CAD-Entwicklung1zu1.png")}
                   alt="CAD Entwicklung und Sonderlösungen"
+                  width={360}
+                  height={240}
+                  sizes="(min-width: 1024px) 20vw, 50vw"
                   className="h-40 w-full object-cover md:h-44"
                 />
               </div>
               <div className="image-depth overflow-hidden rounded-4xl shadow-premium">
-                <img
+                <Image
                   src={encodeURI("/pictures/Über uns/Technische-03.jpg")}
                   alt="Technische Entwicklung bei Dalemans"
+                  width={360}
+                  height={240}
+                  sizes="(min-width: 1024px) 20vw, 50vw"
                   className="h-40 w-full object-cover md:h-44"
                 />
               </div>
@@ -257,9 +270,11 @@ export default function FirmaPage() {
           </div>
 
           <div className="image-depth relative min-h-[360px] overflow-hidden lg:min-h-[520px]">
-            <img
+            <Image
               src={encodeURI("/pictures/Über uns/Werkstatt-24.jpg")}
               alt="Werkstatt und Entwicklung bei Dalemans"
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
               className="absolute inset-0 h-full w-full object-cover"
             />
             <div
@@ -331,16 +346,22 @@ export default function FirmaPage() {
 
           <div className="grid gap-5">
             <div className="image-depth overflow-hidden rounded-5xl shadow-premium">
-              <img
+              <Image
                 src={encodeURI("/pictures/Über uns/Realisierte-11.jpg")}
                 alt="Realisierte Bestuhlung von Dalemans"
+                width={720}
+                height={360}
+                sizes="(min-width: 1024px) 40vw, 100vw"
                 className="h-[220px] w-full object-cover md:h-[260px]"
               />
             </div>
             <div className="image-depth overflow-hidden rounded-5xl shadow-premium">
-              <img
+              <Image
                 src={encodeURI("/pictures/Über uns/Realisierte-05.jpg")}
                 alt="Bestuhlungsprojekt von Dalemans"
+                width={720}
+                height={360}
+                sizes="(min-width: 1024px) 40vw, 100vw"
                 className="h-[220px] w-full object-cover md:h-[260px]"
               />
             </div>

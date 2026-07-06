@@ -1,4 +1,5 @@
 ﻿import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import CategoryShowcaseCard from "@/components/home/CategoryShowcaseCard";
 import CinematicPageHero from "@/components/home/CinematicPageHero";
@@ -45,6 +46,17 @@ export default function ProductCategoriesPage() {
               Zur Produktübersicht
             </Link>
           </>
+        }
+        visual={
+          <Image
+            src={encodeURI("/pictures/Produkte/Stühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.jpg")}
+            alt="Stapelstühle als DLMNS Kategorieauswahl"
+            width={760}
+            height={500}
+            priority
+            sizes="(min-width: 1024px) 42vw, 100vw"
+            className="min-h-[240px] w-full object-cover sm:min-h-[300px] md:min-h-[360px]"
+          />
         }
       />
 

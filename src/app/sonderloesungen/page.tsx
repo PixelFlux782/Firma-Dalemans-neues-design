@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { StructuredData } from "@/components/StructuredData";
 import CinematicPageHero from "@/components/home/CinematicPageHero";
@@ -83,9 +84,13 @@ export default function SonderloesungenPage() {
           </>
         }
         visual={
-          <img
+          <Image
             src={encodeURI("/pictures/Über uns/CAD-Entwicklung1zu1.png")}
             alt="CAD Planung für Sonderlösungen"
+            width={760}
+            height={500}
+            priority
+            sizes="(min-width: 1024px) 42vw, 100vw"
             className="min-h-[240px] w-full object-cover md:min-h-[300px]"
           />
         }
@@ -101,9 +106,12 @@ export default function SonderloesungenPage() {
         <div className="section-grid-top grid gap-6 md:grid-cols-3">
           {steps.map((step, index) => (
             <article key={step.title} className="premium-card image-depth overflow-hidden">
-              <img
+              <Image
                 src={encodeURI(step.image)}
                 alt={`${step.title} einer Sonderlösung`}
+                width={520}
+                height={360}
+                sizes="(min-width: 768px) 33vw, 100vw"
                 className="h-56 w-full object-cover"
               />
               <div className="p-7">

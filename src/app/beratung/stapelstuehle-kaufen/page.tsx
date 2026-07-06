@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import { StructuredData } from "@/components/StructuredData";
@@ -104,9 +105,13 @@ export default function StapelstuehleKaufenPage() {
           </>
         }
         visual={
-          <img
+          <Image
             src={encodeURI("/pictures/Produkte/Stühle/1021c-01.jpg")}
             alt="Stapelstuhl für Gemeinde, Kirche und Saal"
+            width={760}
+            height={500}
+            priority
+            sizes="(min-width: 1024px) 42vw, 100vw"
             className="min-h-[240px] w-full object-cover md:min-h-[300px]"
           />
         }

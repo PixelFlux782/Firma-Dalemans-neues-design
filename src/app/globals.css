@@ -22,19 +22,26 @@
     background-image:
       radial-gradient(
         ellipse 140% 90% at 50% -30%,
-        rgba(196, 165, 116, 0.07),
+        rgba(110, 131, 93, 0.11),
         transparent 60%
       ),
       radial-gradient(
         ellipse 60% 40% at 0% 40%,
-        rgba(237, 232, 225, 0.5),
+        rgba(201, 213, 191, 0.35),
         transparent 55%
       ),
       radial-gradient(
         ellipse 50% 35% at 100% 80%,
-        rgba(217, 208, 196, 0.35),
+        rgba(250, 248, 240, 0.65),
         transparent 50%
       );
+  }
+
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
   }
 
   ::selection {
@@ -44,7 +51,7 @@
 
 @layer components {
   .container-premium {
-    @apply mx-auto max-w-7xl px-5 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-7xl min-w-0 px-5 sm:px-6 lg:px-8;
   }
 
   .font-display {
@@ -57,6 +64,7 @@
 
   .section-title {
     @apply font-display text-[2rem] font-medium leading-[1.12] tracking-[-0.02em] text-premium-ink sm:text-[2.35rem] md:text-[2.65rem] lg:text-[2.85rem];
+    overflow-wrap: anywhere;
   }
 
   .section-lead {
@@ -129,7 +137,7 @@
   }
 
   .page-stack {
-    @apply flex flex-col gap-24 md:gap-32 lg:gap-40;
+    @apply flex min-w-0 flex-col gap-20 md:gap-28 lg:gap-32;
   }
 
   .section-grid-top {
@@ -137,7 +145,7 @@
   }
 
   .btn-primary {
-    @apply relative inline-flex items-center justify-center overflow-hidden rounded-full bg-premium-ink px-8 py-3.5 text-sm font-medium tracking-wide text-premium-highlight shadow-premium transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-premium-canvas;
+    @apply relative inline-flex items-center justify-center overflow-hidden rounded-full bg-premium-forest px-8 py-3.5 text-sm font-medium tracking-wide text-premium-highlight shadow-premium transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-premium-canvas;
   }
 
   .btn-primary::after {
@@ -152,7 +160,7 @@
   }
 
   .btn-primary:hover {
-    @apply bg-premium-espresso shadow-premium-glow;
+    @apply bg-premium-ink shadow-premium-glow;
   }
 
   .btn-primary:hover::after {
@@ -160,7 +168,7 @@
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-full border border-premium-beige bg-white/50 px-8 py-3.5 text-sm font-medium tracking-wide text-premium-ink backdrop-blur-md transition duration-300 hover:border-premium-stone hover:bg-white/90 hover:shadow-premium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-premium-canvas;
+    @apply inline-flex items-center justify-center rounded-full border border-premium-sage bg-white/55 px-8 py-3.5 text-sm font-medium tracking-wide text-premium-ink backdrop-blur-md transition duration-300 hover:border-premium-leaf hover:bg-white/90 hover:shadow-premium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-premium-canvas;
   }
 
   .btn-hero-primary {
@@ -172,7 +180,7 @@
   }
 
   .btn-on-dark {
-    @apply inline-flex items-center justify-center rounded-full bg-premium-highlight px-8 py-3.5 text-sm font-medium tracking-wide text-premium-ink transition duration-300 hover:bg-white hover:shadow-premium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/50 focus-visible:ring-offset-2 focus-visible:ring-offset-premium-charcoal;
+    @apply inline-flex items-center justify-center rounded-full bg-premium-highlight px-8 py-3.5 text-sm font-medium tracking-wide text-premium-forest transition duration-300 hover:bg-white hover:shadow-premium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/50 focus-visible:ring-offset-2 focus-visible:ring-offset-premium-charcoal;
   }
 
   .btn-outline-dark {
@@ -239,7 +247,7 @@
   }
 
   .trust-pill {
-    @apply rounded-full border border-white/15 bg-white/5 px-4 py-2 text-[0.7rem] font-medium tracking-[0.12em] text-white/80 backdrop-blur-xl transition duration-300 hover:border-white/25 hover:bg-white/10;
+    @apply rounded-full border border-white/15 bg-white/5 px-3 py-2 text-[0.68rem] font-medium tracking-[0.08em] text-white/80 backdrop-blur-xl transition duration-300 hover:border-white/25 hover:bg-white/10 sm:px-4 sm:text-[0.7rem] sm:tracking-[0.12em];
   }
 
   /* ——— Image hover depth ——— */
@@ -275,7 +283,6 @@
 @layer utilities {
   .animate-fade-up {
     animation: fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    opacity: 0;
   }
 
   .animate-fade-up-delay-1 {
@@ -350,5 +357,21 @@
 
   .premium-card-hover:hover {
     transform: none;
+  }
+}
+
+@media (max-width: 639px) {
+  .text-balance {
+    text-wrap: pretty;
+  }
+
+  .section-title {
+    font-size: clamp(1.72rem, 8.3vw, 2rem);
+    line-height: 1.16;
+  }
+
+  .section-lead,
+  .hero-headline + p {
+    overflow-wrap: anywhere;
   }
 }

@@ -1,93 +1,85 @@
-﻿import Link from "next/link";
-import { productCategories } from "@/lib/product-categories";
 import Image from "next/image";
+import Link from "next/link";
 
 const pageLinks = [
-  { href: "/", label: "Start" },
-  { href: "/produkte", label: "Produkte" },
-  { href: "/raumloesungen/gemeindesaal", label: "Raumlösungen" },
-  { href: "/sonderloesungen", label: "Sonderlösungen" },
-  { href: "/beratung/stapelstuehle-kaufen", label: "Kaufberatung" },
-  { href: "/firma", label: "Firma" },
-  { href: "/kontakt", label: "Kontakt" },
-];
+  ["/", "Start"],
+  ["/produkte", "Produkte"],
+  ["/raeume-planung", "Räume & Planung"],
+  ["/beratung-service", "Beratung & Service"],
+  ["/sonderloesungen", "Sonderlösungen"],
+  ["/firma", "Über DLMNS"],
+  ["/kontakt", "Kontakt"],
+] as const;
+
+const productLinks = [
+  ["/produkte/kategorien/stapelstuehle", "Stapelstühle"],
+  ["/produkte/kategorien/klapptische", "Klapptische"],
+  ["/produkte/buchablage", "Buchablagen"],
+  ["/produkte/stuhltransportwagen", "Transportwagen"],
+  ["/produkte/reihenverbinder", "Reihenverbinder & Zubehör"],
+  ["/produkte/stuhlgleiter", "Ersatzteile & Gleiter"],
+] as const;
 
 export function Footer() {
   return (
-    <footer aria-label="Fußbereich" className="mb-20 mt-24 border-t border-premium-charcoal/20 bg-premium-ink text-premium-canvas/80 md:mb-0">
-      <div className="container-premium grid gap-12 py-16 md:grid-cols-[1.2fr_0.8fr_0.8fr]">
-        <div>
-          <Image
-            src={encodeURI("/pictures/Über uns/dalemans_logo1.png")}
-            alt="Dalemans"
-            width={160}
-            height={56}
-            className="h-14 w-auto object-contain brightness-0 invert"
-          />
-          <p className="mt-5 max-w-md text-sm leading-7 text-white/55">
-            DLMNS Stapelstühle & Klapptische: Ausstattung für Gemeinden, Säle
-            und flexible Räume — mit Produkten, Zubehör und persönlicher Beratung.
-          </p>
-          <div className="mt-6 grid gap-2 text-sm">
-            <a href="tel:+499342915353" className="font-medium text-white transition hover:text-premium-sand">
-              +49 9342 9153-53
-            </a>
-            <a href="mailto:info@dalemans.de" className="font-medium text-white transition hover:text-premium-sand">
-              info@dalemans.de
-            </a>
+    <footer aria-label="Fußbereich" className="mb-20 mt-20 border-t border-white/10 bg-premium-ink text-white/70 md:mb-0">
+      <div className="container-premium grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.25fr_.75fr_1fr_.55fr]">
+        <div className="sm:col-span-2 lg:col-span-1">
+          <div className="inline-flex rounded-xl bg-white px-3 py-2">
+            <Image
+              src={encodeURI("/pictures/Über uns/dalemans_logo1.png")}
+              alt="DLMNS Dalemans"
+              width={150}
+              height={52}
+              className="h-10 w-auto object-contain"
+            />
           </div>
-          <Link href="/kontakt" className="btn-on-dark mt-6 inline-flex text-sm">
-            Beratung anfragen
-          </Link>
-        </div>
-
-        <div>
-          <p className="section-eyebrow text-[0.65rem] text-premium-sand">
-            Navigation
+          <p className="mt-5 max-w-sm text-sm leading-7 text-white/55">
+            Persönlich geplante Ausstattung für Gemeinden, Säle und flexible Räume – seit 1994.
           </p>
-          <div className="mt-4 grid gap-3 text-sm">
-            {pageLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="transition hover:text-white focus-visible:outline-none focus-visible:text-white focus-visible:underline focus-visible:underline-offset-4"
-              >
-                {link.label}
-              </Link>
-            ))}
-            <Link href="/impressum" className="transition hover:text-white">
-              Impressum
-            </Link>
-            <Link href="/datenschutz" className="transition hover:text-white">
-              Datenschutz
-            </Link>
+          <div className="mt-5 grid gap-2 text-sm">
+            <a href="tel:+499342915353" className="font-medium text-white transition hover:text-premium-sand">+49 9342 9153-53</a>
+            <a href="mailto:info@dalemans.de" className="font-medium text-white transition hover:text-premium-sand">info@dalemans.de</a>
           </div>
         </div>
 
+        <FooterColumn title="Navigation" links={pageLinks} />
+        <FooterColumn title="Produkte" links={productLinks} />
+
         <div>
-          <p className="section-eyebrow text-[0.65rem] text-premium-sand">
-            Kategorien
-          </p>
+          <p className="section-eyebrow text-[0.65rem] text-premium-sand">Rechtliches</p>
           <div className="mt-4 grid gap-3 text-sm">
-            {productCategories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/produkte/kategorien/${category.id}`}
-                className="transition hover:text-white focus-visible:outline-none focus-visible:text-white focus-visible:underline focus-visible:underline-offset-4"
-              >
-                {category.name}
-              </Link>
-            ))}
+            <FooterLink href="/impressum" label="Impressum" />
+            <FooterLink href="/datenschutz" label="Datenschutz" />
           </div>
         </div>
       </div>
 
       <div className="border-t border-white/10">
-        <div className="container-premium flex flex-col gap-3 py-6 text-xs text-white/40 md:flex-row md:items-center md:justify-between">
+        <div className="container-premium flex flex-col gap-2 py-5 text-xs text-white/40 md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} Dalemans. Alle Rechte vorbehalten.</p>
           <p>Familienbetrieb für Gemeinde-, Saal- und Veranstaltungsmobiliar.</p>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterColumn({ title, links }: { title: string; links: readonly (readonly [string, string])[] }) {
+  return (
+    <div>
+      <p className="section-eyebrow text-[0.65rem] text-premium-sand">{title}</p>
+      <div className="mt-4 grid gap-3 text-sm">
+        {links.map(([href, label]) => <FooterLink key={href} href={href} label={label} />)}
+      </div>
+    </div>
+  );
+}
+
+function FooterLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link href={href} className="transition hover:text-white focus-visible:outline-none focus-visible:text-white focus-visible:underline focus-visible:underline-offset-4">
+      {label}
+    </Link>
   );
 }

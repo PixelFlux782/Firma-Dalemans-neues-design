@@ -159,12 +159,12 @@ export default function HomePage() {
       </HomeSection>
 
       <HomeSection variant="breathing">
-        <SectionHeader eyebrow="Ihr Einstieg" title="Was möchten Sie als Nächstes klären?" lead="Produkte, Raum und Beratung greifen ineinander. Starten Sie dort, wo Ihr Projekt gerade steht." align="editorial" />
-        <div className="section-grid-top grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+        <SectionHeader eyebrow="Ihr Einstieg" title="Was möchten Sie als Nächstes klären?" lead="Starten Sie dort, wo Ihr Projekt gerade steht." align="editorial" level="functional" />
+        <div className="section-grid-top grid gap-px overflow-hidden rounded-3xl border border-premium-beige bg-premium-beige md:grid-cols-2 lg:grid-cols-4">
           {entries.map((item, index) => (
-            <Link key={item.title} href={item.href} className={`premium-card premium-card-hover flex min-h-64 flex-col p-7 ${index === 1 ? "bg-premium-warm/70" : ""}`}>
+            <Link key={item.title} href={item.href} className={`flex min-h-56 flex-col bg-white/80 p-6 transition hover:bg-premium-warm ${index === 1 ? "bg-premium-warm/70" : ""}`}>
               <span className="font-mono text-xs text-premium-bronze">0{index + 1}</span>
-              <h2 className="mt-5 font-display text-2xl font-medium text-premium-ink">{item.title}</h2>
+              <h3 className="mt-5 font-display text-2xl font-medium text-premium-ink">{item.title}</h3>
               <p className="mt-4 flex-1 text-sm leading-7 text-premium-muted">{item.text}</p>
               <span className="mt-6 text-sm font-medium text-premium-bronze">{item.label} →</span>
             </Link>
@@ -174,13 +174,27 @@ export default function HomePage() {
 
       <HomeSection>
         <SectionHeader eyebrow="Kernprodukte" title="Vom Hauptmöbel bis zum passenden Detail" lead="Stapelstühle und Klapptische bilden die Basis. Zubehör, Transport und Ersatzteile machen die Ausstattung im Alltag vollständig." href="/produkte" linkLabel="Alle Produktgruppen" align="editorial" />
-        <div className="section-grid-top grid gap-6 md:grid-cols-2 lg:grid-cols-6">
-          {groups.map((group) => (
-            <Link key={group.title} href={group.href} className={`premium-card premium-card-hover overflow-hidden ${group.featured ? "lg:col-span-3" : "lg:col-span-2"}`}>
+        <div className="section-grid-top grid gap-5 md:grid-cols-2">
+          {groups.filter((group) => group.featured).map((group) => (
+            <Link key={group.title} href={group.href} className="premium-card premium-card-hover overflow-hidden">
               <Image src={encodeURI(group.image)} alt={`${group.title} für flexible Gemeinderäume`} width={720} height={440} sizes={group.featured ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 33vw, 100vw"} className={`w-full object-cover ${group.featured ? "h-64" : "h-52"}`} />
               <div className="p-6">
-                <h2 className="font-display text-2xl font-medium text-premium-ink">{group.title}</h2>
+                <h3 className="font-display text-2xl font-medium text-premium-ink">{group.title}</h3>
                 <p className="mt-3 text-sm leading-7 text-premium-muted">{group.text}</p>
+                <span className="mt-5 inline-flex text-sm font-medium text-premium-bronze">{group.cta} →</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div className="mt-5 grid gap-px overflow-hidden rounded-3xl border border-premium-beige bg-premium-beige sm:grid-cols-2 xl:grid-cols-4">
+          {groups.filter((group) => !group.featured).map((group) => (
+            <Link key={group.title} href={group.href} className="group flex min-h-[22rem] flex-col bg-white/80 transition hover:bg-premium-warm">
+              <div className="flex h-40 items-center justify-center bg-premium-highlight p-5">
+                <Image src={encodeURI(group.image)} alt={`${group.title} für flexible Gemeinderäume`} width={420} height={280} sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw" className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.025]" />
+              </div>
+              <div className="flex flex-1 flex-col p-5">
+                <h3 className="font-display text-xl font-medium text-premium-ink">{group.title}</h3>
+                <p className="mt-3 flex-1 text-sm leading-6 text-premium-muted">{group.text}</p>
                 <span className="mt-5 inline-flex text-sm font-medium text-premium-bronze">{group.cta} →</span>
               </div>
             </Link>
@@ -188,63 +202,61 @@ export default function HomePage() {
         </div>
       </HomeSection>
 
-      <HomeSection variant="elevated">
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+      <HomeSection id="herausforderungen" variant="elevated">
+        <div className="grid gap-10 lg:grid-cols-[.95fr_1.05fr] lg:items-center">
           <div>
             <p className="section-eyebrow">Räume statt Einzelprodukte</p>
-            <h2 className="section-title mt-5">Ein Raum muss nicht nur gut aussehen. Er muss im Alltag funktionieren.</h2>
-            <p className="section-lead mt-6">Gottesdienst, Gemeindecafé, Seminar und Kinderprogramm stellen unterschiedliche Anforderungen. Wir planen Reihen, Tische, Wege, Lagerung und Transport als zusammenhängende Lösung.</p>
+            <h2 className="section-title mt-5">Ein Raum muss im Alltag funktionieren.</h2>
+            <p className="section-lead mt-6">Gottesdienst, Gemeindecafé, Seminar, Kinderprogramm und Veranstaltung verlangen wechselnde Ordnungen. Deshalb betrachten wir Reihen, Tische, Wege, Lagerung und Transport zusammen.</p>
             <Link href="/raeume-planung" className="btn-primary mt-8 inline-flex">Raumtypen und Planung ansehen</Link>
           </div>
-          <Image src={encodeURI("/pictures/Über uns/main_carousel_06.jpg")} alt="Gemeinderaum mit Bestuhlung für unterschiedliche Nutzungen" width={760} height={560} sizes="(min-width: 1024px) 50vw, 100vw" className="h-80 w-full rounded-5xl object-cover shadow-premium-lg" />
+          <Image src={encodeURI("/pictures/Über uns/main_carousel_06.jpg")} alt="Gemeinderaum mit Bestuhlung für unterschiedliche Nutzungen" width={760} height={560} sizes="(min-width: 1024px) 50vw, 100vw" className="h-72 w-full rounded-3xl object-cover shadow-premium" />
         </div>
-      </HomeSection>
-
-      <HomeSection id="herausforderungen">
-        <SectionHeader eyebrow="Typische Herausforderungen" title="Konkrete Probleme brauchen konkrete Wege" lead="Nicht jede Frage beginnt mit einem Produkt. Oft beginnt sie mit einem Raum, einem Ablauf oder einem vorhandenen Bestand." align="editorial" />
-        <div className="section-grid-top grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 border-t border-premium-beige pt-8">
+          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-premium-ink">Typische Herausforderungen – direkt zur passenden Klärung</h3>
+          <div className="mt-5 grid gap-px overflow-hidden rounded-2xl border border-premium-beige bg-premium-beige md:grid-cols-2 lg:grid-cols-3">
           {challenges.map(([title, href, label]) => (
-            <Link key={title} href={href} className="premium-card premium-card-hover p-6">
-              <h3 className="font-display text-xl font-medium text-premium-ink">{title}</h3>
-              <span className="mt-5 inline-flex text-sm font-medium text-premium-bronze">{label} →</span>
+            <Link key={title} href={href} className="group bg-white/75 p-5 transition hover:bg-premium-warm">
+              <h4 className="text-sm font-semibold text-premium-ink">{title}</h4>
+              <span className="mt-3 inline-flex text-xs font-medium text-premium-bronze">{label} <span className="ml-1 transition group-hover:translate-x-0.5">→</span></span>
             </Link>
           ))}
+          </div>
         </div>
       </HomeSection>
 
       <HomeSection variant="breathing">
-        <SectionHeader eyebrow="Planungsweg" title="Orientierung vom ersten Gespräch bis zur Nutzung" lead="Der genaue Ablauf bleibt projektabhängig. Diese fünf Schritte zeigen, welche Fragen wir gemeinsam klären." align="editorial" />
-        <ol className="section-grid-top grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <SectionHeader eyebrow="Planungsweg" title="Vom ersten Gespräch bis zur Nutzung" lead="Fünf Schritte geben Orientierung; die Planungstiefe bleibt projektabhängig." align="editorial" level="functional" />
+        <ol className="section-grid-top grid gap-5 md:grid-cols-2 lg:grid-cols-5">
           {process.map(([number, title, text]) => (
             <li key={number} className="border-t border-premium-sage pt-5">
               <span className="font-mono text-xs text-premium-bronze">{number}</span>
               <h3 className="mt-4 font-display text-xl font-medium text-premium-ink">{title}</h3>
-              <p className="mt-3 text-sm leading-7 text-premium-muted">{text}</p>
+              <p className="mt-3 text-sm leading-6 text-premium-muted">{text}</p>
             </li>
           ))}
         </ol>
-      </HomeSection>
-
-      <HomeSection>
+        <div className="mt-12">
         <div className="grid gap-8 lg:grid-cols-3">
           <article className="premium-card overflow-hidden lg:col-span-2">
-            <Image src={encodeURI("/pictures/Über uns/CAD-Entwicklung.png")} alt="CAD-Ansicht für die Planung einer Raumausstattung" width={900} height={520} sizes="(min-width: 1024px) 66vw, 100vw" className="h-72 w-full object-cover" />
-            <div className="p-7 md:p-9">
+            <Image src={encodeURI("/pictures/CAD-Entwicklung.jpeg")} alt="CAD-Ansicht für die Planung einer Raumausstattung" width={900} height={520} sizes="(min-width: 1024px) 66vw, 100vw" className="h-56 w-full object-cover" />
+            <div className="p-7">
               <p className="section-eyebrow">Raum- und Bestuhlungsplanung</p>
-              <h2 className="section-title mt-4">Vor der Bestellung sehen, ob die Lösung im Raum wirklich funktioniert.</h2>
-              <p className="section-lead mt-5">2D- und 3D-Planung, Stellpläne, Reihenabstände, Fluchtwege, Tischordnungen und schwierige Geometrien werden je nach Projekt konkret geprüft.</p>
+              <h3 className="section-title-functional mt-4">Vor der Bestellung sehen, ob die Lösung im Raum funktioniert.</h3>
+              <p className="mt-5 text-sm leading-7 text-premium-muted">2D- und 3D-Planung prüft je nach Projekt Stellpläne, Reihenabstände, Fluchtwege, Tischordnungen und schwierige Geometrien.</p>
               <Link href="/raeume-planung/raumplanung" className="btn-primary mt-7 inline-flex">Raumplanung ansehen</Link>
             </div>
           </article>
           <article id="transport" className="premium-card overflow-hidden">
-            <Image src={encodeURI("/pictures/Produkte/Zubehör/TransportwagenundZubehör.png")} alt="Transportwagen für den sicheren Transport von Stühlen" width={600} height={420} sizes="(min-width: 1024px) 33vw, 100vw" className="h-60 w-full object-cover" />
+            <Image src={encodeURI("/pictures/Produkte/Zubehör/TransportwagenundZubehör.png")} alt="Transportwagen für den sicheren Transport von Stühlen" width={600} height={420} sizes="(min-width: 1024px) 33vw, 100vw" className="h-56 w-full bg-premium-highlight object-contain p-5" />
             <div className="p-7">
               <p className="section-eyebrow">Transport & Lagerung</p>
-              <h2 className="mt-4 font-display text-2xl font-medium text-premium-ink">Flexibel wird Ausstattung erst mit guten Abläufen.</h2>
+              <h3 className="mt-4 font-display text-2xl font-medium text-premium-ink">Flexibel wird Ausstattung erst mit guten Abläufen.</h3>
               <p className="mt-4 text-sm leading-7 text-premium-muted">Wagen, Stapelung, Lagerflächen und Transportwege werden für die Menschen geplant, die später auf- und abbauen.</p>
               <Link href="/kontakt?anliegen=Lager%20und%20Transport" className="mt-6 inline-flex text-sm font-medium text-premium-bronze">Lager und Transport mitplanen →</Link>
             </div>
           </article>
+        </div>
         </div>
       </HomeSection>
 
@@ -265,46 +277,45 @@ export default function HomePage() {
       </HomeSection>
 
       <HomeSection>
-        <div className="grid gap-8 lg:grid-cols-2">
-          <article className="rounded-5xl bg-premium-espresso p-8 text-white md:p-10">
+        <article className="grid overflow-hidden rounded-3xl bg-premium-espresso text-white lg:grid-cols-[.9fr_1.1fr]">
+          <div className="p-8 md:p-10">
             <p className="section-eyebrow text-premium-sand">Sonderlösungen</p>
-            <h2 className="mt-5 font-display text-3xl font-medium">Wenn ein Standardprodukt nicht zum Raum passt, prüfen wir gemeinsam eine praktische Sonderlösung.</h2>
-            <p className="mt-5 text-sm leading-7 text-white/72">Von Skizze und CAD über Konstruktion und Sondermaß bis zur Umsetzung in eigener Werkstatt oder mit passenden Fertigungspartnern.</p>
+            <h2 className="mt-5 max-w-[22ch] font-display text-3xl font-medium leading-tight">Wenn Standard nicht passt, beginnt die Planung.</h2>
+            <p className="mt-5 text-sm leading-7 text-white/72">Ausgangspunkt ist die konkrete Raumanforderung – nicht eine vorgefertigte Referenzgeschichte.</p>
             <Link href="/sonderloesungen" className="btn-on-dark mt-8 inline-flex">Sonderlösung besprechen</Link>
-          </article>
-          <article className="premium-card p-8 md:p-10">
-            <p className="section-eyebrow">Praxisrahmen: flexibler Gemeindesaal</p>
-            <h2 className="mt-5 font-display text-3xl font-medium text-premium-ink">Vom wechselnden Nutzungsbild zur abgestimmten Ausstattung.</h2>
-            <p className="mt-5 text-sm leading-7 text-premium-muted">Belegt ist die typische Planungsaufgabe: Gottesdienst, Begegnung und Veranstaltung in einem Raum; dazu Bestuhlung, Tische, Zubehör, Transport und Lagerung gemeinsam betrachten. Projektspezifische Zahlen und Kundendetails werden erst nach Freigabe ergänzt.</p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/raumloesungen/gemeindesaal" className="btn-secondary">Gemeindesaal planen</Link>
-              <Link href="/produkte" className="btn-secondary">Passende Produkte</Link>
-            </div>
-          </article>
-        </div>
+          </div>
+          <ol className="grid gap-px bg-white/10 sm:grid-cols-2">
+            {[
+              ["01", "Anforderung verstehen", "Raum, Nutzung und das konkrete Problem erfassen."],
+              ["02", "Standard prüfen", "Vorhandene Produkte und Varianten zuerst sinnvoll abgleichen."],
+              ["03", "Skizze & Planung", "Maße, Funktion und Umsetzung in CAD oder Zeichnung klären."],
+              ["04", "Praktisch umsetzen", "Sondermaß oder Sonderlösung mit Werkstatt und Fertigungspartnern realisieren."],
+            ].map(([number, title, text]) => (
+              <li key={number} className="bg-premium-forest/55 p-6">
+                <span className="font-mono text-xs text-premium-sand">{number}</span>
+                <h3 className="mt-4 text-base font-semibold">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-white/65">{text}</p>
+              </li>
+            ))}
+          </ol>
+        </article>
       </HomeSection>
 
       <HomeSection variant="breathing">
-        <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-center">
-          <Image src={encodeURI("/pictures/Über uns/Passbild_Stefan_F_edit.jpg")} alt="Stefan Dalemans, persönlicher Ansprechpartner bei DLMNS" width={560} height={640} sizes="(min-width: 1024px) 35vw, 100vw" className="h-80 w-full rounded-5xl object-cover object-top shadow-premium-lg" />
-          <div>
+        <div id="langfristig" className="grid overflow-hidden rounded-3xl border border-premium-beige bg-premium-warm/55 lg:grid-cols-[.78fr_1.22fr] lg:items-stretch">
+          <Image src={encodeURI("/pictures/Über uns/Passbild_Stefan_F_edit.jpg")} alt="Stefan Dalemans, persönlicher Ansprechpartner und Geschäftsführer von DLMNS" width={560} height={640} sizes="(min-width: 1024px) 35vw, 100vw" className="h-[26rem] w-full object-cover object-[50%_18%] lg:h-full lg:min-h-[31rem]" />
+          <div className="p-7 md:p-10 lg:p-12">
             <p className="section-eyebrow">Familie & Gemeinde</p>
             <h2 className="section-title mt-5">Gemeinde ist für uns nicht nur eine Zielgruppe, sondern Teil unserer eigenen Geschichte.</h2>
-            <p className="section-lead mt-6">1994 von Hubert Dalemans gegründet und heute von Stefan Dalemans geführt, verbindet DLMNS persönliche Ansprechpartner mit eigener Erfahrung aus Gemeinde und Gemeindebau. Daraus entstehen langfristige Kundenbeziehungen und Lösungen, die den Alltag ernst nehmen.</p>
-            <Link href="/firma" className="btn-secondary mt-8 inline-flex">DLMNS kennenlernen</Link>
-          </div>
-        </div>
-      </HomeSection>
-
-      <HomeSection id="langfristig">
-        <div className="grid gap-8 rounded-5xl border border-premium-sage bg-premium-warm/60 p-7 md:p-10 lg:grid-cols-2">
-          <div>
-            <p className="section-eyebrow">Langfristige Betreuung</p>
-            <h2 className="section-title mt-5">Die Zusammenarbeit endet nicht mit der Lieferung.</h2>
-          </div>
-          <div>
-            <p className="section-lead">Ersatzteile, Reparatur, Gleiter, Zubehör, Nachbestellungen und die Ergänzung bestehender Bestuhlung bleiben auch nach Jahren relevante Themen.</p>
-            <Link href="/beratung-service#langfristig" className="btn-primary mt-7 inline-flex">Service für bestehenden Bestand</Link>
+            <p className="mt-6 text-sm leading-7 text-premium-muted md:text-base">1994 von Hubert Dalemans gegründet und heute von Stefan Dalemans geführt, verbindet DLMNS persönliche Ansprechpartner mit eigener Erfahrung aus Gemeinde und Gemeindebau.</p>
+            <div className="mt-6 border-t border-premium-sage pt-6">
+              <h3 className="text-base font-semibold text-premium-ink">Betreuung, die nach der Lieferung weitergeht</h3>
+              <p className="mt-3 text-sm leading-7 text-premium-muted">Ersatzteile, Reparaturen, Gleiter, Zubehör, Nachbestellungen und Ergänzungen bestehender Bestuhlung prüfen wir auch nach Jahren.</p>
+            </div>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link href="/firma" className="btn-secondary">DLMNS kennenlernen</Link>
+              <Link href="/beratung-service#langfristig" className="btn-primary">Service für bestehenden Bestand</Link>
+            </div>
           </div>
         </div>
       </HomeSection>

@@ -8,6 +8,7 @@ interface SectionHeaderProps {
   linkLabel?: string;
   className?: string;
   align?: "left" | "editorial";
+  level?: "primary" | "functional";
 }
 
 export default function SectionHeader({
@@ -18,6 +19,7 @@ export default function SectionHeader({
   linkLabel,
   className = "",
   align = "left",
+  level = "primary",
 }: SectionHeaderProps) {
   return (
     <div
@@ -33,7 +35,7 @@ export default function SectionHeader({
           />
           <p className="section-eyebrow">{eyebrow}</p>
         </div>
-        <h2 className="section-title text-balance">{title}</h2>
+        <h2 className={`${level === "functional" ? "section-title-functional" : "section-title"} text-balance`}>{title}</h2>
         {lead ? (
           <p className="section-lead max-w-xl text-balance">{lead}</p>
         ) : null}

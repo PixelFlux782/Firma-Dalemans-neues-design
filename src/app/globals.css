@@ -250,6 +250,25 @@
     @apply rounded-full border border-white/15 bg-white/5 px-3 py-2 text-[0.68rem] font-medium tracking-[0.08em] text-white/80 backdrop-blur-xl transition duration-300 hover:border-white/25 hover:bg-white/10 sm:px-4 sm:text-[0.7rem] sm:tracking-[0.12em];
   }
 
+  .hero-architectural::before,
+  .company-intro-grid::before {
+    content: "";
+    @apply pointer-events-none absolute inset-0 opacity-[0.035];
+    background-image:
+      linear-gradient(to right, currentColor 1px, transparent 1px),
+      linear-gradient(to bottom, currentColor 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .company-intro-grid {
+    @apply relative;
+  }
+
+  .company-intro-grid::before {
+    inset: 0 auto 0 50%;
+    width: 50%;
+  }
+
   /* ——— Image hover depth ——— */
   .image-depth {
     @apply relative overflow-hidden;

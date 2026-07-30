@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import Link from "next/link";
 import { StructuredData } from "@/components/StructuredData";
 import HomeSection from "@/components/home/HomeSection";
@@ -51,37 +51,110 @@ const process = [
 ] as const;
 
 export default function HomePage() {
+  const heroDesktop = getImageProps({
+    src: "/images/optimized/hero/gemeinderaum-bestuhlung-desktop.jpg",
+    alt: "Heller Gemeindesaal mit Reihen aus Holzstühlen und freiem Mittelgang",
+    width: 1536,
+    height: 1024,
+    priority: true,
+    sizes: "(min-width: 1024px) 58vw, 100vw",
+  }).props;
+  const heroMobile = getImageProps({
+    src: "/images/optimized/hero/gemeinderaum-bestuhlung-mobile.jpg",
+    alt: "Heller Gemeindesaal mit Reihen aus Holzstühlen und freiem Mittelgang",
+    width: 900,
+    height: 1120,
+    sizes: "100vw",
+  }).props;
+
   return (
     <div className="page-stack">
       <StructuredData data={{ "@context": "https://schema.org", "@graph": [organizationStructuredData, { "@type": "WebSite", name: "DLMNS Stapelstühle & Klapptische", url: absoluteUrl("/") }] }} />
 
-      <section className="relative overflow-hidden rounded-6xl bg-premium-espresso text-white shadow-premium-xl">
-        <Image src={encodeURI("/pictures/Über uns/Realisierte-11.jpg")} alt="Flexibel bestuhlter Gemeinderaum" fill priority sizes="(min-width: 1280px) 1200px, 100vw" className="object-cover opacity-45" />
-        <div className="absolute inset-0 bg-gradient-to-r from-premium-espresso via-premium-espresso/90 to-premium-espresso/30" />
-        <div className="relative max-w-3xl px-6 py-16 sm:px-10 md:py-24 lg:px-16 lg:py-28">
-          <p className="section-eyebrow text-premium-sand">DLMNS Stapelstühle & Klapptische</p>
-          <h1 className="mt-5 font-display text-4xl font-medium leading-[1.06] tracking-[-0.035em] sm:text-5xl lg:text-6xl">
-            Flexible Ausstattung für Räume, in denen Gemeinde lebt.
-          </h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-white/80 md:text-lg">
-            Seit 1994 begleiten wir Gemeinden, Kirchen und andere flexible Räume bei Bestuhlung, Tischen, Raumplanung und langfristiger Ausstattung.
-          </p>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-white/70">
-            Kein anonymer Möbelshop, sondern ein erfahrener Partner, der Nutzung, Umbau, Lagerung und den Alltag von Ehrenamtlichen versteht.
-          </p>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Link href="/kontakt?anliegen=Raum%20und%20Bestuhlung" className="btn-hero-primary text-center">Raum & Bestuhlung besprechen</Link>
-            <Link href="/produkte/kategorien/stapelstuehle" className="btn-hero-secondary text-center">Stapelstühle ansehen</Link>
+      <section className="hero-architectural relative -mx-5 overflow-hidden border-y border-premium-beige bg-premium-highlight shadow-premium-xl sm:-mx-6 md:mx-0 md:rounded-[2.5rem] md:border">
+        <div className="grid lg:min-h-[min(72vh,760px)] lg:grid-cols-[.88fr_1.12fr]">
+          <div className="relative z-10 flex flex-col justify-center px-5 py-12 sm:px-8 md:px-12 md:py-16 lg:px-14 xl:px-16">
+            <div className="absolute inset-y-8 right-0 hidden w-px bg-premium-beige lg:block" aria-hidden />
+            <p className="section-eyebrow">DLMNS Stapelstühle & Klapptische</p>
+            <div className="mt-5 flex items-center gap-3 text-[0.65rem] font-medium uppercase tracking-[0.18em] text-premium-muted">
+              <span>Seit 1994</span><span className="h-px w-8 bg-premium-stone" aria-hidden /><span>Persönlich geplant</span>
+            </div>
+            <h1 className="mt-6 max-w-[13ch] font-display text-[2.35rem] font-medium leading-[1.04] tracking-[-0.035em] text-premium-ink sm:text-[3.15rem] lg:text-[3.5rem]">
+              Flexible Ausstattung für Räume, in denen Gemeinde lebt.
+            </h1>
+            <p className="mt-6 max-w-xl text-[0.95rem] leading-7 text-premium-muted md:text-base md:leading-8">
+              Kein anonymer Möbelshop, sondern persönliche Raum- und Ausstattungsberatung für Bestuhlung, Tische und langfristige Nutzung.
+            </p>
+            <p className="mt-6 border-l border-premium-stone pl-4 font-mono text-[0.66rem] uppercase tracking-[0.14em] text-premium-bronze">
+              Raumplanung · Bestuhlung · Sonderlösungen
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link href="/kontakt?anliegen=Raum%20und%20Bestuhlung" className="btn-primary group justify-center rounded-xl px-6">
+                Raum & Bestuhlung besprechen <span aria-hidden className="ml-2 transition-transform group-hover:translate-x-0.5">→</span>
+              </Link>
+              <Link href="/produkte/kategorien/stapelstuehle" className="btn-secondary justify-center rounded-xl px-6">Produkte ansehen</Link>
+            </div>
+            <a href="tel:+499342915353" className="mt-6 inline-flex w-fit items-center gap-3 text-sm font-semibold text-premium-ink transition hover:text-premium-bronze">
+              <span className="text-[0.62rem] font-medium uppercase tracking-[0.16em] text-premium-subtle">Direktkontakt</span>
+              +49 9342 9153-53
+            </a>
           </div>
-          <a href="tel:+499342915353" className="mt-6 inline-flex text-sm font-medium text-white underline decoration-white/40 underline-offset-4">Direkt anrufen: +49 9342 9153-53</a>
+          <div className="relative min-h-[360px] overflow-hidden sm:min-h-[440px] lg:min-h-full">
+            <picture>
+              <source media="(max-width: 639px)" srcSet={heroMobile.srcSet} />
+              <img
+                {...heroDesktop}
+                alt="Heller Gemeindesaal mit Reihen aus Holzstühlen und freiem Mittelgang"
+                className="absolute inset-0 h-full w-full object-cover object-[55%_50%]"
+              />
+            </picture>
+            <div className="absolute inset-0 bg-gradient-to-t from-premium-espresso/35 via-transparent to-transparent lg:bg-gradient-to-r lg:from-premium-highlight/20 lg:via-transparent lg:to-transparent" aria-hidden />
+            <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between border-t border-white/70 pt-3 text-white drop-shadow-[0_1px_5px_rgba(0,0,0,.55)] sm:bottom-7 sm:left-7 sm:right-7">
+              <span className="text-[0.65rem] font-semibold uppercase tracking-[0.18em]">Gemeinderaum · flexibel bestuhlt</span>
+              <span className="hidden font-mono text-[0.62rem] uppercase tracking-[0.14em] sm:block">Planung / Nutzung / Bestand</span>
+            </div>
+          </div>
         </div>
       </section>
 
       <HomeSection>
-        <div className="grid gap-px overflow-hidden rounded-4xl border border-premium-beige bg-premium-beige sm:grid-cols-2 lg:grid-cols-3">
-          {["Seit 1994", "Mehr als 1.000 ausgestattete Räume und Gemeinden", "Rund 90 % Kunden aus dem freikirchlichen Umfeld", "Eigene Werkstatt", "2D- und 3D-Planung", "Ersatzteile und Nachbestellungen auch nach vielen Jahren"].map((item) => (
-            <p key={item} className="bg-premium-canvas px-5 py-5 text-sm font-medium leading-6 text-premium-charcoal">{item}</p>
-          ))}
+        <div className="company-intro-grid grid gap-10 border-y border-premium-beige py-10 md:py-14 lg:grid-cols-[.9fr_1.1fr] lg:gap-16">
+          <div className="lg:pr-6">
+            <p className="section-eyebrow">Erfahrung, die den ganzen Raum sieht</p>
+            <h2 className="mt-5 max-w-xl font-display text-3xl font-medium leading-[1.14] tracking-[-0.025em] text-premium-ink md:text-4xl">
+              Planung, Gemeindeverständnis und langfristige Betreuung gehören zusammen.
+            </h2>
+            <p className="mt-6 max-w-xl text-sm leading-7 text-premium-muted md:text-base md:leading-8">
+              Seit 1994 begleitet Dalemans Gemeinden, Kirchen und flexible Veranstaltungsräume bei Auswahl, Planung und langfristiger Nutzung ihrer Ausstattung. Wir betrachten nicht nur Stuhl oder Tisch, sondern den gesamten Raum – von Bestuhlung und Fluchtwegen bis zu Transport, Lagerung und Nachbestellung.
+            </p>
+            <p className="mt-5 max-w-xl border-l-2 border-premium-sand pl-5 text-sm font-medium leading-7 text-premium-charcoal">
+              Gemeinde ist für uns nicht nur eine Zielgruppe, sondern Teil unserer eigenen Geschichte.
+            </p>
+          </div>
+          <div className="grid gap-px overflow-hidden rounded-3xl border border-premium-beige bg-premium-beige sm:grid-cols-2">
+            <div className="bg-premium-forest p-6 text-white sm:p-7">
+              <span className="font-mono text-[0.62rem] tracking-[0.18em] text-premium-sand">01 / ERFAHRUNG</span>
+              <strong className="mt-7 block font-display text-4xl font-medium">Seit 1994</strong>
+              <span className="mt-2 block text-sm text-white/70">persönlich begleitet und geplant</span>
+            </div>
+            <div className="bg-premium-warm p-6 sm:p-7">
+              <span className="font-mono text-[0.62rem] tracking-[0.18em] text-premium-bronze">02 / RÄUME</span>
+              <strong className="mt-7 block font-display text-4xl font-medium text-premium-ink">1.000+</strong>
+              <span className="mt-2 block text-sm text-premium-muted">ausgestattete Räume und Gemeinden</span>
+            </div>
+            {[
+              ["03", "Gemeindenähe", "Rund 90 % Kunden aus dem freikirchlichen Umfeld"],
+              ["04", "Raumplanung", "2D- und 3D-Planung für konkrete Nutzungen"],
+              ["05", "Werkstatt", "Eigene Werkstatt für praktische Lösungen"],
+              ["06", "Langfristig", "Ersatzteile und Nachbestellungen auch nach Jahren"],
+            ].map(([number, title, text]) => (
+              <div key={number} className="bg-white/70 p-5 sm:p-6">
+                <span className="font-mono text-[0.6rem] tracking-[0.16em] text-premium-bronze">{number}</span>
+                <h3 className="mt-4 text-sm font-semibold text-premium-ink">{title}</h3>
+                <p className="mt-2 text-xs leading-6 text-premium-muted">{text}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </HomeSection>
 

@@ -54,7 +54,7 @@ export const products: Product[] = [
       "in abgestimmten Ausführungen für Reihen- und Flächenbestuhlung",
     ],
     note:
-      "Auf der Originalseite wird die Bedeutung hochwertiger Gestelle und sauber verarbeiteter Sitzschalen besonders hervorgehoben. Gerade bei häufig genutzten Bestuhlungen zahlt sich diese Qualität langfristig aus.",
+      "Bei häufig genutzten Bestuhlungen sollten Gestell, Sitzschale und Verbindungspunkte gemeinsam geprüft werden.",
   },
   {
     title: 'Stapelstuhl Mod. 1021c "Bünde"',
@@ -271,7 +271,7 @@ export const products: Product[] = [
       "Der Klappstuhl LS193 ist eine praktische Lösung, wenn kurzfristig zusätzliche Sitzplätze benötigt werden. Er lässt sich platzsparend lagern und bei Bedarf schnell bereitstellen.",
     highlights: [
       "platzsparend klappbar",
-      "schnell verfügbar bei Sonderbelegung",
+      "als Ergänzungsbestuhlung einsetzbar",
       "ideal als Ergänzungs- und Reservebestuhlung",
     ],
     suitableFor: [
@@ -376,10 +376,10 @@ export const products: Product[] = [
     shortDescription:
       "Bewährter Klapptisch für Bewirtung, Gruppenarbeit und vielseitige Veranstaltungsflächen.",
     description:
-      "Der Klapptisch 310c ist laut Originalseite seit Jahrzehnten ein bewährtes Modell mit einem sehr starken Preis-Leistungs-Verhältnis. Funktion und Design haben sich in Vereinsheimen, Seminarräumen, Kirchen, Gemeinden sowie in Sport- und Stadthallen durchgesetzt. Die Tische stammen aus deutscher Fertigung und sind auf dauerhafte Nutzung ausgelegt.",
+      "Der Klapptisch 310c ist für wechselnde Nutzungen in Vereinsheimen, Seminarräumen, Kirchen, Gemeinden sowie Sport- und Stadthallen vorgesehen.",
     highlights: [
       "bewährte Konstruktion für langjährigen Einsatz",
-      "Platten mit HPL-Oberfläche für robuste Alltagsnutzung",
+      "Oberflächen passend zur geplanten Alltagsnutzung",
       "schnell auf- und abgebaut bei häufigen Umstellungen",
     ],
     suitableFor: [
@@ -389,8 +389,8 @@ export const products: Product[] = [
       "Sport- und Stadthallen",
     ],
     details: [
-      "ausschließlich Komponenten aus deutscher Fertigung",
-      "HPL-Oberflächen sind besonders widerstandsfähig gegen Kratzer, Abrieb und Stöße",
+      "Ausführung und Komponenten werden projektbezogen abgestimmt",
+      "Oberflächen und Kanten werden passend zur Beanspruchung ausgewählt",
       "echte Holzkanten sorgen für Langlebigkeit, saubere Optik und robuste Kantenqualität",
     ],
     variants: [
@@ -399,7 +399,7 @@ export const products: Product[] = [
       "für Reihenaufstellungen und Einzelaufstellungen passend auswählbar",
     ],
     note:
-      "Auf der Informationsseite empfiehlt Dalemans besonders kompakte Maße wie 140 x 70 cm, weil sie sich komfortabel handhaben und in Blockstellungen sehr gut kombinieren lassen.",
+      "Kompakte Tischformate lassen sich komfortabel handhaben und in Blockstellungen gut kombinieren. Konkrete Maße stimmen wir mit Raum und Nutzung ab.",
   },
   {
     title: "Trapezklapptisch 310c",
@@ -443,7 +443,7 @@ export const products: Product[] = [
     shortDescription:
       "Funktionaler Seminartisch für Unterricht, Besprechung und Schulung.",
     description:
-      "Der Seminar-Klapptisch ist laut Originalseite ein seit langem bewährter Kompromiss aus Funktion, Preis und einfacher Konstruktion. Das Design beschränkt sich bewusst auf das Nötigste, um eine wirtschaftliche und dennoch stabile Lösung für Seminar- und Besprechungsräume zu bieten.",
+      "Der Seminar-Klapptisch ist eine bewusst reduzierte Lösung für Seminar- und Besprechungsräume. Ausführung und Eignung werden passend zur geplanten Nutzung beraten.",
     highlights: [
       "preislich attraktive Lösung für Seminarbereiche",
       "identisches Klappgestell wie beim Modell 310c",
@@ -470,7 +470,7 @@ export const products: Product[] = [
     shortDescription:
       "Kompakte Tischlösung für Cafébereiche, Begegnungszonen und Stehempfänge.",
     description:
-      "Der Bistrotisch schafft kommunikative Nebenflächen in Foyers, Gemeindecafés und Aufenthaltsbereichen. Laut Originalseite sind Steh- und Bistrotische in Höhen von 74 cm und 111 cm erhältlich und für eine solide, standfeste Nutzung ausgelegt.",
+      "Der Bistrotisch schafft kommunikative Nebenflächen in Foyers, Gemeindecafés und Aufenthaltsbereichen. Verfügbare Ausführungen und Maße klären wir in der Beratung.",
     highlights: [
       "kompakte Lösung für offene Begegnungsbereiche",
       "massive Standsäule und stabiler Fuß für hohe Standfestigkeit",
@@ -483,12 +483,12 @@ export const products: Product[] = [
       "Bistrobereiche",
     ],
     details: [
-      "80-mm-Standsäule und 8-mm-Fuß aus massivem Stahl, gepulvert",
-      "Tischplatte standardmäßig in Holz mit 25 oder 28 mm Stärke",
+      "Standsäule und Fuß passend zum gewünschten Einsatz",
+      "Tischplatte in projektbezogen abgestimmter Ausführung",
       "Umleimer in verschiedenen Dekoren und Farben möglich",
     ],
     variants: [
-      "Höhen 74 cm und 111 cm",
+      "verschiedene Höhen auf Anfrage",
       "Oberflächendekore aus dem Klapptischprogramm",
       "Sonderlösungen zum Beispiel in Alu-Riffelblech oder Metall",
     ],
@@ -502,7 +502,7 @@ export const products: Product[] = [
     shortDescription:
       "Robuste Transporthilfe für Tische, passend auf das jeweilige Tischmaß abgestimmt.",
     description:
-      "Der Tischtransportwagen ist laut Originalseite solide gebaut und für das Gewicht von etwa zehn Tischen ausgelegt. Jeder Wagen wird passend zur jeweiligen Tischgröße gefertigt und unterstützt sichere, materialschonende Abläufe bei Lagerung und Saalumbauten.",
+      "Der Tischtransportwagen unterstützt materialschonende Abläufe bei Lagerung und Saalumbauten. Passende Abmessungen und Kapazität werden anhand der verwendeten Tische geplant.",
     highlights: [
       "für das Gewicht von etwa zehn Tischen ausgelegt",
       "passend zur Tischgröße gefertigt",
@@ -515,7 +515,7 @@ export const products: Product[] = [
       "Veranstaltungslogistik",
     ],
     details: [
-      "Rohspan-Auflageplatte umlaufend etwa 1 cm größer als das Tischmaß",
+      "Auflagefläche passend zum Tischmaß geplant",
       "dadurch guter Schrammschutz für wertvolle Tischplatten",
       "Haltebügel und Lenkrollen beidseitig sind auf Wunsch möglich",
     ],
@@ -534,9 +534,9 @@ export const products: Product[] = [
     shortDescription:
       "Durchdachte Transportlösung für Stühle verschiedener Bauarten und Gestellbreiten.",
     description:
-      "Der Stuhltransportwagen erleichtert das Bewegen größerer Bestandsmengen deutlich. Auf der Originalseite wird er als solide und durchdachte Konstruktion beschrieben, die sich für praktisch jeden Stuhltyp bis zu einer Gestellbreite von 60 cm eignet.",
+      "Der Stuhltransportwagen erleichtert das Bewegen größerer Bestandsmengen. Die Eignung wird anhand von Stuhltyp, Gestell und Transportweg geprüft.",
     highlights: [
-      "für viele Stuhltypen bis 60 cm Gestellbreite geeignet",
+      "Eignung wird anhand des vorhandenen Stuhltyps geprüft",
       "erleichtert Auf- und Abbauprozesse spürbar",
       "robust für wiederholte Nutzung im Alltag",
     ],
@@ -561,7 +561,7 @@ export const products: Product[] = [
     shortDescription:
       "Bodenschonende Kunststoffgleiter für Stahlrohrstühle wie Mod. 1021 und ähnliche Modelle.",
     description:
-      "Die Stuhlgleiter sind auf bodenschonende Nutzung und eine optimale Kraftverteilung ausgelegt. Laut Originalseite sorgt die Abschrägung für eine möglichst vollflächige Auflage auf dem Boden und damit für einen besseren Schutz empfindlicher Flächen.",
+      "Passende Stuhlgleiter können Böden schützen. Welche Ausführung geeignet ist, hängt von Gestell, Boden und Nutzung ab.",
     highlights: [
       "besonders bodenschonend durch abgeschrägte Form",
       "optimale Kraftverteilung auf eine größere Auflagefläche",
@@ -574,9 +574,9 @@ export const products: Product[] = [
       "empfindliche Bodenflächen",
     ],
     details: [
-      "für Rohrdurchmesser 20 mm beschrieben",
-      "Standfußhöhe etwa 10 mm",
-      "Schaftlänge etwa 19 mm, Schräge ca. 12 bis 15 Grad",
+      "passende Ausführung abhängig vom Rohrdurchmesser",
+      "Standfuß passend zum Gestell",
+      "Form und Schaftlänge werden am Bestand geprüft",
     ],
     variants: [
       "weitere Größen und Typen auf Anfrage",
@@ -591,7 +591,7 @@ export const products: Product[] = [
     shortDescription:
       "Nachrüstlösung für geordnete und stabile Reihenbestuhlung mit vorhandenen Stahlrohrstühlen.",
     description:
-      "Der Reihenverbinder ist für Stahlrohrstühle mit 20 bis 25 mm Gestelldurchmesser gedacht, wenn keine serienmäßige Reihenverbindung vorhanden ist. Damit lassen sich vorhandene Bestände zuverlässig für Gottesdienste, Vorträge und Veranstaltungen in Reihen organisieren.",
+      "Der Reihenverbinder kann für Stahlrohrstühle ohne serienmäßige Reihenverbindung geprüft werden. Entscheidend sind Gestellform und Abmessungen des vorhandenen Bestands.",
     highlights: [
       "zur Nachrüstung bestehender Stahlrohrstühle geeignet",
       "bewährte Lösung für geordnete Reihenbestuhlung",
@@ -604,12 +604,12 @@ export const products: Product[] = [
       "Veranstaltungsräume",
     ],
     details: [
-      "für Gestelldurchmesser von 20 bis 25 mm vorgesehen",
+      "Eignung abhängig von Gestellform und Durchmesser",
       "idealerweise zwei Verbinder pro Stuhlpaar, vorne und hinten",
-      "zwischen den Stühlen entsteht ein Abstand von etwa 4 bis 12 cm",
+      "gewünschter Stuhlabstand wird bei der Auswahl berücksichtigt",
     ],
     note:
-      "Auf der Originalseite wird diese Lösung ausdrücklich als bewährt und stabil beschrieben, besonders für vorhandene Bestände ohne serienmäßige Reihenverbindung.",
+      "Die Lösung kann für vorhandene Bestände ohne serienmäßige Reihenverbindung geprüft werden.",
   },
   {
     title: "Buchablage",

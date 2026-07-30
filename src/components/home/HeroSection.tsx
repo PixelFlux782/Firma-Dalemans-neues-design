@@ -1,12 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const trustBadges = [
-  "Gemeinden",
-  "Säle",
-  "Vereine",
-  "Sondermaße",
-] as const;
+const trustBadges = ["seit 1994", "mehr als 1.000 Räume begleitet", "2D- und 3D-Planung"] as const;
 
 export default function HeroSection() {
   return (
@@ -18,12 +13,12 @@ export default function HeroSection() {
               DLMNS Stapelstühle & Klapptische
             </p>
             <h1 className="hero-headline mt-6 max-w-full text-[1.62rem] sm:text-5xl md:text-[3.15rem] lg:text-[3.55rem] lg:leading-[1.04]">
-              Stapelstühle & Klapptische für Gemeinden, Vereine und Säle.
+              Flexible Ausstattung für Räume, in denen Gemeinde lebt.
             </h1>
             <p className="mt-7 max-w-full text-[0.95rem] leading-[1.78] text-white/74 md:max-w-2xl md:text-lg md:leading-[1.8]">
-              Robuste Gemeindestühle, Kirchenstühle, Klapptische,
-              Transportwagen und Sondermaße, persönlich geplant für Räume, die
-              oft umgebaut und lange genutzt werden.
+              Kein anonymer Möbelshop, sondern ein erfahrener Partner für flexible
+              Gemeinderäume. Seit 1994 begleiten wir Gemeinden und andere flexible
+              Räume bei Bestuhlung, Tischen, Planung und langfristiger Nutzung.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -45,7 +40,6 @@ export default function HeroSection() {
             </div>
 
             <div className="mt-8 flex flex-wrap gap-2">
-              <span className="trust-pill">seit Jahrzehnten beraten</span>
               {trustBadges.map((badge) => (
                 <span key={badge} className="trust-pill">
                   {badge}

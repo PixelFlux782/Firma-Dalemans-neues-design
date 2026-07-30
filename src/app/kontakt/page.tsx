@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { ContactForm } from "@/components/ContactForm";
 import CinematicPageHero from "@/components/home/CinematicPageHero";
 import HomeSection from "@/components/home/HomeSection";
@@ -17,7 +18,6 @@ const contactPoints = [
 
 const quickLinks = [
   { href: "/produkte", label: "Zur Produktübersicht" },
-  { href: "/produkte/kategorien", label: "Zu allen Kategorien" },
   { href: "/firma", label: "Mehr über Dalemans" },
 ] as const;
 
@@ -138,7 +138,7 @@ export default function KontaktPage() {
             <div className="image-depth hidden overflow-hidden rounded-5xl shadow-premium-lg sm:block">
               <Image
                 src={encodeURI("/pictures/Über uns/Werkstatt-24.jpg")}
-                alt="Dalemans Werkstatt und Fertigung"
+                alt="Arbeitsbereich in der Dalemans Werkstatt"
                 width={720}
                 height={360}
                 sizes="(min-width: 1024px) 40vw, 100vw"
@@ -148,7 +148,9 @@ export default function KontaktPage() {
           </div>
 
           <div className="animate-fade-up animate-fade-up-delay-1">
-            <ContactForm />
+            <Suspense fallback={<p className="premium-card p-8 text-premium-muted">Formular wird geladen …</p>}>
+              <ContactForm />
+            </Suspense>
           </div>
         </div>
       </HomeSection>

@@ -70,8 +70,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="de">
       <body>
+        <a
+          href="#main-content"
+          className="fixed left-4 top-4 z-[100] -translate-y-24 rounded-xl bg-premium-ink px-4 py-3 text-sm font-medium text-white transition focus:translate-y-0"
+        >
+          Zum Hauptinhalt
+        </a>
         <Header />
-        <main className="min-h-screen pb-24 pt-6 md:py-10 lg:py-12">
+        <main id="main-content" className="min-h-screen pb-24 pt-6 md:py-10 lg:py-12">
           <div className="container-premium">{children}</div>
         </main>
         <div className="fixed inset-x-0 bottom-0 z-50 border-t border-premium-beige/70 bg-premium-canvas/95 px-4 py-3 shadow-premium-lg backdrop-blur-md md:hidden">

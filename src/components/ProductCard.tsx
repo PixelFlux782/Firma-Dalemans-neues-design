@@ -54,7 +54,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             Details ansehen
           </Link>
           <Link
-            href="/kontakt"
+            href={`/kontakt?produkt=${encodeURIComponent(product.title)}`}
             className="btn-secondary px-5 py-2.5 text-sm"
           >
             Anfragen

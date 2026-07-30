@@ -6,3 +6,4 @@ tsconfig.tsbuildinfo
 Firma-Dalemans/
 .env
 .env.*
+!.env.example

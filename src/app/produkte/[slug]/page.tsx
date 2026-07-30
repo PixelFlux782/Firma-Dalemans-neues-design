@@ -66,11 +66,6 @@ export default async function ProductDetailPage({ params }: Props) {
           "@type": "Brand",
           name: siteName,
         },
-        manufacturer: {
-          "@type": "Organization",
-          name: siteName,
-          url: absoluteUrl("/"),
-        },
         audience: {
           "@type": "Audience",
           audienceType: product.suitableFor.join(", "),
@@ -94,17 +89,6 @@ export default async function ProductDetailPage({ params }: Props) {
             value: item,
           })),
         ],
-        offers: {
-          "@type": "Offer",
-          url: absoluteUrl(`/produkte/${product.slug}`),
-          availability: "https://schema.org/InStock",
-          itemCondition: "https://schema.org/NewCondition",
-          seller: {
-            "@type": "Organization",
-            name: siteName,
-            url: absoluteUrl("/"),
-          },
-        },
       },
       {
         "@type": "BreadcrumbList",
@@ -170,7 +154,7 @@ export default async function ProductDetailPage({ params }: Props) {
         mood={mood}
         actions={
           <>
-            <Link href="/kontakt" className="btn-hero-primary text-center">
+            <Link href={`/kontakt?produkt=${encodeURIComponent(product.title)}`} className="btn-hero-primary text-center">
               Produkt anfragen
             </Link>
             {category ? (
@@ -189,6 +173,7 @@ export default async function ProductDetailPage({ params }: Props) {
             alt={product.title}
             width={720}
             height={460}
+            priority
             sizes="(min-width: 1024px) 42vw, 100vw"
             className="min-h-[220px] w-full object-cover sm:min-h-[260px] md:min-h-[280px]"
           />
@@ -278,7 +263,7 @@ export default async function ProductDetailPage({ params }: Props) {
                   Räume und Abläufe ab — damit die Lösung im Alltag zuverlässig
                   funktioniert.
                 </p>
-                <Link href="/kontakt" className="btn-primary mt-7 inline-flex">
+                <Link href={`/kontakt?produkt=${encodeURIComponent(product.title)}`} className="btn-primary mt-7 inline-flex">
                   Beratung anfragen
                 </Link>
               </div>
@@ -374,7 +359,7 @@ export default async function ProductDetailPage({ params }: Props) {
         eyebrow="Beratung"
         title={`Interesse an ${product.title}?`}
         lead="Wir beraten zu Stückzahlen, Varianten, Zubehör und Einbindung in Ihr Raumkonzept — persönlich und mit Blick auf Raumwirkung."
-        primaryHref="/kontakt"
+        primaryHref={`/kontakt?produkt=${encodeURIComponent(product.title)}`}
         primaryLabel="Projekt besprechen"
         secondaryHref={category ? `/produkte/kategorien/${category.id}` : "/produkte"}
         secondaryLabel={category ? "Mehr aus der Kategorie" : "Alle Produkte"}

@@ -9,8 +9,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     "/",
     "/produkte",
-    "/produkte/kategorien",
+    "/raeume-planung",
+    "/raeume-planung/raumplanung",
     "/raumloesungen/gemeindesaal",
+    "/beratung-service",
     "/beratung/stapelstuehle-kaufen",
     "/sonderloesungen",
     "/firma",

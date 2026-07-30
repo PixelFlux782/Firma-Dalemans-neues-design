@@ -14,7 +14,7 @@ const pageLinks = [
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-premium-charcoal/20 bg-premium-ink text-premium-canvas/80">
+    <footer aria-label="Fußbereich" className="mb-20 mt-24 border-t border-premium-charcoal/20 bg-premium-ink text-premium-canvas/80 md:mb-0">
       <div className="container-premium grid gap-12 py-16 md:grid-cols-[1.2fr_0.8fr_0.8fr]">
         <div>
           <Image

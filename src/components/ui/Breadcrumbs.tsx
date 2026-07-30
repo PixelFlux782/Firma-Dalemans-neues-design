@@ -27,7 +27,7 @@ export default function Breadcrumbs({ items, className = "" }: BreadcrumbsProps)
               {item.label}
             </Link>
           ) : (
-            <span className="font-medium text-premium-charcoal">{item.label}</span>
+            <span aria-current="page" className="font-medium text-premium-charcoal">{item.label}</span>
           )}
         </span>
       ))}

@@ -175,18 +175,17 @@ export default function ProductCategoryOverview({
         breadcrumbs={[
           { label: "Start", href: "/" },
           { label: "Produkte", href: "/produkte" },
-          { label: "Kategorien", href: "/produkte/kategorien" },
           { label: category.name },
         ]}
         mediaAriaLabel={placeholder.ariaLabel}
         mood={placeholder.mood}
         actions={
           <>
-            <Link href="/kontakt" className="btn-hero-primary text-center">
+            <Link href={`/kontakt?kategorie=${encodeURIComponent(category.name)}`} className="btn-hero-primary text-center">
               Beratung anfragen
             </Link>
             <Link
-              href="/produkte/kategorien"
+              href="/produkte"
               className="btn-hero-secondary text-center"
             >
               Alle Kategorien
@@ -199,6 +198,7 @@ export default function ProductCategoryOverview({
             alt={`${category.name} für Gemeinden und Säle`}
             width={720}
             height={460}
+            priority
             sizes="(min-width: 1024px) 42vw, 100vw"
             className="min-h-[220px] w-full object-cover sm:min-h-[260px] md:min-h-[280px]"
           />
@@ -269,7 +269,7 @@ export default function ProductCategoryOverview({
               Lagerung, Transport und die Wirkung im Raum.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/kontakt" className="btn-primary text-center">
+              <Link href={`/kontakt?kategorie=${encodeURIComponent(category.name)}`} className="btn-primary text-center">
                 Raum ausstatten lassen
               </Link>
               <a href="tel:+499342915353" className="btn-secondary text-center">
@@ -357,7 +357,7 @@ export default function ProductCategoryOverview({
         eyebrow="Beratung"
         title={`Planen Sie mit ${category.name}?`}
         lead="Wir helfen bei Raumgröße, Stückzahlen, Reihenbestuhlung, Stapelung, Lagerung, Transportwagen, Budget und Pflege."
-        primaryHref="/kontakt"
+        primaryHref={`/kontakt?kategorie=${encodeURIComponent(category.name)}`}
         primaryLabel="Beratung anfragen"
         secondaryHref="/produkte"
         secondaryLabel="Produkte ansehen"

@@ -16,7 +16,7 @@ export const productCategories: ProductCategory[] = [
   {
     id: "stapelstuehle",
     name: "Stapelstühle",
-    image: asset("/pictures/Produkte/Stühle/1021c-01.jpg"),
+    image: asset("/images/optimized/stapelstuhl-1021c.webp"),
     intro:
       "Vielseitige Bestuhlung für Gottesdienste, Mehrzweckräume und Veranstaltungen mit hoher Frequenz.",
     description:
@@ -38,7 +38,7 @@ export const productCategories: ProductCategory[] = [
       "Unsere Klapptische sind auf den Alltag in Gemeindezentren, Festsälen und Vereinsräumen ausgelegt. Ob Kaffeebereich, Seminar, Buffet oder Konferenz: Sie schaffen verlässliche Flächen mit durchdachter Konstruktion und hochwertigen Materialien.",
     highlights: [
       "stabile Konstruktionen für häufiges Auf- und Abbauen",
-      "HPL-Oberflächen und belastbare Kanten für den täglichen Einsatz",
+      "Oberflächen und Kanten passend zur Beanspruchung auswählbar",
       "verschiedene Formate für kleine und große Räume",
     ],
     useCases: ["Gemeindecafés", "Feiern", "Tagungen", "Buffetbereiche"],

@@ -6,7 +6,8 @@ import CinematicPageHero from "@/components/home/CinematicPageHero";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
-import { absoluteUrl, buildMetadata, siteName } from "@/lib/seo";
+import { absoluteUrl, buildMetadata } from "@/lib/seo";
+import { company, organizationStructuredData } from "@/lib/company";
 
 const strengths = [
   {
@@ -15,9 +16,9 @@ const strengths = [
       "Persönliche Verantwortung, direkte Ansprechpartner und ehrliche Beratung statt anonymer Abwicklung.",
   },
   {
-    title: "Über 50 Jahre Erfahrung",
+    title: "Mehr als 30 Jahre Erfahrung",
     text:
-      "Langjährige Praxis in der Möbelwelt — mit tiefem Verständnis für Gemeinden, Vereine und Veranstaltungsorte.",
+      "Seit 1994 begleiten wir Gemeinden, Vereine und Veranstaltungsorte mit persönlicher Beratung und praktischer Planung.",
   },
   {
     title: "Sonderlösungen mit System",
@@ -75,59 +76,16 @@ const firmaStructuredData = {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "Organization",
-      "@id": absoluteUrl("/#organization"),
-      name: siteName,
-      url: absoluteUrl("/"),
-      logo: absoluteUrl("/pictures/Über uns/dalemans_logo1.png"),
+      ...organizationStructuredData,
       image: absoluteUrl("/pictures/Über uns/Passbild_Stefan_F_edit.jpg"),
-      description:
-        "Dalemans ist ein Familienunternehmen für Stapelstühle, Klapptische, Gemeindestühle, Bankettmöbel sowie individuelle Lösungen für Gemeinden, Säle und Veranstaltungsräume.",
-      email: "info@dalemans.de",
-      telephone: "+49 9342 9153-53",
-      vatID: "DE161952944",
-      foundingDate: "1965",
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: "Bollenwaldstraße 108a",
-        postalCode: "63743",
-        addressLocality: "Aschaffenburg",
-        addressCountry: "DE",
-      },
-      contactPoint: [
-        {
-          "@type": "ContactPoint",
-          contactType: "customer service",
-          telephone: "+49 9342 9153-53",
-          email: "info@dalemans.de",
-          areaServed: "DE",
-          availableLanguage: ["de"],
-        },
-        {
-          "@type": "ContactPoint",
-          contactType: "sales",
-          telephone: "+49 170 5555331",
-          email: "info@dalemans.de",
-          areaServed: "DE",
-          availableLanguage: ["de"],
-        },
-      ],
-      knowsAbout: [
-        "Stapelstühle",
-        "Klapptische",
-        "Gemeindestühle",
-        "Bankettmöbel",
-        "Transportwagen",
-        "Sonderlösungen",
-      ],
     },
     {
       "@type": "WebSite",
-      "@id": absoluteUrl("/#website"),
+      "@id": company.websiteId,
       url: absoluteUrl("/"),
-      name: siteName,
+      name: company.brandName,
       publisher: {
-        "@id": absoluteUrl("/#organization"),
+        "@id": company.organizationId,
       },
     },
     {
@@ -138,10 +96,10 @@ const firmaStructuredData = {
       description:
         "Informationen über Dalemans als Familienunternehmen mit langjähriger Erfahrung, persönlicher Beratung und individuellen Lösungen.",
       isPartOf: {
-        "@id": absoluteUrl("/#website"),
+        "@id": company.websiteId,
       },
       about: {
-        "@id": absoluteUrl("/#organization"),
+        "@id": company.organizationId,
       },
       primaryImageOfPage: {
         "@type": "ImageObject",
@@ -159,7 +117,7 @@ export default function FirmaPage() {
       <CinematicPageHero
         eyebrow="Über Dalemans"
         title="Ein Familienunternehmen für langlebige Räume und ehrliche Beratung"
-        lead="Über Jahrzehnte gewachsene Erfahrung, Nähe zu Gemeinden und Kirchen sowie der Anspruch, praktische und verlässliche Raumlösungen zu liefern — nicht beliebige Standardware."
+        lead="1994 von Hubert Dalemans gegründet und heute von Stefan Dalemans geführt: persönliche Beratung, praktische Planung und verlässliche Lösungen für flexible Räume."
         breadcrumbs={[{ label: "Start", href: "/" }, { label: "Firma" }]}
         mediaAriaLabel="Familienunternehmen — emotionale Markenkomposition"
         mood="espresso-lounge"
@@ -185,7 +143,7 @@ export default function FirmaPage() {
             />
             <Image
               src={encodeURI("/pictures/Über uns/Werkstatt-23.jpg")}
-              alt="Werkstatt und Produktion bei Dalemans"
+              alt="Arbeitsplatz in der Dalemans Werkstatt"
               width={420}
               height={360}
               sizes="(min-width: 1024px) 22vw, 50vw"
@@ -236,9 +194,10 @@ export default function FirmaPage() {
               Nicht nur Handel — Entwicklung und Planung
             </h2>
             <p className="mt-6 max-w-lg text-sm leading-[1.8] text-white/72 md:text-base">
-              Für besondere Anforderungen entstehen Sonderlösungen mit 3D-CAD,
-              abgestimmt auf konkrete Nutzung — Lagerung, Transport, Reihenordnung
-              und ein stimmiges Gesamtbild.
+              Wir entwickeln, planen und vertreiben unsere Modelle. Die Fertigung
+              erfolgt in unserem Auftrag gemeinsam mit langjährigen spezialisierten
+              Partnerbetrieben. In der eigenen Werkstatt entstehen außerdem
+              Anpassungen, Reparaturen und Sonderlösungen.
             </p>
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               <div className="image-depth overflow-hidden rounded-4xl shadow-premium">
@@ -272,7 +231,7 @@ export default function FirmaPage() {
           <div className="image-depth relative min-h-[360px] overflow-hidden lg:min-h-[520px]">
             <Image
               src={encodeURI("/pictures/Über uns/Werkstatt-24.jpg")}
-              alt="Werkstatt und Entwicklung bei Dalemans"
+              alt="Werkstattbereich für Entwicklung und Anpassungen"
               fill
               sizes="(min-width: 1024px) 50vw, 100vw"
               className="absolute inset-0 h-full w-full object-cover"
@@ -288,8 +247,8 @@ export default function FirmaPage() {
       <HomeSection variant="breathing">
         <SectionHeader
           eyebrow="Unternehmensgeschichte"
-          title="Gewachsen über Generationen"
-          lead="Von den Wurzeln bis zur heutigen Beratung — mit Konstanten: Qualität, Nähe und Raumverständnis."
+          title="Seit 1994 persönlich begleitet"
+          lead="Von der Gründung durch Hubert Dalemans bis zur heutigen Führung durch Stefan Dalemans: persönlich, verlässlich und nah an der Nutzung im Raum."
           align="editorial"
         />
 

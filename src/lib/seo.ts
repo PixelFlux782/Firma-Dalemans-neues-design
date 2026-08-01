@@ -7,7 +7,7 @@ export const siteName = "DLMNS Stapelstühle & Klapptische";
 export const defaultTitle = "DLMNS Stapelstühle & Klapptische | Ausstattung für Gemeinden und Säle";
 export const defaultDescription =
   "DLMNS Stapelstühle & Klapptische bietet robuste Stapelstühle, Klapptische, Gemeindestühle, Transportwagen, Zubehör und Beratung für Gemeinden, Säle und flexible Räume.";
-export const defaultOgImage = "/pictures/Produkte/Stühle/1021c-01.jpg";
+export const defaultOgImage = "/images/curated/Stapelstühle/1021c.webp";
 
 export function absoluteUrl(path = "/") {
   return new URL(path, siteUrl).toString();

@@ -27,7 +27,7 @@ export const products: Product[] = [
     slug: "stapelstuhl-mod-1021c",
     categoryId: "stapelstuehle",
     categoryName: "Stapelstühle",
-    image: asset("/pictures/Produkte/Stühle/1021c-01.jpg"),
+    image: asset("/images/curated/Stapelstühle/1021c.webp"),
     shortDescription:
       "Bewährter Stapelstuhl für Gemeinden, Säle und Veranstaltungsräume mit hoher Beanspruchung.",
     description:
@@ -94,9 +94,7 @@ export const products: Product[] = [
     slug: "stapelstuhl-1010i",
     categoryId: "stapelstuehle",
     categoryName: "Stapelstühle",
-    image: asset(
-      "/pictures/Produkte/Stühle/Stapelstuhl_Stahlrohr_Kunststoffschale_1010ir_02.jpg",
-    ),
+    image: asset("/images/curated/Stapelstühle/1021a.webp"),
     shortDescription:
       "Wirtschaftlicher Stapelstuhl für hohe Stückzahlen und schnelle Saalumbauten.",
     description:
@@ -123,9 +121,7 @@ export const products: Product[] = [
     slug: "stapelstuhl-1010a",
     categoryId: "stapelstuehle",
     categoryName: "Stapelstühle",
-    image: asset(
-      "/pictures/Produkte/Stühle/Stapelstuhl_Stahlrohr_Kunststoffschale_1010a_02.jpg",
-    ),
+    image: asset("/images/curated/Stapelstühle/1021b.webp"),
     shortDescription:
       "Klassischer Stapelstuhl für Räume, in denen Funktionalität und Verfügbarkeit im Vordergrund stehen.",
     description:
@@ -152,9 +148,7 @@ export const products: Product[] = [
     slug: "stapelstuhl-1010b",
     categoryId: "stapelstuehle",
     categoryName: "Stapelstühle",
-    image: asset(
-      "/pictures/Produkte/Stühle/Stapelstuhl_Stahlrohr_Kunststoffschale_1010b_02.jpg",
-    ),
+    image: asset("/images/curated/Stapelstühle/1021.webp"),
     shortDescription:
       "Robuste Bestuhlung für Veranstaltungsräume mit häufig wechselnden Nutzungsformen.",
     description:
@@ -208,7 +202,7 @@ export const products: Product[] = [
     slug: "stapelstuhl-e1000",
     categoryId: "stapelstuehle",
     categoryName: "Stapelstühle",
-    image: asset("/pictures/Produkte/Stühle/1021c-06.jpg"),
+    image: asset("/images/curated/Stapelstühle/ovales-griffloch.webp"),
     shortDescription:
       "Zweckmäßiges Modell für belastbare Reihen- und Flächenbestuhlung im Alltag.",
     description:

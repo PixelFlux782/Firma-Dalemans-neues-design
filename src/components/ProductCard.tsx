@@ -7,15 +7,23 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const isStackingChair = product.categoryId === "stapelstuehle";
+
   return (
     <article className="premium-card premium-card-hover image-depth group flex h-full flex-col">
-      <div className="relative h-60 overflow-hidden md:h-64">
+      <div
+        className={
+          isStackingChair
+            ? "relative h-72 overflow-hidden bg-premium-cream/40 p-3 md:h-80 md:p-4"
+            : "relative h-60 overflow-hidden md:h-64"
+        }
+      >
         <Image
           src={product.image}
           alt={`${product.title} für ${product.suitableFor.slice(0, 2).join(" und ")}`}
           fill
           sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw"
-          className="object-cover"
+          className={isStackingChair ? "object-contain" : "object-cover"}
         />
       </div>
 

@@ -175,7 +175,11 @@ export default async function ProductDetailPage({ params }: Props) {
             height={460}
             priority
             sizes="(min-width: 1024px) 42vw, 100vw"
-            className="min-h-[220px] w-full object-cover sm:min-h-[260px] md:min-h-[280px]"
+            className={
+              product.categoryId === "stapelstuehle"
+                ? "h-[360px] w-full bg-premium-cream/40 object-contain sm:h-[440px] md:h-[520px]"
+                : "min-h-[220px] w-full object-cover sm:min-h-[260px] md:min-h-[280px]"
+            }
           />
         }
       />

@@ -51,7 +51,7 @@ export default function HeroSection() {
 
         <div className="relative min-h-[320px] min-w-0 overflow-hidden sm:min-h-[360px] lg:min-h-full">
           <Image
-            src={encodeURI("/pictures/Produkte/Stühle/1021c-01.jpg")}
+            src={encodeURI("/images/curated/Stapelstühle/1021c.webp")}
             alt="Robuster Stapelstuhl für Gemeindesaal und Veranstaltungsraum"
             fill
             priority

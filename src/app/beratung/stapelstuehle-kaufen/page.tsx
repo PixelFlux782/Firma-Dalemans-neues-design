@@ -68,7 +68,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     "Kaufberatung für Stapelstühle: robuste Gemeindestühle, Kirchenstühle, Reihenbestuhlung, Zubehör, Transportwagen und persönliche Beratung.",
   path: "/beratung/stapelstuehle-kaufen",
-  image: "/pictures/Produkte/Stühle/1021c-01.jpg",
+  image: "/images/curated/Stapelstühle/1021c.webp",
   keywords: [
     "Stapelstühle kaufen",
     "Stapelstühle für Gemeinden",
@@ -106,7 +106,7 @@ export default function StapelstuehleKaufenPage() {
         }
         visual={
           <Image
-            src={encodeURI("/pictures/Produkte/Stühle/1021c-01.jpg")}
+            src={encodeURI("/images/curated/Stapelstühle/1021c.webp")}
             alt="Stapelstuhl für Gemeinde, Kirche und Saal"
             width={760}
             height={500}

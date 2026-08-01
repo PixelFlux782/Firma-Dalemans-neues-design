@@ -25,13 +25,13 @@ const media = (folder: string, file: string, alt: string): GalleryImage => ({
 
 export const productOverviewHero = media(
   "Stapelstühle",
-  "Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.png",
+  "Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.webp",
   "Mehrere gepolsterte Stapelstühle mit Stahlrohrgestell",
 );
 
 export const productOverviewCategories: ProductOverviewCard[] = [
   { title: "Stapelstühle", category: "Kernsortiment", text: "Für Räume, die regelmäßig neu bestuhlt, umgebaut und geordnet gelagert werden.", image: media("Stapelstühle", "1021.png", "Gepolsterter Stapelstuhl mit schwarzem Stahlrohrgestell"), href: "/produkte/kategorien/stapelstuehle", featured: true },
-  { title: "Klapptische", category: "Kernsortiment", text: "Flexible Tischflächen für wechselnde Raumaufteilungen und Nutzungen.", image: media("Tische", "Klapptisch_Stapeltisch_t310ccolor_02.png", "Klappbarer Tisch mit heller Tischplatte"), href: "/produkte/kategorien/klapptische", featured: true },
+  { title: "Klapptische", category: "Kernsortiment", text: "Flexible Tischflächen für wechselnde Raumaufteilungen und Nutzungen.", image: media("Tische", "Klapptisch_Stapeltisch_t310ccolor_02.webp", "Rechteckiger Klapptisch mit heller Tischplatte und Metallkufen"), href: "/produkte/kategorien/klapptische", featured: true },
   { title: "Zubehör", category: "Ergänzungen", text: "Buchablagen, Reihenverbinder und weitere Ergänzungen passend zum Produkt prüfen.", image: media("Zubehör", "zubehör-buchablage-an-stuhl.png", "Buchablage unter einem gepolsterten Stapelstuhl"), href: "/produkte/kategorien/transportwagen-zubehoer" },
   { title: "Transport & Lagerung", category: "Abläufe", text: "Wagen für verständliche Wege zwischen Raumnutzung, Umbau und Lager.", image: media("Zubehör", "Stapelstuhl_Stuhltransportwagen_02.png", "Stuhltransportwagen mit gestapelten Stühlen"), href: "/produkte/kategorien/transportwagen-zubehoer" },
   { title: "Sonderlösungen", category: "Individuelle Planung", text: "Besondere Tischformen und Konstruktionen für Anforderungen abseits des Standards.", image: media("Sonderlösungen", "runder-tisch.png", "Runder Tisch als individuelle Sonderlösung"), href: "/sonderloesungen" },
@@ -41,7 +41,7 @@ export const productOverviewCategories: ProductOverviewCard[] = [
 export const productOverviewSolutions: ProductOverviewCard[] = [
   { title: "Gepolsterter Stapelstuhl", category: "Stapelstühle", text: "Eine gepolsterte Ausführung für flexible Reihen- und Flächenbestuhlung.", image: media("Stapelstühle", "Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.png", "Mehrere gepolsterte Stapelstühle mit blauem Bezug"), href: "/produkte/kategorien/stapelstuehle" },
   { title: "Holzschalen-Stapelstuhl", category: "Stapelstühle", text: "Eine klar unterscheidbare Sitzlösung mit Holzschale und Sitzpolster.", image: media("Stapelstühle", "1021c.png", "Holzschalen-Stapelstuhl mit Sitzpolster"), href: "/produkte/kategorien/stapelstuehle" },
-  { title: "Klapptisch für Mehrzweckräume", category: "Klapptische", text: "Ein vollständiger Tisch für wechselnde Aufstellungen im Raum.", image: media("Tische", "Klapptisch_Stapeltisch_t310ccolor_02.png", "Klappbarer Tisch mit heller Tischplatte und Metallgestell"), href: "/produkte/kategorien/klapptische" },
+  { title: "Klapptisch für Mehrzweckräume", category: "Klapptische", text: "Ein vollständiger Tisch für wechselnde Aufstellungen im Raum.", image: media("Tische", "Klapptisch_Stapeltisch_t310ccolor_02.webp", "Rechteckiger Klapptisch mit heller Tischplatte und Metallkufen"), href: "/produkte/kategorien/klapptische" },
   { title: "Stuhltransportwagen", category: "Transport & Lagerung", text: "Eine Transportlösung mit klar erkennbarem Einsatzzweck.", image: media("Zubehör", "Stapelstuhl_Stuhltransportwagen_02.png", "Stuhltransportwagen mit gestapelten Holzschalenstühlen"), href: "/produkte/stuhltransportwagen" },
   { title: "Buchablage für Stapelstühle", category: "Zubehör", text: "Eine Ablage im eingebauten Zustand; die Eignung wird produktbezogen geprüft.", image: media("Zubehör", "zubehör-buchablage-an-stuhl.png", "Buchablage unter einem gepolsterten Stapelstuhl"), href: "/produkte/buchablage" },
   { title: "Individuelle Tischlösung", category: "Sonderlösungen", text: "Eine besondere Tischform als Beispiel für projektbezogene Planung.", image: media("Sonderlösungen", "runder-tisch.png", "Runder Tisch als individuelle Sonderlösung"), href: "/sonderloesungen" },
@@ -97,19 +97,21 @@ export const tableGroups: GalleryGroup[] = [
     title: "Tischformen für wechselnde Raumkonzepte",
     text: "Rechteckige, trapezförmige und kompakte Tischlösungen unterstützen unterschiedliche Aufstellungen. Welche Formen verfügbar und kombinierbar sind, klären wir projektbezogen.",
     images: [
-      media("Tische", "Klapptisch_Stapeltisch_t310ccolor_02.png", "Rechteckiger Klapptisch mit Metallgestell"),
-      media("Tische", "Klapptisch_Stapeltisch_steh3erB_02.png", "Mehrere zusammen aufgestellte Klapptische"),
-      media("Tische", "Trapezklapptisch_Klapptische_trapez_klappbar.png", "Trapezförmiger Klapptisch"),
-      media("Tische", "T210cdetail.png", "Detailansicht einer Tischplatte und ihres Gestells"),
+      media("Tische", "Klapptisch_Stapeltisch_t310ccolor_02.webp", "Rechteckiger Klapptisch mit heller Tischplatte und Metallkufen"),
+      media("Tische", "Trapezklapptisch_Klapptische_trapez_klappbar.webp", "Klappbarer Trapeztisch mit heller Tischplatte"),
+      media("Tische", "Klapptisch_Stapeltisch_steh3erB_02.webp", "Drei runde Bistrotische mit Säulengestell"),
     ],
   },
   {
     title: "Gestelle, Füße und Klappmechanik",
     text: "Die technische Ausführung beeinflusst Standfestigkeit, Handhabung und Lagerung. Die Bilder zeigen unterschiedliche Konstruktionsprinzipien ohne pauschale Verfügbarkeitszusage.",
     images: [
-      media("Tische", "Klapptischgestell-ModNr.K10.png", "Klappbares Tischgestell aus Metall"),
-      media("Tische", "Mod.Nr.K2kufe30x30.png", "Tischgestell mit rechteckigen Metallkufen"),
-      media("Tische", "Stapeltischgestelle-rund-und-vierkant.png", "Runde und vierkantige Tischgestelle im Vergleich"),
+      media("Tische", "T210cdetail.webp", "Platzsparend übereinander gelagerte Tischplatten mit eingeklapptem Gestell"),
+      media("Tische", "Klapptischgestell-ModNr.K10.webp", "Gebogenes Tischgestell mit Bodengleitern"),
+      media("Tische", "Mod.Nr.K2kufe30x30.webp", "Tischkufe aus schwarzem Vierkantrohr"),
+      media("Tische", "MOd. Nr.K3-füße30mm.webp", "Klappbares Tischgestell mit schwarzen Rundrohrfüßen"),
+      media("Tische", "zubehör-10.webp", "Klappbares Tischgestell mit verchromten Rundrohrfüßen"),
+      media("Tische", "Stapeltischgestelle-rund-und-vierkant.webp", "Runde und vierkantige Tischfüße im Vergleich"),
     ],
   },
 ];

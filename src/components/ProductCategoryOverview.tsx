@@ -197,12 +197,20 @@ export default function ProductCategoryOverview({
         visual={
           <Image
             src={category.image}
-            alt={`${category.name} für Gemeinden und Säle`}
+            alt={
+              category.id === "klapptische"
+                ? "Rechteckiger Klapptisch mit heller Tischplatte und Metallkufen"
+                : `${category.name} für Gemeinden und Säle`
+            }
             width={720}
             height={460}
             priority
             sizes="(min-width: 1024px) 42vw, 100vw"
-            className="min-h-[220px] w-full object-cover sm:min-h-[260px] md:min-h-[280px]"
+            className={
+              category.id === "klapptische"
+                ? "h-[360px] w-full bg-premium-cream/40 object-contain sm:h-[440px] md:h-[520px]"
+                : "min-h-[220px] w-full object-cover sm:min-h-[260px] md:min-h-[280px]"
+            }
           />
         }
       />

@@ -170,13 +170,14 @@ export default async function ProductDetailPage({ params }: Props) {
         visual={
           <Image
             src={product.image}
-            alt={product.title}
+            alt={product.imageAlt ?? product.title}
             width={720}
             height={460}
             priority
             sizes="(min-width: 1024px) 42vw, 100vw"
             className={
-              product.categoryId === "stapelstuehle"
+              product.categoryId === "stapelstuehle" ||
+              product.categoryId === "klapptische"
                 ? "h-[360px] w-full bg-premium-cream/40 object-contain sm:h-[440px] md:h-[520px]"
                 : "min-h-[220px] w-full object-cover sm:min-h-[260px] md:min-h-[280px]"
             }

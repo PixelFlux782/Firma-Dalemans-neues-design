@@ -12,6 +12,7 @@ export interface Product {
   categoryId: ProductCategoryId;
   categoryName: string;
   image: string;
+  imageAlt?: string;
   shortDescription: string;
   description: string;
   highlights: string[];
@@ -366,15 +367,16 @@ export const products: Product[] = [
     slug: "klapptisch-310c",
     categoryId: "klapptische",
     categoryName: "Klapptische",
-    image: asset("/pictures/Produkte/Tische/Klapptisch_Stapeltisch_t310ccolor_02.jpg"),
+    image: asset("/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp"),
+    imageAlt: "Rechteckiger Klapptisch mit heller Tischplatte und Metallkufen",
     shortDescription:
-      "Bewährter Klapptisch für Bewirtung, Gruppenarbeit und vielseitige Veranstaltungsflächen.",
+      "Rechteckiger Klapptisch für flexible Aufstellungen in Mehrzweckräumen.",
     description:
       "Der Klapptisch 310c ist für wechselnde Nutzungen in Vereinsheimen, Seminarräumen, Kirchen, Gemeinden sowie Sport- und Stadthallen vorgesehen.",
     highlights: [
-      "bewährte Konstruktion für langjährigen Einsatz",
+      "klappbar für Räume mit wechselnder Nutzung",
       "Oberflächen passend zur geplanten Alltagsnutzung",
-      "schnell auf- und abgebaut bei häufigen Umstellungen",
+      "platzsparend lagerbar bei häufigen Umstellungen",
     ],
     suitableFor: [
       "Vereinsheime",
@@ -385,11 +387,11 @@ export const products: Product[] = [
     details: [
       "Ausführung und Komponenten werden projektbezogen abgestimmt",
       "Oberflächen und Kanten werden passend zur Beanspruchung ausgewählt",
-      "echte Holzkanten sorgen für Langlebigkeit, saubere Optik und robuste Kantenqualität",
+      "Kantenausführung wird passend zur geplanten Nutzung abgestimmt",
     ],
     variants: [
       "in verschiedenen Tischmaßen planbar",
-      "Gestellvarianten K1 bis K4 je nach Aufstellungsart",
+      "Gestellvarianten werden je nach Aufstellungsart beraten",
       "für Reihenaufstellungen und Einzelaufstellungen passend auswählbar",
     ],
     note:
@@ -401,8 +403,9 @@ export const products: Product[] = [
     categoryId: "klapptische",
     categoryName: "Klapptische",
     image: asset(
-      "/pictures/Produkte/Tische/Trapezklapptisch_Klapptische_trapez_klappbar.jpg",
+      "/images/curated/Tische/Trapezklapptisch_Klapptische_trapez_klappbar.webp",
     ),
+    imageAlt: "Klappbarer Trapeztisch mit heller Tischplatte und Metallgestell",
     shortDescription:
       "Variable Tischform für Halbkreise, Gruppeninseln und kommunikative Raumlayouts.",
     description:
@@ -410,7 +413,7 @@ export const products: Product[] = [
     highlights: [
       "sehr vielseitige Stellmöglichkeiten",
       "gut für kommunikative und flexible Raumkonzepte",
-      "eine besondere Dalemans-Lösung auch mit Klappgestell realisierbar",
+      "klappbare Ausführung für flexible Raumkonzepte",
     ],
     suitableFor: [
       "Workshops",
@@ -421,7 +424,7 @@ export const products: Product[] = [
     details: [
       "Plattenkonstruktion weitgehend wie beim Modell 310c",
       "ermöglicht Halbkreise, Inseln und offene Gruppenformen",
-      "auf Wunsch auch mit Klappgestell ohne seitlich hervorstehende Gestellteile",
+      "Gestellausführung wird projektbezogen abgestimmt",
     ],
     variants: [
       "mit unterschiedlichen Aufstellungsbildern planbar",
@@ -433,15 +436,16 @@ export const products: Product[] = [
     slug: "seminar-klapptisch",
     categoryId: "klapptische",
     categoryName: "Klapptische",
-    image: asset("/pictures/Produkte/Tische/CompTischRef_0819_anonym.jpg"),
+    image: asset("/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp"),
+    imageAlt: "Rechteckiger Klapptisch mit heller Tischplatte und Metallkufen",
     shortDescription:
       "Funktionaler Seminartisch für Unterricht, Besprechung und Schulung.",
     description:
       "Der Seminar-Klapptisch ist eine bewusst reduzierte Lösung für Seminar- und Besprechungsräume. Ausführung und Eignung werden passend zur geplanten Nutzung beraten.",
     highlights: [
-      "preislich attraktive Lösung für Seminarbereiche",
-      "identisches Klappgestell wie beim Modell 310c",
-      "ideal für Räume mit wiederkehrender Schulungsnutzung",
+      "klappbare Lösung für Seminarbereiche",
+      "für flexible Aufstellungen planbar",
+      "platzsparend lagerbar",
     ],
     suitableFor: [
       "Seminarräume",
@@ -450,8 +454,8 @@ export const products: Product[] = [
       "Besprechungen",
     ],
     details: [
-      "der aufwendige Umleimer entfällt zugunsten eines günstigen Preises",
-      "robustes Klappgestell aus dem bewährten 310c-Programm",
+      "Kanten- und Plattenausführung werden projektbezogen abgestimmt",
+      "Klappgestell passend zur geplanten Nutzung",
       "für geordnete Reihen, U-Formen und Blockstellungen geeignet",
     ],
   },
@@ -460,15 +464,16 @@ export const products: Product[] = [
     slug: "bistrotisch",
     categoryId: "klapptische",
     categoryName: "Klapptische",
-    image: asset("/pictures/Produkte/Tische/Klapptisch.png"),
+    image: asset("/images/curated/Tische/Klapptisch_Stapeltisch_steh3erB_02.webp"),
+    imageAlt: "Drei runde Bistrotische mit Säulengestell",
     shortDescription:
       "Kompakte Tischlösung für Cafébereiche, Begegnungszonen und Stehempfänge.",
     description:
       "Der Bistrotisch schafft kommunikative Nebenflächen in Foyers, Gemeindecafés und Aufenthaltsbereichen. Verfügbare Ausführungen und Maße klären wir in der Beratung.",
     highlights: [
       "kompakte Lösung für offene Begegnungsbereiche",
-      "massive Standsäule und stabiler Fuß für hohe Standfestigkeit",
-      "Dekore passend zum Klapptischprogramm wählbar",
+      "Säulengestell mit rundem Standfuß",
+      "Ausführung und Oberfläche werden projektbezogen abgestimmt",
     ],
     suitableFor: [
       "Foyers",

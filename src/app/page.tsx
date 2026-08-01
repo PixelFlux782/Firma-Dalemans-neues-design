@@ -52,18 +52,18 @@ const process = [
 
 export default function HomePage() {
   const heroDesktop = getImageProps({
-    src: "/images/optimized/hero/gemeinderaum-bestuhlung-desktop.jpg",
-    alt: "Heller Gemeindesaal mit Reihen aus Holzstühlen und freiem Mittelgang",
+    src: "/neue bilder/Produktion-Lager/Schalenlager-Montage2.png",
+    alt: "Mitarbeiter in der DLMNS Werkstatt zwischen Stuhlschalen und Bestuhlung",
     width: 1536,
     height: 1024,
     priority: true,
     sizes: "(min-width: 1024px) 58vw, 100vw",
   }).props;
   const heroMobile = getImageProps({
-    src: "/images/optimized/hero/gemeinderaum-bestuhlung-mobile.jpg",
-    alt: "Heller Gemeindesaal mit Reihen aus Holzstühlen und freiem Mittelgang",
-    width: 900,
-    height: 1120,
+    src: "/neue bilder/Produktion-Lager/Schalenlager-Montage2.png",
+    alt: "Mitarbeiter in der DLMNS Werkstatt zwischen Stuhlschalen und Bestuhlung",
+    width: 1537,
+    height: 1023,
     sizes: "100vw",
   }).props;
 
@@ -104,14 +104,14 @@ export default function HomePage() {
               <source media="(max-width: 639px)" srcSet={heroMobile.srcSet} />
               <img
                 {...heroDesktop}
-                alt="Heller Gemeindesaal mit Reihen aus Holzstühlen und freiem Mittelgang"
-                className="absolute inset-0 h-full w-full object-cover object-[55%_50%]"
+                alt="Mitarbeiter in der DLMNS Werkstatt zwischen Stuhlschalen und Bestuhlung"
+                className="absolute inset-0 h-full w-full object-cover object-[48%_50%] sm:object-[55%_50%]"
               />
             </picture>
             <div className="absolute inset-0 bg-gradient-to-t from-premium-espresso/35 via-transparent to-transparent lg:bg-gradient-to-r lg:from-premium-highlight/20 lg:via-transparent lg:to-transparent" aria-hidden />
             <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between border-t border-white/70 pt-3 text-white drop-shadow-[0_1px_5px_rgba(0,0,0,.55)] sm:bottom-7 sm:left-7 sm:right-7">
-              <span className="text-[0.65rem] font-semibold uppercase tracking-[0.18em]">Gemeinderaum · flexibel bestuhlt</span>
-              <span className="hidden font-mono text-[0.62rem] uppercase tracking-[0.14em] sm:block">Planung / Nutzung / Bestand</span>
+              <span className="text-[0.65rem] font-semibold uppercase tracking-[0.18em]">Werkstatt · persönlich betreut</span>
+              <span className="hidden font-mono text-[0.62rem] uppercase tracking-[0.14em] sm:block">Auswahl / Anpassung / Bestand</span>
             </div>
           </div>
         </div>

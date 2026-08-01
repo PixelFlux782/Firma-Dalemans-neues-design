@@ -25,12 +25,12 @@ const entries = [
 ] as const;
 
 const groups = [
-  { title: "Stapelstühle", text: "Robuste, komfortable Stühle für flexible Räume und langjährige Nutzung.", href: "/produkte/kategorien/stapelstuehle", cta: "Stapelstühle ansehen", image: "/neue bilder/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.png", featured: true },
-  { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und Mehrzweckräume.", href: "/produkte/kategorien/klapptische", cta: "Klapptische ansehen", image: "/neue bilder/Tische/Klapptisch_Stapeltisch_t310ccolor_02.png", featured: true },
-  { title: "Zubehör", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und praktische Ergänzungen.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör ansehen", image: "/neue bilder/Zubehör/zubehör-buchablage-an-stuhl.png", featured: false },
-  { title: "Transport & Lagerung", text: "Durchdachte Wagen für einfaches Bewegen und platzsparendes Lagern.", href: "/produkte/stuhltransportwagen", cta: "Transportlösungen ansehen", image: "/neue bilder/Zubehör/Stapelstuhl_Stuhltransportwagen_02.png", featured: false },
-  { title: "Sonderlösungen", text: "Individuell entwickelte Lösungen für besondere Räume und Anforderungen.", href: "/sonderloesungen", cta: "Sonderlösungen ansehen", image: "/neue bilder/Sonderlösungen/runder-tisch.png", featured: false },
-  { title: "Sonderposten", text: "Lagerware, Restbestände und B-Ware zu besonders attraktiven Konditionen.", href: "/sonderposten", cta: "Sonderposten ansehen", image: "/neue bilder/Sonderposten/barstuhl-restposten.png", featured: false },
+  { title: "Stapelstühle", text: "Robuste, komfortable Stühle für flexible Räume und langjährige Nutzung.", href: "/produkte/kategorien/stapelstuehle", cta: "Stapelstühle ansehen", image: "/images/curated/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.webp", featured: true },
+  { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und Mehrzweckräume.", href: "/produkte/kategorien/klapptische", cta: "Klapptische ansehen", image: "/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", featured: true },
+  { title: "Zubehör", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und praktische Ergänzungen.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör ansehen", image: "/images/curated/Zubehör/zubehör-buchablage-an-stuhl.webp", featured: false },
+  { title: "Transport & Lagerung", text: "Durchdachte Wagen für einfaches Bewegen und platzsparendes Lagern.", href: "/produkte/stuhltransportwagen", cta: "Transportlösungen ansehen", image: "/images/curated/Zubehör/Stapelstuhl_Stuhltransportwagen_02.webp", featured: false },
+  { title: "Sonderlösungen", text: "Individuell entwickelte Lösungen für besondere Räume und Anforderungen.", href: "/sonderloesungen", cta: "Sonderlösungen ansehen", image: "/images/curated/Sonderlösungen/runder-tisch.webp", featured: false },
+  { title: "Sonderposten", text: "Lagerware, Restbestände und B-Ware zu besonders attraktiven Konditionen.", href: "/sonderposten", cta: "Sonderposten ansehen", image: "/images/curated/Sonderposten/barstuhl-restposten.webp", featured: false },
 ] as const;
 
 const challenges = [
@@ -243,9 +243,9 @@ export default function HomePage() {
       <HomeSection variant="elevated">
         <div className="grid gap-10 lg:grid-cols-[1.05fr_.95fr] lg:items-center">
           <div className="grid grid-cols-2 gap-3">
-            <Image src={encodeURI("/neue bilder/Stoffe-Farben/Textilproben.png")} alt="Stoffmuster für die Auswahl von Bezugsfarben" width={520} height={420} sizes="(min-width: 1024px) 25vw, 50vw" className="h-56 w-full rounded-4xl object-cover" />
-            <Image src={encodeURI("/neue bilder/Stoffe-Farben/beize-varianten.png")} alt="Beizmuster in unterschiedlichen Farbtönen" width={520} height={420} sizes="(min-width: 1024px) 25vw, 50vw" className="h-56 w-full rounded-4xl object-cover" />
-            <Image src={encodeURI("/neue bilder/Produktion-Lager/Polster-Montage.png")} alt="Montage eines Sitzpolsters in der Werkstatt" width={900} height={480} sizes="(min-width: 1024px) 50vw, 100vw" className="col-span-2 h-56 w-full rounded-4xl object-cover" />
+            <Image src={encodeURI("/images/curated/Stoffe-Farben/Textilproben.webp")} alt="Stoffmuster für die Auswahl von Bezugsfarben" width={520} height={420} sizes="(min-width: 1024px) 25vw, 50vw" className="h-56 w-full rounded-4xl object-cover" />
+            <Image src={encodeURI("/images/curated/Stoffe-Farben/beize-varianten.webp")} alt="Beizmuster in unterschiedlichen Farbtönen" width={520} height={420} sizes="(min-width: 1024px) 25vw, 50vw" className="h-56 w-full rounded-4xl object-cover" />
+            <Image src={encodeURI("/images/curated/Produktion-Lager/Polster-Montage.webp")} alt="Montage eines Sitzpolsters in der Werkstatt" width={900} height={480} sizes="(min-width: 1024px) 50vw, 100vw" className="col-span-2 h-56 w-full rounded-4xl object-cover" />
           </div>
           <div>
             <p className="section-eyebrow">Materialien & Bemusterung</p>

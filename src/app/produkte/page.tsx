@@ -14,8 +14,8 @@ const groups = [
   { name: "Klapptische", href: "/produkte/kategorien/klapptische", image: "/pictures/Produkte/Tische/Klapptisch_Stapeltisch_t310ccolor_02.jpg", text: "Für Gemeindecafé, Seminar, Feier und wechselnde Tischordnungen.", cta: "Klapptische vergleichen", featured: true },
   { name: "Buchablagen", href: "/produkte/buchablage", image: "/pictures/Über uns/Zubehor-06.jpg", text: "Für Bücher und Unterlagen, passend zum vorgesehenen Stuhl prüfen.", cta: "Buchablage ansehen", featured: false },
   { name: "Transportwagen", href: "/produkte/stuhltransportwagen", image: "/pictures/Produkte/Zubehör/Stapelstuhl_Stuhltransportwagen_02.jpg", text: "Für geordnete Lagerung und einfachere Wege beim Saalumbau.", cta: "Transportwagen ansehen", featured: false },
-  { name: "Reihenverbinder & Zubehör", href: "/produkte/reihenverbinder", image: "/neue bilder/Stapelstühle/stuhlverbinder1.png", text: "Für geordnete Reihen und sinnvolle Ergänzungen am vorhandenen Bestand.", cta: "Zubehör prüfen", featured: false },
-  { name: "Ersatzteile & Gleiter", href: "/produkte/stuhlgleiter", image: "/neue bilder/Zubehör/gummistopfen-schwarz1.png", text: "Für Bodenschutz, Reparatur und langfristige Nutzung vorhandener Stühle.", cta: "Ersatzteil finden", featured: false },
+  { name: "Reihenverbinder & Zubehör", href: "/produkte/reihenverbinder", image: "/images/curated/Stapelstühle/stuhlverbinder1.webp", text: "Für geordnete Reihen und sinnvolle Ergänzungen am vorhandenen Bestand.", cta: "Zubehör prüfen", featured: false },
+  { name: "Ersatzteile & Gleiter", href: "/produkte/stuhlgleiter", image: "/images/curated/Zubehör/gummistopfen-schwarz1.webp", text: "Für Bodenschutz, Reparatur und langfristige Nutzung vorhandener Stühle.", cta: "Ersatzteil finden", featured: false },
 ] as const;
 
 const featured = ["stapelstuhl-mod-1021c", "klapptisch-310c", "buchablage", "stuhltransportwagen", "reihenverbinder", "stuhlgleiter"]

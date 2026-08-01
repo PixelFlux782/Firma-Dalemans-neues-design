@@ -1,4 +1,4 @@
-﻿import type { ProductCategoryId } from "@/lib/products";
+import type { ProductCategoryId } from "@/lib/products";
 
 const asset = (path: string) => encodeURI(path);
 
@@ -16,7 +16,7 @@ export const productCategories: ProductCategory[] = [
   {
     id: "stapelstuehle",
     name: "Stapelstühle",
-    image: asset("/neue bilder/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.png"),
+    image: asset("/images/curated/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.webp"),
     intro:
       "Vielseitige Bestuhlung für Gottesdienste, Mehrzweckräume und Veranstaltungen mit hoher Frequenz.",
     description:
@@ -31,7 +31,7 @@ export const productCategories: ProductCategory[] = [
   {
     id: "klapptische",
     name: "Klapptische",
-    image: asset("/neue bilder/Tische/Klapptisch_Stapeltisch_t310ccolor_02.png"),
+    image: asset("/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp"),
     intro:
       "Schnell aufgebaut, stabil im Einsatz und nach der Veranstaltung wieder kompakt verstaut.",
     description:
@@ -63,7 +63,7 @@ export const productCategories: ProductCategory[] = [
   {
     id: "transportwagen-zubehoer",
     name: "Transportwagen & Zubehör",
-    image: asset("/neue bilder/Zubehör/Stapelstuhl_Stuhltransportwagen_02.png"),
+    image: asset("/images/curated/Zubehör/Stapelstuhl_Stuhltransportwagen_02.webp"),
     intro:
       "Die praktische Ergänzung für schnelle Abläufe, sichere Lagerung und einfaches Handling im Alltag.",
     description:

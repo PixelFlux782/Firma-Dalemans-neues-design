@@ -253,9 +253,8 @@ export default function FirmaPage() {
         />
         <div className="section-grid-top grid gap-5 md:grid-cols-3">
           {[
-            { src: "/neue bilder/Produktion-Lager/Polster-Montage.png", alt: "Handarbeit bei der Montage eines Stuhlpolsters" },
-            { src: "/neue bilder/Produktion-Lager/Schalenlager-Montage.png", alt: "Stuhlschalen und Bauteile in einem Montagebereich" },
-            { src: "/neue bilder/Produktion-Lager/Schalenlager-Montage2.png", alt: "Weitere Ansicht gelagerter Stuhlschalen und Bauteile" },
+            { src: "/images/curated/Produktion-Lager/Polster-Montage.webp", alt: "Handarbeit bei der Montage eines Stuhlpolsters" },
+            { src: "/images/curated/Produktion-Lager/Schalenlager-Montage.webp", alt: "Stuhlschalen und Bauteile in einem Montagebereich" },
           ].map((image) => (
             <figure key={image.src} className="premium-card overflow-hidden">
               <Image src={encodeURI(image.src)} alt={image.alt} width={720} height={480} sizes="(min-width: 768px) 31vw, 100vw" className="aspect-[4/3] w-full object-cover" />

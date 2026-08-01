@@ -177,7 +177,8 @@ export default async function ProductDetailPage({ params }: Props) {
             sizes="(min-width: 1024px) 42vw, 100vw"
             className={
               product.categoryId === "stapelstuehle" ||
-              product.categoryId === "klapptische"
+              product.categoryId === "klapptische" ||
+              product.categoryId === "transportwagen-zubehoer"
                 ? "h-[360px] w-full bg-premium-cream/40 object-contain sm:h-[440px] md:h-[520px]"
                 : "min-h-[220px] w-full object-cover sm:min-h-[260px] md:min-h-[280px]"
             }

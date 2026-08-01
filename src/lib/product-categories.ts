@@ -62,16 +62,16 @@ export const productCategories: ProductCategory[] = [
   },
   {
     id: "transportwagen-zubehoer",
-    name: "Transportwagen & Zubehör",
+    name: "Transportwagen, Zubehör und Ersatzteile",
     image: asset("/images/curated/Zubehör/Stapelstuhl_Stuhltransportwagen_02.webp"),
     intro:
-      "Die praktische Ergänzung für schnelle Abläufe, sichere Lagerung und einfaches Handling im Alltag.",
+      "Möbel einfach bewegen, platzsparend lagern und bestehende Ausstattung sinnvoll ergänzen.",
     description:
-      "Mit passenden Transportwagen und Zubehör wird aus guter Ausstattung ein wirklich effizienter Ablauf. Diese Produkte unterstützen saubere Lagerung, geordnete Reihenbildung, bodenschonende Nutzung und schnelle Umbauten im laufenden Betrieb.",
+      "Von Transportwagen über Buchablagen und Reihenverbinder bis zu Gleitern und Ersatzteilen: Wir unterstützen Sie dabei, Ihre Ausstattung im Alltag praktisch zu nutzen und langfristig zu erhalten.",
     highlights: [
       "Transportlösungen für Stühle und Tische",
       "Zubehör für Ordnung, Reihenbildung und Werterhalt",
-      "spürbare Entlastung beim Auf- und Abbau",
+      "praktische Entlastung beim Auf- und Abbau",
     ],
     useCases: ["Lagerung", "Saalumbau", "Veranstaltungslogistik", "Hausmeisterteams"],
   },

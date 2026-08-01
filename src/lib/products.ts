@@ -13,6 +13,7 @@ export interface Product {
   categoryName: string;
   image: string;
   imageAlt?: string;
+  overviewGroup?: "transport" | "chair-accessories" | "table-accessories" | "spares";
   shortDescription: string;
   description: string;
   highlights: string[];
@@ -497,14 +498,16 @@ export const products: Product[] = [
     slug: "tischtransportwagen",
     categoryId: "transportwagen-zubehoer",
     categoryName: "Transportwagen & Zubehör",
-    image: asset("/pictures/Produkte/Zubehör/Tischtransportwagen_02.jpg"),
+    image: asset("/images/curated/Zubehör/Tischtransportwagen_02.webp"),
+    imageAlt: "Transportwagen für zusammengeklappte Tische",
+    overviewGroup: "transport",
     shortDescription:
       "Robuste Transporthilfe für Tische, passend auf das jeweilige Tischmaß abgestimmt.",
     description:
-      "Der Tischtransportwagen unterstützt materialschonende Abläufe bei Lagerung und Saalumbauten. Passende Abmessungen und Kapazität werden anhand der verwendeten Tische geplant.",
+      "Der Tischtransportwagen unterstützt geordnete Abläufe bei Lagerung und Saalumbauten. Passende Abmessungen werden anhand der verwendeten Tische und Transportwege geplant.",
     highlights: [
-      "für das Gewicht von etwa zehn Tischen ausgelegt",
-      "passend zur Tischgröße gefertigt",
+      "Ausführung passend zu Tischmaß und Transportweg planbar",
+      "für geordnete Lager- und Transportabläufe",
       "solide Lösung für den innerbetrieblichen Transport",
     ],
     suitableFor: [
@@ -529,7 +532,9 @@ export const products: Product[] = [
     slug: "stuhltransportwagen",
     categoryId: "transportwagen-zubehoer",
     categoryName: "Transportwagen & Zubehör",
-    image: asset("/pictures/Produkte/Zubehör/Stapelstuhl_Stuhltransportwagen_02.jpg"),
+    image: asset("/images/curated/Zubehör/Stapelstuhl_Stuhltransportwagen_02.webp"),
+    imageAlt: "Stuhltransportwagen mit gestapelten Holzschalenstühlen",
+    overviewGroup: "transport",
     shortDescription:
       "Durchdachte Transportlösung für Stühle verschiedener Bauarten und Gestellbreiten.",
     description:
@@ -556,15 +561,17 @@ export const products: Product[] = [
     slug: "stuhlgleiter",
     categoryId: "transportwagen-zubehoer",
     categoryName: "Transportwagen & Zubehör",
-    image: asset("/pictures/Über uns/Zubehor-04.jpg"),
+    image: asset("/images/curated/Zubehör/zubehör-filzgleiter.webp"),
+    imageAlt: "Filzgleiter für ein Stuhlgestell",
+    overviewGroup: "chair-accessories",
     shortDescription:
-      "Bodenschonende Kunststoffgleiter für Stahlrohrstühle wie Mod. 1021 und ähnliche Modelle.",
+      "Gleiter und Gestellstopfen für den langfristigen Erhalt vorhandener Stühle.",
     description:
       "Passende Stuhlgleiter können Böden schützen. Welche Ausführung geeignet ist, hängt von Gestell, Boden und Nutzung ab.",
     highlights: [
-      "besonders bodenschonend durch abgeschrägte Form",
-      "optimale Kraftverteilung auf eine größere Auflagefläche",
-      "geeignet für Stahlrohrstühle Mod. 1021 und ähnliche Modelle",
+      "Ausführung passend zu Boden und Nutzung auswählen",
+      "Zuordnung anhand von Gestellform und Maßen",
+      "Filz- und Kunststoffvarianten persönlich anfragen",
     ],
     suitableFor: [
       "Holzböden",
@@ -573,7 +580,7 @@ export const products: Product[] = [
       "empfindliche Bodenflächen",
     ],
     details: [
-      "passende Ausführung abhängig vom Rohrdurchmesser",
+      "passende Ausführung abhängig von Rohrform und Maßen",
       "Standfuß passend zum Gestell",
       "Form und Schaftlänge werden am Bestand geprüft",
     ],
@@ -586,13 +593,15 @@ export const products: Product[] = [
     slug: "reihenverbinder",
     categoryId: "transportwagen-zubehoer",
     categoryName: "Transportwagen & Zubehör",
-    image: asset("/pictures/Über uns/Zubehor-11.jpg"),
+    image: asset("/images/curated/Stapelstühle/stuhlverbinder.webp"),
+    imageAlt: "Reihenverbinder zwischen zwei Stuhlgestellen",
+    overviewGroup: "chair-accessories",
     shortDescription:
-      "Nachrüstlösung für geordnete und stabile Reihenbestuhlung mit vorhandenen Stahlrohrstühlen.",
+      "Verbindungslösung für geordnete Reihenbestuhlung, deren Eignung am vorhandenen Stuhl geprüft wird.",
     description:
       "Der Reihenverbinder kann für Stahlrohrstühle ohne serienmäßige Reihenverbindung geprüft werden. Entscheidend sind Gestellform und Abmessungen des vorhandenen Bestands.",
     highlights: [
-      "zur Nachrüstung bestehender Stahlrohrstühle geeignet",
+      "Eignung für vorhandene Stühle wird individuell geprüft",
       "bewährte Lösung für geordnete Reihenbestuhlung",
       "stabil genug für den regelmäßigen Einsatz",
     ],
@@ -604,7 +613,7 @@ export const products: Product[] = [
     ],
     details: [
       "Eignung abhängig von Gestellform und Durchmesser",
-      "idealerweise zwei Verbinder pro Stuhlpaar, vorne und hinten",
+      "Anzahl und Position werden anhand der Bestuhlung geklärt",
       "gewünschter Stuhlabstand wird bei der Auswahl berücksichtigt",
     ],
     note:
@@ -615,7 +624,9 @@ export const products: Product[] = [
     slug: "buchablage",
     categoryId: "transportwagen-zubehoer",
     categoryName: "Transportwagen & Zubehör",
-    image: asset("/pictures/Über uns/Zubehor-06.jpg"),
+    image: asset("/images/curated/Zubehör/zubehör-buchablage-an-stuhl.webp"),
+    imageAlt: "Buchablage unter der Sitzfläche eines Stapelstuhls",
+    overviewGroup: "chair-accessories",
     shortDescription:
       "Klappbare Buchablage für Stahlrohrstühle, ohne die Stapelbarkeit zu verlieren.",
     description:
@@ -639,6 +650,48 @@ export const products: Product[] = [
     variants: [
       "wirtschaftlich auch nur in jedem zweiten Stuhl einsetzbar",
     ],
+  },
+  {
+    title: "Schreibtablare",
+    slug: "schreibtablare",
+    categoryId: "transportwagen-zubehoer",
+    categoryName: "Transportwagen & Zubehör",
+    image: asset("/images/curated/Zubehör/schreibtablart-mit-stuhl-seite.webp"),
+    imageAlt: "Schreibtablar seitlich an einem Stapelstuhl",
+    overviewGroup: "chair-accessories",
+    shortDescription: "Schreibflächen am Stuhl für Vortrag, Seminar und konzentriertes Arbeiten.",
+    description: "Schreibtablare ergänzen geeignete Stühle um eine kompakte Schreibfläche. Ob Befestigung und Ausführung zu einem vorhandenen Modell passen, prüfen wir anhand von Fotos, Maßen und Produktangaben.",
+    highlights: ["montierte Gesamtansicht statt isoliertem Kleinteil", "Befestigung wird am vorhandenen Stuhl geprüft"],
+    suitableFor: ["Seminare", "Vorträge", "Schulungen"],
+    details: ["Einbauort und Befestigung müssen zum Gestell passen", "Ausführung wird produktbezogen zugeordnet"],
+  },
+  {
+    title: "Tischfüße und Gestellteile",
+    slug: "tischfuesse-gestellteile",
+    categoryId: "transportwagen-zubehoer",
+    categoryName: "Transportwagen & Zubehör",
+    image: asset("/images/curated/Tische/Stapeltischgestelle-rund-und-vierkant.webp"),
+    imageAlt: "Runde und vierkantige Tischfüße als Gestellteile",
+    overviewGroup: "table-accessories",
+    shortDescription: "Tischfüße, Gestellteile und passende Kleinteile für vorhandene Ausstattung.",
+    description: "Für Tischgestelle lassen sich Füße, Stopfen und weitere Bauteile häufig gezielt anfragen. Die Zuordnung erfolgt anhand des vollständigen Tisches, des Einbauorts und der vorhandenen Maße.",
+    highlights: ["Gestellbereich im Zusammenhang sichtbar", "Zuordnung anhand von Form, Fotos und Maßen"],
+    suitableFor: ["Klapptische", "Bestandspflege", "Instandsetzung"],
+    details: ["Gestellform und Einbauort dokumentieren", "Maße und vorhandene Produktangaben mitsenden"],
+  },
+  {
+    title: "Ersatzteile und Kleinteile",
+    slug: "ersatzteile-kleinteile",
+    categoryId: "transportwagen-zubehoer",
+    categoryName: "Transportwagen & Zubehör",
+    image: asset("/images/curated/Zubehör/zubehör-stopfen.webp"),
+    imageAlt: "Kunststoffstopfen für ein Metallrohrgestell",
+    overviewGroup: "spares",
+    shortDescription: "Verschleißteile und kleine Ergänzungen anhand des vorhandenen Produkts zuordnen lassen.",
+    description: "Viele Verschleißteile können ersetzt werden. Senden Sie uns dafür Fotos des vollständigen Produkts und des benötigten Teils sowie Maße, Modellangaben, ungefähres Kaufjahr und Stückzahl.",
+    highlights: ["persönliche Zuordnung statt pauschaler Kompatibilität", "Fotos und Maße erleichtern die Auswahl"],
+    suitableFor: ["Nachbestellung", "Werterhalt", "Bestandspflege"],
+    details: ["Foto des vollständigen Stuhls oder Tisches", "Foto und Maße des defekten oder fehlenden Teils", "Modellbezeichnung, Kaufjahr und Stückzahl soweit bekannt"],
   },
 ];
 

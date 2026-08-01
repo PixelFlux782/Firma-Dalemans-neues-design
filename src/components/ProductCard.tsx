@@ -9,7 +9,8 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const usesContainedProductImage =
     product.categoryId === "stapelstuehle" ||
-    product.categoryId === "klapptische";
+    product.categoryId === "klapptische" ||
+    product.categoryId === "transportwagen-zubehoer";
 
   return (
     <article className="premium-card premium-card-hover image-depth group flex h-full flex-col">
@@ -53,7 +54,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </p>
 
         <ul className="mt-5 space-y-2 border-t border-premium-warm pt-5 text-sm text-premium-charcoal/90">
-          {product.highlights.slice(0, 3).map((item) => (
+          {product.highlights.slice(0, 2).map((item) => (
             <li key={item} className="flex gap-2 leading-[1.75]">
               <span className="text-premium-sand" aria-hidden>
                 —

@@ -112,12 +112,12 @@ const categoryDecisionHelp: Record<
       {
         question: "Wann lohnt sich ein Transportwagen für Stühle und Tische?",
         answer:
-          "Ein Transportwagen lohnt sich, sobald größere Mengen regelmäßig bewegt werden. Er spart Zeit, schützt Material und macht Umbauten in Gemeindesaal, Verein oder Kommune deutlich leichter.",
+          "Ein Transportwagen kann regelmäßige Umbauten, Lagerwege und den geordneten Umgang mit der Ausstattung erleichtern. Welche Ausführung geeignet ist, hängt von Möbeln, Wegen und Lagerraum ab.",
       },
       {
         question: "Kann Zubehör zu vorhandenen Stühlen nachgerüstet werden?",
         answer:
-          "Viele Zubehörteile wie Reihenverbinder, Gleiter oder Buchablagen können passend zu vorhandenen Stahlrohrstühlen geprüft und nachgerüstet werden. Entscheidend sind Maße und Gestellform.",
+          "Ob Reihenverbinder, Gleiter oder Buchablagen zu vorhandenen Stühlen passen, prüfen wir anhand von Modell, Fotos, Maßen und Gestellform.",
       },
     ],
   },
@@ -133,6 +133,39 @@ export default function ProductCategoryOverview({
   }
 
   const categoryProducts = getProductsByCategory(category.id);
+  const isAccessories = category.id === "transportwagen-zubehoer";
+  const productGroups = isAccessories
+    ? [
+        {
+          id: "transportwagen",
+          eyebrow: "A. Transportwagen",
+          title: "Transportwagen",
+          lead: "Stühle und Tische leichter bewegen, schnelle Umbauten unterstützen und Ausstattung geordnet lagern.",
+          products: categoryProducts.filter((product) => product.overviewGroup === "transport"),
+        },
+        {
+          id: "stuhlzubehoer",
+          eyebrow: "B. Zubehör für Stühle",
+          title: "Praktische Ergänzungen für vorhandene Stühle",
+          lead: "Buchablagen, Reihenverbinder, Schreibtablare sowie Gleiter und Stopfen werden anhand des vorhandenen Stuhls zugeordnet.",
+          products: categoryProducts.filter((product) => product.overviewGroup === "chair-accessories"),
+        },
+        {
+          id: "tischzubehoer",
+          eyebrow: "C. Zubehör für Tische",
+          title: "Tischfüße, Gestellteile und Kleinteile",
+          lead: "Für die sichere Auswahl prüfen wir Einbauort, Gestellform, Fotos und Maße.",
+          products: categoryProducts.filter((product) => product.overviewGroup === "table-accessories"),
+        },
+        {
+          id: "ersatzteile",
+          eyebrow: "D. Ersatzteile und Nachbestellung",
+          title: "Verschleißteile gezielt ersetzen",
+          lead: "Ersatzteile und Kleinteile ordnen wir persönlich zu – ohne pauschale Aussage zur Kompatibilität.",
+          products: categoryProducts.filter((product) => product.overviewGroup === "spares"),
+        },
+      ]
+    : [];
   const placeholder = categoryPlaceholders[category.id];
   const decisionHelp = categoryDecisionHelp[category.id];
   const structuredData = {
@@ -172,7 +205,7 @@ export default function ProductCategoryOverview({
 
       <CinematicPageHero
         eyebrow={category.name}
-        title={`${category.name} für Gemeinden, Säle und flexible Räume`}
+        title={isAccessories ? "Transportwagen, Zubehör und Ersatzteile" : `${category.name} für Gemeinden, Säle und flexible Räume`}
         lead={category.description}
         breadcrumbs={[
           { label: "Start", href: "/" },
@@ -184,13 +217,13 @@ export default function ProductCategoryOverview({
         actions={
           <>
             <Link href={`/kontakt?kategorie=${encodeURIComponent(category.name)}`} className="btn-hero-primary text-center">
-              Beratung anfragen
+              {isAccessories ? "Passendes Ersatzteil anfragen" : "Beratung anfragen"}
             </Link>
             <Link
               href="/produkte"
               className="btn-hero-secondary text-center"
             >
-              Alle Kategorien
+              {isAccessories ? "Zubehör entdecken" : "Alle Kategorien"}
             </Link>
           </>
         }
@@ -200,6 +233,8 @@ export default function ProductCategoryOverview({
             alt={
               category.id === "klapptische"
                 ? "Rechteckiger Klapptisch mit heller Tischplatte und Metallkufen"
+                : isAccessories
+                  ? "Stuhltransportwagen mit gestapelten Holzschalenstühlen"
                 : `${category.name} für Gemeinden und Säle`
             }
             width={720}
@@ -207,7 +242,7 @@ export default function ProductCategoryOverview({
             priority
             sizes="(min-width: 1024px) 42vw, 100vw"
             className={
-              category.id === "klapptische"
+              category.id === "klapptische" || isAccessories
                 ? "h-[360px] w-full bg-premium-cream/40 object-contain sm:h-[440px] md:h-[520px]"
                 : "min-h-[220px] w-full object-cover sm:min-h-[260px] md:min-h-[280px]"
             }
@@ -324,21 +359,34 @@ export default function ProductCategoryOverview({
         </div>
       </HomeSection>
 
-      <HomeSection variant="breathing">
+      <HomeSection variant="breathing" id={isAccessories ? "produkte" : undefined}>
         <SectionHeader
-          eyebrow="Modelle"
-          title="Produkte in dieser Kategorie"
-          lead="Alle Modelle mit Bild, Einsatzbereichen, Vorteilen und direktem Kontakt zur Beratung."
+          eyebrow={isAccessories ? "Produkte und Lösungen" : "Modelle"}
+          title={isAccessories ? "Transportwagen und Zubehör im Überblick" : "Produkte in dieser Kategorie"}
+          lead={isAccessories ? "Klar gegliedert nach Transport, Stuhlzubehör, Tischzubehör und Ersatzteilen." : "Alle Modelle mit Bild, Einsatzbereichen, Vorteilen und direktem Kontakt zur Beratung."}
           href="/kontakt"
           linkLabel="Beratung zur Auswahl"
           align="editorial"
         />
 
-        <div className="section-grid-top grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-          {categoryProducts.map((product) => (
-            <ProductCard key={product.slug} product={product} />
-          ))}
-        </div>
+        {isAccessories ? (
+          <div className="section-grid-top space-y-16">
+            {productGroups.map((group) => (
+              <section key={group.id} id={group.id} className="scroll-mt-28">
+                <p className="section-eyebrow">{group.eyebrow}</p>
+                <h2 className="mt-3 font-display text-2xl font-medium text-premium-ink md:text-3xl">{group.title}</h2>
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-premium-muted">{group.lead}</p>
+                <div className="mt-7 grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+                  {group.products.map((product) => <ProductCard key={product.slug} product={product} />)}
+                </div>
+              </section>
+            ))}
+          </div>
+        ) : (
+          <div className="section-grid-top grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+            {categoryProducts.map((product) => <ProductCard key={product.slug} product={product} />)}
+          </div>
+        )}
       </HomeSection>
 
       {category.id === "stapelstuehle" ? (
@@ -373,6 +421,19 @@ export default function ProductCategoryOverview({
             <ol className="section-grid-top grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {["Möbel im Raum nutzen", "Tische zusammenstellen und Stühle stapeln", "Bestand mit dem passenden Wagen transportieren", "Geordnet und platzsparend lagern"].map((step, index) => <li key={step} className="premium-card p-6"><span className="section-eyebrow">0{index + 1}</span><p className="mt-3 font-display text-xl text-premium-ink">{step}</p></li>)}
             </ol>
+          </HomeSection>
+          <HomeSection variant="elevated">
+            <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-start">
+              <div>
+                <p className="section-eyebrow">Ersatzteilanfrage</p>
+                <h2 className="section-title mt-5">Sie suchen ein bestimmtes Ersatzteil?</h2>
+                <p className="section-lead mt-6">Senden Sie uns möglichst ein Foto des vorhandenen Stuhls oder Tisches sowie Bilder und Maße des benötigten Teils. So können wir die passende Ausführung besser zuordnen.</p>
+                <Link href="/kontakt?anliegen=Ersatzteilanfrage" className="btn-primary mt-8 inline-flex">Ersatzteil anfragen</Link>
+              </div>
+              <ul className="premium-card space-y-3 p-7 text-sm leading-7 text-premium-muted md:p-8">
+                {["Foto des vollständigen Produkts", "Foto des defekten oder fehlenden Teils", "Maße", "vorhandene Modellbezeichnung", "ungefähres Kaufjahr", "benötigte Stückzahl"].map((item) => <li key={item} className="flex gap-2.5"><span className="text-premium-sand" aria-hidden>—</span>{item}</li>)}
+              </ul>
+            </div>
           </HomeSection>
         </>
       ) : null}

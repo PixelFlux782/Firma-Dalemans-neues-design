@@ -25,12 +25,12 @@ const entries = [
 ] as const;
 
 const groups = [
-  { title: "Stapelstühle", text: "Für Reihen, häufige Umbauten und platzsparende Lagerung.", href: "/produkte/kategorien/stapelstuehle", cta: "Stapelstühle ansehen", image: "/images/optimized/stapelstuhl-1021c.webp", featured: true },
-  { title: "Klapptische", text: "Für Gemeindecafé, Seminar, Feier und wechselnde Tischordnungen.", href: "/produkte/kategorien/klapptische", cta: "Klapptische ansehen", image: "/pictures/Produkte/Tische/Klapptisch_Stapeltisch_t310ccolor_02.jpg", featured: true },
-  { title: "Buchablagen", text: "Praktische Ergänzung für Gottesdienst und Gemeindesaal.", href: "/produkte/buchablage", cta: "Buchablage prüfen", image: "/pictures/Über uns/Zubehor-06.jpg", featured: false },
-  { title: "Transportwagen", text: "Damit Auf- und Abbau mit wenigen Helfern verlässlich gelingt.", href: "/produkte/stuhltransportwagen", cta: "Transportwagen ansehen", image: "/pictures/Produkte/Zubehör/Stapelstuhl_Stuhltransportwagen_02.jpg", featured: false },
-  { title: "Reihenverbinder & Zubehör", text: "Für geordnete Reihen und die Abstimmung mit dem vorhandenen Bestand.", href: "/produkte/reihenverbinder", cta: "Reihenverbinder prüfen", image: "/neue bilder/Stapelstühle/stuhlverbinder1.png", featured: false },
-  { title: "Ersatzteile & Gleiter", text: "Passende Teile am Gestell und am vorhandenen Boden prüfen lassen.", href: "/produkte/stuhlgleiter", cta: "Ersatzteil finden", image: "/neue bilder/Zubehör/gummistopfen-schwarz1.png", featured: false },
+  { title: "Stapelstühle", text: "Robuste, komfortable Stühle für flexible Räume und langjährige Nutzung.", href: "/produkte/kategorien/stapelstuehle", cta: "Stapelstühle ansehen", image: "/neue bilder/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.png", featured: true },
+  { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und Mehrzweckräume.", href: "/produkte/kategorien/klapptische", cta: "Klapptische ansehen", image: "/neue bilder/Tische/Klapptisch_Stapeltisch_t310ccolor_02.png", featured: true },
+  { title: "Zubehör", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und praktische Ergänzungen.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör ansehen", image: "/neue bilder/Zubehör/zubehör-buchablage-an-stuhl.png", featured: false },
+  { title: "Transport & Lagerung", text: "Durchdachte Wagen für einfaches Bewegen und platzsparendes Lagern.", href: "/produkte/stuhltransportwagen", cta: "Transportlösungen ansehen", image: "/neue bilder/Zubehör/Stapelstuhl_Stuhltransportwagen_02.png", featured: false },
+  { title: "Sonderlösungen", text: "Individuell entwickelte Lösungen für besondere Räume und Anforderungen.", href: "/sonderloesungen", cta: "Sonderlösungen ansehen", image: "/neue bilder/Sonderlösungen/runder-tisch.png", featured: false },
+  { title: "Sonderposten", text: "Lagerware, Restbestände und B-Ware zu besonders attraktiven Konditionen.", href: "/sonderposten", cta: "Sonderposten ansehen", image: "/neue bilder/Sonderposten/barstuhl-restposten.png", featured: false },
 ] as const;
 
 const challenges = [
@@ -118,6 +118,16 @@ export default function HomePage() {
       </section>
 
       <HomeSection>
+        <SectionHeader eyebrow="Sortiment" title="Stühle, Tische und Lösungen für flexible Räume" lead="Direkt zum passenden Bereich – von den Kernprodukten bis zu Transport, Sonderanfertigung und wechselnder Lagerware." href="/produkte" linkLabel="Alle Produkte" align="editorial" />
+        <div className="section-grid-top grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {groups.map((group) => <Link key={group.title} href={group.href} className="premium-card premium-card-hover group overflow-hidden">
+            <div className="relative h-60 bg-premium-highlight"><Image src={encodeURI(group.image)} alt={group.title === "Sonderposten" ? "Barstuhl als Beispiel für wechselnde Lagerware" : group.title} fill sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" className="object-cover transition duration-500 group-hover:scale-[1.025]" /></div>
+            <div className="p-6"><h2 className="font-display text-2xl font-medium text-premium-ink">{group.title}</h2><p className="mt-3 text-sm leading-7 text-premium-muted">{group.text}</p><span className="mt-5 inline-flex text-sm font-medium text-premium-bronze">{group.cta} →</span></div>
+          </Link>)}
+        </div>
+      </HomeSection>
+
+      <HomeSection>
         <div className="company-intro-grid grid gap-10 border-y border-premium-beige py-10 md:py-14 lg:grid-cols-[.9fr_1.1fr] lg:gap-16">
           <div className="lg:pr-6">
             <p className="section-eyebrow">Erfahrung, die den ganzen Raum sieht</p>
@@ -167,36 +177,6 @@ export default function HomePage() {
               <h3 className="mt-5 font-display text-2xl font-medium text-premium-ink">{item.title}</h3>
               <p className="mt-4 flex-1 text-sm leading-7 text-premium-muted">{item.text}</p>
               <span className="mt-6 text-sm font-medium text-premium-bronze">{item.label} →</span>
-            </Link>
-          ))}
-        </div>
-      </HomeSection>
-
-      <HomeSection>
-        <SectionHeader eyebrow="Kernprodukte" title="Vom Hauptmöbel bis zum passenden Detail" lead="Stapelstühle und Klapptische bilden die Basis. Zubehör, Transport und Ersatzteile machen die Ausstattung im Alltag vollständig." href="/produkte" linkLabel="Alle Produktgruppen" align="editorial" />
-        <div className="section-grid-top grid gap-5 md:grid-cols-2">
-          {groups.filter((group) => group.featured).map((group) => (
-            <Link key={group.title} href={group.href} className="premium-card premium-card-hover overflow-hidden">
-              <Image src={encodeURI(group.image)} alt={`${group.title} für flexible Gemeinderäume`} width={720} height={440} sizes={group.featured ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 33vw, 100vw"} className={`w-full object-cover ${group.featured ? "h-64" : "h-52"}`} />
-              <div className="p-6">
-                <h3 className="font-display text-2xl font-medium text-premium-ink">{group.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-premium-muted">{group.text}</p>
-                <span className="mt-5 inline-flex text-sm font-medium text-premium-bronze">{group.cta} →</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-        <div className="mt-5 grid gap-px overflow-hidden rounded-3xl border border-premium-beige bg-premium-beige sm:grid-cols-2 xl:grid-cols-4">
-          {groups.filter((group) => !group.featured).map((group) => (
-            <Link key={group.title} href={group.href} className="group flex min-h-[22rem] flex-col bg-white/80 transition hover:bg-premium-warm">
-              <div className="flex h-40 items-center justify-center bg-premium-highlight p-5">
-                <Image src={encodeURI(group.image)} alt={`${group.title} für flexible Gemeinderäume`} width={420} height={280} sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw" className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.025]" />
-              </div>
-              <div className="flex flex-1 flex-col p-5">
-                <h3 className="font-display text-xl font-medium text-premium-ink">{group.title}</h3>
-                <p className="mt-3 flex-1 text-sm leading-6 text-premium-muted">{group.text}</p>
-                <span className="mt-5 inline-flex text-sm font-medium text-premium-bronze">{group.cta} →</span>
-              </div>
             </Link>
           ))}
         </div>

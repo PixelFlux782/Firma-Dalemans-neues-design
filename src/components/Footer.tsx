@@ -7,6 +7,7 @@ const pageLinks = [
   ["/raeume-planung", "Räume & Planung"],
   ["/beratung-service", "Beratung & Service"],
   ["/sonderloesungen", "Sonderlösungen"],
+  ["/sonderposten", "Sonderposten"],
   ["/firma", "Über DLMNS"],
   ["/kontakt", "Kontakt"],
 ] as const;
@@ -18,6 +19,7 @@ const productLinks = [
   ["/produkte/stuhltransportwagen", "Transportwagen"],
   ["/produkte/reihenverbinder", "Reihenverbinder & Zubehör"],
   ["/produkte/stuhlgleiter", "Ersatzteile & Gleiter"],
+  ["/sonderposten", "Sonderposten"],
 ] as const;
 
 export function Footer() {

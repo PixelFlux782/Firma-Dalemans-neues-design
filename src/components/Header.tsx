@@ -10,6 +10,7 @@ const primaryLinks = [
   { href: "/raeume-planung", label: "Räume & Planung" },
   { href: "/beratung-service", label: "Beratung & Service" },
   { href: "/sonderloesungen", label: "Sonderlösungen" },
+  { href: "/sonderposten", label: "Sonderposten" },
   { href: "/firma", label: "Über DLMNS" },
   { href: "/kontakt", label: "Kontakt" },
 ] as const;

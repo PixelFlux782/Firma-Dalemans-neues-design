@@ -15,6 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/beratung-service",
     "/beratung/stapelstuehle-kaufen",
     "/sonderloesungen",
+    "/sonderposten",
     "/firma",
     "/kontakt",
   ];

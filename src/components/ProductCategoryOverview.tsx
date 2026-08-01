@@ -10,6 +10,8 @@ import { categoryPlaceholders } from "@/lib/category-placeholders";
 import { getProductCategoryById } from "@/lib/product-categories";
 import { getProductsByCategory, type ProductCategoryId } from "@/lib/products";
 import { absoluteUrl, siteName } from "@/lib/seo";
+import ProductImageGallery, { ImageRail } from "@/components/ProductImageGallery";
+import { accessoryGroups, chairGroups, materialImages, tableGroups } from "@/lib/category-media";
 
 interface ProductCategoryOverviewProps {
   categoryId: ProductCategoryId;
@@ -330,6 +332,42 @@ export default function ProductCategoryOverview({
           ))}
         </div>
       </HomeSection>
+
+      {category.id === "stapelstuehle" ? (
+        <>
+          <HomeSection variant="elevated">
+            <SectionHeader eyebrow="Modell- und Detailvielfalt" title="Stühle aus mehreren Blickwinkeln" lead="Gesamtansichten und Details helfen, Form, Material und praktische Ergänzungen früh im Projekt einzuordnen." align="editorial" />
+            <div className="section-grid-top"><ProductImageGallery groups={chairGroups} /></div>
+          </HomeSection>
+          <HomeSection>
+            <SectionHeader eyebrow="Bemusterung" title="Farben und Materialien passend zum Raum" lead="Stoffe, Holzoberflächen und Gestellfarben beeinflussen nicht nur die Optik, sondern auch die Wirkung des gesamten Raumes. Wir unterstützen Sie bei einer Auswahl, die zur Nutzung, Architektur und bestehenden Ausstattung passt." align="editorial" />
+            <div className="section-grid-top"><ImageRail images={materialImages} /></div>
+            <p className="mt-6 max-w-3xl text-sm leading-7 text-premium-muted">Je nach Modell stehen unterschiedliche Stoffe, Farben, Holzoberflächen und Gestellausführungen zur Auswahl. Wir beraten Sie persönlich zu einer passenden Zusammenstellung.</p>
+          </HomeSection>
+        </>
+      ) : null}
+
+      {category.id === "klapptische" ? (
+        <HomeSection variant="elevated">
+          <SectionHeader eyebrow="Formen und Konstruktion" title="Flexible Tische für unterschiedliche Raumkonzepte" lead="Die Galerie zeigt Tischformen, Gestelle und Details für schnelles Umstellen, robuste Nutzung und eine möglichst kompakte Lagerung." align="editorial" />
+          <div className="section-grid-top"><ProductImageGallery groups={tableGroups} /></div>
+        </HomeSection>
+      ) : null}
+
+      {category.id === "transportwagen-zubehoer" ? (
+        <>
+          <HomeSection variant="elevated">
+            <SectionHeader eyebrow="Zubehör im Detail" title="Ersatzteile und Ergänzungen anschaulich zugeordnet" lead="Von der Buchablage bis zum Gestellstopfen: Bilder erleichtern die erste Zuordnung. Für eine verlässliche Auswahl prüfen wir anschließend Modell, Maße und Einsatz." align="editorial" />
+            <div className="section-grid-top"><ProductImageGallery groups={accessoryGroups} /></div>
+          </HomeSection>
+          <HomeSection>
+            <SectionHeader eyebrow="Transport und Lagerung" title="Vom genutzten Raum zurück ins Lager" lead="Ein verständlicher Ablauf für Ehrenamt, Hausmeister- und Veranstaltungsteams — ohne unnötige Handgriffe." align="editorial" />
+            <ol className="section-grid-top grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {["Möbel im Raum nutzen", "Tische zusammenstellen und Stühle stapeln", "Bestand mit dem passenden Wagen transportieren", "Geordnet und platzsparend lagern"].map((step, index) => <li key={step} className="premium-card p-6"><span className="section-eyebrow">0{index + 1}</span><p className="mt-3 font-display text-xl text-premium-ink">{step}</p></li>)}
+            </ol>
+          </HomeSection>
+        </>
+      ) : null}
 
       <HomeSection>
         <SectionHeader

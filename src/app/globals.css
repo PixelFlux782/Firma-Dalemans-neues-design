@@ -405,3 +405,9 @@
     overflow-wrap: anywhere;
   }
 }
+
+@media (min-width: 640px) {
+  .hero-architectural img[style*="--hero-desktop-position"] {
+    object-position: var(--hero-desktop-position) !important;
+  }
+}

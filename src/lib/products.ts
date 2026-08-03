@@ -23,7 +23,9 @@ export interface Product {
   note?: string;
 }
 
-export const products: Product[] = [
+// Keep withdrawn products in the source catalog so they can be reviewed and
+// reactivated later without exposing their pages, images, or links publicly.
+const productCatalog: Product[] = [
   {
     title: "Stapelstuhl Mod. 1021c",
     slug: "stapelstuhl-mod-1021c",
@@ -694,6 +696,10 @@ export const products: Product[] = [
     details: ["Foto des vollständigen Stuhls oder Tisches", "Foto und Maße des defekten oder fehlenden Teils", "Modellbezeichnung, Kaufjahr und Stückzahl soweit bekannt"],
   },
 ];
+
+export const products = productCatalog.filter(
+  (product) => product.categoryId !== "gemeindestuehle-bankettmoebel",
+);
 
 export function getProductBySlug(slug: string) {
   return products.find((product) => product.slug === slug);

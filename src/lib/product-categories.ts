@@ -44,23 +44,6 @@ export const productCategories: ProductCategory[] = [
     useCases: ["Gemeindecafés", "Feiern", "Tagungen", "Buffetbereiche"],
   },
   {
-    id: "gemeindestuehle-bankettmoebel",
-    name: "Gemeindestühle & Bankettmöbel",
-    image: asset(
-      "/pictures/Produkte/Stühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.jpg",
-    ),
-    intro:
-      "Komfortable Lösungen für Säle, Feste und repräsentative Veranstaltungen mit einheitlichem Gesamtbild.",
-    description:
-      "Wenn neben Funktion auch Atmosphäre zählt, bieten Gemeindestühle und Bankettmöbel die passende Balance aus Komfort, Wertigkeit und praktischer Handhabung. Besonders bei Reihenbestuhlung, Feiern und wiederkehrenden Veranstaltungen entsteht so ein stimmiger Gesamteindruck.",
-    highlights: [
-      "ansprechender Auftritt für Feiern und festliche Räume",
-      "praktische Lösungen für Ergänzungs- und Reservebestuhlung",
-      "geeignet für Reihenbestuhlung und größere Personenzahlen",
-    ],
-    useCases: ["Gemeindesäle", "Bankette", "Konferenzen", "Festveranstaltungen"],
-  },
-  {
     id: "transportwagen-zubehoer",
     name: "Transportwagen, Zubehör und Ersatzteile",
     image: asset("/images/curated/Zubehör/Stapelstuhl_Stuhltransportwagen_02.webp"),

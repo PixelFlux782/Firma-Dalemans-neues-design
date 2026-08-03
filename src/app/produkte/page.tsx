@@ -37,8 +37,8 @@ export default function ProductsPage() {
     </section>
 
     <section id="sortiment" className="scroll-mt-28" aria-labelledby="sortiment-title">
-      <p className="section-eyebrow">Sortimentsübersicht</p><h2 id="sortiment-title" className="mt-3 font-display text-3xl font-medium text-premium-ink md:text-4xl">Vier Wege zum passenden Produkt</h2>
-      <div className="mt-7 grid gap-5 md:grid-cols-2 lg:grid-cols-4">{productCategories.map((category) => {
+      <p className="section-eyebrow">Sortimentsübersicht</p><h2 id="sortiment-title" className="mt-3 font-display text-3xl font-medium text-premium-ink md:text-4xl">Drei Wege zum passenden Produkt</h2>
+      <div className="mt-7 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{productCategories.map((category) => {
         const count = products.filter((product) => product.categoryId === category.id).length;
         return <Link key={category.id} href={`/produkte/kategorien/${category.id}`} className="premium-card premium-card-hover group flex min-h-full flex-col">
           <div className="relative aspect-[4/3] bg-premium-warm"><Image src={category.image} alt={category.name} fill sizes="(min-width: 1024px) 24vw, (min-width: 768px) 50vw, 100vw" className="object-contain p-3 transition duration-500 group-hover:scale-[1.02]" /></div>

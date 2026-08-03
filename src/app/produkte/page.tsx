@@ -1,54 +1,56 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import CinematicPageHero from "@/components/home/CinematicPageHero";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import ProductCard from "@/components/ProductCard";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
-import { productOverviewCategories, productOverviewHero, productOverviewSolutions, type ProductOverviewCard } from "@/lib/category-media";
+import { productOverviewHero } from "@/lib/category-media";
+import { productCategories } from "@/lib/product-categories";
+import { products } from "@/lib/products";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
   title: "Stapelstühle, Klapptische und Zubehör",
   description: "Stapelstühle und Klapptische für flexible Räume – ergänzt durch Zubehör, Transportlösungen, Sonderlösungen und persönliche Beratung.",
-  path: "/produkte",
-  image: productOverviewHero.src,
-  keywords: ["Stapelstühle", "Klapptische", "Zubehör", "Transportwagen", "Sonderlösungen"],
+  path: "/produkte", image: productOverviewHero.src,
+  keywords: ["Stapelstühle", "Klapptische", "Zubehör", "Transportwagen", "Gemeindemöbel"],
 });
 
-function CategoryCard({ item }: { item: ProductOverviewCard }) {
-  return <Link href={item.href} className={`premium-card premium-card-hover group flex h-full flex-col overflow-hidden ${item.featured ? "lg:col-span-3" : "lg:col-span-2"}`}>
-    <div className={`relative bg-white ${item.featured ? "aspect-[16/9]" : "aspect-[4/3]"}`}>
-      <Image src={item.image.src} alt={item.image.alt} fill sizes={item.featured ? "(min-width: 1024px) 45vw, (min-width: 768px) 50vw, 100vw" : "(min-width: 1024px) 30vw, (min-width: 768px) 50vw, 100vw"} className="object-cover object-center transition duration-500 group-hover:scale-[1.02]" />
-    </div>
-    <div className="flex flex-1 flex-col p-6 md:p-7"><p className="section-eyebrow text-[0.65rem]">{item.category}</p><h2 className="mt-3 font-display text-2xl font-medium text-premium-ink">{item.title}</h2><p className="mt-3 flex-1 text-sm leading-7 text-premium-muted">{item.text}</p><span className="mt-5 inline-flex text-sm font-medium text-premium-bronze">Bereich ansehen →</span></div>
-  </Link>;
-}
-
-function SolutionCard({ item }: { item: ProductOverviewCard }) {
-  return <article className="premium-card premium-card-hover group flex h-full flex-col overflow-hidden">
-    <div className="relative aspect-[4/3] bg-white"><Image src={item.image.src} alt={item.image.alt} fill sizes="(min-width: 1280px) 27vw, (min-width: 768px) 45vw, 100vw" className="object-contain p-4 transition duration-500 group-hover:scale-[1.02]" /></div>
-    <div className="flex flex-1 flex-col border-t border-premium-beige/60 p-6 md:p-7"><p className="section-eyebrow text-[0.65rem]">{item.category}</p><h3 className="mt-3 font-display text-xl font-medium text-premium-ink md:text-2xl">{item.title}</h3><p className="mt-4 flex-1 text-sm leading-7 text-premium-muted">{item.text}</p><Link href={item.href} className="mt-6 inline-flex text-sm font-medium text-premium-bronze focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">Details ansehen →</Link></div>
-  </article>;
-}
+const featuredSlugs = ["stapelstuhl-mod-1021c", "klapptisch-310c", "stuhltransportwagen"];
 
 export default function ProductsPage() {
-  return <div className="page-stack">
-    <CinematicPageHero eyebrow="Produktübersicht" title="Stapelstühle und Klapptische für Räume, die flexibel bleiben." lead="Zubehör, Transportlösungen und Sonderlösungen ergänzen das Kernsortiment. Gemeinsam wählen wir aus, was zu Raum, Nutzung, Lagerung und regelmäßigem Umbau passt." breadcrumbs={[{ label: "Start", href: "/" }, { label: "Produkte" }]} mediaAriaLabel="Gestapelte Stühle als Kernprodukt" mood="stone-arch" actions={<><Link href="#sortiment" className="btn-hero-primary">Sortiment ansehen</Link><Link href="/kontakt?anliegen=Produktauswahl" className="btn-hero-secondary">Beratung anfragen</Link></>} visual={<Image src={productOverviewHero.src} alt={productOverviewHero.alt} width={760} height={950} priority sizes="(min-width: 1280px) 570px, (min-width: 1024px) 42vw, 100vw" className="h-full min-h-72 w-full object-cover object-center" />} />
+  const featuredProducts = featuredSlugs.map((slug) => products.find((product) => product.slug === slug)).filter((product): product is (typeof products)[number] => Boolean(product));
+  return <div className="flex min-w-0 flex-col gap-14 md:gap-20">
+    <section className="overflow-hidden rounded-4xl border border-premium-beige/70 bg-white/70 shadow-premium">
+      <div className="grid lg:grid-cols-[1.08fr_.92fr]">
+        <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-10">
+          <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte" }]} />
+          <p className="section-eyebrow mt-7">Digitaler Beratungskatalog</p>
+          <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Langlebige Ausstattung für flexible Räume.</h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-premium-muted">Stapelstühle, Klapptische und praktische Ergänzungen für Gemeinden, Säle und Mehrzweckräume – persönlich ausgewählt und langfristig betreut.</p>
+          <div className="mt-6 flex flex-wrap gap-3"><Link href="#sortiment" className="btn-primary px-6 py-3">Sortiment entdecken</Link><Link href="/kontakt?anliegen=Produktauswahl" className="btn-secondary px-6 py-3">Beratung zur Auswahl</Link></div>
+        </div>
+        <div className="relative min-h-64 bg-premium-warm sm:min-h-72 lg:min-h-[390px]"><Image src={productOverviewHero.src} alt={productOverviewHero.alt} fill priority sizes="(min-width: 1024px) 42vw, 100vw" className="object-cover" /></div>
+      </div>
+    </section>
 
-    <HomeSection id="sortiment">
-      <SectionHeader eyebrow="Sortimentsübersicht" title="Unser Sortiment für flexible Räume" lead="Entdecken Sie Stapelstühle, Klapptische und praktische Ergänzungen für Räume, die regelmäßig neu genutzt, umgebaut und bestuhlt werden." align="editorial" />
-      <div className="section-grid-top grid gap-6 md:grid-cols-2 lg:grid-cols-6">{productOverviewCategories.map((item) => <CategoryCard key={item.title} item={item} />)}</div>
-    </HomeSection>
+    <section id="sortiment" className="scroll-mt-28" aria-labelledby="sortiment-title">
+      <p className="section-eyebrow">Sortimentsübersicht</p><h2 id="sortiment-title" className="mt-3 font-display text-3xl font-medium text-premium-ink md:text-4xl">Vier Wege zum passenden Produkt</h2>
+      <div className="mt-7 grid gap-5 md:grid-cols-2 lg:grid-cols-4">{productCategories.map((category) => {
+        const count = products.filter((product) => product.categoryId === category.id).length;
+        return <Link key={category.id} href={`/produkte/kategorien/${category.id}`} className="premium-card premium-card-hover group flex min-h-full flex-col">
+          <div className="relative aspect-[4/3] bg-premium-warm"><Image src={category.image} alt={category.name} fill sizes="(min-width: 1024px) 24vw, (min-width: 768px) 50vw, 100vw" className="object-contain p-3 transition duration-500 group-hover:scale-[1.02]" /></div>
+          <div className="flex flex-1 flex-col p-5"><p className="section-eyebrow text-[.62rem]">{count} Produkte</p><h3 className="mt-2 font-display text-xl font-medium text-premium-ink">{category.name}</h3><p className="mt-3 flex-1 text-sm leading-6 text-premium-muted">{category.intro}</p><span className="mt-4 text-sm font-medium text-premium-forest">Kategorie ansehen →</span></div>
+        </Link>;
+      })}</div>
+    </section>
 
-    <HomeSection variant="breathing">
-      <SectionHeader eyebrow="Kuratierte Auswahl" title="Ausgewählte Produkte und Lösungen" lead="Eine kompakte Auswahl zeigt die Breite des Sortiments – von der Bestuhlung über Tischflächen und Zubehör bis zur individuellen Lösung." align="editorial" />
-      <div className="section-grid-top grid gap-8 md:grid-cols-2 xl:grid-cols-3">{productOverviewSolutions.map((item) => <SolutionCard key={item.title} item={item} />)}</div>
-      <div className="mt-10"><Link href="/kontakt?anliegen=Produktauswahl" className="btn-primary inline-flex">Auswahl gemeinsam eingrenzen</Link></div>
-    </HomeSection>
+    <HomeSection><SectionHeader eyebrow="Häufig nachgefragt" title="Direkt zu ausgewählten Produkten" lead="Ein schneller Einstieg in bewährte Lösungen aus den wichtigsten Sortimentsbereichen." align="editorial" /><div className="section-grid-top grid gap-6 md:grid-cols-2 xl:grid-cols-3">{featuredProducts.map((product) => <ProductCard key={product.slug} product={product} />)}</div></HomeSection>
 
-    <HomeSection variant="elevated"><div className="grid items-center gap-10 lg:grid-cols-[1.25fr_.75fr]"><div><p className="section-eyebrow">Beratung und Planung</p><h2 className="section-title mt-5">Nicht jedes Produkt passt zu jedem Raum.</h2><p className="section-lead mt-6">Wir unterstützen Sie bei Auswahl, Bestuhlungsplanung, Zubehör sowie Transport und Lagerung – abgestimmt auf Nutzung, vorhandenen Bestand und die Abläufe vor Ort.</p></div><div className="flex flex-col gap-3 sm:flex-row lg:flex-col"><Link href="/kontakt?anliegen=Projektbesprechung" className="btn-primary text-center">Projekt besprechen</Link><Link href="/raeume-planung/raumplanung" className="btn-secondary text-center">Raumplanung anfragen</Link></div></div></HomeSection>
-
-    <PremiumCtaSection title="Welche Lösung passt zu Ihrem Raum?" lead="Beschreiben Sie Raum, Nutzung und geplante Abläufe. Wir helfen Ihnen persönlich bei der sinnvollen Auswahl." primaryHref="/kontakt?anliegen=Produktauswahl" primaryLabel="Beratung anfragen" secondaryHref="/raeume-planung" secondaryLabel="Vom Raum aus starten" />
+    <HomeSection variant="elevated"><div className="grid gap-8 lg:grid-cols-[1fr_.9fr] lg:items-center"><div><p className="section-eyebrow">Kurze Auswahlhilfe</p><h2 className="section-title mt-4">Vom Raum zur passenden Ausstattung</h2><p className="section-lead mt-5">Nutzung, Personenzahl, Umbauhäufigkeit, Lagerweg und gewünschte Raumwirkung grenzen die Auswahl schnell ein.</p></div><div className="grid gap-3 sm:grid-cols-2"><Link href="/raeume-planung/raumplanung" className="btn-primary text-center">Raumplanung ansehen</Link><Link href="/kontakt?anliegen=Produktauswahl" className="btn-secondary text-center">Ausführung klären</Link></div></div></HomeSection>
+    <HomeSection><div className="grid gap-8 border-y border-premium-beige py-10 md:grid-cols-3"><div><p className="section-eyebrow">01 · Auswahl</p><p className="mt-3 text-sm leading-7 text-premium-muted">Produkte nach Nutzung, Komfort und Handhabung vergleichen.</p></div><div><p className="section-eyebrow">02 · Raumplanung</p><p className="mt-3 text-sm leading-7 text-premium-muted">Stückzahlen, Reihen, Wege und Lagerung sinnvoll zusammendenken.</p></div><div><p className="section-eyebrow">03 · Betreuung</p><p className="mt-3 text-sm leading-7 text-premium-muted">Zubehör, Nachbestellung und Ersatzteile langfristig persönlich klären.</p></div></div></HomeSection>
+    <PremiumCtaSection title="Welche Ausstattung passt zu Ihrem Raum?" lead="Beschreiben Sie Raum, Nutzung und geplante Abläufe. Wir helfen persönlich bei der Auswahl." primaryHref="/kontakt?anliegen=Produktauswahl" primaryLabel="Beratung anfragen" secondaryHref="tel:+499342915353" secondaryLabel="Direkt anrufen" />
   </div>;
 }

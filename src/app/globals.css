@@ -257,7 +257,6 @@
     @apply rounded-full border border-white/15 bg-white/5 px-3 py-2 text-[0.68rem] font-medium tracking-[0.08em] text-white/80 backdrop-blur-xl transition duration-300 hover:border-white/25 hover:bg-white/10 sm:px-4 sm:text-[0.7rem] sm:tracking-[0.12em];
   }
 
-  .hero-architectural::before,
   .company-intro-grid::before {
     content: "";
     @apply pointer-events-none absolute inset-0 opacity-[0.035];
@@ -265,13 +264,6 @@
       linear-gradient(to right, currentColor 1px, transparent 1px),
       linear-gradient(to bottom, currentColor 1px, transparent 1px);
     background-size: 40px 40px;
-  }
-
-  .hero-architectural::before {
-    inset: 0 auto 0 0;
-    width: min(72%, 880px);
-    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 52%, rgb(0 0 0 / 0.72) 68%, rgb(0 0 0 / 0.22) 84%, transparent 100%);
-    mask-image: linear-gradient(90deg, #000 0%, #000 52%, rgb(0 0 0 / 0.72) 68%, rgb(0 0 0 / 0.22) 84%, transparent 100%);
   }
 
   .company-intro-grid {
@@ -441,23 +433,17 @@
     content: "";
     position: absolute;
     z-index: -1;
-    inset: 0 calc(-1 * var(--hero-image-overlap)) 0 auto;
-    width: calc(var(--hero-image-overlap) + 210px);
+    inset: 0 calc(-1 * var(--hero-image-overlap)) 0 0;
     pointer-events: none;
-    background:
-      radial-gradient(ellipse 78% 46% at 42% 0%, rgb(250 248 240 / 0.18) 0%, transparent 74%),
-      radial-gradient(ellipse 72% 42% at 24% 100%, rgb(250 248 240 / 0.12) 0%, transparent 76%),
-      linear-gradient(
-        98deg,
-        rgb(250 248 240) 0%,
-        rgb(250 248 240) 30%,
-        rgb(250 248 240 / 0.94) 44%,
-        rgb(250 248 240 / 0.72) 58%,
-        rgb(250 248 240 / 0.34) 70%,
-        rgb(250 248 240 / 0.12) 80%,
-        rgb(250 248 240 / 0.035) 87%,
-        transparent 100%
-      );
+    background: linear-gradient(
+      90deg,
+      rgb(250 248 240) 0%,
+      rgb(250 248 240) 52%,
+      rgb(250 248 240 / 0.86) 66%,
+      rgb(250 248 240 / 0.42) 80%,
+      rgb(250 248 240 / 0.12) 91%,
+      transparent 100%
+    );
   }
 }
 

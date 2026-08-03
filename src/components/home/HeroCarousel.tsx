@@ -10,7 +10,11 @@ const slides = [
     headline: "Flexible Tische für Räume, die sich immer wieder verändern.",
     description: "Robust, klappbar und passend zur täglichen Nutzung geplant.",
     objectPosition: "50% 50%",
-    mobilePosition: "52% 50%",
+    objectFit: "cover",
+    imageScale: 0.88,
+    mobileObjectPosition: "50% 43%",
+    mobileScale: 0.9,
+    softenedBackdrop: true,
   },
   {
     src: "/neue bilder/Stapelstühle/hero-bestuhlung.png",
@@ -18,7 +22,11 @@ const slides = [
     headline: "Bestuhlung, die zum Raum und zu den Menschen passt.",
     description: "Seit 1994 planen wir flexible Lösungen für Gemeinden, Säle und Kommunen.",
     objectPosition: "50% 50%",
-    mobilePosition: "55% 50%",
+    objectFit: "cover",
+    imageScale: 0.91,
+    mobileObjectPosition: "50% 44%",
+    mobileScale: 0.92,
+    softenedBackdrop: true,
   },
   {
     src: "/neue bilder/Stoffe-Farben/makro-stoffe-farbig.png",
@@ -26,7 +34,7 @@ const slides = [
     headline: "Materialien, die Atmosphäre schaffen und lange bestehen.",
     description: "Wir beraten persönlich bei Stoffen, Farben und belastbaren Ausführungen.",
     objectPosition: "50% 48%",
-    mobilePosition: "50% 50%",
+    mobileObjectPosition: "50% 50%",
   },
   {
     src: "/neue bilder/Stoffe-Farben/stuhl-farbverlauf.png",
@@ -34,7 +42,7 @@ const slides = [
     headline: "Farben und Ausführungen passend zu Ihrem Raum.",
     description: "Von der Bemusterung bis zur stimmigen Gesamtauswahl.",
     objectPosition: "50% 50%",
-    mobilePosition: "50% 48%",
+    mobileObjectPosition: "50% 48%",
   },
   {
     src: "/neue bilder/Produktion-Lager/Polster-Montage.png",
@@ -42,7 +50,7 @@ const slides = [
     headline: "Persönlich begleitet – von der Auswahl bis zur fertigen Lösung.",
     description: "Planung, Sonderlösungen und Montagekompetenz aus einem erfahrenen Familienbetrieb.",
     objectPosition: "52% 50%",
-    mobilePosition: "56% 50%",
+    mobileObjectPosition: "56% 50%",
   },
   {
     src: "/neue bilder/Produktion-Lager/Schalenlager-Montage.png",
@@ -50,7 +58,7 @@ const slides = [
     headline: "Durchdachte Produkte entstehen aus Erfahrung und sorgfältiger Abstimmung.",
     description: "Wir entwickeln und planen unsere Modelle gemeinsam mit spezialisierten Partnerbetrieben.",
     objectPosition: "48% 50%",
-    mobilePosition: "52% 50%",
+    mobileObjectPosition: "52% 50%",
   },
 ] as const;
 
@@ -96,7 +104,7 @@ export default function HeroCarousel() {
 
   return (
     <div
-      className="group relative h-full min-h-[360px] overflow-hidden sm:min-h-[440px] lg:min-h-full"
+      className="hero-carousel group relative h-full min-h-[360px] overflow-visible sm:min-h-[440px] lg:min-h-full"
       role="region"
       aria-roledescription="Karussell"
       aria-label="DLMNS Raumlösungen, Materialien und Montage"
@@ -121,25 +129,38 @@ export default function HeroCarousel() {
       {slides.map((slide, index) => (
         <div
           key={slide.src}
-          className={`absolute inset-0 transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${index === active ? "z-0 opacity-100" : "pointer-events-none opacity-0"}`}
+          className={`hero-carousel-slide absolute inset-0 overflow-hidden transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${index === active ? "z-0 opacity-100" : "pointer-events-none opacity-0"}`}
           aria-hidden={index !== active}
         >
+          {"softenedBackdrop" in slide && slide.softenedBackdrop ? (
+            <Image
+              src={slide.src}
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 56vw, 100vw"
+              className="scale-110 object-cover blur-2xl brightness-[.62] saturate-[.85]"
+              aria-hidden
+            />
+          ) : null}
           <Image
             src={slide.src}
             alt={index === active ? slide.alt : ""}
             fill
             priority={index === 0}
             sizes="(min-width: 1024px) 56vw, 100vw"
-            className="object-cover"
+            className="hero-slide-main object-cover"
             style={{
-              objectPosition: `var(--hero-mobile-position, ${slide.mobilePosition})`,
+              objectFit: "objectFit" in slide ? slide.objectFit : "cover",
+              objectPosition: `var(--hero-mobile-position, ${slide.mobileObjectPosition})`,
               ["--hero-desktop-position" as string]: slide.objectPosition,
+              ["--hero-desktop-scale" as string]: "imageScale" in slide ? slide.imageScale : 1,
+              ["--hero-mobile-scale" as string]: "mobileScale" in slide ? slide.mobileScale : 1,
             }}
           />
         </div>
       ))}
 
-      <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-premium-espresso/70 via-transparent to-transparent lg:bg-gradient-to-r lg:from-premium-highlight/20 lg:via-transparent lg:to-transparent" aria-hidden />
+      <div className="hero-carousel-shade pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-premium-espresso/70 via-transparent to-transparent lg:bg-gradient-to-r lg:from-premium-highlight/20 lg:via-transparent lg:to-transparent" aria-hidden />
 
       <div className="absolute inset-x-4 bottom-4 z-20 sm:inset-x-7 sm:bottom-7">
         <div className="max-w-2xl rounded-2xl border border-white/20 bg-premium-ink/72 px-4 py-3 text-white shadow-lg backdrop-blur-md sm:px-5 sm:py-4">

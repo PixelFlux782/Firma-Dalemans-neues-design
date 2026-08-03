@@ -58,8 +58,7 @@ export default function HomePage() {
 
       <section className="hero-architectural relative -mx-5 overflow-hidden border-y border-premium-beige bg-premium-highlight shadow-premium-xl sm:-mx-6 md:mx-0 md:rounded-[2.5rem] md:border">
         <div className="grid lg:min-h-[min(72vh,760px)] lg:grid-cols-[.88fr_1.12fr]">
-          <div className="relative z-10 flex flex-col justify-center px-5 py-12 sm:px-8 md:px-12 md:py-16 lg:px-14 xl:px-16">
-            <div className="absolute inset-y-8 right-0 hidden w-px bg-premium-beige lg:block" aria-hidden />
+          <div className="hero-copy relative z-10 flex flex-col justify-center px-5 py-12 sm:px-8 md:px-12 md:py-16 lg:px-14 xl:px-16">
             <p className="section-eyebrow">DLMNS Stapelstühle & Klapptische</p>
             <div className="mt-5 flex items-center gap-3 text-[0.65rem] font-medium uppercase tracking-[0.18em] text-premium-muted">
               <span>Seit 1994</span><span className="h-px w-8 bg-premium-stone" aria-hidden /><span>Persönlich geplant</span>

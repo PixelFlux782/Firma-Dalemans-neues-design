@@ -410,4 +410,46 @@
   .hero-architectural img[style*="--hero-desktop-position"] {
     object-position: var(--hero-desktop-position) !important;
   }
+
+  .hero-architectural .hero-slide-main {
+    transform: scale(var(--hero-desktop-scale, 1));
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-architectural {
+    --hero-image-overlap: clamp(80px, 8vw, 120px);
+  }
+
+  .hero-architectural .hero-carousel-slide,
+  .hero-architectural .hero-carousel-shade {
+    left: calc(-1 * var(--hero-image-overlap));
+  }
+
+  .hero-architectural .hero-copy {
+    isolation: isolate;
+  }
+
+  .hero-architectural .hero-copy::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0 calc(-1 * var(--hero-image-overlap)) 0 auto;
+    width: calc(var(--hero-image-overlap) + 150px);
+    pointer-events: none;
+    background: linear-gradient(
+      100deg,
+      rgb(250 248 240 / 0.98) 0%,
+      rgb(250 248 240 / 0.93) 38%,
+      rgb(250 248 240 / 0.68) 62%,
+      rgb(250 248 240 / 0.24) 82%,
+      transparent 100%
+    );
+  }
+}
+
+@media (max-width: 639px) {
+  .hero-architectural .hero-slide-main {
+    transform: scale(var(--hero-mobile-scale, 1));
+  }
 }

@@ -23,16 +23,20 @@ const featuredSlugs = ["stapelstuhl-mod-1021c", "klapptisch-310c", "stuhltranspo
 export default function ProductsPage() {
   const featuredProducts = featuredSlugs.map((slug) => products.find((product) => product.slug === slug)).filter((product): product is (typeof products)[number] => Boolean(product));
   return <div className="flex min-w-0 flex-col gap-14 md:gap-20">
-    <section className="overflow-hidden rounded-4xl border border-premium-beige/70 bg-white/70 shadow-premium">
-      <div className="grid lg:grid-cols-[1.08fr_.92fr]">
-        <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-10">
+    <section className="overflow-hidden rounded-4xl border border-premium-beige/70 bg-[#f7f3eb] shadow-premium">
+      <div className="grid md:grid-cols-[56%_44%] lg:grid-cols-[54%_46%]">
+        <div className="relative z-20 flex flex-col justify-center bg-[radial-gradient(circle_at_12%_18%,rgba(255,255,255,.62),transparent_34%),linear-gradient(90deg,#f8f5ee_0%,#f7f3eb_82%,rgba(247,243,235,.92)_100%)] p-6 sm:p-8 md:py-10 md:pl-8 md:pr-16 lg:min-h-[500px] lg:p-10 lg:pr-20">
           <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte" }]} />
           <p className="section-eyebrow mt-7">Digitaler Beratungskatalog</p>
           <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Langlebige Ausstattung für flexible Räume.</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-premium-muted">Stapelstühle, Klapptische und praktische Ergänzungen für Gemeinden, Säle und Mehrzweckräume – persönlich ausgewählt und langfristig betreut.</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="#sortiment" className="btn-primary px-6 py-3">Sortiment entdecken</Link><Link href="/kontakt?anliegen=Produktauswahl" className="btn-secondary px-6 py-3">Beratung zur Auswahl</Link></div>
         </div>
-        <div className="relative min-h-64 bg-premium-warm sm:min-h-72 lg:min-h-[390px]"><Image src={productOverviewHero.src} alt={productOverviewHero.alt} fill priority sizes="(min-width: 1024px) 42vw, 100vw" className="object-cover" /></div>
+        <div className="relative z-10 min-h-[390px] overflow-hidden bg-[#d9cfbf] md:-ml-20 md:min-h-[460px] md:w-[calc(100%+5rem)] lg:-ml-28 lg:min-h-[500px] lg:w-[calc(100%+7rem)]">
+          <Image src={productOverviewHero.src} alt="" fill priority sizes="(min-width: 1024px) 52vw, (min-width: 768px) 52vw, 100vw" className="scale-[1.06] object-cover object-[52%_55%] blur-[10px] brightness-[.78] saturate-[.82]" aria-hidden="true" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(247,243,235,.96)_0%,rgba(247,243,235,.36)_55px,transparent_110px),linear-gradient(180deg,rgba(34,29,23,.04),transparent_24%,transparent_76%,rgba(34,29,23,.08))] md:bg-[linear-gradient(90deg,rgba(247,243,235,1)_0%,rgba(247,243,235,.92)_24px,rgba(247,243,235,.48)_72px,rgba(247,243,235,.12)_112px,transparent_160px),linear-gradient(180deg,rgba(34,29,23,.04),transparent_24%,transparent_76%,rgba(34,29,23,.08))]" aria-hidden="true" />
+          <Image src={productOverviewHero.src} alt={productOverviewHero.alt} fill priority sizes="(min-width: 1024px) 52vw, (min-width: 768px) 52vw, 100vw" className="scale-[.92] object-contain object-[52%_55%] drop-shadow-[0_18px_22px_rgba(34,29,23,.16)] md:origin-[56%_55%]" />
+        </div>
       </div>
     </section>
 

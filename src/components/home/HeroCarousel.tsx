@@ -9,7 +9,7 @@ const slides = [
     alt: "Klapptische von Dalemans in einer flexiblen Raumlösung",
     headline: "Flexible Tische für Räume, die sich immer wieder verändern.",
     description: "Robust, klappbar und passend zur täglichen Nutzung geplant.",
-    objectPosition: "50% 50%",
+    objectPosition: "48% 50%",
     objectFit: "cover",
     imageScale: 0.88,
     mobileObjectPosition: "50% 43%",
@@ -21,7 +21,7 @@ const slides = [
     alt: "Bestuhlter Gemeindesaal mit Stapelstühlen von Dalemans",
     headline: "Bestuhlung, die zum Raum und zu den Menschen passt.",
     description: "Seit 1994 planen wir flexible Lösungen für Gemeinden, Säle und Kommunen.",
-    objectPosition: "50% 50%",
+    objectPosition: "47% 50%",
     objectFit: "cover",
     imageScale: 0.91,
     mobileObjectPosition: "50% 44%",
@@ -33,7 +33,7 @@ const slides = [
     alt: "Nahaufnahme verschiedener farbiger Möbelstoffe",
     headline: "Materialien, die Atmosphäre schaffen und lange bestehen.",
     description: "Wir beraten persönlich bei Stoffen, Farben und belastbaren Ausführungen.",
-    objectPosition: "50% 48%",
+    objectPosition: "46% 48%",
     mobileObjectPosition: "50% 50%",
   },
   {
@@ -41,7 +41,7 @@ const slides = [
     alt: "Stuhlvarianten in unterschiedlichen Farben",
     headline: "Farben und Ausführungen passend zu Ihrem Raum.",
     description: "Von der Bemusterung bis zur stimmigen Gesamtauswahl.",
-    objectPosition: "50% 50%",
+    objectPosition: "47% 50%",
     mobileObjectPosition: "50% 48%",
   },
   {
@@ -49,7 +49,7 @@ const slides = [
     alt: "Montage einer gepolsterten Sitzschale",
     headline: "Persönlich begleitet – von der Auswahl bis zur fertigen Lösung.",
     description: "Planung, Sonderlösungen und Montagekompetenz aus einem erfahrenen Familienbetrieb.",
-    objectPosition: "52% 50%",
+    objectPosition: "50% 50%",
     mobileObjectPosition: "56% 50%",
   },
   {
@@ -57,7 +57,7 @@ const slides = [
     alt: "Sitzschalen und Bauteile im Montage- und Lagerbereich",
     headline: "Durchdachte Produkte entstehen aus Erfahrung und sorgfältiger Abstimmung.",
     description: "Wir entwickeln und planen unsere Modelle gemeinsam mit spezialisierten Partnerbetrieben.",
-    objectPosition: "48% 50%",
+    objectPosition: "43% 50%",
     mobileObjectPosition: "52% 50%",
   },
 ] as const;
@@ -160,10 +160,10 @@ export default function HeroCarousel() {
         </div>
       ))}
 
-      <div className="hero-carousel-shade pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-premium-espresso/70 via-transparent to-transparent lg:bg-gradient-to-r lg:from-premium-highlight/20 lg:via-transparent lg:to-transparent" aria-hidden />
+      <div className="hero-carousel-shade pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-premium-espresso/65 via-transparent to-transparent lg:bg-gradient-to-t lg:from-premium-espresso/25 lg:via-transparent lg:to-transparent" aria-hidden />
 
       <div className="absolute inset-x-4 bottom-4 z-20 sm:inset-x-7 sm:bottom-7">
-        <div className="max-w-2xl rounded-2xl border border-white/20 bg-premium-ink/72 px-4 py-3 text-white shadow-lg backdrop-blur-md sm:px-5 sm:py-4">
+        <div className="max-w-2xl rounded-2xl border border-white/25 bg-premium-ink/58 px-4 py-3 text-white shadow-md backdrop-blur-sm sm:px-5 sm:py-4">
           <p className="font-display text-base font-medium leading-snug sm:text-lg" aria-live="polite">
             {slides[active].headline}
           </p>
@@ -183,13 +183,13 @@ export default function HeroCarousel() {
                 aria-label={`Bild ${index + 1} anzeigen`}
                 aria-current={index === active ? "true" : undefined}
               >
-                <span className={`h-0.5 w-full rounded-full transition-colors ${index === active ? "bg-white" : "bg-white/35 group-hover/indicator:bg-white/65"}`} />
+                <span className={`h-0.5 w-full rounded-full transition-colors ${index === active ? "bg-white" : "bg-white/25 group-hover/indicator:bg-white/55"}`} />
               </button>
             ))}
           </div>
           <div className="flex gap-2">
-            <button type="button" onClick={() => selectSlide(active - 1)} className="grid size-11 place-items-center rounded-full border border-white/35 bg-premium-ink/55 text-lg text-white backdrop-blur-md transition hover:bg-premium-ink/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white" aria-label="Vorheriges Bild">←</button>
-            <button type="button" onClick={() => selectSlide(active + 1)} className="grid size-11 place-items-center rounded-full border border-white/35 bg-premium-ink/55 text-lg text-white backdrop-blur-md transition hover:bg-premium-ink/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white" aria-label="Nächstes Bild">→</button>
+            <button type="button" onClick={() => selectSlide(active - 1)} className="grid size-11 place-items-center rounded-full border border-white/25 bg-premium-ink/42 text-lg text-white backdrop-blur-sm transition hover:bg-premium-ink/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white" aria-label="Vorheriges Bild">←</button>
+            <button type="button" onClick={() => selectSlide(active + 1)} className="grid size-11 place-items-center rounded-full border border-white/25 bg-premium-ink/42 text-lg text-white backdrop-blur-sm transition hover:bg-premium-ink/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white" aria-label="Nächstes Bild">→</button>
           </div>
         </div>
       </div>

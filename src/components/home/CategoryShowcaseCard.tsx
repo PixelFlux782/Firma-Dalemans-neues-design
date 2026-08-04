@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import ProductVisual from "@/components/ProductVisual";
 import type { ProductCategory } from "@/lib/product-categories";
 
 interface CategoryShowcaseCardProps {
@@ -23,21 +23,13 @@ export default function CategoryShowcaseCard({
   return (
     <Link
       href={`/produkte/kategorien/${category.id}`}
-      className={`premium-card premium-card-hover image-depth group flex flex-col animate-fade-up ${delayClass} ${
+      className={`group flex flex-col animate-fade-up ${delayClass} ${
         index % 2 === 1 ? "md:mt-8" : ""
       }`}
     >
-      <div className="relative h-60 overflow-hidden md:h-64">
-        <Image
-          src={category.image}
-          alt={category.name}
-          fill
-          sizes="(min-width: 1024px) 50vw, 100vw"
-          className="object-cover"
-        />
-      </div>
+      <ProductVisual src={category.image} alt={category.name} sizes="(min-width: 1024px) 50vw, 100vw" imageInset="5%" backgroundTone="canvas" />
 
-      <div className="flex flex-1 flex-col p-8 md:p-9 lg:p-10">
+      <div className="flex flex-1 flex-col px-1 pb-2 pt-6">
         <h3 className="font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink md:text-[1.65rem]">
           {category.name}
         </h3>

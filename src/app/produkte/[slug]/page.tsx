@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
@@ -7,7 +6,7 @@ import CinematicPageHero from "@/components/home/CinematicPageHero";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
-import SoftFadedProductImage from "@/components/SoftFadedProductImage";
+import ProductVisual from "@/components/ProductVisual";
 import { StructuredData } from "@/components/StructuredData";
 import { categoryPlaceholders } from "@/lib/category-placeholders";
 import { getProductCategoryById } from "@/lib/product-categories";
@@ -153,11 +152,7 @@ export default async function ProductDetailPage({ params }: Props) {
         breadcrumbs={breadcrumbItems}
         mediaAriaLabel={`${product.title} — Produktkomposition`}
         mood={mood}
-        visualWrapperClassName={
-          product.categoryId === "stapelstuehle"
-            ? "animate-fade-up animate-fade-up-delay-2"
-            : undefined
-        }
+        visualWrapperClassName="animate-fade-up animate-fade-up-delay-2"
         actions={
           <>
             <Link href={`/kontakt?produkt=${encodeURIComponent(product.title)}`} className="btn-hero-primary text-center">
@@ -173,31 +168,16 @@ export default async function ProductDetailPage({ params }: Props) {
             ) : null}
           </>
         }
-        visual={
-          product.categoryId === "stapelstuehle" ? (
-            <SoftFadedProductImage
-              src={product.image}
-              alt={product.imageAlt ?? product.title}
-              priority
-              className="h-[390px] w-full sm:h-[470px] md:h-[540px]"
-            />
-          ) : (
-            <Image
-              src={product.image}
-              alt={product.imageAlt ?? product.title}
-              width={720}
-              height={460}
-              priority
-              sizes="(min-width: 1024px) 42vw, 100vw"
-              className={
-              product.categoryId === "klapptische" ||
-              product.categoryId === "transportwagen-zubehoer"
-                ? "h-[360px] w-full bg-premium-cream/40 object-contain sm:h-[440px] md:h-[520px]"
-                : "min-h-[220px] w-full object-cover sm:min-h-[260px] md:min-h-[280px]"
-              }
-            />
-          )
-        }
+        visual={<ProductVisual
+          src={product.image}
+          alt={product.imageAlt ?? product.title}
+          priority
+          sizes="(min-width: 1024px) 42vw, 100vw"
+          aspectRatio={product.categoryId === "stapelstuehle" ? "4 / 5" : product.categoryId === "klapptische" ? "5 / 4" : "4 / 3"}
+          imageInset={product.categoryId === "transportwagen-zubehoer" ? "9%" : "7%"}
+          backgroundTone="#123322"
+          className="min-h-[360px] sm:min-h-[440px] md:min-h-[520px]"
+        />}
       />
 
       <HomeSection>

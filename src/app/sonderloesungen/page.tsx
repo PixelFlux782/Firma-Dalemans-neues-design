@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import ProductVisual from "@/components/ProductVisual";
 import { StructuredData } from "@/components/StructuredData";
 import CinematicPageHero from "@/components/home/CinematicPageHero";
 import HomeSection from "@/components/home/HomeSection";
@@ -73,6 +74,7 @@ export default function SonderloesungenPage() {
         breadcrumbs={[{ label: "Start", href: "/" }, { label: "Sonderlösungen" }]}
         mediaAriaLabel="CAD Planung und Werkstatt für Sonderlösungen"
         mood="bronze-glow"
+        visualWrapperClassName="animate-fade-up animate-fade-up-delay-2"
         actions={
           <>
             <Link href="/kontakt" className="btn-hero-primary text-center">
@@ -84,14 +86,15 @@ export default function SonderloesungenPage() {
           </>
         }
         visual={
-          <Image
-            src={encodeURI("/images/curated/Sonderlösungen/runder-tisch.webp")}
+          <ProductVisual
+            src="/images/curated/Sonderlösungen/runder-tisch.webp"
             alt="Runder Tisch als individuell geplante Sonderlösung"
-            width={760}
-            height={500}
             priority
             sizes="(min-width: 1024px) 42vw, 100vw"
-            className="min-h-[240px] w-full object-cover md:min-h-[300px]"
+            aspectRatio="3 / 2"
+            imageInset="7%"
+            backgroundTone="#123322"
+            className="min-h-[240px] md:min-h-[300px]"
           />
         }
       />
@@ -134,12 +137,12 @@ export default function SonderloesungenPage() {
           align="editorial"
         />
         <div className="section-grid-top grid gap-6 lg:grid-cols-[1.15fr_.85fr]">
-          <figure className="premium-card overflow-hidden">
-            <Image src={encodeURI("/images/curated/Sonderlösungen/Kleinst_Klapptisch_Entwicklung02.webp")} alt="Entwicklung eines kompakten Klapptisches" width={960} height={640} sizes="(min-width: 1024px) 55vw, 100vw" className="aspect-[3/2] w-full object-contain bg-white p-4" />
+          <figure>
+            <ProductVisual src="/images/curated/Sonderlösungen/Kleinst_Klapptisch_Entwicklung02.webp" alt="Entwicklung eines kompakten Klapptisches" sizes="(min-width: 1024px) 55vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
             <figcaption className="px-6 py-5 text-sm leading-7 text-premium-muted">Eine konstruktive Idee wird mit Blick auf Nutzung, Handhabung und Lagerung geprüft.</figcaption>
           </figure>
-          <figure className="premium-card overflow-hidden">
-            <Image src={encodeURI("/images/curated/Gestelle/Gestell-hero.webp")} alt="Metallgestell als Grundlage einer individuellen Möbelkonstruktion" width={760} height={506} sizes="(min-width: 1024px) 38vw, 100vw" className="aspect-[3/2] w-full object-contain bg-white p-4" />
+          <figure>
+            <ProductVisual src="/images/curated/Gestelle/Gestell-hero.webp" alt="Metallgestell als Grundlage einer individuellen Möbelkonstruktion" sizes="(min-width: 1024px) 38vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
             <figcaption className="px-6 py-5 text-sm leading-7 text-premium-muted">Bauteile und Gestelle werden passend zur konkreten Aufgabe betrachtet.</figcaption>
           </figure>
         </div>

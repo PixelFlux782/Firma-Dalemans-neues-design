@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ProductCard from "@/components/ProductCard";
+import ProductVisual from "@/components/ProductVisual";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
@@ -23,18 +23,17 @@ const featuredSlugs = ["stapelstuhl-mod-1021c", "klapptisch-310c", "stuhltranspo
 export default function ProductsPage() {
   const featuredProducts = featuredSlugs.map((slug) => products.find((product) => product.slug === slug)).filter((product): product is (typeof products)[number] => Boolean(product));
   return <div className="flex min-w-0 flex-col gap-14 md:gap-20">
-    <section className="overflow-hidden rounded-4xl border border-premium-beige/70 bg-[#f7f3eb] shadow-[0_12px_36px_rgba(20,18,16,.06)]">
+    <section>
       <div className="grid md:grid-cols-[58%_42%]">
-        <div className="relative z-20 flex flex-col justify-center bg-[#f7f3eb] p-6 sm:p-8 md:min-h-[520px] md:py-10 md:pl-8 md:pr-14 lg:min-h-[560px] lg:p-10 lg:pr-16">
+        <div className="relative z-20 flex flex-col justify-center py-8 md:min-h-[520px] md:pr-14 lg:min-h-[560px] lg:pr-16">
           <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte" }]} />
           <p className="section-eyebrow mt-7">Digitaler Beratungskatalog</p>
           <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Langlebige Ausstattung für flexible Räume.</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-premium-muted">Stapelstühle, Klapptische und praktische Ergänzungen für Gemeinden, Säle und Mehrzweckräume – persönlich ausgewählt und langfristig betreut.</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="#sortiment" className="btn-primary px-6 py-3">Sortiment entdecken</Link><Link href="/kontakt?anliegen=Produktauswahl" className="btn-secondary px-6 py-3">Beratung zur Auswahl</Link></div>
         </div>
-        <div className="relative min-h-[420px] overflow-hidden md:min-h-[520px] lg:min-h-[560px]">
-          <Image src={productOverviewHero.src} alt={productOverviewHero.alt} fill priority sizes="(min-width: 768px) 42vw, 100vw" className="object-cover object-[58%_55%]" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-[linear-gradient(180deg,#f7f3eb_0%,rgba(247,243,235,.52)_42%,transparent_100%)] md:inset-y-0 md:left-0 md:right-auto md:h-auto md:w-28 md:bg-[linear-gradient(90deg,#f7f3eb_0%,rgba(247,243,235,.72)_28%,rgba(247,243,235,.22)_68%,transparent_100%)]" aria-hidden="true" />
+        <div className="relative min-h-[420px] md:min-h-[520px] lg:min-h-[560px]">
+          <ProductVisual src={productOverviewHero.src} alt={productOverviewHero.alt} priority sizes="(min-width: 768px) 42vw, 100vw" aspectRatio="3 / 4" objectPosition="58% 52%" imageInset="5%" backgroundTone="canvas" className="h-full min-h-[420px] md:min-h-[520px] lg:min-h-[560px]" />
         </div>
       </div>
     </section>
@@ -43,8 +42,8 @@ export default function ProductsPage() {
       <p className="section-eyebrow">Sortimentsübersicht</p><h2 id="sortiment-title" className="mt-3 font-display text-3xl font-medium text-premium-ink md:text-4xl">Drei Wege zum passenden Produkt</h2>
       <div className="mt-7 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{productCategories.map((category) => {
         const count = products.filter((product) => product.categoryId === category.id).length;
-        return <Link key={category.id} href={`/produkte/kategorien/${category.id}`} className="premium-card premium-card-hover group flex min-h-full flex-col">
-          <div className="relative aspect-[4/3] bg-premium-warm"><Image src={category.image} alt={category.name} fill sizes="(min-width: 1024px) 24vw, (min-width: 768px) 50vw, 100vw" className="object-contain p-3 transition duration-500 group-hover:scale-[1.02]" /></div>
+        return <Link key={category.id} href={`/produkte/kategorien/${category.id}`} className="group flex min-h-full flex-col">
+          <ProductVisual src={category.image} alt={category.name} sizes="(min-width: 1024px) 24vw, (min-width: 768px) 50vw, 100vw" imageInset="5%" backgroundTone="canvas" />
           <div className="flex flex-1 flex-col p-5"><p className="section-eyebrow text-[.62rem]">{count} Produkte</p><h3 className="mt-2 font-display text-xl font-medium text-premium-ink">{category.name}</h3><p className="mt-3 flex-1 text-sm leading-6 text-premium-muted">{category.intro}</p><span className="mt-4 text-sm font-medium text-premium-forest">Kategorie ansehen →</span></div>
         </Link>;
       })}</div>

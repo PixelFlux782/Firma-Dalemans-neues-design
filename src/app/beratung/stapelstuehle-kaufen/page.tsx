@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
+import ProductVisual from "@/components/ProductVisual";
 import ProductCard from "@/components/ProductCard";
 import { StructuredData } from "@/components/StructuredData";
 import CinematicPageHero from "@/components/home/CinematicPageHero";
@@ -104,17 +104,8 @@ export default function StapelstuehleKaufenPage() {
             </Link>
           </>
         }
-        visual={
-          <Image
-            src={encodeURI("/images/curated/Stapelstühle/1021c.webp")}
-            alt="Stapelstuhl für Gemeinde, Kirche und Saal"
-            width={760}
-            height={500}
-            priority
-            sizes="(min-width: 1024px) 42vw, 100vw"
-            className="min-h-[240px] w-full object-cover md:min-h-[300px]"
-          />
-        }
+        visual={<ProductVisual src="/images/curated/Stapelstühle/1021c.webp" alt="Stapelstuhl für Gemeinde, Kirche und Saal" priority sizes="(min-width: 1024px) 42vw, 100vw" aspectRatio="4 / 5" imageInset="5%" backgroundTone="#123322" className="min-h-[300px]" />}
+        visualWrapperClassName="animate-fade-up animate-fade-up-delay-2"
       />
 
       <HomeSection>

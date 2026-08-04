@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import ProductVisual from "@/components/ProductVisual";
 import type { Product } from "@/lib/products";
 
 interface Props {
@@ -42,7 +42,7 @@ function ProductActions({ product, requestSample }: { product: Product; requestS
 export default function StackingChairsCategory({ heroImage, products }: Props) {
   return (
     <div className="flex min-w-0 flex-col gap-12 md:gap-14">
-      <section className="overflow-hidden rounded-4xl bg-[#f8f4ec]">
+      <section>
         <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(420px,520px)]">
           <div className="relative z-10 flex flex-col justify-center p-6 sm:p-8 lg:p-10 lg:pr-5">
             <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: "Stapelstühle" }]} />
@@ -54,9 +54,8 @@ export default function StackingChairsCategory({ heroImage, products }: Props) {
               <a href="tel:+499342915353" className="btn-secondary px-6 py-3">Beratung</a>
             </div>
           </div>
-          <div className="relative min-h-[420px] overflow-hidden bg-premium-warm sm:min-h-[520px] lg:min-h-[620px]">
-            <Image src={heroImage} alt="Fünf gepolsterte Stapelstühle in einem hellen Raum" fill priority sizes="(min-width: 1024px) 520px, 100vw" className="object-cover object-[50%_58%] sm:object-[50%_56%] lg:object-[50%_55%]" />
-            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#f8f4ec] to-transparent lg:inset-y-0 lg:left-0 lg:right-auto lg:h-auto lg:w-24 lg:bg-gradient-to-r" />
+          <div className="relative min-h-[420px] sm:min-h-[520px] lg:min-h-[620px]">
+            <ProductVisual src={heroImage} alt="Fünf gepolsterte Stapelstühle in einem hellen Raum" priority sizes="(min-width: 1024px) 520px, 100vw" aspectRatio="4 / 5" objectPosition="50% 55%" imageInset="5%" backgroundTone="canvas" className="h-full min-h-[420px] sm:min-h-[520px] lg:min-h-[620px]" />
           </div>
         </div>
       </section>
@@ -81,26 +80,7 @@ export default function StackingChairsCategory({ heroImage, products }: Props) {
                 key={product.slug}
                 className={`grid min-w-0 gap-7 py-12 sm:gap-10 sm:py-16 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)] lg:items-center lg:gap-16 lg:py-20 ${index > 0 ? "border-t border-premium-beige/55" : ""}`}
               >
-                <div className={`relative aspect-[4/5] min-w-0 overflow-hidden sm:aspect-[5/4] lg:aspect-auto lg:min-h-[580px] ${imageRight ? "lg:order-2" : ""}`}>
-                  <div aria-hidden="true" className="absolute inset-[8%_3%] rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(238,229,214,.58)_0%,rgba(248,244,236,.28)_48%,transparent_74%)]" />
-                  <Image
-                    src={product.image}
-                    alt={product.imageAlt ?? product.title}
-                    fill
-                    sizes="(min-width: 1280px) 570px, (min-width: 1024px) 48vw, 100vw"
-                    className="hidden object-contain sm:block"
-                    style={{ objectPosition: imageTreatment.imagePosition, transform: `scale(${imageTreatment.imageScale})` }}
-                  />
-                  <Image
-                    src={product.image}
-                    alt=""
-                    aria-hidden="true"
-                    fill
-                    sizes="(max-width: 639px) 100vw, 1px"
-                    className="object-contain sm:hidden"
-                    style={{ objectPosition: imageTreatment.mobileImagePosition, transform: `scale(${imageTreatment.mobileImageScale})` }}
-                  />
-                </div>
+                <ProductVisual src={product.image} alt={product.imageAlt ?? product.title} sizes="(min-width: 1280px) 570px, (min-width: 1024px) 48vw, 100vw" aspectRatio="4 / 5" objectPosition={imageTreatment.imagePosition} imageScale={Math.min(imageTreatment.imageScale, 1)} imageInset="5%" backgroundTone="canvas" className={`min-w-0 sm:[--visual-ratio:5/4] lg:min-h-[580px] ${imageRight ? "lg:order-2" : ""}`} />
                 <div className={`flex min-w-0 flex-col justify-center px-1 sm:px-2 lg:px-0 ${imageRight ? "lg:order-1" : ""}`}>
                   <p className="section-eyebrow">Stapelstühle</p>
                   <h3 className="mt-2 font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink sm:text-3xl">{product.title}</h3>

@@ -7,6 +7,7 @@ import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
 import HeroCarousel from "@/components/home/HeroCarousel";
 import ProductCategoryFeature from "@/components/home/ProductCategoryFeature";
+import ProductVisual from "@/components/ProductVisual";
 import { absoluteUrl, buildMetadata } from "@/lib/seo";
 import { organizationStructuredData } from "@/lib/company";
 
@@ -27,10 +28,10 @@ const entries = [
 ] as const;
 
 const groups = [
-  { title: "Stapelstühle", text: "Robuste, komfortable Stühle für flexible Räume und eine langjährige Nutzung.", href: "/produkte/kategorien/stapelstuehle", cta: "Stapelstühle ansehen", image: "/images/curated/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.webp", alt: "Vollständig sichtbarer Stapel gepolsterter Stapelstühle", backgroundTone: "#e9e2d7", imageInset: "1.5%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.72 },
-  { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und flexibel genutzte Räume.", href: "/produkte/kategorien/klapptische", cta: "Klapptische ansehen", image: "/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", alt: "Vollständig sichtbarer Klapptisch mit verchromtem Gestell", backgroundTone: "#ece2d4", imageInset: "1.5%", imageScale: 1, objectPosition: "50% 51%", aspectRatio: "4 / 3", fadeStrength: 0.7 },
-  { title: "Rednerpulte", text: "Klare und funktionale Lösungen für Gottesdienste, Vorträge und Veranstaltungen.", href: "/produkte/rednerpulte", cta: "Rednerpulte ansehen", image: "/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.png", alt: "Vollständig sichtbares Rednerpult aus Acrylglas, Typ A", backgroundTone: "#dfe1e5", imageInset: "0.5% 2%", imageScale: 1, objectPosition: "50% 50%", aspectRatio: "4 / 3", fadeStrength: 0.56 },
-  { title: "Zubehör & Transport", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und Transportlösungen für den praktischen Alltag.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör & Transport ansehen", image: "/neue bilder/Zubehör/zubehör-hero.png", alt: "Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile", backgroundTone: "#e5d9cb", imageInset: "1.5%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.74 },
+  { title: "Stapelstühle", text: "Robuste, komfortable Stühle für flexible Räume und eine langjährige Nutzung.", href: "/produkte/kategorien/stapelstuehle", cta: "Stapelstühle ansehen", image: "/images/curated/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.webp", alt: "Vollständig sichtbarer Stapel gepolsterter Stapelstühle", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
+  { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und flexibel genutzte Räume.", href: "/produkte/kategorien/klapptische", cta: "Klapptische ansehen", image: "/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", alt: "Vollständig sichtbarer Klapptisch mit verchromtem Gestell", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 51%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
+  { title: "Rednerpulte", text: "Klare und funktionale Lösungen für Gottesdienste, Vorträge und Veranstaltungen.", href: "/produkte/rednerpulte", cta: "Rednerpulte ansehen", image: "/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.png", alt: "Vollständig sichtbares Rednerpult aus Acrylglas, Typ A", backgroundTone: "#F8F7F1", imageInset: "1% 3%", imageScale: 1, objectPosition: "50% 50%", aspectRatio: "4 / 3", fadeStrength: 0.78 },
+  { title: "Zubehör & Transport", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und Transportlösungen für den praktischen Alltag.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör & Transport ansehen", image: "/neue bilder/Zubehör/zubehör-hero.png", alt: "Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.9 },
 ] as const;
 
 const challenges = [
@@ -193,8 +194,8 @@ export default function HomePage() {
               <Link href="/raeume-planung/raumplanung" className="btn-primary mt-7 inline-flex">Raumplanung ansehen</Link>
             </div>
           </article>
-          <article id="transport" className="premium-card overflow-hidden">
-            <Image src={encodeURI("/pictures/Produkte/Zubehör/TransportwagenundZubehör.png")} alt="Transportwagen für den sicheren Transport von Stühlen" width={600} height={420} sizes="(min-width: 1024px) 33vw, 100vw" className="h-56 w-full bg-premium-highlight object-contain p-5" />
+          <article id="transport">
+            <ProductVisual src="/pictures/Produkte/Zubehör/TransportwagenundZubehör.png" alt="Transportwagen für den sicheren Transport von Stühlen" sizes="(min-width: 1024px) 33vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
             <div className="p-7">
               <p className="section-eyebrow">Transport & Lagerung</p>
               <h3 className="mt-4 font-display text-2xl font-medium text-premium-ink">Flexibel wird Ausstattung erst mit guten Abläufen.</h3>

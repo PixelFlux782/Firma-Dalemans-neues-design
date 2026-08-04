@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import ProductVisual from "@/components/ProductVisual";
 
 const trustBadges = ["seit 1994", "mehr als 1.000 Räume begleitet", "2D- und 3D-Planung"] as const;
 
@@ -49,20 +49,13 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <div className="relative min-h-[320px] min-w-0 overflow-hidden sm:min-h-[360px] lg:min-h-full">
-          <Image
-            src={encodeURI("/images/curated/Stapelstühle/1021c.webp")}
-            alt="Robuster Stapelstuhl für Gemeindesaal und Veranstaltungsraum"
-            fill
-            priority
-            sizes="(min-width: 1024px) 48vw, 100vw"
-            className="object-cover"
-          />
+        <div className="relative min-h-[320px] min-w-0 sm:min-h-[360px] lg:min-h-full">
+          <ProductVisual src="/images/curated/Stapelstühle/1021c.webp" alt="Robuster Stapelstuhl für Gemeindesaal und Veranstaltungsraum" priority sizes="(min-width: 1024px) 48vw, 100vw" aspectRatio="4 / 5" imageInset="5%" backgroundTone="#0D1712" className="h-full min-h-[360px]" />
           <div
             className="absolute inset-0 bg-gradient-to-t from-premium-ink via-premium-ink/20 to-transparent lg:bg-gradient-to-r lg:from-premium-ink/85 lg:via-premium-ink/18 lg:to-transparent"
             aria-hidden
           />
-          <div className="absolute bottom-5 left-5 right-5 rounded-3xl border border-white/15 bg-premium-ink/70 p-5 backdrop-blur-md md:bottom-8 md:left-8 md:right-8">
+          <div className="absolute bottom-5 left-5 right-5 p-5 md:bottom-8 md:left-8 md:right-8">
             <p className="text-xs font-medium uppercase tracking-[0.24em] text-premium-sand">
               Praktische Hauptsäule
             </p>

@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import ProductVisual from "@/components/ProductVisual";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ProductCatalog from "@/components/ProductCatalog";
 import ProductImageGallery from "@/components/ProductImageGallery";
@@ -77,7 +77,7 @@ export default function ProductCategoryOverview({ categoryId }: Props) {
 
   return <div className="flex min-w-0 flex-col gap-14 md:gap-20">
     <StructuredData data={data} />
-    <section className="overflow-hidden rounded-4xl border border-premium-beige/70 bg-white/70 shadow-premium">
+    <section>
       <div className="grid lg:grid-cols-[1.08fr_.92fr]">
         <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-10">
           <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: category.name }]} />
@@ -89,9 +89,7 @@ export default function ProductCategoryOverview({ categoryId }: Props) {
             <a href="tel:+499342915353" className="btn-secondary px-6 py-3">Beratung</a>
           </div>
         </div>
-        <div className="relative min-h-64 bg-premium-warm sm:min-h-72 lg:min-h-[390px]">
-          <Image src={category.image} alt={`${category.name} im Einsatz`} fill priority sizes="(min-width: 1024px) 42vw, 100vw" className={isAccessories || categoryId === "klapptische" ? "object-contain p-5" : "object-cover"} />
-        </div>
+        <ProductVisual src={category.image} alt={`${category.name} im Einsatz`} priority sizes="(min-width: 1024px) 42vw, 100vw" aspectRatio="4 / 3" imageInset={isAccessories ? "6%" : "5%"} backgroundTone="canvas" className="min-h-72 lg:min-h-[390px]" />
       </div>
     </section>
 

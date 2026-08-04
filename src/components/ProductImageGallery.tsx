@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import ProductVisual from "@/components/ProductVisual";
 import type { GalleryGroup, GalleryImage } from "@/lib/category-media";
 
 export function ImageRail({ images, label = "Bildergalerie" }: { images: GalleryImage[]; label?: string }) {
@@ -8,11 +8,9 @@ export function ImageRail({ images, label = "Bildergalerie" }: { images: Gallery
     <p className="mb-3 text-xs font-medium text-premium-muted sm:hidden">Seitlich wischen für weitere Ansichten →</p>
     <div role="region" aria-label={label} tabIndex={0} className="gallery-rail -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3 xl:grid-cols-4">
       {images.map((image) => (
-        <figure key={image.src} className="premium-card min-w-[74vw] snap-start overflow-hidden sm:min-w-0">
-          <div className="relative aspect-[4/3] bg-white">
-            <Image src={image.src} alt={image.alt} fill sizes="(min-width: 1280px) 21vw, (min-width: 640px) 42vw, 78vw" className="object-contain p-3" />
-          </div>
-          <figcaption className="border-t border-premium-beige/60 px-5 py-4 text-sm leading-6 text-premium-muted">{image.alt}</figcaption>
+        <figure key={image.src} className="min-w-[74vw] snap-start sm:min-w-0">
+          <ProductVisual src={image.src} alt={image.alt} sizes="(min-width: 1280px) 21vw, (min-width: 640px) 42vw, 78vw" imageInset="4%" backgroundTone="canvas" fadeStrength="medium" />
+          <figcaption className="px-1 pt-4 text-sm leading-6 text-premium-muted">{image.alt}</figcaption>
         </figure>
       ))}
       <span className="sr-only">Auf kleinen Bildschirmen horizontal scrollen, um weitere Bilder zu sehen.</span>

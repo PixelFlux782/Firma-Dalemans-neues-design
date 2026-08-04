@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import ProductVisual from "@/components/ProductVisual";
 import CinematicPageHero from "@/components/home/CinematicPageHero";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
@@ -69,8 +70,8 @@ export default function RaeumePlanungPage() {
             <Image src={encodeURI("/pictures/Über uns/CAD-Entwicklung.png")} alt="CAD-Planung für eine individuelle Raumlösung" width={760} height={440} sizes="(min-width: 1024px) 50vw, 100vw" className="h-64 w-full object-cover" />
             <div className="p-7"><p className="section-eyebrow">Raum- & Bestuhlungsplanung</p><h2 className="mt-4 font-display text-3xl font-medium text-premium-ink">Nutzungsvarianten vor der Bestellung prüfen.</h2><p className="mt-4 text-sm leading-7 text-premium-muted">Je nach Projekt helfen 2D- oder 3D-Darstellungen, Stellpläne, Tischanordnungen und die Prüfung schwieriger Geometrien.</p><Link href="/raeume-planung/raumplanung" className="btn-primary mt-7 inline-flex">Raumplanung im Detail</Link></div>
           </article>
-          <article id="transport" className="premium-card overflow-hidden">
-            <Image src={encodeURI("/pictures/Produkte/Zubehör/Tischtransportwagen_02.jpg")} alt="Tischtransportwagen für Lagerung und Saalumbau" width={760} height={440} sizes="(min-width: 1024px) 50vw, 100vw" className="h-64 w-full object-cover" />
+          <article id="transport">
+            <ProductVisual src="/pictures/Produkte/Zubehör/Tischtransportwagen_02.jpg" alt="Tischtransportwagen für Lagerung und Saalumbau" sizes="(min-width: 1024px) 50vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
             <div className="p-7"><p className="section-eyebrow">Transport- & Lagerplanung</p><h2 className="mt-4 font-display text-3xl font-medium text-premium-ink">Auf- und Abbau von Anfang an mitdenken.</h2><p className="mt-4 text-sm leading-7 text-premium-muted">Passende Wagen, Lagerflächen, Transportwege und sichere Handhabung schützen Möbel und Böden und entlasten ehrenamtliche Teams.</p><Link href="/kontakt?anliegen=Lager%20und%20Transport" className="btn-primary mt-7 inline-flex">Lager und Transport mitplanen</Link></div>
           </article>
         </div>

@@ -1,43 +1,26 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Product } from "@/lib/products";
+import ProductVisual from "@/components/ProductVisual";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const usesContainedProductImage =
-    product.categoryId === "stapelstuehle" ||
-    product.categoryId === "klapptische" ||
-    product.categoryId === "transportwagen-zubehoer";
-
   return (
-    <article className="premium-card premium-card-hover image-depth group flex h-full flex-col">
-      <div
-        className={
-          usesContainedProductImage
-            ? "relative aspect-[4/3] overflow-hidden bg-premium-warm/40 p-3 md:p-4"
-            : "relative h-60 overflow-hidden md:h-64"
-        }
-      >
-        <Image
+    <article className="group flex h-full flex-col">
+        <ProductVisual
           src={product.image}
           alt={
             product.imageAlt ??
             `${product.title} für ${product.suitableFor.slice(0, 2).join(" und ")}`
           }
-          fill
-        sizes="(min-width: 1280px) 30vw, (min-width: 768px) 50vw, 100vw"
-          className={
-            usesContainedProductImage
-              ? "object-contain p-3 md:p-4"
-              : "object-cover"
-          }
+          sizes="(min-width: 1280px) 30vw, (min-width: 768px) 50vw, 100vw"
+          imageInset={product.categoryId === "transportwagen-zubehoer" ? "8%" : "6%"}
+          backgroundTone="canvas"
         />
-      </div>
 
-      <div className="flex flex-1 flex-col p-5 md:p-6">
+      <div className="flex flex-1 flex-col px-1 pb-2 pt-5">
         <p className="section-eyebrow text-[0.65rem]">{product.categoryName}</p>
         <h3 className="mt-3 font-display text-xl font-medium tracking-[-0.02em] text-premium-ink md:text-2xl">
           {product.title}

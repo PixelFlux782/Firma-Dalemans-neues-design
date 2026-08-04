@@ -114,7 +114,7 @@ export default function CinematicPageHero({
 
           {visual ? (
             <div className="container-premium pointer-events-auto min-w-0 pb-10 lg:py-16 lg:pl-4">
-              <div className={visualWrapperClassName ?? "animate-fade-up animate-fade-up-delay-2 image-depth overflow-hidden rounded-5xl shadow-premium-xl"}>
+              <div className={visualWrapperClassName ?? "animate-fade-up animate-fade-up-delay-2"}>
                 {visual}
               </div>
             </div>

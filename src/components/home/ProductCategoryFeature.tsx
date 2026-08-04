@@ -1,6 +1,5 @@
-import type { CSSProperties } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import ProductVisual from "@/components/ProductVisual";
 
 interface ProductCategoryFeatureProps {
   title: string;
@@ -17,15 +16,6 @@ interface ProductCategoryFeatureProps {
   backgroundTone?: string;
 }
 
-type ProductMediaStyle = CSSProperties & {
-  "--product-scale": number;
-  "--product-position": string;
-  "--product-inset": string;
-  "--product-ratio": string;
-  "--fade-strength": number;
-  "--background-tone": string;
-};
-
 export default function ProductCategoryFeature({
   title,
   description,
@@ -38,47 +28,18 @@ export default function ProductCategoryFeature({
   imageInset = "2.5%",
   aspectRatio = "4 / 3",
   fadeStrength = 0.82,
-  backgroundTone = "#ebe5da",
+  backgroundTone = "#F8F7F1",
 }: ProductCategoryFeatureProps) {
-  const encodedImage = encodeURI(image);
-  const mediaStyle: ProductMediaStyle = {
-    "--product-scale": imageScale,
-    "--product-position": objectPosition,
-    "--product-inset": imageInset,
-    "--product-ratio": aspectRatio,
-    "--fade-strength": fadeStrength,
-    "--background-tone": backgroundTone,
-  };
-
   return (
     <Link
       href={href}
-      className="group block rounded-[2rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-forest focus-visible:ring-offset-4"
+      className="homepage-category-feature group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-forest focus-visible:ring-offset-4"
       aria-label={`${title}: ${linkLabel}`}
     >
       <article>
-        <div className="category-product-media" style={mediaStyle}>
-          <Image
-            src={encodedImage}
-            alt=""
-            fill
-            sizes="(min-width: 1024px) 50vw, (min-width: 768px) 50vw, 100vw"
-            className="category-product-media__atmosphere"
-            aria-hidden="true"
-          />
-          <div className="category-product-media__product">
-            <Image
-              src={encodedImage}
-              alt={alt}
-              fill
-              sizes="(min-width: 1024px) 50vw, (min-width: 768px) 50vw, 100vw"
-              className="category-product-media__image"
-            />
-          </div>
-          <div className="category-product-media__fade" aria-hidden="true" />
-        </div>
+        <ProductVisual imageScale={imageScale} objectPosition={objectPosition} imageInset={imageInset} aspectRatio={aspectRatio} fadeStrength={fadeStrength} backgroundTone={backgroundTone} surface="transparent" decorativeAtmosphere={false} src={image} alt={alt} sizes="(min-width: 1024px) 50vw, (min-width: 768px) 50vw, 100vw" className="homepage-product-visual" />
 
-        <div className="px-1 pb-2 pt-5 sm:px-2 sm:pt-6">
+        <div className="pb-2 pt-5 sm:pt-6">
           <div className="flex items-start justify-between gap-6">
             <div>
               <h2 className="font-display text-[1.75rem] font-medium leading-tight tracking-[-0.02em] text-premium-ink sm:text-3xl">{title}</h2>

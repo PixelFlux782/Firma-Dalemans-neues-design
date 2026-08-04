@@ -319,6 +319,70 @@
     );
   }
 
+  /* Homepage catalogue cards: the sharp, complete product stays separate from
+     the softly enlarged atmosphere layer, so no second contour is visible. */
+  .category-product-media {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    aspect-ratio: var(--product-ratio);
+    border-radius: 2rem;
+    background: var(--background-tone);
+  }
+
+  .category-product-media__atmosphere {
+    z-index: -2;
+    object-fit: cover;
+    object-position: var(--product-position);
+    opacity: calc(var(--fade-strength) * 0.14);
+    filter: blur(30px) saturate(0.72);
+    transform: scale(1.16);
+  }
+
+  .category-product-media__product {
+    position: absolute;
+    inset: var(--product-inset);
+    transform: scale(var(--product-scale));
+    transform-origin: var(--product-position);
+    transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .category-product-media__image {
+    object-fit: contain;
+    object-position: var(--product-position);
+    -webkit-mask-image: radial-gradient(ellipse 96% 94% at var(--product-position), #000 70%, rgb(0 0 0 / .82) 84%, transparent 100%);
+    mask-image: radial-gradient(ellipse 96% 94% at var(--product-position), #000 70%, rgb(0 0 0 / .82) 84%, transparent 100%);
+  }
+
+  .category-product-media__fade {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(to bottom, var(--background-tone) 0%, transparent 8%),
+      linear-gradient(to right, var(--background-tone) 0%, transparent 7%, transparent 93%, var(--background-tone) 100%),
+      linear-gradient(to top, var(--background-tone) 0%, transparent 16%);
+    opacity: var(--fade-strength);
+  }
+
+  .group:hover .category-product-media__product {
+    transform: translateY(-0.25rem) scale(calc(var(--product-scale) * 1.01));
+  }
+
+  @media (max-width: 639px) {
+    .category-product-media {
+      aspect-ratio: 4 / 3;
+      border-radius: 1.5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .category-product-media__product {
+      transition: none;
+    }
+  }
+
   .soft-faded-product-image img {
     -webkit-mask-image: radial-gradient(
       ellipse 74% 78% at 50% 46%,

@@ -6,6 +6,7 @@ import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
 import HeroCarousel from "@/components/home/HeroCarousel";
+import ProductCategoryFeature from "@/components/home/ProductCategoryFeature";
 import { absoluteUrl, buildMetadata } from "@/lib/seo";
 import { organizationStructuredData } from "@/lib/company";
 
@@ -26,12 +27,10 @@ const entries = [
 ] as const;
 
 const groups = [
-  { title: "Stapelstühle", text: "Robuste, komfortable Stühle für flexible Räume und langjährige Nutzung.", href: "/produkte/kategorien/stapelstuehle", cta: "Stapelstühle ansehen", image: "/images/curated/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.webp", featured: true },
-  { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und Mehrzweckräume.", href: "/produkte/kategorien/klapptische", cta: "Klapptische ansehen", image: "/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", featured: true },
-  { title: "Zubehör", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und praktische Ergänzungen.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör ansehen", image: "/images/curated/Zubehör/zubehör-buchablage-an-stuhl.webp", featured: false },
-  { title: "Transport & Lagerung", text: "Durchdachte Wagen für einfaches Bewegen und platzsparendes Lagern.", href: "/produkte/stuhltransportwagen", cta: "Transportlösungen ansehen", image: "/images/curated/Zubehör/Stapelstuhl_Stuhltransportwagen_02.webp", featured: false },
-  { title: "Sonderlösungen", text: "Individuell entwickelte Lösungen für besondere Räume und Anforderungen.", href: "/sonderloesungen", cta: "Sonderlösungen ansehen", image: "/images/curated/Sonderlösungen/runder-tisch.webp", featured: false },
-  { title: "Sonderposten", text: "Lagerware, Restbestände und B-Ware zu besonders attraktiven Konditionen.", href: "/sonderposten", cta: "Sonderposten ansehen", image: "/images/curated/Sonderposten/barstuhl-restposten.webp", featured: false },
+  { title: "Stapelstühle", text: "Robuste, komfortable Stühle für flexible Räume und eine langjährige Nutzung.", href: "/produkte/kategorien/stapelstuehle", cta: "Stapelstühle ansehen", image: "/images/curated/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.webp", alt: "Vollständig sichtbarer Stapel gepolsterter Stapelstühle", backgroundClass: "bg-[#ebe5da]" },
+  { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und flexibel genutzte Räume.", href: "/produkte/kategorien/klapptische", cta: "Klapptische ansehen", image: "/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", alt: "Vollständig sichtbarer Klapptisch mit verchromtem Gestell", backgroundClass: "bg-[#eee4d5]" },
+  { title: "Rednerpulte", text: "Klare und funktionale Lösungen für Gottesdienste, Vorträge und Veranstaltungen.", href: "/produkte/rednerpulte", cta: "Rednerpulte ansehen", image: "/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.png", alt: "Vollständig sichtbares Rednerpult aus Acrylglas, Typ A", backgroundClass: "bg-[#e5e6e9]", imageScale: "scale-[.96]" },
+  { title: "Zubehör & Transport", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und Transportlösungen für den praktischen Alltag.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör & Transport ansehen", image: "/neue bilder/Zubehör/zubehör-hero.png", alt: "Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile", backgroundClass: "bg-[#e8ddd0]" },
 ] as const;
 
 const challenges = [
@@ -88,12 +87,9 @@ export default function HomePage() {
       </section>
 
       <HomeSection>
-        <SectionHeader eyebrow="Sortiment" title="Stühle, Tische und Lösungen für flexible Räume" lead="Direkt zum passenden Bereich – von den Kernprodukten bis zu Transport, Sonderanfertigung und wechselnder Lagerware." href="/produkte" linkLabel="Alle Produkte" align="editorial" />
-        <div className="section-grid-top grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {groups.map((group) => <Link key={group.title} href={group.href} className="premium-card premium-card-hover group overflow-hidden">
-            <div className="relative h-60 bg-premium-highlight"><Image src={encodeURI(group.image)} alt={group.title === "Sonderposten" ? "Barstuhl als Beispiel für wechselnde Lagerware" : group.title} fill sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" className="object-cover transition duration-500 group-hover:scale-[1.025]" /></div>
-            <div className="p-6"><h2 className="font-display text-2xl font-medium text-premium-ink">{group.title}</h2><p className="mt-3 text-sm leading-7 text-premium-muted">{group.text}</p><span className="mt-5 inline-flex text-sm font-medium text-premium-bronze">{group.cta} →</span></div>
-          </Link>)}
+        <SectionHeader eyebrow="Sortiment" title="Stühle, Tische und Lösungen für flexible Räume" lead="Vier Produktbereiche für Räume, die sich im Alltag schnell und zuverlässig verändern müssen." href="/produkte" linkLabel="Alle Produkte" align="editorial" />
+        <div className="section-grid-top grid gap-x-8 gap-y-14 md:grid-cols-2 lg:gap-x-12 lg:gap-y-20">
+          {groups.map((group) => <ProductCategoryFeature key={group.title} title={group.title} description={group.text} href={group.href} image={group.image} alt={group.alt} linkLabel={group.cta} backgroundClass={group.backgroundClass} imageScale={"imageScale" in group ? group.imageScale : undefined} />)}
         </div>
       </HomeSection>
 

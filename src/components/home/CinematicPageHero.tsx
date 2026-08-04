@@ -14,6 +14,7 @@ interface CinematicPageHeroProps {
   mediaDevNote?: string;
   mood?: CinematicMood;
   visual?: ReactNode;
+  visualWrapperClassName?: string;
 }
 
 export default function CinematicPageHero({
@@ -26,6 +27,7 @@ export default function CinematicPageHero({
   mediaDevNote,
   mood = "warm-hall",
   visual,
+  visualWrapperClassName,
 }: CinematicPageHeroProps) {
   const minHeight = visual
     ? "min-h-0 md:min-h-[min(54vh,620px)]"
@@ -112,7 +114,7 @@ export default function CinematicPageHero({
 
           {visual ? (
             <div className="container-premium pointer-events-auto min-w-0 pb-10 lg:py-16 lg:pl-4">
-              <div className="animate-fade-up animate-fade-up-delay-2 image-depth overflow-hidden rounded-5xl shadow-premium-xl">
+              <div className={visualWrapperClassName ?? "animate-fade-up animate-fade-up-delay-2 image-depth overflow-hidden rounded-5xl shadow-premium-xl"}>
                 {visual}
               </div>
             </div>

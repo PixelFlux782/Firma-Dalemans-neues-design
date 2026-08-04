@@ -303,6 +303,44 @@
   .image-depth:hover::after {
     @apply opacity-100;
   }
+
+  /* Reusable catalogue treatment: keeps the product crisp while its image
+     background dissolves into the surrounding surface. */
+  .soft-faded-product-image {
+    overflow: visible;
+  }
+
+  .soft-faded-product-image__wash {
+    background: radial-gradient(
+      ellipse 68% 72% at 50% 48%,
+      rgb(250 248 240 / 0.28) 0%,
+      rgb(250 248 240 / 0.12) 58%,
+      transparent 82%
+    );
+  }
+
+  .soft-faded-product-image img {
+    -webkit-mask-image: radial-gradient(
+      ellipse 74% 78% at 50% 46%,
+      #000 0%,
+      #000 62%,
+      rgb(0 0 0 / 0.92) 70%,
+      rgb(0 0 0 / 0.52) 84%,
+      transparent 100%
+    );
+    mask-image: radial-gradient(
+      ellipse 74% 78% at 50% 46%,
+      #000 0%,
+      #000 62%,
+      rgb(0 0 0 / 0.92) 70%,
+      rgb(0 0 0 / 0.52) 84%,
+      transparent 100%
+    );
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
 }
 
 @layer utilities {

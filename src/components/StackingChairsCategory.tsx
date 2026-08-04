@@ -8,12 +8,20 @@ interface Props {
   products: Product[];
 }
 
-const imagePositions: Record<string, string> = {
-  "stapelstuhl-mod-1021c": "object-[50%_52%]",
-  "stapelstuhl-1010i": "object-[50%_50%]",
-  "stapelstuhl-1010a": "object-[50%_51%]",
-  "stapelstuhl-1010b": "object-[50%_52%]",
-  "stapelstuhl-e1000": "object-[50%_49%]",
+interface ProductImageTreatment {
+  imageFit: "contain" | "cover";
+  imagePosition: string;
+  imageScale: number;
+  mobileImagePosition: string;
+  mobileImageScale: number;
+}
+
+const productImageTreatments: Record<string, ProductImageTreatment> = {
+  "stapelstuhl-mod-1021c": { imageFit: "contain", imagePosition: "50% 54%", imageScale: 1.2, mobileImagePosition: "50% 53%", mobileImageScale: 1.08 },
+  "stapelstuhl-1010i": { imageFit: "contain", imagePosition: "50% 51%", imageScale: 1.24, mobileImagePosition: "50% 51%", mobileImageScale: 1.1 },
+  "stapelstuhl-1010a": { imageFit: "contain", imagePosition: "49% 52%", imageScale: 1.18, mobileImagePosition: "49% 52%", mobileImageScale: 1.06 },
+  "stapelstuhl-1010b": { imageFit: "contain", imagePosition: "49% 53%", imageScale: 1.23, mobileImagePosition: "49% 52%", mobileImageScale: 1.09 },
+  "stapelstuhl-e1000": { imageFit: "contain", imagePosition: "51% 54%", imageScale: 1.2, mobileImagePosition: "51% 53%", mobileImageScale: 1.07 },
 };
 
 function ProductActions({ product, requestSample }: { product: Product; requestSample: boolean }) {
@@ -58,29 +66,46 @@ export default function StackingChairsCategory({ heroImage, products }: Props) {
         <h2 id="products-title" className="mt-3 max-w-3xl font-display text-3xl font-medium leading-tight text-premium-ink sm:text-4xl">Fünf Stapelstühle für unterschiedliche Räume und Anforderungen</h2>
         <p className="mt-4 max-w-2xl leading-7 text-premium-muted">Von der robusten Grundausstattung bis zur gepolsterten Komfortlösung – persönlich ausgewählt und langfristig betreut.</p>
 
-        <div className="mt-6 space-y-5 sm:mt-7 sm:space-y-6">
+        <div className="mt-4 sm:mt-5">
           {products.map((product, index) => {
             const imageRight = index % 2 === 1;
+            const imageTreatment = productImageTreatments[product.slug] ?? {
+              imageFit: "contain" as const,
+              imagePosition: "50% 52%",
+              imageScale: 1.15,
+              mobileImagePosition: "50% 52%",
+              mobileImageScale: 1.05,
+            };
 
             return (
               <article
                 key={product.slug}
-                className="grid min-w-0 overflow-hidden rounded-2xl border border-premium-beige/75 bg-[#fbfaf5] shadow-[0_7px_24px_rgba(20,18,16,.045)] lg:grid-cols-[38%_62%]"
+                className={`grid min-w-0 gap-7 py-12 sm:gap-10 sm:py-16 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)] lg:items-center lg:gap-16 lg:py-20 ${index > 0 ? "border-t border-premium-beige/55" : ""}`}
               >
-                <div className={`relative min-h-[320px] overflow-hidden bg-premium-warm/70 sm:min-h-[360px] lg:min-h-[390px] ${imageRight ? "lg:order-2" : ""}`}>
+                <div className={`relative aspect-[4/5] min-w-0 overflow-hidden rounded-[1.75rem] bg-[linear-gradient(145deg,#f7f3eb_0%,#fdfcf8_58%,#f3eee4_100%)] sm:aspect-[5/4] lg:aspect-auto lg:min-h-[560px] ${imageRight ? "lg:order-2" : ""}`}>
                   <Image
                     src={product.image}
                     alt={product.imageAlt ?? product.title}
                     fill
-                    sizes="(min-width: 1024px) 38vw, 100vw"
-                    className={`object-contain ${imagePositions[product.slug] ?? "object-center"}`}
+                    sizes="(min-width: 1280px) 570px, (min-width: 1024px) 48vw, 100vw"
+                    className="hidden object-contain sm:block"
+                    style={{ objectFit: imageTreatment.imageFit, objectPosition: imageTreatment.imagePosition, transform: `scale(${imageTreatment.imageScale})` }}
+                  />
+                  <Image
+                    src={product.image}
+                    alt=""
+                    aria-hidden="true"
+                    fill
+                    sizes="(max-width: 639px) 100vw, 1px"
+                    className="object-contain sm:hidden"
+                    style={{ objectFit: imageTreatment.imageFit, objectPosition: imageTreatment.mobileImagePosition, transform: `scale(${imageTreatment.mobileImageScale})` }}
                   />
                 </div>
-                <div className={`flex min-w-0 flex-col justify-center p-6 sm:p-8 lg:px-10 lg:py-8 ${imageRight ? "lg:order-1" : ""}`}>
+                <div className={`flex min-w-0 flex-col justify-center px-1 sm:px-2 lg:px-0 ${imageRight ? "lg:order-1" : ""}`}>
                   <p className="section-eyebrow">Stapelstühle</p>
                   <h3 className="mt-2 font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink sm:text-3xl">{product.title}</h3>
-                  <p className="mt-3 max-w-2xl leading-7 text-premium-muted">{product.shortDescription}</p>
-                  <ul className="mt-4 grid gap-2 text-sm leading-6 text-premium-charcoal/90 sm:grid-cols-3 sm:gap-4" aria-label={`Merkmale von ${product.title}`}>
+                  <p className="mt-4 max-w-xl leading-7 text-premium-muted">{product.shortDescription}</p>
+                  <ul className="mt-6 grid max-w-xl gap-3 border-y border-premium-beige/60 py-5 text-sm leading-6 text-premium-charcoal/90" aria-label={`Merkmale von ${product.title}`}>
                     {product.highlights.slice(0, 3).map((item) => (
                       <li key={item} className="flex gap-2">
                         <span aria-hidden="true" className="mt-[0.65rem] size-1.5 shrink-0 rounded-full bg-premium-sand" />

@@ -41,6 +41,16 @@ const tones: Record<ProductVisualTone, string> = {
 
 const fades: Record<ProductVisualFade, number> = { none: 0, soft: 0.46, medium: 0.7, strong: 0.9 };
 
+function normalizeImageSrc(src: string) {
+  if (!src.startsWith("/")) return src;
+
+  try {
+    return encodeURI(decodeURI(src));
+  } catch {
+    return encodeURI(src);
+  }
+}
+
 export default function ProductVisual({
   src,
   alt,
@@ -57,7 +67,7 @@ export default function ProductVisual({
   imageClassName = "",
   decorativeAtmosphere = false,
 }: ProductVisualProps) {
-  const encodedSrc = encodeURI(src);
+  const encodedSrc = normalizeImageSrc(src);
   const style: VisualStyle = {
     "--visual-ratio": aspectRatio,
     "--visual-position": objectPosition,

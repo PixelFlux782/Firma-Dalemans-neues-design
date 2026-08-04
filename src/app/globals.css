@@ -336,10 +336,10 @@
   .product-visual__image {
     object-fit: contain;
     object-position: var(--visual-position);
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent), linear-gradient(to bottom, transparent, #000 4%, #000 86%, transparent);
-    -webkit-mask-composite: source-in;
-    mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent), linear-gradient(to bottom, transparent, #000 4%, #000 86%, transparent);
-    mask-composite: intersect;
+    -webkit-mask-image: radial-gradient(ellipse 98% 97% at 50% 47%, #000 0%, #000 82%, rgb(0 0 0 / .88) 90%, transparent 100%);
+    mask-image: radial-gradient(ellipse 98% 97% at 50% 47%, #000 0%, #000 82%, rgb(0 0 0 / .88) 90%, transparent 100%);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
   }
 
   .product-visual__fade {

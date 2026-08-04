@@ -2,12 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ProductCatalog from "@/components/ProductCatalog";
-import ProductImageGallery, { ImageRail } from "@/components/ProductImageGallery";
+import ProductImageGallery from "@/components/ProductImageGallery";
 import { StructuredData } from "@/components/StructuredData";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
-import { chairGroups, materialImages, tableGroups } from "@/lib/category-media";
+import StackingChairsCategory from "@/components/StackingChairsCategory";
+import { tableGroups } from "@/lib/category-media";
 import { getProductCategoryById } from "@/lib/product-categories";
 import { getProductsByCategory, type ProductCategoryId } from "@/lib/products";
 import { absoluteUrl, siteName } from "@/lib/seo";
@@ -67,6 +68,13 @@ export default function ProductCategoryOverview({ categoryId }: Props) {
     { "@type": "FAQPage", "@id": absoluteUrl(`/produkte/kategorien/${category.id}#faq`), mainEntity: info.faq.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) },
   ] };
 
+  if (categoryId === "stapelstuehle") {
+    return <>
+      <StructuredData data={data} />
+      <StackingChairsCategory heroImage={category.image} products={products} />
+    </>;
+  }
+
   return <div className="flex min-w-0 flex-col gap-14 md:gap-20">
     <StructuredData data={data} />
     <section className="overflow-hidden rounded-4xl border border-premium-beige/70 bg-white/70 shadow-premium">
@@ -77,7 +85,7 @@ export default function ProductCategoryOverview({ categoryId }: Props) {
           <h1 className="mt-3 max-w-[18ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">{title}</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-premium-muted">{lead}</p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href={`/kontakt?${isAccessories ? "anliegen=Ersatzteilanfrage" : `kategorie=${encodeURIComponent(category.name)}`}`} className="btn-primary px-6 py-3">{isAccessories ? "Ersatzteil anfragen" : categoryId === "stapelstuehle" ? "Musterstuhl anfragen" : "Beratung zur Auswahl"}</Link>
+            <Link href={`/kontakt?${isAccessories ? "anliegen=Ersatzteilanfrage" : `kategorie=${encodeURIComponent(category.name)}`}`} className="btn-primary px-6 py-3">{isAccessories ? "Ersatzteil anfragen" : "Beratung zur Auswahl"}</Link>
             <a href="tel:+499342915353" className="btn-secondary px-6 py-3">Beratung</a>
           </div>
         </div>
@@ -106,7 +114,6 @@ export default function ProductCategoryOverview({ categoryId }: Props) {
       <div className="mt-8 flex flex-wrap gap-2 border-t border-premium-beige pt-6 text-sm text-premium-charcoal">{category.highlights.slice(0, 3).map((item) => <span key={item} className="rounded-full bg-white px-4 py-2">{item}</span>)}</div>
     </HomeSection>
 
-    {categoryId === "stapelstuehle" ? <><HomeSection><SectionHeader eyebrow="Anwendung und Ausführung" title="Details, die im Raum den Unterschied machen" lead="Ergänzende Ansichten helfen bei Form, Material und Ausstattung. Die vollständige Modellbeschreibung bleibt auf der jeweiligen Produktseite." align="editorial" /><div className="section-grid-top"><ProductImageGallery groups={chairGroups.slice(1)} /></div></HomeSection><HomeSection><SectionHeader eyebrow="Bemusterung" title="Farben und Materialien passend zum Raum" lead="Stoffe, Holzoberflächen und Gestellfarben prägen die Raumwirkung." align="editorial" /><div className="section-grid-top"><ImageRail images={materialImages} /></div></HomeSection></> : null}
     {categoryId === "klapptische" ? <HomeSection><SectionHeader eyebrow="Anwendung und Konstruktion" title="Tischformen für unterschiedliche Raumkonzepte" lead="Ergänzende Ansichten zeigen Formen und technische Prinzipien, ohne die Produkte ein zweites Mal vollständig zu präsentieren." align="editorial" /><div className="section-grid-top"><ProductImageGallery groups={tableGroups} /></div></HomeSection> : null}
 
     <HomeSection id="faq"><SectionHeader eyebrow="Häufige Fragen" title={`Kurz geklärt: ${category.name}`} lead="Antworten auf typische Fragen vor der konkreten Anfrage." align="editorial" /><div className="section-grid-top grid gap-5 md:grid-cols-2">{info.faq.map((item) => <article key={item.question} className="premium-card p-7"><h2 className="font-display text-xl font-medium text-premium-ink">{item.question}</h2><p className="mt-4 text-sm leading-7 text-premium-muted">{item.answer}</p></article>)}</div></HomeSection>

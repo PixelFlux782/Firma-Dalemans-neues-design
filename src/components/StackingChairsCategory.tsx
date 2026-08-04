@@ -43,7 +43,7 @@ export default function StackingChairsCategory({ heroImage, products }: Props) {
   return (
     <div className="flex min-w-0 flex-col gap-12 md:gap-14">
       <section className="overflow-hidden rounded-4xl bg-[#f8f4ec]">
-        <div className="grid lg:grid-cols-[.94fr_1.06fr]">
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(420px,520px)]">
           <div className="relative z-10 flex flex-col justify-center p-6 sm:p-8 lg:p-10 lg:pr-5">
             <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: "Stapelstühle" }]} />
             <p className="section-eyebrow mt-6">Produktkategorie · {products.length} Produkte</p>
@@ -54,8 +54,8 @@ export default function StackingChairsCategory({ heroImage, products }: Props) {
               <a href="tel:+499342915353" className="btn-secondary px-6 py-3">Beratung</a>
             </div>
           </div>
-          <div className="relative min-h-[330px] overflow-hidden bg-premium-warm sm:min-h-[390px] lg:min-h-[440px]">
-            <Image src={heroImage} alt="Fünf gepolsterte Stapelstühle in einem hellen Raum" fill priority sizes="(min-width: 1024px) 53vw, 100vw" className="object-cover object-[54%_66%] sm:object-[54%_64%] lg:object-[58%_62%]" />
+          <div className="relative min-h-[420px] overflow-hidden bg-premium-warm sm:min-h-[520px] lg:min-h-[620px]">
+            <Image src={heroImage} alt="Fünf gepolsterte Stapelstühle in einem hellen Raum" fill priority sizes="(min-width: 1024px) 520px, 100vw" className="object-cover object-[50%_58%] sm:object-[50%_56%] lg:object-[50%_55%]" />
             <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#f8f4ec] to-transparent lg:inset-y-0 lg:left-0 lg:right-auto lg:h-auto lg:w-24 lg:bg-gradient-to-r" />
           </div>
         </div>

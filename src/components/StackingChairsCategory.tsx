@@ -9,7 +9,7 @@ type CategoryProduct = Pick<Product, "title" | "slug" | "image" | "imageAlt" | "
 interface Props {
   heroImage: string;
   products: readonly CategoryProduct[];
-  variant?: "chairs" | "tables" | "lecterns";
+  variant?: "chairs" | "tables" | "lecterns" | "accessories";
 }
 
 interface ProductImageTreatment {
@@ -27,7 +27,7 @@ const productImageTreatments: Record<string, ProductImageTreatment> = {
   "stapelstuhl-e1000": { imagePosition: "51% 52%", imageScale: 1.07, mobileImagePosition: "51% 51%", mobileImageScale: 1.01 },
 };
 
-function ProductActions({ product, requestSample, variant }: { product: CategoryProduct; requestSample: boolean; variant: "chairs" | "tables" | "lecterns" }) {
+function ProductActions({ product, requestSample, variant }: { product: CategoryProduct; requestSample: boolean; variant: "chairs" | "tables" | "lecterns" | "accessories" }) {
   if (variant === "lecterns") {
     return (
       <div className="mt-5 grid gap-3 sm:flex sm:flex-wrap sm:items-center sm:gap-x-5">
@@ -50,7 +50,7 @@ function ProductActions({ product, requestSample, variant }: { product: Category
         href={`/kontakt?produkt=${encodeURIComponent(product.title)}`}
         className="inline-flex min-h-11 items-center justify-center text-sm font-medium text-premium-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-4 sm:justify-start"
       >
-        {variant === "tables" ? "Ausführung besprechen" : requestSample ? "Musterstuhl anfragen" : "Ausführung besprechen"}
+        {variant === "accessories" ? "Passende Ausführung anfragen" : variant === "tables" ? "Ausführung besprechen" : requestSample ? "Musterstuhl anfragen" : "Ausführung besprechen"}
       </Link>
     </div>
   );
@@ -59,7 +59,8 @@ function ProductActions({ product, requestSample, variant }: { product: Category
 export default function StackingChairsCategory({ heroImage, products, variant = "chairs" }: Props) {
   const isTables = variant === "tables";
   const isLecterns = variant === "lecterns";
-  const categoryName = isLecterns ? "Rednerpulte" : isTables ? "Klapptische" : "Stapelstühle";
+  const isAccessories = variant === "accessories";
+  const categoryName = isAccessories ? "Transportwagen & Zubehör" : isLecterns ? "Rednerpulte" : isTables ? "Klapptische" : "Stapelstühle";
   const categoryQuery = encodeURIComponent(categoryName);
 
   return (
@@ -73,7 +74,7 @@ export default function StackingChairsCategory({ heroImage, products, variant = 
               fill
               priority
               sizes="(min-width: 1280px) 1216px, 100vw"
-              className={isTables || isLecterns ? "object-cover object-center" : "object-cover object-[72%_center] md:object-[80%_center]"}
+              className={isTables || isLecterns || isAccessories ? "object-cover object-center" : "object-cover object-[72%_center] md:object-[80%_center]"}
             />
           </div>
           <div className="stacking-chairs-hero__shade pointer-events-none absolute inset-0" aria-hidden="true" />
@@ -81,11 +82,11 @@ export default function StackingChairsCategory({ heroImage, products, variant = 
             <div className="max-w-[42rem] md:w-[61%]">
               <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: categoryName }]} />
               <p className="section-eyebrow mt-7">Produktkategorie · {products.length} Produkte</p>
-              <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">{isLecterns ? "Rednerpulte für einen klaren Auftritt." : isTables ? "Klapptische für flexible Räume." : "Stapelstühle für flexible Räume."}</h1>
-              <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">{isLecterns ? "Klare und funktionale Lösungen für Gottesdienste, Vorträge und Veranstaltungen." : isTables ? "Schnell aufgebaut, stabil im Einsatz und nach der Veranstaltung wieder kompakt verstaut." : "Vielseitige Bestuhlung für Gottesdienste, Mehrzweckräume und Veranstaltungen mit hoher Frequenz."}</p>
+              <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">{isAccessories ? "Transportwagen & Zubehör für flexible Räume." : isLecterns ? "Rednerpulte für einen klaren Auftritt." : isTables ? "Klapptische für flexible Räume." : "Stapelstühle für flexible Räume."}</h1>
+              <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">{isAccessories ? "Praktische Lösungen für Transport, Lagerung, Reihenbestuhlung und den langfristigen Erhalt Ihrer Ausstattung." : isLecterns ? "Klare und funktionale Lösungen für Gottesdienste, Vorträge und Veranstaltungen." : isTables ? "Schnell aufgebaut, stabil im Einsatz und nach der Veranstaltung wieder kompakt verstaut." : "Vielseitige Bestuhlung für Gottesdienste, Mehrzweckräume und Veranstaltungen mit hoher Frequenz."}</p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href="#products" className="btn-primary px-6 py-3">Sortiment entdecken</Link>
-                <Link href={`/kontakt?${isLecterns ? "anliegen=Rednerpulte" : `kategorie=${categoryQuery}`}`} className="btn-secondary px-6 py-3">{isLecterns ? "Rednerpult anfragen" : isTables ? "Beratung anfragen" : "Musterstuhl anfragen"}</Link>
+                <Link href={`/kontakt?${isAccessories ? "anliegen=Ersatzteilanfrage" : isLecterns ? "anliegen=Rednerpulte" : `kategorie=${categoryQuery}`}`} className="btn-secondary px-6 py-3">{isAccessories ? "Zubehör anfragen" : isLecterns ? "Rednerpult anfragen" : isTables ? "Beratung anfragen" : "Musterstuhl anfragen"}</Link>
               </div>
             </div>
           </div>
@@ -94,8 +95,8 @@ export default function StackingChairsCategory({ heroImage, products, variant = 
 
       <section id="products" aria-labelledby="products-title" className="scroll-mt-28">
         <p className="section-eyebrow">Sortiment</p>
-        <h2 id="products-title" className="mt-3 max-w-3xl font-display text-3xl font-medium leading-tight text-premium-ink sm:text-4xl">{isLecterns ? "Zwei Rednerpulte für unterschiedliche Räume und Anlässe" : isTables ? `${products.length} Klapptische für unterschiedliche Räume und Anforderungen` : "Fünf Stapelstühle für unterschiedliche Räume und Anforderungen"}</h2>
-        <p className="mt-4 max-w-2xl leading-7 text-premium-muted">{isLecterns ? "Transparente Acrylglas-Ausführungen mit ruhiger Formensprache – für eine präsente, aber zurückhaltende Wirkung im Raum." : isTables ? "Vom vielseitigen Rechtecktisch bis zur kommunikativen Bistro-Lösung – passend zu Nutzung, Raum und Lagerung ausgewählt." : "Von der robusten Grundausstattung bis zur gepolsterten Komfortlösung – persönlich ausgewählt und langfristig betreut."}</p>
+        <h2 id="products-title" className="mt-3 max-w-3xl font-display text-3xl font-medium leading-tight text-premium-ink sm:text-4xl">{isAccessories ? `${products.length} Lösungen für Transport, Ausstattung und Werterhalt` : isLecterns ? "Zwei Rednerpulte für unterschiedliche Räume und Anlässe" : isTables ? `${products.length} Klapptische für unterschiedliche Räume und Anforderungen` : "Fünf Stapelstühle für unterschiedliche Räume und Anforderungen"}</h2>
+        <p className="mt-4 max-w-2xl leading-7 text-premium-muted">{isAccessories ? "Vom passenden Transportwagen bis zum kleinen Ersatzteil – abgestimmt auf Ihren Bestand, Ihre Räume und Ihre täglichen Abläufe." : isLecterns ? "Transparente Acrylglas-Ausführungen mit ruhiger Formensprache – für eine präsente, aber zurückhaltende Wirkung im Raum." : isTables ? "Vom vielseitigen Rechtecktisch bis zur kommunikativen Bistro-Lösung – passend zu Nutzung, Raum und Lagerung ausgewählt." : "Von der robusten Grundausstattung bis zur gepolsterten Komfortlösung – persönlich ausgewählt und langfristig betreut."}</p>
 
         <div className="mt-4 sm:mt-5">
           {products.map((product, index) => {
@@ -137,21 +138,21 @@ export default function StackingChairsCategory({ heroImage, products, variant = 
         <div className="grid gap-7 lg:grid-cols-[.9fr_1.1fr] lg:items-end">
           <div>
             <p className="section-eyebrow">Auswahlhilfe</p>
-            <h2 id="selection-title" className="mt-3 font-display text-3xl font-medium text-premium-ink">{isLecterns ? "Welches Rednerpult passt zu Ihrem Raum?" : isTables ? "Welcher Klapptisch passt zu Ihrem Raum?" : "Welcher Stapelstuhl passt zu Ihrem Raum?"}</h2>
-            <p className="mt-4 text-sm leading-7 text-premium-muted">{isLecterns ? "Raumwirkung, Anlass, Ablagefläche und gewünschte Form entscheiden über die passende Ausführung." : isTables ? "Raumgröße, Nutzung, Tischform, Oberfläche, Transportweg und Lagerfläche entscheiden über die passende Ausführung." : "Nutzungshäufigkeit, Stapelhöhe, Sitzkomfort, Boden, Reihenbildung und Raumwirkung entscheiden über die passende Ausführung."}</p>
+            <h2 id="selection-title" className="mt-3 font-display text-3xl font-medium text-premium-ink">{isAccessories ? "Welches Zubehör passt zu Ihrer Ausstattung?" : isLecterns ? "Welches Rednerpult passt zu Ihrem Raum?" : isTables ? "Welcher Klapptisch passt zu Ihrem Raum?" : "Welcher Stapelstuhl passt zu Ihrem Raum?"}</h2>
+            <p className="mt-4 text-sm leading-7 text-premium-muted">{isAccessories ? "Modell, Gestellform, Maße, Kaufjahr und Einsatzbereich helfen uns, Transportlösung, Zubehör oder Ersatzteil zuverlässig einzuordnen." : isLecterns ? "Raumwirkung, Anlass, Ablagefläche und gewünschte Form entscheiden über die passende Ausführung." : isTables ? "Raumgröße, Nutzung, Tischform, Oberfläche, Transportweg und Lagerfläche entscheiden über die passende Ausführung." : "Nutzungshäufigkeit, Stapelhöhe, Sitzkomfort, Boden, Reihenbildung und Raumwirkung entscheiden über die passende Ausführung."}</p>
           </div>
           <div>
             <ul className="grid gap-3 sm:grid-cols-3">
-              {(isLecterns ? ["Raum und Anlass", "Form und Ablage", "Material und Wirkung"] : isTables ? ["Maße und Nutzung", "Transport und Lagerung", "Oberflächen und Gestelle"] : ["Komfort und Nutzung", "Transport und Lagerung", "Stoffe, Farben und Zubehör"]).map((item) => (
+              {(isAccessories ? ["Modell und Maße", "Fotos und Kaufjahr", "Einsatz und Stückzahl"] : isLecterns ? ["Raum und Anlass", "Form und Ablage", "Material und Wirkung"] : isTables ? ["Maße und Nutzung", "Transport und Lagerung", "Oberflächen und Gestelle"] : ["Komfort und Nutzung", "Transport und Lagerung", "Stoffe, Farben und Zubehör"]).map((item) => (
                 <li key={item} className="rounded-xl bg-premium-warm/70 px-4 py-4 text-sm font-medium text-premium-ink">{item}</li>
               ))}
             </ul>
             <div className="mt-5 grid gap-3 sm:flex sm:flex-wrap">
-              <Link href={`/kontakt?${isLecterns ? "anliegen=Rednerpulte" : `kategorie=${categoryQuery}`}`} className="btn-primary justify-center px-5 py-2.5 text-sm">Beratung zur Auswahl</Link>
+              <Link href={`/kontakt?${isAccessories ? "anliegen=Ersatzteilanfrage" : isLecterns ? "anliegen=Rednerpulte" : `kategorie=${categoryQuery}`}`} className="btn-primary justify-center px-5 py-2.5 text-sm">{isAccessories ? "Zubehör anfragen" : "Beratung zur Auswahl"}</Link>
               {isLecterns ? (
                 <a href="tel:+499342915353" className="btn-secondary justify-center px-5 py-2.5 text-sm">Direkt anrufen</a>
               ) : (
-                <Link href={`/kontakt?kategorie=${categoryQuery}`} className="btn-secondary justify-center px-5 py-2.5 text-sm">{isTables ? "Ausführung besprechen" : "Musterstuhl anfragen"}</Link>
+                <Link href={`/kontakt?${isAccessories ? "anliegen=Ersatzteilanfrage" : `kategorie=${categoryQuery}`}`} className="btn-secondary justify-center px-5 py-2.5 text-sm">{isAccessories ? "Ersatzteil anfragen" : isTables ? "Ausführung besprechen" : "Musterstuhl anfragen"}</Link>
               )}
             </div>
           </div>

@@ -66,10 +66,10 @@ export default function ProductCategoryOverview({ categoryId }: Props) {
     { "@type": "FAQPage", "@id": absoluteUrl(`/produkte/kategorien/${category.id}#faq`), mainEntity: info.faq.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) },
   ] };
 
-  if (categoryId === "stapelstuehle" || categoryId === "klapptische") {
+  if (categoryId === "stapelstuehle" || categoryId === "klapptische" || categoryId === "transportwagen-zubehoer") {
     return <>
       <StructuredData data={data} />
-      <StackingChairsCategory heroImage={category.image} products={products} variant={categoryId === "klapptische" ? "tables" : "chairs"} />
+      <StackingChairsCategory heroImage={category.image} products={products} variant={categoryId === "transportwagen-zubehoer" ? "accessories" : categoryId === "klapptische" ? "tables" : "chairs"} />
     </>;
   }
 

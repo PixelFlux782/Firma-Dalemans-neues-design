@@ -44,18 +44,18 @@ export default function StackingChairsCategory({ heroImage, products }: Props) {
   return (
     <div className="flex min-w-0 flex-col gap-12 md:gap-14">
       <section>
-        <div className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[620px]">
-          <div className="products-hero-media absolute inset-0" aria-hidden="true">
+        <div className="stacking-chairs-hero products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[620px]">
+          <div className="stacking-chairs-hero__media products-hero-media absolute inset-0" aria-hidden="true">
             <Image
               src={heroImage}
               alt=""
               fill
               priority
               sizes="(min-width: 1280px) 1216px, 100vw"
-              className="object-cover object-[62%_center] md:object-[68%_center]"
+              className="object-cover object-[72%_center] md:object-[80%_center]"
             />
           </div>
-          <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
+          <div className="stacking-chairs-hero__shade pointer-events-none absolute inset-0" aria-hidden="true" />
           <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[620px] md:items-center md:px-12 md:py-16 lg:px-16">
             <div className="max-w-[42rem] md:w-[61%]">
               <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: "Stapelstühle" }]} />

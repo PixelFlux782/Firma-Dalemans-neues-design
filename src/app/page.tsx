@@ -150,14 +150,16 @@ export default function HomePage() {
       </HomeSection>
 
       <HomeSection id="herausforderungen" variant="elevated">
-        <div className="grid gap-10 lg:grid-cols-[.95fr_1.05fr] lg:items-center">
-          <div>
+        <div className="grid overflow-hidden rounded-3xl border border-premium-beige/70 bg-white/65 lg:grid-cols-[.92fr_1.08fr] lg:items-stretch">
+          <div className="flex flex-col justify-center p-7 sm:p-9 lg:p-12">
             <p className="section-eyebrow">Räume statt Einzelprodukte</p>
             <h2 className="section-title mt-5">Ein Raum muss im Alltag funktionieren.</h2>
             <p className="section-lead mt-6">Gottesdienst, Gemeindecafé, Seminar, Kinderprogramm und Veranstaltung verlangen wechselnde Ordnungen. Deshalb betrachten wir Reihen, Tische, Wege, Lagerung und Transport zusammen.</p>
             <Link href="/raeume-planung" className="btn-primary mt-8 inline-flex">Raumtypen und Planung ansehen</Link>
           </div>
-          <Image src={encodeURI("/pictures/Über uns/main_carousel_06.jpg")} alt="Gemeinderaum mit Bestuhlung für unterschiedliche Nutzungen" width={760} height={560} sizes="(min-width: 1024px) 50vw, 100vw" className="h-72 w-full rounded-3xl object-cover shadow-premium" />
+          <div className="relative min-h-72 overflow-hidden border-t border-premium-beige/70 lg:min-h-[430px] lg:border-l lg:border-t-0">
+            <Image src={encodeURI("/neue bilder/raum-im-alltag.png")} alt="Flexibel eingerichteter Gemeinderaum mit Reihenbestuhlung, Cafétisch und Rednerpult" fill sizes="(min-width: 1024px) 54vw, 100vw" className="object-cover" />
+          </div>
         </div>
         <div className="mt-10 border-t border-premium-beige pt-8">
           <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-premium-ink">Typische Herausforderungen – direkt zur passenden Klärung</h3>
@@ -195,7 +197,7 @@ export default function HomePage() {
             </div>
           </article>
           <article id="transport">
-            <ProductVisual src="/pictures/Produkte/Zubehör/TransportwagenundZubehör.png" alt="Transportwagen für den sicheren Transport von Stühlen" sizes="(min-width: 1024px) 33vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
+            <ProductVisual src="/neue bilder/Zubehör/zubehör-hero.png" alt="Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile" sizes="(min-width: 1024px) 33vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
             <div className="p-7">
               <p className="section-eyebrow">Transport & Lagerung</p>
               <h3 className="mt-4 font-display text-2xl font-medium text-premium-ink">Flexibel wird Ausstattung erst mit guten Abläufen.</h3>

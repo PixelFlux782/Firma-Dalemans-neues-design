@@ -325,8 +325,8 @@ export default function FirmaPage() {
           <div className="grid gap-5">
             <div className="image-depth overflow-hidden rounded-5xl shadow-premium">
               <Image
-                src={encodeURI("/pictures/Über uns/Realisierte-11.jpg")}
-                alt="Realisierte Bestuhlung von Dalemans"
+                src={encodeURI("/neue bilder/referenz1.png")}
+                alt="In eine Bühne integrierter Stauraum für gepolsterte Stühle"
                 width={720}
                 height={360}
                 sizes="(min-width: 1024px) 40vw, 100vw"
@@ -335,8 +335,8 @@ export default function FirmaPage() {
             </div>
             <div className="image-depth overflow-hidden rounded-5xl shadow-premium">
               <Image
-                src={encodeURI("/pictures/Über uns/Realisierte-05.jpg")}
-                alt="Bestuhlungsprojekt von Dalemans"
+                src={encodeURI("/neue bilder/referenz2.png")}
+                alt="Kirchenraum mit farbiger Bestuhlung entlang der Seitenwände"
                 width={720}
                 height={360}
                 sizes="(min-width: 1024px) 40vw, 100vw"

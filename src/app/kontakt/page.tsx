@@ -149,8 +149,8 @@ export default function KontaktPage() {
 
             <div className="image-depth hidden overflow-hidden rounded-5xl shadow-premium-lg sm:block">
               <Image
-                src={encodeURI("/pictures/Über uns/Werkstatt-24.jpg")}
-                alt="Arbeitsbereich in der Dalemans Werkstatt"
+                src={encodeURI("/neue bilder/planung-schritt-3.png")}
+                alt="Planungsarbeitsplatz mit Raumplänen, Bestuhlungsvarianten und Materialmustern"
                 width={720}
                 height={360}
                 sizes="(min-width: 1024px) 40vw, 100vw"

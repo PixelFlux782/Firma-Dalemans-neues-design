@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ProductCard from "@/components/ProductCard";
-import ProductVisual from "@/components/ProductVisual";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
+import ProductCategoryFeature from "@/components/home/ProductCategoryFeature";
 import SectionHeader from "@/components/home/SectionHeader";
 import { productOverviewHero } from "@/lib/category-media";
-import { productCategories } from "@/lib/product-categories";
 import { products } from "@/lib/products";
 import { buildMetadata } from "@/lib/seo";
 
@@ -20,33 +20,44 @@ export const metadata: Metadata = buildMetadata({
 
 const featuredSlugs = ["stapelstuhl-mod-1021c", "klapptisch-310c", "stuhltransportwagen"];
 
+const productGroups = [
+  { title: "Stapelstühle", text: "Robuste, komfortable Stühle für flexible Räume und eine langjährige Nutzung.", href: "/produkte/kategorien/stapelstuehle", cta: "Stapelstühle ansehen", image: "/images/curated/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.webp", alt: "Vollständig sichtbarer Stapel gepolsterter Stapelstühle", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
+  { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und flexibel genutzte Räume.", href: "/produkte/kategorien/klapptische", cta: "Klapptische ansehen", image: "/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", alt: "Vollständig sichtbarer Klapptisch mit verchromtem Gestell", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 51%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
+  { title: "Rednerpulte", text: "Klare und funktionale Lösungen für Gottesdienste, Vorträge und Veranstaltungen.", href: "/produkte/rednerpulte", cta: "Rednerpulte ansehen", image: "/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.png", alt: "Vollständig sichtbares Rednerpult aus Acrylglas, Typ A", backgroundTone: "#F8F7F1", imageInset: "1% 3%", imageScale: 1, objectPosition: "50% 50%", aspectRatio: "4 / 3", fadeStrength: 0.78 },
+  { title: "Zubehör & Transport", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und Transportlösungen für den praktischen Alltag.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör & Transport ansehen", image: "/neue bilder/Zubehör/zubehör-hero.png", alt: "Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.9 },
+] as const;
+
 export default function ProductsPage() {
   const featuredProducts = featuredSlugs.map((slug) => products.find((product) => product.slug === slug)).filter((product): product is (typeof products)[number] => Boolean(product));
   return <div className="flex min-w-0 flex-col gap-14 md:gap-20">
-    <section>
-      <div className="grid md:grid-cols-[58%_42%]">
-        <div className="relative z-20 flex flex-col justify-center py-8 md:min-h-[520px] md:pr-14 lg:min-h-[560px] lg:pr-16">
+    <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
+      <div className="products-hero-media absolute inset-0" aria-hidden="true">
+        <Image
+          src={encodeURI("/neue bilder/Stapelstühle/hero-bestuhlung.png")}
+          alt=""
+          fill
+          priority
+          sizes="(min-width: 1280px) 1216px, 100vw"
+          className="object-cover object-[52%_center] md:object-center"
+        />
+      </div>
+      <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
+      <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[560px] md:items-center md:px-12 md:py-16 lg:px-16">
+        <div className="max-w-[42rem] md:w-[61%]">
           <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte" }]} />
           <p className="section-eyebrow mt-7">Digitaler Beratungskatalog</p>
           <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Langlebige Ausstattung für flexible Räume.</h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-premium-muted">Stapelstühle, Klapptische und praktische Ergänzungen für Gemeinden, Säle und Mehrzweckräume – persönlich ausgewählt und langfristig betreut.</p>
+          <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Stapelstühle, Klapptische und praktische Ergänzungen für Gemeinden, Säle und Mehrzweckräume – persönlich ausgewählt und langfristig betreut.</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="#sortiment" className="btn-primary px-6 py-3">Sortiment entdecken</Link><Link href="/kontakt?anliegen=Produktauswahl" className="btn-secondary px-6 py-3">Beratung zur Auswahl</Link></div>
-        </div>
-        <div className="relative min-h-[420px] md:min-h-[520px] lg:min-h-[560px]">
-          <ProductVisual src={productOverviewHero.src} alt={productOverviewHero.alt} priority sizes="(min-width: 768px) 42vw, 100vw" aspectRatio="3 / 4" objectPosition="58% 52%" imageInset="5%" backgroundTone="canvas" className="h-full min-h-[420px] md:min-h-[520px] lg:min-h-[560px]" />
         </div>
       </div>
     </section>
 
     <section id="sortiment" className="scroll-mt-28" aria-labelledby="sortiment-title">
-      <p className="section-eyebrow">Sortimentsübersicht</p><h2 id="sortiment-title" className="mt-3 font-display text-3xl font-medium text-premium-ink md:text-4xl">Drei Wege zum passenden Produkt</h2>
-      <div className="mt-7 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{productCategories.map((category) => {
-        const count = products.filter((product) => product.categoryId === category.id).length;
-        return <Link key={category.id} href={`/produkte/kategorien/${category.id}`} className="group flex min-h-full flex-col">
-          <ProductVisual src={category.image} alt={category.name} sizes="(min-width: 1024px) 24vw, (min-width: 768px) 50vw, 100vw" imageInset="5%" backgroundTone="canvas" />
-          <div className="flex flex-1 flex-col p-5"><p className="section-eyebrow text-[.62rem]">{count} Produkte</p><h3 className="mt-2 font-display text-xl font-medium text-premium-ink">{category.name}</h3><p className="mt-3 flex-1 text-sm leading-6 text-premium-muted">{category.intro}</p><span className="mt-4 text-sm font-medium text-premium-forest">Kategorie ansehen →</span></div>
-        </Link>;
-      })}</div>
+      <p className="section-eyebrow">Sortimentsübersicht</p><h2 id="sortiment-title" className="mt-3 font-display text-3xl font-medium text-premium-ink md:text-4xl">Vier Produktbereiche für flexible Räume</h2>
+      <div className="mt-9 grid gap-x-8 gap-y-14 md:grid-cols-2 lg:gap-x-12 lg:gap-y-20">
+        {productGroups.map((group) => <ProductCategoryFeature key={group.title} title={group.title} description={group.text} href={group.href} image={group.image} alt={group.alt} linkLabel={group.cta} imageScale={group.imageScale} objectPosition={group.objectPosition} imageInset={group.imageInset} aspectRatio={group.aspectRatio} fadeStrength={group.fadeStrength} backgroundTone={group.backgroundTone} />)}
+      </div>
     </section>
 
     <HomeSection><SectionHeader eyebrow="Häufig nachgefragt" title="Direkt zu ausgewählten Produkten" lead="Ein schneller Einstieg in bewährte Lösungen aus den wichtigsten Sortimentsbereichen." align="editorial" /><div className="section-grid-top grid gap-6 md:grid-cols-2 xl:grid-cols-3">{featuredProducts.map((product) => <ProductCard key={product.slug} product={product} />)}</div></HomeSection>

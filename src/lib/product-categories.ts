@@ -16,7 +16,7 @@ export const productCategories: ProductCategory[] = [
   {
     id: "stapelstuehle",
     name: "Stapelstühle",
-    image: asset("/images/curated/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.webp"),
+    image: asset("/neue bilder/Stapelstühle/mit beschichtung-sortiment.png"),
     intro:
       "Vielseitige Bestuhlung für Gottesdienste, Mehrzweckräume und Veranstaltungen mit hoher Frequenz.",
     description:

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ProductVisual from "@/components/ProductVisual";
@@ -43,19 +44,29 @@ export default function StackingChairsCategory({ heroImage, products }: Props) {
   return (
     <div className="flex min-w-0 flex-col gap-12 md:gap-14">
       <section>
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(420px,520px)]">
-          <div className="relative z-10 flex flex-col justify-center p-6 sm:p-8 lg:p-10 lg:pr-5">
-            <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: "Stapelstühle" }]} />
-            <p className="section-eyebrow mt-6">Produktkategorie · {products.length} Produkte</p>
-            <h1 className="mt-3 font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Stapelstühle</h1>
-            <p className="mt-4 max-w-xl text-base leading-7 text-premium-muted">Vielseitige Bestuhlung für Gottesdienste, Mehrzweckräume und Veranstaltungen mit hoher Frequenz.</p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/kontakt?kategorie=Stapelst%C3%BChle" className="btn-primary px-6 py-3">Musterstuhl anfragen</Link>
-              <a href="tel:+499342915353" className="btn-secondary px-6 py-3">Beratung</a>
-            </div>
+        <div className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[620px]">
+          <div className="products-hero-media absolute inset-0" aria-hidden="true">
+            <Image
+              src={heroImage}
+              alt=""
+              fill
+              priority
+              sizes="(min-width: 1280px) 1216px, 100vw"
+              className="object-cover object-[62%_center] md:object-[68%_center]"
+            />
           </div>
-          <div className="relative min-h-[420px] sm:min-h-[520px] lg:min-h-[620px]">
-            <ProductVisual src={heroImage} alt="Fünf gepolsterte Stapelstühle in einem hellen Raum" priority sizes="(min-width: 1024px) 520px, 100vw" aspectRatio="4 / 5" objectPosition="50% 55%" imageInset="5%" backgroundTone="canvas" className="h-full min-h-[420px] sm:min-h-[520px] lg:min-h-[620px]" />
+          <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
+          <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[620px] md:items-center md:px-12 md:py-16 lg:px-16">
+            <div className="max-w-[42rem] md:w-[61%]">
+              <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: "Stapelstühle" }]} />
+              <p className="section-eyebrow mt-7">Produktkategorie · {products.length} Produkte</p>
+              <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Stapelstühle für flexible Räume.</h1>
+              <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Vielseitige Bestuhlung für Gottesdienste, Mehrzweckräume und Veranstaltungen mit hoher Frequenz.</p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href="#products" className="btn-primary px-6 py-3">Sortiment entdecken</Link>
+                <Link href="/kontakt?kategorie=Stapelst%C3%BChle" className="btn-secondary px-6 py-3">Musterstuhl anfragen</Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

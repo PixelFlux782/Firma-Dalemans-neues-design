@@ -1,10 +1,21 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ProductVisual from "@/components/ProductVisual";
 import type { Product } from "@/lib/products";
 
-type CategoryProduct = Pick<Product, "title" | "slug" | "image" | "imageAlt" | "shortDescription" | "highlights">;
+type CategoryProduct = Pick<Product, "title" | "slug" | "image" | "imageAlt" | "shortDescription" | "highlights" | "overviewGroup">;
+
+const accessoryFilters = [
+  { id: "all", label: "Alle" },
+  { id: "transport", label: "Transportwagen" },
+  { id: "chair-accessories", label: "Stuhlzubehör" },
+  { id: "table-accessories", label: "Tischzubehör" },
+  { id: "spares", label: "Ersatzteile" },
+] as const;
 
 interface Props {
   heroImage: string;
@@ -60,8 +71,15 @@ export default function StackingChairsCategory({ heroImage, products, variant = 
   const isTables = variant === "tables";
   const isLecterns = variant === "lecterns";
   const isAccessories = variant === "accessories";
+  const [activeFilter, setActiveFilter] = useState("all");
   const categoryName = isAccessories ? "Transportwagen & Zubehör" : isLecterns ? "Rednerpulte" : isTables ? "Klapptische" : "Stapelstühle";
   const categoryQuery = encodeURIComponent(categoryName);
+  const visibleProducts = isAccessories && activeFilter !== "all"
+    ? products.filter((product) => product.overviewGroup === activeFilter)
+    : products;
+  const countForFilter = (id: string) => id === "all"
+    ? products.length
+    : products.filter((product) => product.overviewGroup === id).length;
 
   return (
     <div className="flex min-w-0 flex-col gap-12 md:gap-14">
@@ -93,13 +111,38 @@ export default function StackingChairsCategory({ heroImage, products, variant = 
         </div>
       </section>
 
+      {isAccessories && (
+        <section aria-label="Zubehör filtern" className="-mt-5 md:-mt-7">
+          <p className="section-eyebrow mb-3">Schnellauswahl</p>
+          <div className="-mx-5 overflow-x-auto px-5 pb-2 sm:mx-0 sm:px-0">
+            <div className="flex min-w-max gap-2" role="group" aria-label="Produkte filtern">
+              {accessoryFilters.map((filter) => {
+                const selected = activeFilter === filter.id;
+                return (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setActiveFilter(filter.id)}
+                    className={`min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-forest focus-visible:ring-offset-2 ${selected ? "border-premium-forest bg-premium-forest text-white" : "border-premium-beige bg-white/80 text-premium-charcoal hover:border-premium-leaf"}`}
+                  >
+                    {filter.label} <span className={selected ? "text-white/70" : "text-premium-muted"}>{countForFilter(filter.id)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <p className="mt-3 text-sm text-premium-muted" aria-live="polite">{visibleProducts.length} {visibleProducts.length === 1 ? "Produkt" : "Produkte"} angezeigt</p>
+        </section>
+      )}
+
       <section id="products" aria-labelledby="products-title" className="scroll-mt-28">
         <p className="section-eyebrow">Sortiment</p>
         <h2 id="products-title" className="mt-3 max-w-3xl font-display text-3xl font-medium leading-tight text-premium-ink sm:text-4xl">{isAccessories ? `${products.length} Lösungen für Transport, Ausstattung und Werterhalt` : isLecterns ? "Zwei Rednerpulte für unterschiedliche Räume und Anlässe" : isTables ? `${products.length} Klapptische für unterschiedliche Räume und Anforderungen` : "Fünf Stapelstühle für unterschiedliche Räume und Anforderungen"}</h2>
         <p className="mt-4 max-w-2xl leading-7 text-premium-muted">{isAccessories ? "Vom passenden Transportwagen bis zum kleinen Ersatzteil – abgestimmt auf Ihren Bestand, Ihre Räume und Ihre täglichen Abläufe." : isLecterns ? "Transparente Acrylglas-Ausführungen mit ruhiger Formensprache – für eine präsente, aber zurückhaltende Wirkung im Raum." : isTables ? "Vom vielseitigen Rechtecktisch bis zur kommunikativen Bistro-Lösung – passend zu Nutzung, Raum und Lagerung ausgewählt." : "Von der robusten Grundausstattung bis zur gepolsterten Komfortlösung – persönlich ausgewählt und langfristig betreut."}</p>
 
         <div className="mt-4 sm:mt-5">
-          {products.map((product, index) => {
+          {visibleProducts.map((product, index) => {
             const imageRight = index % 2 === 1;
             const imageTreatment = productImageTreatments[product.slug] ?? {
               imagePosition: "50% 52%",

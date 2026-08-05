@@ -8,7 +8,7 @@ const pageLinks = [
   ["/beratung-service", "Beratung & Service"],
   ["/sonderloesungen", "Sonderlösungen"],
   ["/sonderposten", "Sonderposten"],
-  ["/firma", "Über DLMNS"],
+  ["/firma", "Über Dalemans"],
   ["/kontakt", "Kontakt"],
 ] as const;
 
@@ -30,7 +30,7 @@ export function Footer() {
           <div className="inline-flex rounded-xl bg-white px-3 py-2">
             <Image
               src={encodeURI("/pictures/Über uns/dalemans_logo1.png")}
-              alt="DLMNS Dalemans"
+              alt="Dalemans"
               width={150}
               height={52}
               className="h-10 w-auto object-contain"

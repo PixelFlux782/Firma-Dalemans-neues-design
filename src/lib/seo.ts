@@ -3,10 +3,10 @@
 const FALLBACK_SITE_URL = "https://stapelstuhl-klapptisch.de";
 
 export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL;
-export const siteName = "DLMNS Stapelstühle & Klapptische";
-export const defaultTitle = "DLMNS Stapelstühle & Klapptische | Ausstattung für Gemeinden und Säle";
+export const siteName = "Dalemans Stapelstühle & Klapptische";
+export const defaultTitle = "Dalemans Stapelstühle & Klapptische | Ausstattung für Gemeinden und Säle";
 export const defaultDescription =
-  "DLMNS Stapelstühle & Klapptische bietet robuste Stapelstühle, Klapptische, Gemeindestühle, Transportwagen, Zubehör und Beratung für Gemeinden, Säle und flexible Räume.";
+  "Dalemans Stapelstühle & Klapptische bietet robuste Stapelstühle, Klapptische, Gemeindestühle, Transportwagen, Zubehör und Beratung für Gemeinden, Säle und flexible Räume.";
 export const defaultOgImage = "/images/curated/Stapelstühle/1021c.webp";
 
 export function absoluteUrl(path = "/") {

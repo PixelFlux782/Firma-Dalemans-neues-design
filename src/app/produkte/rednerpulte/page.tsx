@@ -6,7 +6,7 @@ const heroImage = "/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.
 
 export const metadata: Metadata = buildMetadata({
   title: "Rednerpulte",
-  description: "Übersicht der Rednerpulte von DLMNS für Gottesdienste, Vorträge und Veranstaltungen.",
+  description: "Übersicht der Rednerpulte von Dalemans für Gottesdienste, Vorträge und Veranstaltungen.",
   path: "/produkte/rednerpulte",
   image: heroImage,
 });

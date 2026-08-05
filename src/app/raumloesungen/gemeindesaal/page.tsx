@@ -28,7 +28,7 @@ const structuredData = {
   name: "Gemeindesaal Ausstattung planen",
   provider: {
     "@type": "LocalBusiness",
-    name: "DLMNS Stapelstühle & Klapptische",
+    name: "Dalemans Stapelstühle & Klapptische",
     url: absoluteUrl("/"),
   },
   areaServed: "DE",

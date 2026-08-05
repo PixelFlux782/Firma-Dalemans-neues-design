@@ -107,7 +107,7 @@ export default function HeroCarousel() {
       className="hero-carousel group relative h-full min-h-[360px] overflow-visible sm:min-h-[440px] lg:min-h-full"
       role="region"
       aria-roledescription="Karussell"
-      aria-label="DLMNS Raumlösungen, Materialien und Montage"
+      aria-label="Dalemans Raumlösungen, Materialien und Montage"
       tabIndex={0}
       onMouseEnter={() => setInteractionPaused(true)}
       onMouseLeave={() => setInteractionPaused(false)}

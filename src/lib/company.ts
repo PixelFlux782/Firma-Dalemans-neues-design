@@ -2,7 +2,7 @@ import { absoluteUrl } from "@/lib/seo";
 
 export const company = {
   name: "Dalemans Sitzmöbel und Tische",
-  brandName: "DLMNS Stapelstühle & Klapptische",
+  brandName: "Dalemans Stapelstühle & Klapptische",
   organizationId: absoluteUrl("/#organization"),
   websiteId: absoluteUrl("/#website"),
   founded: "1994",

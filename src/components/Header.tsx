@@ -11,7 +11,7 @@ const primaryLinks = [
   { href: "/beratung-service", label: "Beratung & Service" },
   { href: "/sonderloesungen", label: "Sonderlösungen" },
   { href: "/sonderposten", label: "Sonderposten" },
-  { href: "/firma", label: "Über DLMNS" },
+  { href: "/firma", label: "Über Dalemans" },
   { href: "/kontakt", label: "Kontakt" },
 ] as const;
 
@@ -65,7 +65,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-premium-beige/70 bg-premium-canvas/90 shadow-[0_1px_0_rgba(23,37,29,.03)] backdrop-blur-xl">
       <div className="container-premium flex min-h-[4.5rem] items-center justify-between gap-4 py-2.5">
-        <Link href="/" className="group flex min-w-0 items-center gap-3.5" aria-label="DLMNS Startseite">
+        <Link href="/" className="group flex min-w-0 items-center gap-3.5" aria-label="Dalemans Startseite">
           <Image
             src={encodeURI("/pictures/Über uns/dalemans_logo1.png")}
             alt=""
@@ -74,7 +74,7 @@ export function Header() {
             className="h-9 w-auto shrink-0 object-contain sm:h-10"
           />
           <span className="hidden border-l border-premium-beige pl-3.5 sm:block">
-            <span className="block text-[0.64rem] font-semibold uppercase tracking-[0.2em] text-premium-ink">DLMNS</span>
+            <span className="block text-[0.64rem] font-semibold uppercase tracking-[0.2em] text-premium-ink">Dalemans</span>
             <span className="mt-1 block text-[0.68rem] tracking-[0.04em] text-premium-muted">Stapelstühle & Klapptische</span>
           </span>
         </Link>

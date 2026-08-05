@@ -10,7 +10,7 @@ export default function HeroSection() {
         <div className="relative z-10 flex min-w-0 flex-col justify-center px-5 py-12 sm:px-6 md:px-10 md:py-16 lg:px-12 xl:px-16">
           <div className="max-w-full md:max-w-3xl">
             <p className="section-eyebrow text-premium-sand">
-              DLMNS Stapelstühle & Klapptische
+              Dalemans Stapelstühle & Klapptische
             </p>
             <h1 className="hero-headline mt-6 max-w-full text-[1.62rem] sm:text-5xl md:text-[3.15rem] lg:text-[3.55rem] lg:leading-[1.04]">
               Flexible Ausstattung für Räume, in denen Gemeinde lebt.

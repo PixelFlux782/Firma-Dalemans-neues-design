@@ -14,7 +14,7 @@ import { organizationStructuredData } from "@/lib/company";
 export const metadata: Metadata = buildMetadata({
   title: "Flexible Ausstattung für Gemeinderäume",
   description:
-    "DLMNS plant Stapelstühle, Klapptische, Raumaufteilung, Transport und langfristige Ausstattung für Gemeinden und flexible Räume – persönlich seit 1994.",
+    "Dalemans plant Stapelstühle, Klapptische, Raumaufteilung, Transport und langfristige Ausstattung für Gemeinden und flexible Räume – persönlich seit 1994.",
   path: "/",
   image: "/pictures/Über uns/Realisierte-11.jpg",
   keywords: ["Stapelstühle für Gemeinden", "Klapptische für Gemeinden", "Bestuhlungsplanung", "flexible Gemeinderäume"],
@@ -54,12 +54,12 @@ const process = [
 export default function HomePage() {
   return (
     <div className="page-stack">
-      <StructuredData data={{ "@context": "https://schema.org", "@graph": [organizationStructuredData, { "@type": "WebSite", name: "DLMNS Stapelstühle & Klapptische", url: absoluteUrl("/") }] }} />
+      <StructuredData data={{ "@context": "https://schema.org", "@graph": [organizationStructuredData, { "@type": "WebSite", name: "Dalemans Stapelstühle & Klapptische", url: absoluteUrl("/") }] }} />
 
       <section className="hero-architectural relative -mx-5 bg-premium-highlight sm:-mx-6 md:mx-0">
         <div className="grid lg:min-h-[min(72vh,760px)] lg:grid-cols-[.88fr_1.12fr]">
           <div className="hero-copy relative z-10 flex flex-col justify-center px-5 py-12 sm:px-8 md:px-12 md:py-16 lg:px-14 xl:px-16">
-            <p className="section-eyebrow">DLMNS Stapelstühle & Klapptische</p>
+            <p className="section-eyebrow">Dalemans Stapelstühle & Klapptische</p>
             <div className="mt-5 flex items-center gap-3 text-[0.65rem] font-medium uppercase tracking-[0.18em] text-premium-muted">
               <span>Seit 1994</span><span className="h-px w-8 bg-premium-stone" aria-hidden /><span>Persönlich geplant</span>
             </div>
@@ -250,17 +250,17 @@ export default function HomePage() {
 
       <HomeSection variant="breathing">
         <div id="langfristig" className="grid overflow-hidden rounded-3xl border border-premium-beige bg-premium-warm/55 lg:grid-cols-[.78fr_1.22fr] lg:items-stretch">
-          <Image src={encodeURI("/neue bilder/stefan-dalemans-portrait.png")} alt="Stefan Dalemans, persönlicher Ansprechpartner und Geschäftsführer von DLMNS" width={560} height={640} sizes="(min-width: 1024px) 35vw, 100vw" className="h-[26rem] w-full object-cover object-[50%_18%] lg:h-full lg:min-h-[31rem]" />
+          <Image src={encodeURI("/neue bilder/stefan-dalemans-portrait.png")} alt="Stefan Dalemans, persönlicher Ansprechpartner und Geschäftsführer von Dalemans" width={560} height={640} sizes="(min-width: 1024px) 35vw, 100vw" className="h-[26rem] w-full object-cover object-[50%_18%] lg:h-full lg:min-h-[31rem]" />
           <div className="p-7 md:p-10 lg:p-12">
             <p className="section-eyebrow">Familie & Gemeinde</p>
             <h2 className="section-title mt-5">Gemeinde ist für uns nicht nur eine Zielgruppe, sondern Teil unserer eigenen Geschichte.</h2>
-            <p className="mt-6 text-sm leading-7 text-premium-muted md:text-base">1994 von Hubert Dalemans gegründet und heute von Stefan Dalemans geführt, verbindet DLMNS persönliche Ansprechpartner mit eigener Erfahrung aus Gemeinde und Gemeindebau.</p>
+            <p className="mt-6 text-sm leading-7 text-premium-muted md:text-base">1994 von Hubert Dalemans gegründet und heute von Stefan Dalemans geführt, verbindet Dalemans persönliche Ansprechpartner mit eigener Erfahrung aus Gemeinde und Gemeindebau.</p>
             <div className="mt-6 border-t border-premium-sage pt-6">
               <h3 className="text-base font-semibold text-premium-ink">Betreuung, die nach der Lieferung weitergeht</h3>
               <p className="mt-3 text-sm leading-7 text-premium-muted">Ersatzteile, Reparaturen, Gleiter, Zubehör, Nachbestellungen und Ergänzungen bestehender Bestuhlung prüfen wir auch nach Jahren.</p>
             </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/firma" className="btn-secondary">DLMNS kennenlernen</Link>
+              <Link href="/firma" className="btn-secondary">Dalemans kennenlernen</Link>
               <Link href="/beratung-service#langfristig" className="btn-primary">Service für bestehenden Bestand</Link>
             </div>
           </div>

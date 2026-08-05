@@ -41,7 +41,7 @@ const structuredData = {
   name: "Sonderlösungen für Stapelstühle, Klapptische und Zubehör",
   provider: {
     "@type": "LocalBusiness",
-    name: "DLMNS Stapelstühle & Klapptische",
+    name: "Dalemans Stapelstühle & Klapptische",
     url: absoluteUrl("/"),
   },
   url: absoluteUrl("/sonderloesungen"),
@@ -51,7 +51,7 @@ const structuredData = {
 export const metadata: Metadata = buildMetadata({
   title: "Sonderlösungen und CAD-Planung für Klapptische und Zubehör",
   description:
-    "DLMNS plant Sonderlösungen für Klapptische, Stapelstühle, Transportwagen, Zubehör und schwierige Raummaße von Skizze über CAD bis Umsetzung.",
+    "Dalemans plant Sonderlösungen für Klapptische, Stapelstühle, Transportwagen, Zubehör und schwierige Raummaße von Skizze über CAD bis Umsetzung.",
   path: "/sonderloesungen",
   image: "/pictures/Über uns/CAD-Entwicklung1zu1.png",
   keywords: [
@@ -84,7 +84,7 @@ export default function SonderloesungenPage() {
             <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Sonderlösungen" }]} />
             <p className="section-eyebrow mt-7">Sonderlösungen</p>
             <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Wenn Standard nicht reicht: Sondermaße, CAD und praktische Umsetzung.</h1>
-            <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">DLMNS verbindet alte Sonderlösungs-Kompetenz mit heutiger Planung: von der Skizze über CAD bis zu Zubehör, Tischlösung oder Transportlogik.</p>
+            <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Dalemans verbindet alte Sonderlösungs-Kompetenz mit heutiger Planung: von der Skizze über CAD bis zu Zubehör, Tischlösung oder Transportlogik.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/kontakt" className="btn-primary px-6 py-3">Sonderlösung besprechen</Link>
               <Link href="/produkte/kategorien/klapptische" className="btn-secondary px-6 py-3">Klapptische ansehen</Link>

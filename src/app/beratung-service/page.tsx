@@ -9,7 +9,7 @@ import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
   title: "Beratung & Service für Gemeindemöbel",
-  description: "Persönliche Kaufberatung, Bemusterung, Musterstuhl, Stoff- und Farbberatung, Ersatzteile, Reparatur und Nachbestellung bei DLMNS.",
+  description: "Persönliche Kaufberatung, Bemusterung, Musterstuhl, Stoff- und Farbberatung, Ersatzteile, Reparatur und Nachbestellung bei Dalemans.",
   path: "/beratung-service",
   image: "/images/curated/Stoffe-Farben/Textilproben.webp",
   keywords: ["Musterstuhl anfragen", "Stoffmuster Stühle", "Ersatzteile Stapelstühle", "Kaufberatung Gemeindestühle"],

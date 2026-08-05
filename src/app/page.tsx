@@ -56,7 +56,7 @@ export default function HomePage() {
     <div className="page-stack">
       <StructuredData data={{ "@context": "https://schema.org", "@graph": [organizationStructuredData, { "@type": "WebSite", name: "DLMNS Stapelstühle & Klapptische", url: absoluteUrl("/") }] }} />
 
-      <section className="hero-architectural relative -mx-5 overflow-hidden border-y border-premium-beige bg-premium-highlight shadow-premium-xl sm:-mx-6 md:mx-0 md:rounded-[2.5rem] md:border">
+      <section className="hero-architectural relative -mx-5 bg-premium-highlight sm:-mx-6 md:mx-0">
         <div className="grid lg:min-h-[min(72vh,760px)] lg:grid-cols-[.88fr_1.12fr]">
           <div className="hero-copy relative z-10 flex flex-col justify-center px-5 py-12 sm:px-8 md:px-12 md:py-16 lg:px-14 xl:px-16">
             <p className="section-eyebrow">DLMNS Stapelstühle & Klapptische</p>

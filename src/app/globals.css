@@ -562,32 +562,38 @@
       transparent 100%
     );
   }
+
+  .hero-architectural .hero-carousel::after {
+    background:
+      linear-gradient(90deg, transparent 76%, rgb(250 248 240 / 0.3) 88%, rgb(250 248 240) 100%),
+      linear-gradient(180deg, rgb(250 248 240) 0%, rgb(250 248 240 / 0.18) 10%, transparent 22%, transparent 78%, rgb(250 248 240 / 0.2) 90%, rgb(250 248 240) 100%);
+  }
 }
 
 @media (min-width: 640px) and (max-width: 1023px) {
-  .hero-architectural .hero-carousel::before {
-    content: "";
-    position: absolute;
-    z-index: 10;
-    inset: 0 0 auto;
-    height: 96px;
-    pointer-events: none;
-    background: linear-gradient(180deg, rgb(250 248 240 / 0.94) 0%, rgb(250 248 240 / 0.32) 52%, transparent 100%);
+  .hero-architectural .hero-carousel::after {
+    background:
+      linear-gradient(90deg, rgb(250 248 240) 0%, transparent 14%, transparent 86%, rgb(250 248 240) 100%),
+      linear-gradient(180deg, rgb(250 248 240) 0%, rgb(250 248 240 / 0.2) 14%, transparent 28%, transparent 76%, rgb(250 248 240 / 0.22) 90%, rgb(250 248 240) 100%);
   }
 }
 
 @media (max-width: 639px) {
-  .hero-architectural .hero-carousel::before {
-    content: "";
-    position: absolute;
-    z-index: 10;
-    inset: 0 0 auto;
-    height: 72px;
-    pointer-events: none;
-    background: linear-gradient(180deg, rgb(250 248 240 / 0.92) 0%, rgb(250 248 240 / 0.26) 52%, transparent 100%);
+  .hero-architectural .hero-carousel::after {
+    background:
+      linear-gradient(90deg, rgb(250 248 240) 0%, transparent 12%, transparent 88%, rgb(250 248 240) 100%),
+      linear-gradient(180deg, rgb(250 248 240) 0%, rgb(250 248 240 / 0.18) 12%, transparent 26%, transparent 76%, rgb(250 248 240 / 0.22) 90%, rgb(250 248 240) 100%);
   }
 
   .hero-architectural .hero-slide-main {
     transform: scale(var(--hero-mobile-scale, 1));
   }
+}
+
+.hero-architectural .hero-carousel::after {
+  content: "";
+  position: absolute;
+  z-index: 11;
+  inset: 0;
+  pointer-events: none;
 }

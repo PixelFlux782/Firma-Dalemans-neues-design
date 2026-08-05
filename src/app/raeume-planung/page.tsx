@@ -46,10 +46,10 @@ export default function RaeumePlanungPage() {
             fill
             priority
             sizes="(min-width: 1280px) 1216px, 100vw"
-            className="object-cover object-center"
+            className="origin-left scale-[1.1] object-cover object-left"
           />
         </div>
-        <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
+        <div className="raeume-planung-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[560px] md:items-center md:px-12 md:py-16 lg:px-16">
           <div className="max-w-[42rem] md:w-[61%]">
             <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Räume & Planung" }]} />

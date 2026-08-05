@@ -33,12 +33,12 @@ export default function ProductsPage() {
     <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
       <div className="products-hero-media absolute inset-0" aria-hidden="true">
         <Image
-          src={encodeURI("/neue bilder/Stapelstühle/hero-bestuhlung.png")}
+          src={encodeURI("/neue bilder/produkte-hero.png")}
           alt=""
           fill
           priority
           sizes="(min-width: 1280px) 1216px, 100vw"
-          className="object-cover object-[52%_center] md:object-center"
+          className="object-cover object-[28%_center] md:object-[35%_center]"
         />
       </div>
       <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />

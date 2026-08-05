@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 type FormStatus = { type: "success" | "error"; message: string } | null;
@@ -10,6 +10,7 @@ export function ContactForm() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<FormStatus>(null);
   const [pending, setPending] = useState(false);
+  const statusRef = useRef<HTMLParagraphElement>(null);
   const initialSubject = useMemo(
     () =>
       contextKeys
@@ -18,6 +19,10 @@ export function ContactForm() {
         .join(" – ") || "Allgemeine Beratung",
     [searchParams],
   );
+
+  useEffect(() => {
+    if (status) statusRef.current?.focus();
+  }, [status]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -56,27 +61,32 @@ export function ContactForm() {
       <div className="mt-8 grid gap-5 sm:grid-cols-2">
         <label className="block text-sm font-medium text-premium-charcoal">
           Name
-          <input name="name" type="text" autoComplete="name" className={inputClass} required />
+          <span aria-hidden="true"> *</span>
+          <input name="name" type="text" autoComplete="name" className={inputClass} maxLength={200} required />
         </label>
         <label className="block text-sm font-medium text-premium-charcoal">
           Gemeinde oder Organisation
-          <input name="organization" type="text" autoComplete="organization" className={inputClass} required />
+          <span aria-hidden="true"> *</span>
+          <input name="organization" type="text" autoComplete="organization" className={inputClass} maxLength={200} required />
         </label>
         <label className="block text-sm font-medium text-premium-charcoal">
           E-Mail
-          <input name="email" type="email" autoComplete="email" className={inputClass} required />
+          <span aria-hidden="true"> *</span>
+          <input name="email" type="email" autoComplete="email" className={inputClass} maxLength={200} required />
         </label>
         <label className="block text-sm font-medium text-premium-charcoal">
           Telefon <span className="font-normal text-premium-muted">(optional)</span>
-          <input name="phone" type="tel" autoComplete="tel" className={inputClass} />
+          <input name="phone" type="tel" autoComplete="tel" className={inputClass} maxLength={200} />
         </label>
         <label className="block text-sm font-medium text-premium-charcoal sm:col-span-2">
           Anliegen oder gewünschter Bereich
-          <input name="subject" type="text" className={inputClass} defaultValue={initialSubject} required />
+          <span aria-hidden="true"> *</span>
+          <input name="subject" type="text" className={inputClass} defaultValue={initialSubject} maxLength={200} required />
         </label>
         <label className="block text-sm font-medium text-premium-charcoal sm:col-span-2">
           Nachricht
-          <textarea name="message" className={`${inputClass} min-h-[180px] resize-y`} minLength={10} required />
+          <span aria-hidden="true"> *</span>
+          <textarea name="message" className={`${inputClass} min-h-[180px] resize-y`} minLength={10} maxLength={5000} required />
         </label>
         <label className="absolute -left-[9999px]" aria-hidden="true">
           Website
@@ -93,6 +103,8 @@ export function ContactForm() {
         </div>
         {status ? (
           <p
+            ref={statusRef}
+            tabIndex={-1}
             role={status.type === "error" ? "alert" : "status"}
             aria-live="polite"
             className={`sm:col-span-2 rounded-2xl border px-4 py-3.5 text-sm leading-7 ${

@@ -17,7 +17,7 @@ const slides = [
     softenedBackdrop: true,
   },
   {
-    src: "/neue bilder/Stapelstühle/hero-bestuhlung.png",
+    src: "/images/optimized/hero/stapelstuehle-hero.jpg",
     alt: "Bestuhlter Gemeindesaal mit Stapelstühlen von Dalemans",
     headline: "Bestuhlung, die zum Raum und zu den Menschen passt.",
     description: "Seit 1994 planen wir flexible Lösungen für Gemeinden, Säle und Kommunen.",

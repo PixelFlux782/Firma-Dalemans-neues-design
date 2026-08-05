@@ -1,6 +1,8 @@
 node_modules
 .next
 .vercel
+playwright-report
+test-results
 *.log
 tsconfig.tsbuildinfo
 Firma-Dalemans/

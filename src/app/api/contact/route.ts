@@ -5,7 +5,14 @@ function text(value: unknown, maxLength = 200) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
+const MAX_REQUEST_BYTES = 10_000;
+
 export async function POST(request: Request) {
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (contentLength > MAX_REQUEST_BYTES) {
+    return NextResponse.json({ error: "Die Anfrage ist zu groß." }, { status: 413 });
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -17,7 +24,7 @@ export async function POST(request: Request) {
   const organization = text(body.organization);
   const email = text(body.email);
   const phone = text(body.phone);
-  const subject = text(body.subject);
+  const subject = text(body.subject).replace(/[\r\n]+/g, " ");
   const message = text(body.message, 5000);
 
   if (text(body.website)) return NextResponse.json({ ok: true });
@@ -46,6 +53,9 @@ export async function POST(request: Request) {
     port: Number(process.env.CONTACT_SMTP_PORT),
     secure: process.env.CONTACT_SMTP_SECURE === "true",
     auth: { user: process.env.CONTACT_SMTP_USER, pass: process.env.CONTACT_SMTP_PASSWORD },
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
   });
 
   try {

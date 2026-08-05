@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:prelaunch": "playwright test"
   },
   "dependencies": {
     "next": "^15.5.22",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^22.7.4",
     "@types/nodemailer": "^7.0.12",
     "@types/react": "^18.3.10",

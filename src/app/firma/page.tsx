@@ -77,7 +77,7 @@ const firmaStructuredData = {
   "@graph": [
     {
       ...organizationStructuredData,
-      image: absoluteUrl("/pictures/Über uns/Passbild_Stefan_F_edit.jpg"),
+      image: absoluteUrl("/neue bilder/stefan-dalemans-portrait.png"),
     },
     {
       "@type": "WebSite",
@@ -115,27 +115,15 @@ export default function FirmaPage() {
       <StructuredData data={firmaStructuredData} />
 
       <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
-        <div className="products-hero-media absolute inset-0 grid grid-cols-[1.4fr_.6fr]" aria-hidden="true">
-          <div className="relative">
-            <Image
-              src={encodeURI("/neue bilder/Produktion-Lager/Schalenlager-Montage2.png")}
-              alt=""
-              fill
-              priority
-              sizes="(min-width: 1280px) 850px, 70vw"
-              className="object-cover object-[78%_center]"
-            />
-          </div>
-          <div className="relative">
-            <Image
-              src={encodeURI("/pictures/Über uns/Passbild_Stefan_F_edit.jpg")}
-              alt=""
-              fill
-              priority
-              sizes="(min-width: 1280px) 366px, 30vw"
-              className="object-cover object-top"
-            />
-          </div>
+        <div className="products-hero-media absolute inset-0" aria-hidden="true">
+          <Image
+            src={encodeURI("/neue bilder/Produktion-Lager/Schalenlager-Montage2.png")}
+            alt=""
+            fill
+            priority
+            sizes="(min-width: 1280px) 1216px, 100vw"
+            className="object-cover object-[68%_center]"
+          />
         </div>
         <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[560px] md:items-center md:px-12 md:py-16 lg:px-16">
@@ -270,6 +258,43 @@ export default function FirmaPage() {
           lead="Von der Gründung durch Hubert Dalemans bis zur heutigen Führung durch Stefan Dalemans: persönlich, verlässlich und nah an der Nutzung im Raum."
           align="editorial"
         />
+
+        <article className="section-grid-top overflow-hidden rounded-6xl bg-premium-espresso text-premium-canvas shadow-premium-xl">
+          <div className="grid lg:grid-cols-[minmax(300px,0.82fr)_1.18fr] lg:items-stretch">
+            <div className="relative min-h-[420px] overflow-hidden sm:min-h-[520px] lg:min-h-[560px]">
+              <Image
+                src={encodeURI("/neue bilder/stefan-dalemans-portrait.png")}
+                alt="Stefan Dalemans, heutiger Geschäftsführer von Dalemans"
+                fill
+                sizes="(min-width: 1024px) 42vw, 100vw"
+                className="object-cover object-top"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-premium-espresso/45 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-premium-espresso/25" aria-hidden />
+            </div>
+
+            <div className="relative flex flex-col justify-center px-7 py-10 sm:px-10 sm:py-12 lg:px-14 lg:py-16">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_70%_at_100%_0%,rgba(196,165,116,0.12),transparent_60%)]" aria-hidden />
+              <div className="relative">
+                <p className="section-eyebrow text-premium-sand">Heute persönlich für Sie da</p>
+                <h3 className="mt-5 font-display text-3xl font-medium leading-tight tracking-[-0.02em] sm:text-4xl">
+                  Stefan Dalemans
+                </h3>
+                <p className="mt-2 text-sm font-medium uppercase tracking-[0.14em] text-premium-sand/90">
+                  Geschäftsführer
+                </p>
+                <p className="mt-7 max-w-xl text-base leading-8 text-white/76">
+                  Stefan Dalemans führt das Familienunternehmen heute in zweiter Generation weiter. Als direkter Ansprechpartner verbindet er die Erfahrung aus mehr als 30 Jahren mit einem klaren Blick für die Anforderungen moderner, flexibel genutzter Räume.
+                </p>
+                <p className="mt-5 max-w-xl text-base leading-8 text-white/76">
+                  Dabei bleibt erhalten, was Dalemans seit 1994 auszeichnet: persönliche Beratung, verbindliche Absprachen und Lösungen, die im Alltag dauerhaft funktionieren.
+                </p>
+                <Link href="/kontakt" className="btn-on-dark mt-8 inline-flex self-start">
+                  Persönlich Kontakt aufnehmen
+                </Link>
+              </div>
+            </div>
+          </div>
+        </article>
 
         <div className="section-grid-top grid gap-6 md:grid-cols-3 lg:gap-8">
           {milestones.map((item, index) => (

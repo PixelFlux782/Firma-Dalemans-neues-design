@@ -533,37 +533,44 @@
 }
 
 @media (min-width: 1024px) {
-  .hero-architectural {
-    /* The media column is 1.12fr wide beside a .88fr copy column.
-       Pulling it left by 78.58% of its own width places the image beneath
-       the entire copy area, so its edge can never show through the fade. */
-    --hero-image-overlap: 78.58%;
+  .hero-architectural > .grid {
+    position: relative;
+  }
+
+  .hero-architectural .hero-carousel {
+    position: absolute;
+    inset: 0;
   }
 
   .hero-architectural .hero-carousel-slide,
   .hero-architectural .hero-carousel-shade {
-    left: calc(-1 * var(--hero-image-overlap));
+    left: 0;
   }
 
   .hero-architectural .hero-copy {
     isolation: isolate;
+    grid-column: 1;
   }
 
   .hero-architectural .hero-copy::after {
     content: "";
     position: absolute;
     z-index: -1;
-    inset: 0 calc(-1 * var(--hero-image-overlap)) 0 0;
+    inset: 0 -76% 0 0;
     pointer-events: none;
     background: linear-gradient(
       90deg,
       rgb(250 248 240) 0%,
-      rgb(250 248 240) 52%,
-      rgb(250 248 240 / 0.86) 66%,
-      rgb(250 248 240 / 0.42) 80%,
-      rgb(250 248 240 / 0.12) 91%,
+      rgb(250 248 240) 48%,
+      rgb(250 248 240 / 0.9) 62%,
+      rgb(250 248 240 / 0.56) 76%,
+      rgb(250 248 240 / 0.18) 90%,
       transparent 100%
     );
+  }
+
+  .hero-architectural .hero-carousel-controls {
+    left: 48%;
   }
 
   .hero-architectural .hero-carousel::after {

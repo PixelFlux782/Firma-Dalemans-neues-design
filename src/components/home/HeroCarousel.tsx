@@ -162,7 +162,7 @@ export default function HeroCarousel() {
 
       <div className="hero-carousel-shade pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-premium-espresso/65 via-transparent to-transparent lg:bg-gradient-to-t lg:from-premium-espresso/25 lg:via-transparent lg:to-transparent" aria-hidden />
 
-      <div className="absolute inset-x-4 bottom-4 z-20 sm:inset-x-7 sm:bottom-7">
+      <div className="hero-carousel-controls absolute inset-x-4 bottom-4 z-20 sm:inset-x-7 sm:bottom-7">
         <div className="max-w-2xl rounded-2xl border border-white/25 bg-premium-ink/58 px-4 py-3 text-white shadow-md backdrop-blur-sm sm:px-5 sm:py-4">
           <p className="font-display text-base font-medium leading-snug sm:text-lg" aria-live="polite">
             {slides[active].headline}

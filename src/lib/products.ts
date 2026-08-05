@@ -439,8 +439,8 @@ const productCatalog: Product[] = [
     slug: "seminar-klapptisch",
     categoryId: "klapptische",
     categoryName: "Klapptische",
-    image: asset("/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp"),
-    imageAlt: "Rechteckiger Klapptisch mit heller Tischplatte und Metallkufen",
+    image: asset("/neue bilder/Tische/t210.png"),
+    imageAlt: "Seminar-Klapptisch Modell T210",
     shortDescription:
       "Funktionaler Seminartisch für Unterricht, Besprechung und Schulung.",
     description:

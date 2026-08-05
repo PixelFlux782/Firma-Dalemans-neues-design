@@ -86,7 +86,7 @@ export default function RaeumePlanungPage() {
             <div className="p-7"><p className="section-eyebrow">Raum- & Bestuhlungsplanung</p><h2 className="mt-4 font-display text-3xl font-medium text-premium-ink">Nutzungsvarianten vor der Bestellung prüfen.</h2><p className="mt-4 text-sm leading-7 text-premium-muted">Je nach Projekt helfen 2D- oder 3D-Darstellungen, Stellpläne, Tischanordnungen und die Prüfung schwieriger Geometrien.</p><Link href="/raeume-planung/raumplanung" className="btn-primary mt-7 inline-flex">Raumplanung im Detail</Link></div>
           </article>
           <article id="transport">
-            <ProductVisual src="/pictures/Produkte/Zubehör/Tischtransportwagen_02.jpg" alt="Tischtransportwagen für Lagerung und Saalumbau" sizes="(min-width: 1024px) 50vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
+            <ProductVisual src="/neue bilder/Zubehör/Tischtransportwagen_02.png" alt="Tischtransportwagen für Lagerung und Saalumbau" sizes="(min-width: 1024px) 50vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
             <div className="p-7"><p className="section-eyebrow">Transport- & Lagerplanung</p><h2 className="mt-4 font-display text-3xl font-medium text-premium-ink">Auf- und Abbau von Anfang an mitdenken.</h2><p className="mt-4 text-sm leading-7 text-premium-muted">Passende Wagen, Lagerflächen, Transportwege und sichere Handhabung schützen Möbel und Böden und entlasten ehrenamtliche Teams.</p><Link href="/kontakt?anliegen=Lager%20und%20Transport" className="btn-primary mt-7 inline-flex">Lager und Transport mitplanen</Link></div>
           </article>
         </div>

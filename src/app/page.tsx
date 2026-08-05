@@ -186,7 +186,7 @@ export default function HomePage() {
         <div className="mt-12">
         <div className="grid gap-8 lg:grid-cols-3">
           <article className="premium-card overflow-hidden lg:col-span-2">
-            <Image src={encodeURI("/pictures/CAD-Entwicklung.jpeg")} alt="CAD-Ansicht für die Planung einer Raumausstattung" width={900} height={520} sizes="(min-width: 1024px) 66vw, 100vw" className="h-56 w-full object-cover" />
+            <Image src={encodeURI("/neue bilder/Sonderlösungen/Räume-u-Planung.png")} alt="Visualisierung einer Raum- und Bestuhlungsplanung" width={900} height={520} sizes="(min-width: 1024px) 66vw, 100vw" className="h-56 w-full object-cover" />
             <div className="p-7">
               <p className="section-eyebrow">Raum- und Bestuhlungsplanung</p>
               <h3 className="section-title-functional mt-4">Vor der Bestellung sehen, ob die Lösung im Raum funktioniert.</h3>
@@ -250,7 +250,7 @@ export default function HomePage() {
 
       <HomeSection variant="breathing">
         <div id="langfristig" className="grid overflow-hidden rounded-3xl border border-premium-beige bg-premium-warm/55 lg:grid-cols-[.78fr_1.22fr] lg:items-stretch">
-          <Image src={encodeURI("/pictures/Über uns/Passbild_Stefan_F_edit.jpg")} alt="Stefan Dalemans, persönlicher Ansprechpartner und Geschäftsführer von DLMNS" width={560} height={640} sizes="(min-width: 1024px) 35vw, 100vw" className="h-[26rem] w-full object-cover object-[50%_18%] lg:h-full lg:min-h-[31rem]" />
+          <Image src={encodeURI("/neue bilder/stefan-dalemans-portrait.png")} alt="Stefan Dalemans, persönlicher Ansprechpartner und Geschäftsführer von DLMNS" width={560} height={640} sizes="(min-width: 1024px) 35vw, 100vw" className="h-[26rem] w-full object-cover object-[50%_18%] lg:h-full lg:min-h-[31rem]" />
           <div className="p-7 md:p-10 lg:p-12">
             <p className="section-eyebrow">Familie & Gemeinde</p>
             <h2 className="section-title mt-5">Gemeinde ist für uns nicht nur eine Zielgruppe, sondern Teil unserer eigenen Geschichte.</h2>

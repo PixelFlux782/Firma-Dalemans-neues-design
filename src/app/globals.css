@@ -534,7 +534,10 @@
 
 @media (min-width: 1024px) {
   .hero-architectural {
-    --hero-image-overlap: clamp(180px, 17vw, 240px);
+    /* The media column is 1.12fr wide beside a .88fr copy column.
+       Pulling it left by 78.58% of its own width places the image beneath
+       the entire copy area, so its edge can never show through the fade. */
+    --hero-image-overlap: 78.58%;
   }
 
   .hero-architectural .hero-carousel-slide,

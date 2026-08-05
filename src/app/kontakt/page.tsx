@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ContactForm } from "@/components/ContactForm";
-import CinematicPageHero from "@/components/home/CinematicPageHero";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
@@ -26,6 +26,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     "Kontaktieren Sie Dalemans für Stapelstühle, Klapptische, Gemeindestühle, Zubehör und individuelle Lösungen für Ihre Räume und Veranstaltungen.",
   path: "/kontakt",
+  image: "/neue bilder/kontakt-hero.png",
   keywords: [
     "Kontakt Dalemans",
     "Beratung Stapelstühle",
@@ -37,19 +38,30 @@ export const metadata: Metadata = buildMetadata({
 export default function KontaktPage() {
   return (
     <div className="page-stack">
-      <CinematicPageHero
-        eyebrow="Beratung"
-        title="Persönlich anfragen — wir hören zu"
-        lead="Fragen zu Produkten, Kategorien oder einer individuellen Raumlösung? Der direkte Kontakt ist der schnellste Weg zu einer durchdachten Empfehlung — ruhig, konkret und mit Blick auf Ihren Raum."
-        breadcrumbs={[{ label: "Start", href: "/" }, { label: "Kontakt" }]}
-        mediaAriaLabel="Beratung — einladende Raumatmosphäre"
-        mood="bronze-glow"
-        actions={
-          <a href="#anfrage" className="btn-hero-primary text-center">
-            Anfrage starten
-          </a>
-        }
-      />
+      <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
+        <div className="products-hero-media absolute inset-0" aria-hidden="true">
+          <Image
+            src={encodeURI("/neue bilder/kontakt-hero.png")}
+            alt=""
+            fill
+            priority
+            sizes="(min-width: 1280px) 1216px, 100vw"
+            className="object-cover object-center"
+          />
+        </div>
+        <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
+        <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[560px] md:items-center md:px-12 md:py-16 lg:px-16">
+          <div className="max-w-[42rem] md:w-[61%]">
+            <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Kontakt" }]} />
+            <p className="section-eyebrow mt-7">Beratung</p>
+            <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Persönlich anfragen — wir hören zu</h1>
+            <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Fragen zu Produkten, Kategorien oder einer individuellen Raumlösung? Der direkte Kontakt ist der schnellste Weg zu einer durchdachten Empfehlung — ruhig, konkret und mit Blick auf Ihren Raum.</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a href="#anfrage" className="btn-primary px-6 py-3">Anfrage starten</a>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <HomeSection id="anfrage">
         <SectionHeader

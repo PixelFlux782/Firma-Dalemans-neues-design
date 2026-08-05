@@ -2,13 +2,11 @@ import Link from "next/link";
 import ProductVisual from "@/components/ProductVisual";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ProductCatalog from "@/components/ProductCatalog";
-import ProductImageGallery from "@/components/ProductImageGallery";
 import { StructuredData } from "@/components/StructuredData";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
 import StackingChairsCategory from "@/components/StackingChairsCategory";
-import { tableGroups } from "@/lib/category-media";
 import { getProductCategoryById } from "@/lib/product-categories";
 import { getProductsByCategory, type ProductCategoryId } from "@/lib/products";
 import { absoluteUrl, siteName } from "@/lib/seo";
@@ -68,10 +66,10 @@ export default function ProductCategoryOverview({ categoryId }: Props) {
     { "@type": "FAQPage", "@id": absoluteUrl(`/produkte/kategorien/${category.id}#faq`), mainEntity: info.faq.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) },
   ] };
 
-  if (categoryId === "stapelstuehle") {
+  if (categoryId === "stapelstuehle" || categoryId === "klapptische") {
     return <>
       <StructuredData data={data} />
-      <StackingChairsCategory heroImage={category.image} products={products} />
+      <StackingChairsCategory heroImage={category.image} products={products} variant={categoryId === "klapptische" ? "tables" : "chairs"} />
     </>;
   }
 
@@ -111,8 +109,6 @@ export default function ProductCategoryOverview({ categoryId }: Props) {
       </div>
       <div className="mt-8 flex flex-wrap gap-2 border-t border-premium-beige pt-6 text-sm text-premium-charcoal">{category.highlights.slice(0, 3).map((item) => <span key={item} className="rounded-full bg-white px-4 py-2">{item}</span>)}</div>
     </HomeSection>
-
-    {categoryId === "klapptische" ? <HomeSection><SectionHeader eyebrow="Anwendung und Konstruktion" title="Tischformen für unterschiedliche Raumkonzepte" lead="Ergänzende Ansichten zeigen Formen und technische Prinzipien, ohne die Produkte ein zweites Mal vollständig zu präsentieren." align="editorial" /><div className="section-grid-top"><ProductImageGallery groups={tableGroups} /></div></HomeSection> : null}
 
     <HomeSection id="faq"><SectionHeader eyebrow="Häufige Fragen" title={`Kurz geklärt: ${category.name}`} lead="Antworten auf typische Fragen vor der konkreten Anfrage." align="editorial" /><div className="section-grid-top grid gap-5 md:grid-cols-2">{info.faq.map((item) => <article key={item.question} className="premium-card p-7"><h2 className="font-display text-xl font-medium text-premium-ink">{item.question}</h2><p className="mt-4 text-sm leading-7 text-premium-muted">{item.answer}</p></article>)}</div></HomeSection>
     <PremiumCtaSection eyebrow="Persönliche Beratung" title={`Passende ${category.name} auswählen`} lead="Wir klären Ausführung, Stückzahl, Raumwirkung, Lagerung und Transport persönlich mit Ihnen." primaryHref={`/kontakt?kategorie=${encodeURIComponent(category.name)}`} primaryLabel={isAccessories ? "Ersatzteil anfragen" : "Beratung zur Auswahl"} secondaryHref="tel:+499342915353" secondaryLabel="Direkt anrufen" />

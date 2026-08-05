@@ -7,6 +7,7 @@ import type { Product } from "@/lib/products";
 interface Props {
   heroImage: string;
   products: Product[];
+  variant?: "chairs" | "tables";
 }
 
 interface ProductImageTreatment {
@@ -24,7 +25,7 @@ const productImageTreatments: Record<string, ProductImageTreatment> = {
   "stapelstuhl-e1000": { imagePosition: "51% 52%", imageScale: 1.07, mobileImagePosition: "51% 51%", mobileImageScale: 1.01 },
 };
 
-function ProductActions({ product, requestSample }: { product: Product; requestSample: boolean }) {
+function ProductActions({ product, requestSample, variant }: { product: Product; requestSample: boolean; variant: "chairs" | "tables" }) {
   return (
     <div className="mt-5 grid gap-3 sm:flex sm:flex-wrap sm:items-center sm:gap-x-5">
       <Link href={`/produkte/${product.slug}`} className="btn-primary justify-center px-5 py-2.5 text-sm">
@@ -34,13 +35,17 @@ function ProductActions({ product, requestSample }: { product: Product; requestS
         href={`/kontakt?produkt=${encodeURIComponent(product.title)}`}
         className="inline-flex min-h-11 items-center justify-center text-sm font-medium text-premium-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-4 sm:justify-start"
       >
-        {requestSample ? "Musterstuhl anfragen" : "Ausführung besprechen"}
+        {variant === "tables" ? "Ausführung besprechen" : requestSample ? "Musterstuhl anfragen" : "Ausführung besprechen"}
       </Link>
     </div>
   );
 }
 
-export default function StackingChairsCategory({ heroImage, products }: Props) {
+export default function StackingChairsCategory({ heroImage, products, variant = "chairs" }: Props) {
+  const isTables = variant === "tables";
+  const categoryName = isTables ? "Klapptische" : "Stapelstühle";
+  const categoryQuery = encodeURIComponent(categoryName);
+
   return (
     <div className="flex min-w-0 flex-col gap-12 md:gap-14">
       <section>
@@ -52,19 +57,19 @@ export default function StackingChairsCategory({ heroImage, products }: Props) {
               fill
               priority
               sizes="(min-width: 1280px) 1216px, 100vw"
-              className="object-cover object-[72%_center] md:object-[80%_center]"
+              className={isTables ? "object-cover object-center" : "object-cover object-[72%_center] md:object-[80%_center]"}
             />
           </div>
           <div className="stacking-chairs-hero__shade pointer-events-none absolute inset-0" aria-hidden="true" />
           <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[620px] md:items-center md:px-12 md:py-16 lg:px-16">
             <div className="max-w-[42rem] md:w-[61%]">
-              <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: "Stapelstühle" }]} />
+              <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: categoryName }]} />
               <p className="section-eyebrow mt-7">Produktkategorie · {products.length} Produkte</p>
-              <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Stapelstühle für flexible Räume.</h1>
-              <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Vielseitige Bestuhlung für Gottesdienste, Mehrzweckräume und Veranstaltungen mit hoher Frequenz.</p>
+              <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">{isTables ? "Klapptische für flexible Räume." : "Stapelstühle für flexible Räume."}</h1>
+              <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">{isTables ? "Schnell aufgebaut, stabil im Einsatz und nach der Veranstaltung wieder kompakt verstaut." : "Vielseitige Bestuhlung für Gottesdienste, Mehrzweckräume und Veranstaltungen mit hoher Frequenz."}</p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href="#products" className="btn-primary px-6 py-3">Sortiment entdecken</Link>
-                <Link href="/kontakt?kategorie=Stapelst%C3%BChle" className="btn-secondary px-6 py-3">Musterstuhl anfragen</Link>
+                <Link href={`/kontakt?kategorie=${categoryQuery}`} className="btn-secondary px-6 py-3">{isTables ? "Beratung anfragen" : "Musterstuhl anfragen"}</Link>
               </div>
             </div>
           </div>
@@ -73,8 +78,8 @@ export default function StackingChairsCategory({ heroImage, products }: Props) {
 
       <section id="products" aria-labelledby="products-title" className="scroll-mt-28">
         <p className="section-eyebrow">Sortiment</p>
-        <h2 id="products-title" className="mt-3 max-w-3xl font-display text-3xl font-medium leading-tight text-premium-ink sm:text-4xl">Fünf Stapelstühle für unterschiedliche Räume und Anforderungen</h2>
-        <p className="mt-4 max-w-2xl leading-7 text-premium-muted">Von der robusten Grundausstattung bis zur gepolsterten Komfortlösung – persönlich ausgewählt und langfristig betreut.</p>
+        <h2 id="products-title" className="mt-3 max-w-3xl font-display text-3xl font-medium leading-tight text-premium-ink sm:text-4xl">{isTables ? `${products.length} Klapptische für unterschiedliche Räume und Anforderungen` : "Fünf Stapelstühle für unterschiedliche Räume und Anforderungen"}</h2>
+        <p className="mt-4 max-w-2xl leading-7 text-premium-muted">{isTables ? "Vom vielseitigen Rechtecktisch bis zur kommunikativen Bistro-Lösung – passend zu Nutzung, Raum und Lagerung ausgewählt." : "Von der robusten Grundausstattung bis zur gepolsterten Komfortlösung – persönlich ausgewählt und langfristig betreut."}</p>
 
         <div className="mt-4 sm:mt-5">
           {products.map((product, index) => {
@@ -93,7 +98,7 @@ export default function StackingChairsCategory({ heroImage, products }: Props) {
               >
                 <ProductVisual src={product.image} alt={product.imageAlt ?? product.title} sizes="(min-width: 1280px) 570px, (min-width: 1024px) 48vw, 100vw" aspectRatio="4 / 5" objectPosition={imageTreatment.imagePosition} imageScale={Math.min(imageTreatment.imageScale, 1)} imageInset="5%" backgroundTone="canvas" className={`min-w-0 sm:[--visual-ratio:5/4] lg:min-h-[580px] ${imageRight ? "lg:order-2" : ""}`} />
                 <div className={`flex min-w-0 flex-col justify-center px-1 sm:px-2 lg:px-0 ${imageRight ? "lg:order-1" : ""}`}>
-                  <p className="section-eyebrow">Stapelstühle</p>
+                  <p className="section-eyebrow">{categoryName}</p>
                   <h3 className="mt-2 font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink sm:text-3xl">{product.title}</h3>
                   <p className="mt-4 max-w-xl leading-7 text-premium-muted">{product.shortDescription}</p>
                   <ul className="mt-6 grid max-w-xl gap-3 border-y border-premium-beige/60 py-5 text-sm leading-6 text-premium-charcoal/90" aria-label={`Merkmale von ${product.title}`}>
@@ -104,7 +109,7 @@ export default function StackingChairsCategory({ heroImage, products }: Props) {
                       </li>
                     ))}
                   </ul>
-                  <ProductActions product={product} requestSample={index % 2 === 0} />
+                  <ProductActions product={product} requestSample={index % 2 === 0} variant={variant} />
                 </div>
               </article>
             );
@@ -116,18 +121,18 @@ export default function StackingChairsCategory({ heroImage, products }: Props) {
         <div className="grid gap-7 lg:grid-cols-[.9fr_1.1fr] lg:items-end">
           <div>
             <p className="section-eyebrow">Auswahlhilfe</p>
-            <h2 id="selection-title" className="mt-3 font-display text-3xl font-medium text-premium-ink">Welcher Stapelstuhl passt zu Ihrem Raum?</h2>
-            <p className="mt-4 text-sm leading-7 text-premium-muted">Nutzungshäufigkeit, Stapelhöhe, Sitzkomfort, Boden, Reihenbildung und Raumwirkung entscheiden über die passende Ausführung.</p>
+            <h2 id="selection-title" className="mt-3 font-display text-3xl font-medium text-premium-ink">{isTables ? "Welcher Klapptisch passt zu Ihrem Raum?" : "Welcher Stapelstuhl passt zu Ihrem Raum?"}</h2>
+            <p className="mt-4 text-sm leading-7 text-premium-muted">{isTables ? "Raumgröße, Nutzung, Tischform, Oberfläche, Transportweg und Lagerfläche entscheiden über die passende Ausführung." : "Nutzungshäufigkeit, Stapelhöhe, Sitzkomfort, Boden, Reihenbildung und Raumwirkung entscheiden über die passende Ausführung."}</p>
           </div>
           <div>
             <ul className="grid gap-3 sm:grid-cols-3">
-              {["Komfort und Nutzung", "Transport und Lagerung", "Stoffe, Farben und Zubehör"].map((item) => (
+              {(isTables ? ["Maße und Nutzung", "Transport und Lagerung", "Oberflächen und Gestelle"] : ["Komfort und Nutzung", "Transport und Lagerung", "Stoffe, Farben und Zubehör"]).map((item) => (
                 <li key={item} className="rounded-xl bg-premium-warm/70 px-4 py-4 text-sm font-medium text-premium-ink">{item}</li>
               ))}
             </ul>
             <div className="mt-5 grid gap-3 sm:flex sm:flex-wrap">
-              <Link href="/kontakt?kategorie=Stapelst%C3%BChle" className="btn-primary justify-center px-5 py-2.5 text-sm">Beratung zur Auswahl</Link>
-              <Link href="/kontakt?kategorie=Stapelst%C3%BChle" className="btn-secondary justify-center px-5 py-2.5 text-sm">Musterstuhl anfragen</Link>
+              <Link href={`/kontakt?kategorie=${categoryQuery}`} className="btn-primary justify-center px-5 py-2.5 text-sm">Beratung zur Auswahl</Link>
+              <Link href={`/kontakt?kategorie=${categoryQuery}`} className="btn-secondary justify-center px-5 py-2.5 text-sm">{isTables ? "Ausführung besprechen" : "Musterstuhl anfragen"}</Link>
             </div>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import ProductVisual from "@/components/ProductVisual";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
@@ -16,16 +17,29 @@ export const metadata: Metadata = buildMetadata({
 
 export default function SonderpostenPage() {
   return <div className="page-stack">
-    <section className="relative -mx-5 overflow-hidden bg-premium-ink sm:-mx-6 md:mx-0 md:rounded-[2.5rem]">
-      <div className="grid lg:grid-cols-[1.05fr_.95fr]">
-        <div className="relative z-10 flex flex-col justify-center px-5 py-12 sm:px-10 lg:px-14 lg:py-20">
-          <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Sonderposten" }]} className="text-white/70 [&_span]:text-white/80 [&_a:hover]:text-white" />
-          <p className="section-eyebrow mt-8 text-premium-sand">Vorschau · wechselndes Sortiment</p>
-          <h1 className="mt-5 max-w-[14ch] font-display text-4xl font-medium leading-tight text-white sm:text-5xl">Sonderposten nach sorgfältiger Prüfung</h1>
-          <p className="mt-6 max-w-xl text-base leading-8 text-white/70">Wenn konkrete Lagerware, Einzelstücke oder Restbestände vorliegen, veröffentlichen wir sie hier mit eindeutigen Angaben. Die derzeit gezeigten Produkte dienen ausschließlich als Vorschau.</p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row"><Link href="#angebote" className="btn-on-dark">Vorschau ansehen</Link><Link href="/kontakt?anliegen=Sonderposten" className="btn-outline-dark">Sonderposten vormerken</Link></div>
+    <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
+      <div className="products-hero-media absolute inset-0" aria-hidden="true">
+        <Image
+          src={encodeURI("/images/curated/Sonderposten/kunstoffschalenstuhl-restposten.webp")}
+          alt=""
+          fill
+          priority
+          sizes="(min-width: 1280px) 1216px, 100vw"
+          className="object-cover object-center"
+        />
+      </div>
+      <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
+      <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[560px] md:items-center md:px-12 md:py-16 lg:px-16">
+        <div className="max-w-[42rem] md:w-[61%]">
+          <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Sonderposten" }]} />
+          <p className="section-eyebrow mt-7">Vorschau · wechselndes Sortiment</p>
+          <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Sonderposten nach sorgfältiger Prüfung</h1>
+          <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Wenn konkrete Lagerware, Einzelstücke oder Restbestände vorliegen, veröffentlichen wir sie hier mit eindeutigen Angaben. Die derzeit gezeigten Produkte dienen ausschließlich als Vorschau.</p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="#angebote" className="btn-primary px-6 py-3">Vorschau ansehen</Link>
+            <Link href="/kontakt?anliegen=Sonderposten" className="btn-secondary px-6 py-3">Sonderposten vormerken</Link>
+          </div>
         </div>
-        <ProductVisual src="/images/curated/Sonderposten/kunstoffschalenstuhl-restposten.webp" alt="Grauer Kunststoffschalenstuhl als Beispiel für wechselnde Lagerware" priority sizes="(min-width: 1024px) 45vw, 100vw" aspectRatio="4 / 5" imageInset="6%" backgroundTone="#0D1712" className="min-h-[360px] lg:min-h-[560px]" />
       </div>
     </section>
 

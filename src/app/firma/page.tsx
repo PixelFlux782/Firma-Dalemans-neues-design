@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { StructuredData } from "@/components/StructuredData";
-import CinematicPageHero from "@/components/home/CinematicPageHero";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
@@ -103,7 +103,7 @@ const firmaStructuredData = {
       },
       primaryImageOfPage: {
         "@type": "ImageObject",
-        url: absoluteUrl("/pictures/Über uns/Werkstatt-23.jpg"),
+        url: absoluteUrl("/neue bilder/Produktion-Lager/Schalenlager-Montage2.png"),
       },
     },
   ],
@@ -114,44 +114,43 @@ export default function FirmaPage() {
     <div className="page-stack">
       <StructuredData data={firmaStructuredData} />
 
-      <CinematicPageHero
-        eyebrow="Über Dalemans"
-        title="Ein Familienunternehmen für langlebige Räume und ehrliche Beratung"
-        lead="1994 von Hubert Dalemans gegründet und heute von Stefan Dalemans geführt: persönliche Beratung, praktische Planung und verlässliche Lösungen für flexible Räume."
-        breadcrumbs={[{ label: "Start", href: "/" }, { label: "Firma" }]}
-        mediaAriaLabel="Familienunternehmen — emotionale Markenkomposition"
-        mood="espresso-lounge"
-        actions={
-          <>
-            <Link href="/kontakt" className="btn-hero-primary text-center">
-              Kontakt aufnehmen
-            </Link>
-            <Link href="/produkte" className="btn-hero-secondary text-center">
-              Produkte ansehen
-            </Link>
-          </>
-        }
-        visual={
-          <div className="grid gap-4 sm:grid-cols-2">
+      <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
+        <div className="products-hero-media absolute inset-0 grid grid-cols-[1.4fr_.6fr]" aria-hidden="true">
+          <div className="relative">
             <Image
-              src={encodeURI("/pictures/Über uns/Passbild_Stefan_F_edit.jpg")}
-              alt="Stefan Dalemans"
-              width={420}
-              height={360}
-              sizes="(min-width: 1024px) 22vw, 50vw"
-              className="min-h-[200px] w-full object-cover object-top md:min-h-[240px]"
-            />
-            <Image
-              src={encodeURI("/pictures/Über uns/Werkstatt-23.jpg")}
-              alt="Arbeitsplatz in der Dalemans Werkstatt"
-              width={420}
-              height={360}
-              sizes="(min-width: 1024px) 22vw, 50vw"
-              className="min-h-[200px] w-full object-cover md:min-h-[240px]"
+              src={encodeURI("/neue bilder/Produktion-Lager/Schalenlager-Montage2.png")}
+              alt=""
+              fill
+              priority
+              sizes="(min-width: 1280px) 850px, 70vw"
+              className="object-cover object-[78%_center]"
             />
           </div>
-        }
-      />
+          <div className="relative">
+            <Image
+              src={encodeURI("/pictures/Über uns/Passbild_Stefan_F_edit.jpg")}
+              alt=""
+              fill
+              priority
+              sizes="(min-width: 1280px) 366px, 30vw"
+              className="object-cover object-top"
+            />
+          </div>
+        </div>
+        <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
+        <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[560px] md:items-center md:px-12 md:py-16 lg:px-16">
+          <div className="max-w-[42rem] md:w-[61%]">
+            <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Firma" }]} />
+            <p className="section-eyebrow mt-7">Über Dalemans</p>
+            <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Ein Familienunternehmen für langlebige Räume und ehrliche Beratung</h1>
+            <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">1994 von Hubert Dalemans gegründet und heute von Stefan Dalemans geführt: persönliche Beratung, praktische Planung und verlässliche Lösungen für flexible Räume.</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link href="/kontakt" className="btn-primary px-6 py-3">Kontakt aufnehmen</Link>
+              <Link href="/produkte" className="btn-secondary px-6 py-3">Produkte ansehen</Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <HomeSection>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">

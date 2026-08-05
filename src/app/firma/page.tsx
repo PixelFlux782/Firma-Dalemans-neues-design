@@ -201,8 +201,8 @@ export default function FirmaPage() {
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               <div className="image-depth overflow-hidden rounded-4xl shadow-premium">
                 <Image
-                  src={encodeURI("/pictures/Über uns/CAD-Entwicklung1zu1.png")}
-                  alt="CAD Entwicklung und Sonderlösungen"
+                  src={encodeURI("/neue bilder/Sonderlösungen/Räume-u-Planung.png")}
+                  alt="Planung individueller Räume und Sonderlösungen"
                   width={360}
                   height={240}
                   sizes="(min-width: 1024px) 20vw, 50vw"
@@ -229,8 +229,8 @@ export default function FirmaPage() {
 
           <div className="image-depth relative min-h-[360px] overflow-hidden lg:min-h-[520px]">
             <Image
-              src={encodeURI("/pictures/Über uns/Werkstatt-24.jpg")}
-              alt="Werkstattbereich für Entwicklung und Anpassungen"
+              src={encodeURI("/neue bilder/Sonderlösungen/runder-tisch.png")}
+              alt="Runder Tisch als individuell geplante Sonderlösung"
               fill
               sizes="(min-width: 1024px) 50vw, 100vw"
               className="absolute inset-0 h-full w-full object-cover"

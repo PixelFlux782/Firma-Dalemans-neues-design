@@ -23,7 +23,7 @@ const steps = [
   {
     title: "Umsetzung",
     text: "Die Lösung wird praktisch gedacht: Nutzung, Lagerung, Transport und Alltagstauglichkeit.",
-    image: "/pictures/Über uns/Werkstatt-24.jpg",
+    image: "/neue bilder/planung-schritt-3.png",
   },
 ] as const;
 

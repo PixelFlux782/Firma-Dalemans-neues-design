@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import CinematicPageHero from "@/components/home/CinematicPageHero";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
@@ -26,7 +26,31 @@ const services = [
 
 export default function BeratungServicePage() {
   return <div className="page-stack">
-    <CinematicPageHero eyebrow="Beratung & Service" title="Persönlich klären, was zu Raum und Alltag passt." lead="Wir kennen uns aus, sprechen direkt mit unseren Kunden und empfehlen nur Lösungen, von deren Qualität wir selbst überzeugt sind." breadcrumbs={[{ label: "Start", href: "/" }, { label: "Beratung & Service" }]} mediaAriaLabel="Persönliche Material- und Produktberatung" mood="stone-arch" actions={<><Link href="/kontakt?anliegen=Beratung" className="btn-hero-primary">Beratung anfragen</Link><a href="tel:+499342915353" className="btn-hero-secondary">Direkt anrufen</a></>} visual={<Image src={encodeURI("/images/curated/Stoffe-Farben/Textilproben.webp")} alt="Stoffmuster und Stühle für eine persönliche Materialberatung" width={760} height={500} priority sizes="(min-width: 1024px) 42vw, 100vw" className="min-h-72 w-full object-cover" />} />
+    <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
+      <div className="products-hero-media absolute inset-0" aria-hidden="true">
+        <Image
+          src={encodeURI("/images/curated/Stoffe-Farben/Textilproben.webp")}
+          alt=""
+          fill
+          priority
+          sizes="(min-width: 1280px) 1216px, 100vw"
+          className="object-cover object-center"
+        />
+      </div>
+      <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
+      <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[560px] md:items-center md:px-12 md:py-16 lg:px-16">
+        <div className="max-w-[42rem] md:w-[61%]">
+          <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Beratung & Service" }]} />
+          <p className="section-eyebrow mt-7">Beratung & Service</p>
+          <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Persönlich klären, was zu Raum und Alltag passt.</h1>
+          <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Wir kennen uns aus, sprechen direkt mit unseren Kunden und empfehlen nur Lösungen, von deren Qualität wir selbst überzeugt sind.</p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="/kontakt?anliegen=Beratung" className="btn-primary px-6 py-3">Beratung anfragen</Link>
+            <a href="tel:+499342915353" className="btn-secondary px-6 py-3">Direkt anrufen</a>
+          </div>
+        </div>
+      </div>
+    </section>
     <HomeSection>
       <SectionHeader eyebrow="Von Auswahl bis Nutzung" title="Beratung, die an konkreten Alltagssituationen ansetzt" lead="Sie müssen nicht vorab wissen, welches Modell richtig ist. Ein Raum, ein Bestand oder eine praktische Frage genügt als Einstieg." align="editorial" />
       <div className="section-grid-top grid gap-5 md:grid-cols-2 lg:grid-cols-3">{services.map(([title, text, label, href]) => <article key={title} className="premium-card flex flex-col p-7"><h2 className="font-display text-2xl font-medium text-premium-ink">{title}</h2><p className="mt-4 flex-1 text-sm leading-7 text-premium-muted">{text}</p><Link href={href} className="mt-6 text-sm font-medium text-premium-bronze">{label} →</Link></article>)}</div>

@@ -20,7 +20,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Die Anfrage konnte nicht gelesen werden." }, { status: 400 });
   }
 
-  const contactPerson = text(body.contactPerson);
+  const firstName = text(body.firstName);
+  const lastName = text(body.lastName);
   const organization = text(body.organization);
   const email = text(body.email);
   const phone = text(body.phone);
@@ -30,7 +31,8 @@ export async function POST(request: Request) {
 
   if (text(body.website)) return NextResponse.json({ ok: true });
   if (
-    !contactPerson ||
+    !firstName ||
+    !lastName ||
     (!email && !phone) ||
     (email.length > 0 && !validEmail) ||
     !subject ||
@@ -72,7 +74,8 @@ export async function POST(request: Request) {
       replyTo: validEmail ? email : undefined,
       subject: `Website-Anfrage: ${subject}`,
       text: [
-        `Ansprechpartner: ${contactPerson}`,
+        `Vorname: ${firstName}`,
+        `Nachname: ${lastName}`,
         `Gemeinde / Organisation: ${organization || "nicht angegeben"}`,
         `E-Mail: ${email || "nicht angegeben"}`, `Telefon: ${phone || "nicht angegeben"}`,
         `Anliegen: ${subject}`, "", message,

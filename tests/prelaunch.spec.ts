@@ -104,14 +104,15 @@ test("mobile Navigation ist per Tastatur bedienbar", async ({ page }) => {
 test("Kontaktformular validiert lokal und sendet keine Nachricht", async ({ page }) => {
   await page.goto("/kontakt");
   await page.getByRole("button", { name: "Anfrage senden" }).click();
-  await expect(page.locator("input[name=contactPerson]")).toBeFocused();
-  for (const field of ["contactPerson", "subject", "message"]) {
+  await expect(page.locator("input[name=firstName]")).toBeFocused();
+  for (const field of ["firstName", "lastName", "subject", "message"]) {
     await expect(page.locator(`[name=${field}]`)).toHaveAttribute("required", "");
   }
   await expect(page.locator("input[name=organization]")).not.toHaveAttribute("required", "");
   expect(await page.locator(":invalid").count()).toBeGreaterThan(0);
 
-  await page.locator("input[name=contactPerson]").fill("Max Mustermann");
+  await page.locator("input[name=firstName]").fill("Max");
+  await page.locator("input[name=lastName]").fill("Mustermann");
   await page.locator("textarea[name=message]").fill("Bitte beraten Sie uns zu unserer geplanten Bestuhlung.");
   await page.getByRole("button", { name: "Anfrage senden" }).click();
   await expect(page.locator("form [role=alert]")).toContainText("E-Mail-Adresse oder Telefonnummer");
@@ -124,7 +125,8 @@ test("Kontakt-API weist ungültige und übergroße Anfragen ab", async ({ reques
 
   const missingContactMethod = await request.post("/api/contact", {
     data: {
-      contactPerson: "Max Mustermann",
+      firstName: "Max",
+      lastName: "Mustermann",
       subject: "Stapelstühle",
       message: "Bitte senden Sie uns ein Angebot.",
     },

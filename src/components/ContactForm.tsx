@@ -71,9 +71,14 @@ export function ContactForm() {
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2">
         <label className="block text-sm font-medium text-premium-charcoal">
-          Name
+          Vorname
           <span aria-hidden="true"> *</span>
-          <input name="contactPerson" type="text" autoComplete="name" className={inputClass} maxLength={200} required />
+          <input name="firstName" type="text" autoComplete="given-name" className={inputClass} maxLength={200} required />
+        </label>
+        <label className="block text-sm font-medium text-premium-charcoal">
+          Nachname
+          <span aria-hidden="true"> *</span>
+          <input name="lastName" type="text" autoComplete="family-name" className={inputClass} maxLength={200} required />
         </label>
         <label className="block text-sm font-medium text-premium-charcoal">
           Gemeinde oder Organisation <span className="font-normal text-premium-muted">(optional)</span>

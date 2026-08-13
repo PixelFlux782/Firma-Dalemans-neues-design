@@ -11,6 +11,7 @@ export function ContactForm() {
   const [status, setStatus] = useState<FormStatus>(null);
   const [pending, setPending] = useState(false);
   const statusRef = useRef<HTMLParagraphElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
   const initialSubject = useMemo(
     () =>
       contextKeys
@@ -26,15 +27,25 @@ export function ContactForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPending(true);
     setStatus(null);
     const form = event.currentTarget;
+    const formData = new FormData(form);
+    const email = String(formData.get("email") ?? "").trim();
+    const phone = String(formData.get("phone") ?? "").trim();
+
+    if (!email && !phone) {
+      setStatus({ type: "error", message: "Bitte geben Sie eine E-Mail-Adresse oder Telefonnummer an." });
+      window.requestAnimationFrame(() => emailRef.current?.focus());
+      return;
+    }
+
+    setPending(true);
 
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(Object.fromEntries(new FormData(form).entries())),
+        body: JSON.stringify(Object.fromEntries(formData.entries())),
       });
       const result = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(result.error || "Die Anfrage konnte nicht gesendet werden.");
@@ -56,47 +67,25 @@ export function ContactForm() {
     <form onSubmit={handleSubmit} className="premium-card relative overflow-hidden p-7 md:p-9 lg:p-10">
       <p className="section-eyebrow">Anfrage</p>
       <h2 className="font-display mt-4 text-2xl font-medium text-premium-ink">Projekt beschreiben</h2>
-      <p className="mt-3 text-sm leading-7 text-premium-muted">Kurz und konkret – wir melden uns persönlich zu Ihrem Raum oder Produktwunsch.</p>
+      <p className="mt-3 text-sm leading-7 text-premium-muted">Kurz und konkret – ein bestimmtes Modell müssen Sie noch nicht kennen. Wir melden uns persönlich zu Ihrem Raum oder Produktwunsch.</p>
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2">
         <label className="block text-sm font-medium text-premium-charcoal">
-          Ansprechpartner
+          Name
           <span aria-hidden="true"> *</span>
           <input name="contactPerson" type="text" autoComplete="name" className={inputClass} maxLength={200} required />
         </label>
         <label className="block text-sm font-medium text-premium-charcoal">
-          Gemeinde oder Organisation
-          <span aria-hidden="true"> *</span>
-          <input name="organization" type="text" autoComplete="organization" className={inputClass} maxLength={200} required />
+          Gemeinde oder Organisation <span className="font-normal text-premium-muted">(optional)</span>
+          <input name="organization" type="text" autoComplete="organization" className={inputClass} maxLength={200} />
         </label>
         <label className="block text-sm font-medium text-premium-charcoal">
-          E-Mail
-          <span aria-hidden="true"> *</span>
-          <input name="email" type="email" autoComplete="email" className={inputClass} maxLength={200} required />
+          E-Mail <span className="font-normal text-premium-muted">(E-Mail oder Telefon)</span>
+          <input ref={emailRef} name="email" type="email" autoComplete="email" className={inputClass} maxLength={200} />
         </label>
         <label className="block text-sm font-medium text-premium-charcoal">
-          Telefon <span className="font-normal text-premium-muted">(optional)</span>
+          Telefon <span className="font-normal text-premium-muted">(E-Mail oder Telefon)</span>
           <input name="phone" type="tel" autoComplete="tel" className={inputClass} maxLength={200} />
-        </label>
-        <label className="block text-sm font-medium text-premium-charcoal sm:col-span-2">
-          Straße und Hausnummer
-          <span aria-hidden="true"> *</span>
-          <input name="street" type="text" autoComplete="street-address" className={inputClass} maxLength={200} required />
-        </label>
-        <label className="block text-sm font-medium text-premium-charcoal">
-          Postleitzahl
-          <span aria-hidden="true"> *</span>
-          <input name="postalCode" type="text" inputMode="text" autoComplete="postal-code" className={inputClass} maxLength={20} required />
-        </label>
-        <label className="block text-sm font-medium text-premium-charcoal">
-          Ort
-          <span aria-hidden="true"> *</span>
-          <input name="city" type="text" autoComplete="address-level2" className={inputClass} maxLength={120} required />
-        </label>
-        <label className="block text-sm font-medium text-premium-charcoal sm:col-span-2">
-          Land
-          <span aria-hidden="true"> *</span>
-          <input name="country" type="text" autoComplete="country-name" className={inputClass} defaultValue="Deutschland" maxLength={120} required />
         </label>
         <label className="block text-sm font-medium text-premium-charcoal sm:col-span-2">
           Anliegen oder gewünschter Bereich

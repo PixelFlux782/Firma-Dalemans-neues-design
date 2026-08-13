@@ -39,12 +39,13 @@ export default function RaeumePlanungPage() {
   return (
     <div className="page-stack">
       <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
-        <div className="products-hero-media absolute inset-0" aria-hidden="true">
+          <div className="products-hero-media absolute inset-0">
           <Image
             src={encodeURI("/neue bilder/Sonderlösungen/Räume-u-Planung.png")}
-            alt=""
+            alt="Vom CAD-Entwurf zum eingerichteten Gemeinderaum mit flexibler Tischbestuhlung"
             fill
             priority
+            fetchPriority="high"
             sizes="(min-width: 1280px) 1216px, 100vw"
             className="origin-left scale-[1.1] object-cover object-left"
           />
@@ -52,7 +53,7 @@ export default function RaeumePlanungPage() {
         <div className="raeume-planung-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[560px] md:items-center md:px-12 md:py-16 lg:px-16">
           <div className="max-w-[42rem] md:w-[61%]">
-            <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Räume & Planung" }]} />
+            <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Räume & Planung" }]} currentPath="/raeume-planung" />
             <p className="section-eyebrow mt-7">Räume & Planung</p>
             <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Ausstattung entsteht aus Raum, Nutzung und Alltag.</h1>
             <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Wir betrachten nicht nur einzelne Stühle und Tische, sondern auch Reihen, Wege, Umbau, Transport, Lagerung und die Menschen, die den Raum täglich nutzen.</p>
@@ -92,7 +93,7 @@ export default function RaeumePlanungPage() {
         </div>
       </HomeSection>
 
-      <PremiumCtaSection title="Passt die geplante Ausstattung wirklich in Ihren Raum?" lead="Senden Sie einen vorhandenen Grundriss, Fotos oder eine kurze Beschreibung der Nutzungen. Wir klären den sinnvollen nächsten Schritt." primaryHref="/kontakt?raum=Raumplanung" primaryLabel="Raumplan prüfen lassen" secondaryHref="/produkte" secondaryLabel="Produktgruppen ansehen" />
+      <PremiumCtaSection title="Passt die geplante Ausstattung wirklich in Ihren Raum?" lead="Senden Sie einen vorhandenen Grundriss, Fotos oder eine kurze Beschreibung der Nutzungen. Wir klären den sinnvollen nächsten Schritt." primaryHref="/kontakt?raum=Raumplanung" primaryLabel="Raumplan prüfen lassen" secondaryHref="/produkte" secondaryLabel="Produktgruppen ansehen" reassurance="Auch eine kurze Beschreibung ohne fertigen Grundriss reicht für den Einstieg." showDirectContact />
     </div>
   );
 }

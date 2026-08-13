@@ -62,9 +62,10 @@ export default function GemeindesaalPage() {
         lead="Für Gottesdienst, Feiern, Seminare und Begegnung braucht ein Gemeindesaal Möbel, die gut aussehen, lange halten und schnell umgebaut werden können."
         breadcrumbs={[
           { label: "Start", href: "/" },
-          { label: "Raumlösungen" },
+          { label: "Räume & Planung", href: "/raeume-planung" },
           { label: "Gemeindesaal" },
         ]}
+        breadcrumbPath="/raumloesungen/gemeindesaal"
         mediaAriaLabel="Gemeindesaal mit flexibler Bestuhlung"
         mood="stone-arch"
         actions={

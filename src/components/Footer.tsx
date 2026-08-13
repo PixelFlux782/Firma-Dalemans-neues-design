@@ -58,7 +58,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="container-premium flex flex-col gap-2 py-5 text-xs text-white/40 md:flex-row md:items-center md:justify-between">
+        <div className="container-premium flex flex-col gap-2 py-5 text-xs text-white/60 md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} Dalemans. Alle Rechte vorbehalten.</p>
           <p>Familienbetrieb für Gemeinde-, Saal- und Veranstaltungsmobiliar.</p>
         </div>

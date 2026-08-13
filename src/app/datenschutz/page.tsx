@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: "Datenschutzhinweise der Website von Dalemans.",
     path: "/datenschutz",
   }),
-  robots: { index: false, follow: false },
+  robots: { index: false, follow: true },
 };
 
 export default function DatenschutzPage() {
@@ -20,6 +20,7 @@ export default function DatenschutzPage() {
           { label: "Start", href: "/" },
           { label: "Datenschutz" },
         ]}
+        currentPath="/datenschutz"
       />
 
       <article className="premium-card p-8 md:p-10 lg:p-12">

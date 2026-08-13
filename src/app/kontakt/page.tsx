@@ -5,7 +5,6 @@ import { Suspense } from "react";
 import { ContactForm } from "@/components/ContactForm";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import HomeSection from "@/components/home/HomeSection";
-import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
 import { buildMetadata } from "@/lib/seo";
 
@@ -39,12 +38,13 @@ export default function KontaktPage() {
   return (
     <div className="page-stack">
       <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
-        <div className="products-hero-media absolute inset-0" aria-hidden="true">
+        <div className="products-hero-media absolute inset-0">
           <Image
             src={encodeURI("/neue bilder/kontakt-hero.png")}
-            alt=""
+            alt="Persönliches Beratungsgespräch mit Telefon, Notizen und digitaler Anfrage"
             fill
             priority
+            fetchPriority="high"
             sizes="(min-width: 1280px) 1216px, 100vw"
             className="object-cover object-center"
           />
@@ -52,7 +52,7 @@ export default function KontaktPage() {
         <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[560px] md:items-center md:px-12 md:py-16 lg:px-16">
           <div className="max-w-[42rem] md:w-[61%]">
-            <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Kontakt" }]} />
+            <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Kontakt" }]} currentPath="/kontakt" />
             <p className="section-eyebrow mt-7">Beratung</p>
             <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Persönlich anfragen — wir hören zu</h1>
             <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Fragen zu Produkten, Kategorien oder einer individuellen Raumlösung? Der direkte Kontakt ist der schnellste Weg zu einer durchdachten Empfehlung — ruhig, konkret und mit Blick auf Ihren Raum.</p>
@@ -66,8 +66,8 @@ export default function KontaktPage() {
       <HomeSection id="anfrage">
         <SectionHeader
           eyebrow="Ihr Projekt"
-          title="Gemeinsam zum passenden Raumkonzept"
-          lead="Beschreiben Sie Nutzung und Größe — wir melden uns mit einer Empfehlung aus Sortiment und Sonderlösungen."
+          title="Kurze Angaben reichen für den ersten Schritt"
+          lead="Nennen Sie uns Ihr Anliegen und eine Rückrufmöglichkeit. Sie müssen noch nicht wissen, welches Modell oder welche Ausführung Sie benötigen."
           align="editorial"
         />
 
@@ -121,6 +121,10 @@ export default function KontaktPage() {
                     persönlich, lösungsorientiert und ohne Umwege
                   </span>
                 </p>
+                <div className="border-t border-white/15 pt-5">
+                  <p className="font-medium text-white">Was passiert danach?</p>
+                  <p className="mt-2 text-white/70">Wir lesen Ihre Angaben persönlich, klären offene Fragen per Telefon oder E-Mail und besprechen den sinnvollen nächsten Schritt.</p>
+                </div>
               </div>
             </article>
 
@@ -167,15 +171,6 @@ export default function KontaktPage() {
         </div>
       </HomeSection>
 
-      <PremiumCtaSection
-        eyebrow="Noch unsicher?"
-        title="Wir skizzieren gern ein erstes Raumkonzept"
-        lead="Stöbern Sie im Sortiment oder lernen Sie unser Familienunternehmen kennen — bevor Sie Ihre Anfrage absenden."
-        primaryHref="/produkte"
-        primaryLabel="Sortiment entdecken"
-        secondaryHref="/firma"
-        secondaryLabel="Über Dalemans"
-      />
     </div>
   );
 }

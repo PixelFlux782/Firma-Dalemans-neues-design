@@ -31,12 +31,13 @@ export default function ProductsPage() {
   const featuredProducts = featuredSlugs.map((slug) => products.find((product) => product.slug === slug)).filter((product): product is (typeof products)[number] => Boolean(product));
   return <div className="flex min-w-0 flex-col gap-14 md:gap-20">
     <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
-      <div className="products-hero-media absolute inset-0" aria-hidden="true">
+      <div className="products-hero-media absolute inset-0">
         <Image
           src={encodeURI("/neue bilder/produkte-hero.png")}
-          alt=""
+          alt="Mitarbeiter bei der Montage gepolsterter Stapelstühle in einer Werkstatt"
           fill
           priority
+          fetchPriority="high"
           sizes="(min-width: 1280px) 1216px, 100vw"
           className="object-cover object-[28%_center] md:object-[35%_center]"
         />
@@ -44,7 +45,7 @@ export default function ProductsPage() {
       <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
       <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[560px] md:items-center md:px-12 md:py-16 lg:px-16">
         <div className="max-w-[42rem] md:w-[61%]">
-          <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte" }]} />
+          <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte" }]} currentPath="/produkte" />
           <p className="section-eyebrow mt-7">Digitaler Beratungskatalog</p>
           <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Langlebige Ausstattung für flexible Räume.</h1>
           <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Stapelstühle, Klapptische und praktische Ergänzungen für Gemeinden, Säle und Mehrzweckräume – persönlich ausgewählt und langfristig betreut.</p>
@@ -64,6 +65,6 @@ export default function ProductsPage() {
 
     <HomeSection variant="elevated"><div className="grid gap-8 lg:grid-cols-[1fr_.9fr] lg:items-center"><div><p className="section-eyebrow">Kurze Auswahlhilfe</p><h2 className="section-title mt-4">Vom Raum zur passenden Ausstattung</h2><p className="section-lead mt-5">Nutzung, Personenzahl, Umbauhäufigkeit, Lagerweg und gewünschte Raumwirkung grenzen die Auswahl schnell ein.</p></div><div className="grid gap-3 sm:grid-cols-2"><Link href="/raeume-planung/raumplanung" className="btn-primary text-center">Raumplanung ansehen</Link><Link href="/kontakt?anliegen=Produktauswahl" className="btn-secondary text-center">Ausführung klären</Link></div></div></HomeSection>
     <HomeSection><div className="grid gap-8 border-y border-premium-beige py-10 md:grid-cols-3"><div><p className="section-eyebrow">01 · Auswahl</p><p className="mt-3 text-sm leading-7 text-premium-muted">Produkte nach Nutzung, Komfort und Handhabung vergleichen.</p></div><div><p className="section-eyebrow">02 · Raumplanung</p><p className="mt-3 text-sm leading-7 text-premium-muted">Stückzahlen, Reihen, Wege und Lagerung sinnvoll zusammendenken.</p></div><div><p className="section-eyebrow">03 · Betreuung</p><p className="mt-3 text-sm leading-7 text-premium-muted">Zubehör, Nachbestellung und Ersatzteile langfristig persönlich klären.</p></div></div></HomeSection>
-    <PremiumCtaSection title="Welche Ausstattung passt zu Ihrem Raum?" lead="Beschreiben Sie Raum, Nutzung und geplante Abläufe. Wir helfen persönlich bei der Auswahl." primaryHref="/kontakt?anliegen=Produktauswahl" primaryLabel="Beratung anfragen" secondaryHref="tel:+499342915353" secondaryLabel="Direkt anrufen" />
+    <PremiumCtaSection title="Welche Ausstattung passt zu Ihrem Raum?" lead="Beschreiben Sie Raum, Nutzung und geplante Abläufe. Wir helfen persönlich bei der Auswahl." primaryHref="/kontakt?anliegen=Produktauswahl" primaryLabel="Beratung anfragen" secondaryHref="tel:+499342915353" secondaryLabel="Direkt anrufen" reassurance="Ein konkretes Modell müssen Sie für die erste Anfrage noch nicht kennen." showDirectContact />
   </div>;
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { company } from "@/lib/company";
 
 interface PremiumCtaSectionProps {
   eyebrow?: string;
@@ -8,6 +9,8 @@ interface PremiumCtaSectionProps {
   primaryLabel: string;
   secondaryHref?: string;
   secondaryLabel?: string;
+  reassurance?: string;
+  showDirectContact?: boolean;
 }
 
 export default function PremiumCtaSection({
@@ -18,6 +21,8 @@ export default function PremiumCtaSection({
   primaryLabel,
   secondaryHref,
   secondaryLabel,
+  reassurance,
+  showDirectContact = false,
 }: PremiumCtaSectionProps) {
   return (
     <section className="relative overflow-hidden rounded-6xl bg-premium-forest px-8 py-16 text-center shadow-premium-xl md:px-16 md:py-24">
@@ -47,6 +52,14 @@ export default function PremiumCtaSection({
             </Link>
           ) : null}
         </div>
+        {reassurance ? <p className="mt-6 text-sm leading-6 text-white/65">{reassurance}</p> : null}
+        {showDirectContact ? (
+          <p className="mt-3 text-sm text-white/70">
+            Direkt erreichbar: <a href={company.telephoneHref} className="font-medium text-white underline-offset-4 hover:underline">{company.telephone}</a>
+            <span aria-hidden> · </span>
+            <a href={company.emailHref} className="font-medium text-white underline-offset-4 hover:underline">{company.email}</a>
+          </p>
+        ) : null}
       </div>
     </section>
   );

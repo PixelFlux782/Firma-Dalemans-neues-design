@@ -34,10 +34,9 @@ export default function ProductCategoryFeature({
     <Link
       href={href}
       className="homepage-category-feature group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-forest focus-visible:ring-offset-4"
-      aria-label={`${title}: ${linkLabel}`}
     >
       <article>
-        <ProductVisual imageScale={imageScale} objectPosition={objectPosition} imageInset={imageInset} aspectRatio={aspectRatio} fadeStrength={fadeStrength} backgroundTone={backgroundTone} surface="transparent" decorativeAtmosphere={false} src={image} alt={alt} sizes="(min-width: 1024px) 50vw, (min-width: 768px) 50vw, 100vw" className="homepage-product-visual" />
+        <ProductVisual imageScale={imageScale} objectPosition={objectPosition} imageInset={imageInset} aspectRatio={aspectRatio} fadeStrength={fadeStrength} backgroundTone={backgroundTone} surface="transparent" decorativeAtmosphere={false} src={image} alt={alt} sizes="(min-width: 1280px) 584px, (min-width: 1024px) calc(50vw - 56px), (min-width: 768px) calc(50vw - 40px), calc(100vw - 40px)" className="homepage-product-visual" />
 
         <div className="pb-2 pt-5 sm:pt-6">
           <div className="flex items-start justify-between gap-6">

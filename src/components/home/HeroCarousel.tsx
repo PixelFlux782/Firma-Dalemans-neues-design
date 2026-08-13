@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const slides = [
   {
-    src: "/neue bilder/Tische/hero-klapptische.png",
+    src: "/images/optimized/hero/klapptische-hero.webp",
     alt: "Klapptische von Dalemans in einer flexiblen Raumlösung",
     headline: "Flexible Tische für Räume, die sich immer wieder verändern.",
     description: "Robust, klappbar und passend zur täglichen Nutzung geplant.",
@@ -29,7 +29,7 @@ const slides = [
     softenedBackdrop: true,
   },
   {
-    src: "/neue bilder/raum-im-alltag-2.png",
+    src: "/images/optimized/hero/gemeinderaum-flexibel.webp",
     alt: "Flexibel eingerichteter Gemeindesaal mit Reihenbestuhlung, Tischen und Transportwagen",
     headline: "Ein Raum, viele Möglichkeiten – schnell passend eingerichtet.",
     description: "Bestuhlung, Tische und Transportlösungen für wechselnde Nutzungen aus einem abgestimmten System.",
@@ -41,7 +41,7 @@ const slides = [
     softenedBackdrop: true,
   },
   {
-    src: "/neue bilder/Stoffe-Farben/Singer-Nähmaschine-mit-frau.png",
+    src: "/images/optimized/hero/polsterfertigung.webp",
     alt: "Frau bei der Verarbeitung von Möbelstoffen an einer Singer-Nähmaschine",
     headline: "Materialien, die Atmosphäre schaffen und lange bestehen.",
     description: "Wir beraten persönlich bei Stoffen, Farben und belastbaren Ausführungen.",
@@ -49,7 +49,7 @@ const slides = [
     mobileObjectPosition: "50% 50%",
   },
   {
-    src: "/neue bilder/Stoffe-Farben/stuhl-farbverlauf.png",
+    src: "/images/curated/Stoffe-Farben/stuhl-farbverlauf.webp",
     alt: "Stuhlvarianten in unterschiedlichen Farben",
     headline: "Farben und Ausführungen passend zu Ihrem Raum.",
     description: "Von der Bemusterung bis zur stimmigen Gesamtauswahl.",
@@ -57,7 +57,7 @@ const slides = [
     mobileObjectPosition: "50% 48%",
   },
   {
-    src: "/neue bilder/Produktion-Lager/Polster-Montage.png",
+    src: "/images/curated/Produktion-Lager/Polster-Montage.webp",
     alt: "Montage einer gepolsterten Sitzschale",
     headline: "Persönlich begleitet – von der Auswahl bis zur fertigen Lösung.",
     description: "Planung, Sonderlösungen und Montagekompetenz aus einem erfahrenen Familienbetrieb.",
@@ -65,7 +65,7 @@ const slides = [
     mobileObjectPosition: "56% 50%",
   },
   {
-    src: "/neue bilder/Produktion-Lager/Schalenlager-Montage.png",
+    src: "/images/curated/Produktion-Lager/Schalenlager-Montage.webp",
     alt: "Sitzschalen und Bauteile im Montage- und Lagerbereich",
     headline: "Durchdachte Produkte entstehen aus Erfahrung und sorgfältiger Abstimmung.",
     description: "Wir entwickeln und planen unsere Modelle gemeinsam mit spezialisierten Partnerbetrieben.",
@@ -149,6 +149,9 @@ export default function HeroCarousel() {
               src={slide.src}
               alt=""
               fill
+              priority={index === 0}
+              fetchPriority={index === 0 ? "high" : "low"}
+              quality={50}
               sizes="(min-width: 1024px) 56vw, 100vw"
               className="scale-110 object-cover blur-2xl brightness-[.62] saturate-[.85]"
               aria-hidden
@@ -159,6 +162,8 @@ export default function HeroCarousel() {
             alt={index === active ? slide.alt : ""}
             fill
             priority={index === 0}
+            fetchPriority={index === 0 ? "high" : "low"}
+            quality={85}
             sizes="(min-width: 1024px) 56vw, 100vw"
             className="hero-slide-main object-cover"
             style={{

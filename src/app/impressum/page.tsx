@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: "Impressum und Anbieterkennzeichnung von Dalemans.",
     path: "/impressum",
   }),
-  robots: { index: false, follow: false },
+  robots: { index: false, follow: true },
 };
 
 export default function ImpressumPage() {
@@ -20,6 +20,7 @@ export default function ImpressumPage() {
           { label: "Start", href: "/" },
           { label: "Impressum" },
         ]}
+        currentPath="/impressum"
       />
 
       <article className="premium-card p-8 md:p-10 lg:p-12">

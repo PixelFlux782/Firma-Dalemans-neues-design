@@ -210,7 +210,7 @@
   }
 
   .btn-primary {
-    @apply relative inline-flex items-center justify-center overflow-hidden rounded-full bg-premium-forest px-8 py-3.5 text-sm font-medium tracking-wide text-premium-highlight shadow-premium transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-premium-canvas;
+    @apply relative inline-flex min-h-11 items-center justify-center overflow-hidden rounded-full bg-premium-forest px-8 py-3.5 text-sm font-medium tracking-wide text-premium-highlight shadow-premium transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-premium-canvas lg:min-h-0;
   }
 
   .btn-primary::after {
@@ -233,7 +233,7 @@
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-full border border-premium-sage bg-white/55 px-8 py-3.5 text-sm font-medium tracking-wide text-premium-ink backdrop-blur-md transition duration-300 hover:border-premium-leaf hover:bg-white/90 hover:shadow-premium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-premium-canvas;
+    @apply inline-flex min-h-11 items-center justify-center rounded-full border border-premium-sage bg-white/55 px-8 py-3.5 text-sm font-medium tracking-wide text-premium-ink backdrop-blur-md transition duration-300 hover:border-premium-leaf hover:bg-white/90 hover:shadow-premium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-premium-canvas lg:min-h-0;
   }
 
   .btn-hero-primary {
@@ -245,15 +245,15 @@
   }
 
   .btn-on-dark {
-    @apply inline-flex items-center justify-center rounded-full bg-premium-highlight px-8 py-3.5 text-sm font-medium tracking-wide text-premium-forest transition duration-300 hover:bg-white hover:shadow-premium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/50 focus-visible:ring-offset-2 focus-visible:ring-offset-premium-charcoal;
+    @apply inline-flex min-h-11 items-center justify-center rounded-full bg-premium-highlight px-8 py-3.5 text-sm font-medium tracking-wide text-premium-forest transition duration-300 hover:bg-white hover:shadow-premium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand/50 focus-visible:ring-offset-2 focus-visible:ring-premium-charcoal lg:min-h-0;
   }
 
   .btn-outline-dark {
-    @apply inline-flex items-center justify-center rounded-full border border-white/20 px-8 py-3.5 text-sm font-medium tracking-wide text-white/90 transition duration-300 hover:border-white/40 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:ring-offset-2 focus-visible:ring-offset-premium-charcoal;
+    @apply inline-flex min-h-11 items-center justify-center rounded-full border border-white/20 px-8 py-3.5 text-sm font-medium tracking-wide text-white/90 transition duration-300 hover:border-white/40 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:ring-offset-2 focus-visible:ring-offset-premium-charcoal lg:min-h-0;
   }
 
   .form-input {
-    @apply mt-2.5 w-full rounded-2xl border border-premium-beige/70 bg-white/80 px-4 py-3.5 text-sm text-premium-ink outline-none transition duration-300 placeholder:text-premium-subtle focus:border-premium-sand focus:bg-white focus:ring-2 focus:ring-premium-sand/15;
+    @apply mt-2.5 w-full rounded-2xl border border-premium-beige/70 bg-white/80 px-4 py-3.5 text-base text-premium-ink outline-none transition duration-300 placeholder:text-premium-subtle focus:border-premium-sand focus:bg-white focus:ring-2 focus:ring-premium-sand/15 sm:text-sm;
   }
 
   /* ——— Cinematic media surfaces ——— */

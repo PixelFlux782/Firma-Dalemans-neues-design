@@ -67,19 +67,19 @@ export default function HomePage() {
               Flexible Ausstattung für Räume, in denen Gemeinde lebt.
             </h1>
             <p className="mt-6 max-w-xl text-[0.95rem] leading-7 text-premium-muted md:text-base md:leading-8">
-              Kein anonymer Möbelshop, sondern persönliche Raum- und Ausstattungsberatung für Bestuhlung, Tische und langfristige Nutzung.
+              Kein anonymer Möbelshop: persönliche Beratung zu Stapelstühlen, Klapptischen und Raumplanung für Gemeinden, Kirchen und flexible Mehrzweckräume.
             </p>
             <p className="mt-6 border-l border-premium-stone pl-4 font-mono text-[0.66rem] uppercase tracking-[0.14em] text-premium-bronze">
               Raumplanung · Bestuhlung · Sonderlösungen
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/kontakt?anliegen=Raum%20und%20Bestuhlung" className="btn-primary group justify-center rounded-xl px-6">
-                Raum & Bestuhlung besprechen <span aria-hidden className="ml-2 transition-transform group-hover:translate-x-0.5">→</span>
+              <Link href="/kontakt?anliegen=Beratung" className="btn-primary group justify-center rounded-xl px-6">
+                Beratung anfragen <span aria-hidden className="ml-2 transition-transform group-hover:translate-x-0.5">→</span>
               </Link>
               <Link href="/produkte/kategorien/stapelstuehle" className="btn-secondary justify-center rounded-xl px-6">Produkte ansehen</Link>
             </div>
             <a href="tel:+499342915353" className="mt-6 inline-flex w-fit items-center gap-3 text-sm font-semibold text-premium-ink transition hover:text-premium-bronze">
-              <span className="text-[0.62rem] font-medium uppercase tracking-[0.16em] text-premium-subtle">Direktkontakt</span>
+              <span className="text-[0.62rem] font-medium uppercase tracking-[0.16em] text-premium-muted">Direktkontakt</span>
               +49 9342 9153-53
             </a>
           </div>
@@ -277,6 +277,8 @@ export default function HomePage() {
         primaryLabel="Raum und Ausstattung besprechen"
         secondaryHref="tel:+499342915353"
         secondaryLabel="Direkt anrufen"
+        reassurance="Sie müssen noch nicht wissen, welches Modell oder welche Ausführung Sie benötigen."
+        showDirectContact
       />
     </div>
   );

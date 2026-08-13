@@ -24,22 +24,15 @@ export async function POST(request: Request) {
   const organization = text(body.organization);
   const email = text(body.email);
   const phone = text(body.phone);
-  const street = text(body.street);
-  const postalCode = text(body.postalCode, 20);
-  const city = text(body.city, 120);
-  const country = text(body.country, 120);
   const subject = text(body.subject).replace(/[\r\n]+/g, " ");
   const message = text(body.message, 5000);
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   if (text(body.website)) return NextResponse.json({ ok: true });
   if (
     !contactPerson ||
-    !organization ||
-    !street ||
-    !postalCode ||
-    !city ||
-    !country ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+    (!email && !phone) ||
+    (email.length > 0 && !validEmail) ||
     !subject ||
     message.length < 10
   ) {
@@ -76,13 +69,12 @@ export async function POST(request: Request) {
     await transporter.sendMail({
       from: process.env.CONTACT_FROM_EMAIL,
       to: process.env.CONTACT_TO_EMAIL,
-      replyTo: email,
+      replyTo: validEmail ? email : undefined,
       subject: `Website-Anfrage: ${subject}`,
       text: [
-        `Ansprechpartner: ${contactPerson}`, `Gemeinde / Organisation: ${organization}`,
-        `Straße / Hausnummer: ${street}`, `PLZ / Ort: ${postalCode} ${city}`,
-        `Land: ${country}`,
-        `E-Mail: ${email}`, `Telefon: ${phone || "nicht angegeben"}`,
+        `Ansprechpartner: ${contactPerson}`,
+        `Gemeinde / Organisation: ${organization || "nicht angegeben"}`,
+        `E-Mail: ${email || "nicht angegeben"}`, `Telefon: ${phone || "nicht angegeben"}`,
         `Anliegen: ${subject}`, "", message,
       ].join("\n"),
     });

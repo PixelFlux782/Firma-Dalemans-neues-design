@@ -89,9 +89,10 @@ export default function StapelstuehleKaufenPage() {
         lead="Wer viele Stühle anschafft, kauft nicht nur Sitzplätze. Es geht um Haltbarkeit, Lagerung, Reihen, Zubehör und einen Raum, der jahrelang zuverlässig funktioniert."
         breadcrumbs={[
           { label: "Start", href: "/" },
-          { label: "Beratung" },
+          { label: "Beratung & Service", href: "/beratung-service" },
           { label: "Stapelstühle kaufen" },
         ]}
+        breadcrumbPath="/beratung/stapelstuehle-kaufen"
         mediaAriaLabel="Robuste Stapelstühle für Kaufberatung"
         mood="stone-arch"
         actions={

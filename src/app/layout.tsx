@@ -85,8 +85,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <a href="tel:+499342915353" className="btn-primary px-4 py-3 text-center text-xs">
               Anrufen
             </a>
-            <a href="mailto:info@dalemans.de" className="btn-secondary px-4 py-3 text-center text-xs">
-              E-Mail
+            <a href="/kontakt?anliegen=Beratung" className="btn-secondary px-4 py-3 text-center text-xs">
+              Beratung
             </a>
           </div>
         </div>

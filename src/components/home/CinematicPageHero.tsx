@@ -9,6 +9,7 @@ interface CinematicPageHeroProps {
   title: string;
   lead?: string;
   breadcrumbs?: BreadcrumbItem[];
+  breadcrumbPath?: string;
   actions?: ReactNode;
   mediaAriaLabel: string;
   mediaDevNote?: string;
@@ -22,6 +23,7 @@ export default function CinematicPageHero({
   title,
   lead,
   breadcrumbs,
+  breadcrumbPath,
   actions,
   mediaAriaLabel,
   mediaDevNote,
@@ -82,6 +84,7 @@ export default function CinematicPageHero({
               <div className="animate-fade-up mb-6">
                 <Breadcrumbs
                   items={breadcrumbs}
+                  currentPath={breadcrumbPath}
                   className="text-white/60 [&_a]:text-white/85 [&_a:hover]:text-white [&_span]:text-white"
                 />
               </div>

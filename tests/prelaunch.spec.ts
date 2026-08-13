@@ -9,6 +9,7 @@ const routes = [
 ];
 
 test("alle Sitemap-Routen laden ohne Browser- oder Netzwerkfehler", async ({ page, request }) => {
+  test.setTimeout(90_000);
   const failures: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error") failures.push(`Konsole: ${message.text()}`);
@@ -26,18 +27,68 @@ test("alle Sitemap-Routen laden ohne Browser- oder Netzwerkfehler", async ({ pag
     const response = await page.goto(route, { waitUntil: "networkidle" });
     expect(response?.status(), route).toBe(200);
     await expect(page.locator("h1"), route).toHaveCount(1);
+    await expect(page.locator('link[rel="canonical"]'), route).toHaveCount(1);
+    expect(await page.title(), route).not.toBe("");
+    expect(await page.locator("img:not([alt])").count(), route).toBe(0);
   }
   expect(failures).toEqual([]);
 });
 
-for (const width of [320, 360, 390, 430, 768, 1024, 1280, 1440, 1920]) {
-  test(`Startseite ohne horizontalen Überlauf bei ${width}px`, async ({ page }) => {
+const mobileRoutes = [
+  "/", "/produkte", "/produkte/kategorien/stapelstuehle",
+  "/produkte/kategorien/klapptische", "/raeume-planung", "/sonderloesungen",
+  "/sonderposten", "/firma", "/kontakt",
+];
+
+for (const width of [320, 360, 375, 390, 430, 768]) {
+  test(`priorisierte Seiten ohne horizontalen Überlauf bei ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: width < 600 ? 760 : 900 });
-    await page.goto("/", { waitUntil: "networkidle" });
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-    expect(overflow).toBeLessThanOrEqual(1);
+    for (const route of mobileRoutes) {
+      await page.goto(route, { waitUntil: "domcontentloaded" });
+      await expect(page.locator("h1"), route).toHaveCount(1);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(overflow, route).toBeLessThanOrEqual(1);
+    }
   });
 }
+
+test("mobile Buttons und Formularfelder bieten ausreichend große Touch-Ziele", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const route of mobileRoutes) {
+    await page.goto(route, { waitUntil: "domcontentloaded" });
+    const undersized = await page.locator("button, .btn-primary, .btn-secondary, .btn-on-dark, .btn-outline-dark, .form-input").evaluateAll((elements) =>
+      elements
+        .filter((element) => {
+          const rect = element.getBoundingClientRect();
+          const style = window.getComputedStyle(element);
+          return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden";
+        })
+        .filter((element) => element.getBoundingClientRect().height < 42)
+        .map((element) => `${element.tagName.toLowerCase()}.${element.className}:${Math.round(element.getBoundingClientRect().height)}px`),
+    );
+    expect(undersized, route).toEqual([]);
+  }
+});
+
+test("inhaltliche Seiten-Heroes besitzen konkrete Bildbeschreibungen", async ({ page }) => {
+  const heroRoutes = [
+    "/produkte", "/produkte/kategorien/stapelstuehle", "/kontakt", "/firma",
+    "/beratung-service", "/raeume-planung", "/sonderloesungen", "/sonderposten",
+  ];
+  for (const route of heroRoutes) {
+    await page.goto(route, { waitUntil: "domcontentloaded" });
+    const heroImage = page.locator(".products-hero-media img").first();
+    await expect(heroImage, route).toHaveAttribute("alt", /\S.{10,}/);
+  }
+});
+
+test("wichtige Unterseiten liefern BreadcrumbList-Daten", async ({ page }) => {
+  for (const route of ["/produkte", "/produkte/kategorien/stapelstuehle", "/raeume-planung", "/kontakt", "/firma"]) {
+    await page.goto(route, { waitUntil: "domcontentloaded" });
+    const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
+    expect(jsonLd.some((entry) => entry.includes('"BreadcrumbList"')), route).toBe(true);
+  }
+});
 
 test("mobile Navigation ist per Tastatur bedienbar", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -54,26 +105,31 @@ test("Kontaktformular validiert lokal und sendet keine Nachricht", async ({ page
   await page.goto("/kontakt");
   await page.getByRole("button", { name: "Anfrage senden" }).click();
   await expect(page.locator("input[name=contactPerson]")).toBeFocused();
-  for (const field of ["contactPerson", "organization", "street", "postalCode", "city", "country"]) {
+  for (const field of ["contactPerson", "subject", "message"]) {
     await expect(page.locator(`[name=${field}]`)).toHaveAttribute("required", "");
   }
+  await expect(page.locator("input[name=organization]")).not.toHaveAttribute("required", "");
   expect(await page.locator(":invalid").count()).toBeGreaterThan(0);
+
+  await page.locator("input[name=contactPerson]").fill("Max Mustermann");
+  await page.locator("textarea[name=message]").fill("Bitte beraten Sie uns zu unserer geplanten Bestuhlung.");
+  await page.getByRole("button", { name: "Anfrage senden" }).click();
+  await expect(page.locator("form [role=alert]")).toContainText("E-Mail-Adresse oder Telefonnummer");
+  await expect(page.locator("input[name=email]")).toBeFocused();
 });
 
 test("Kontakt-API weist ungültige und übergroße Anfragen ab", async ({ request }) => {
   const invalid = await request.post("/api/contact", { data: {} });
   expect(invalid.status()).toBe(422);
 
-  const missingAddress = await request.post("/api/contact", {
+  const missingContactMethod = await request.post("/api/contact", {
     data: {
       contactPerson: "Max Mustermann",
-      organization: "Musterstadt",
-      email: "max@example.de",
       subject: "Stapelstühle",
       message: "Bitte senden Sie uns ein Angebot.",
     },
   });
-  expect(missingAddress.status()).toBe(422);
+  expect(missingContactMethod.status()).toBe(422);
 
   const oversized = await request.post("/api/contact", {
     data: { message: "x".repeat(10_001) },

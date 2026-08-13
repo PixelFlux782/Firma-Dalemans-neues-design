@@ -80,17 +80,25 @@ export default function StackingChairsCategory({ heroImage, products, variant = 
   const countForFilter = (id: string) => id === "all"
     ? products.length
     : products.filter((product) => product.overviewGroup === id).length;
+  const categoryPath = isAccessories
+    ? "/produkte/kategorien/transportwagen-zubehoer"
+    : isLecterns
+      ? "/produkte/rednerpulte"
+      : isTables
+        ? "/produkte/kategorien/klapptische"
+        : "/produkte/kategorien/stapelstuehle";
 
   return (
     <div className="flex min-w-0 flex-col gap-12 md:gap-14">
       <section>
         <div className="stacking-chairs-hero products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[620px]">
-          <div className="stacking-chairs-hero__media products-hero-media absolute inset-0" aria-hidden="true">
+          <div className="stacking-chairs-hero__media products-hero-media absolute inset-0">
             <Image
               src={heroImage}
-              alt=""
+              alt={isAccessories ? "Transportwagen mit gestapelten Stühlen für Lagerung und Saalumbau" : isLecterns ? "Rednerpult für Gottesdienste, Vorträge und Veranstaltungen" : isTables ? "Klappbare Tische für flexibel genutzte Gemeinde- und Mehrzweckräume" : "Stapelbare Stühle für flexible Reihenbestuhlung in Gemeinde- und Veranstaltungsräumen"}
               fill
               priority
+              fetchPriority="high"
               sizes="(min-width: 1280px) 1216px, 100vw"
               className={isTables || isLecterns || isAccessories ? "object-cover object-center" : "object-cover object-[72%_center] md:object-[80%_center]"}
             />
@@ -98,7 +106,7 @@ export default function StackingChairsCategory({ heroImage, products, variant = 
           <div className="stacking-chairs-hero__shade pointer-events-none absolute inset-0" aria-hidden="true" />
           <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[620px] md:items-center md:px-12 md:py-16 lg:px-16">
             <div className="max-w-[42rem] md:w-[61%]">
-              <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: categoryName }]} />
+              <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: categoryName }]} currentPath={categoryPath} />
               <p className="section-eyebrow mt-7">Produktkategorie · {products.length} Produkte</p>
               <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">{isAccessories ? "Transportwagen & Zubehör für flexible Räume." : isLecterns ? "Rednerpulte für einen klaren Auftritt." : isTables ? "Klapptische für flexible Räume." : "Stapelstühle für flexible Räume."}</h1>
               <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">{isAccessories ? "Praktische Lösungen für Transport, Lagerung, Reihenbestuhlung und den langfristigen Erhalt Ihrer Ausstattung." : isLecterns ? "Klare und funktionale Lösungen für Gottesdienste, Vorträge und Veranstaltungen." : isTables ? "Schnell aufgebaut, stabil im Einsatz und nach der Veranstaltung wieder kompakt verstaut." : "Vielseitige Bestuhlung für Gottesdienste, Mehrzweckräume und Veranstaltungen mit hoher Frequenz."}</p>

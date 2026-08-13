@@ -68,12 +68,13 @@ export default function SonderloesungenPage() {
       <StructuredData data={structuredData} />
 
       <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
-        <div className="products-hero-media absolute inset-0" aria-hidden="true">
+        <div className="products-hero-media absolute inset-0">
           <Image
             src={encodeURI("/images/curated/Sonderlösungen/runder-tisch.webp")}
-            alt=""
+            alt="Große runde Tischanlage als individuell geplante Sonderlösung"
             fill
             priority
+            fetchPriority="high"
             sizes="(min-width: 1280px) 1216px, 100vw"
             className="object-cover object-center"
           />
@@ -81,7 +82,7 @@ export default function SonderloesungenPage() {
         <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[560px] md:items-center md:px-12 md:py-16 lg:px-16">
           <div className="max-w-[42rem] md:w-[61%]">
-            <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Sonderlösungen" }]} />
+            <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Sonderlösungen" }]} currentPath="/sonderloesungen" />
             <p className="section-eyebrow mt-7">Sonderlösungen</p>
             <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Wenn Standard nicht reicht: Sondermaße, CAD und praktische Umsetzung.</h1>
             <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Dalemans verbindet alte Sonderlösungs-Kompetenz mit heutiger Planung: von der Skizze über CAD bis zu Zubehör, Tischlösung oder Transportlogik.</p>
@@ -172,6 +173,8 @@ export default function SonderloesungenPage() {
         primaryLabel="Sonderlösung anfragen"
         secondaryHref="/produkte/kategorien/transportwagen-zubehoer"
         secondaryLabel="Zubehör ansehen"
+        reassurance="Wir prüfen zuerst, ob eine Standardlösung genügt und wo eine Sonderlösung wirklich sinnvoll ist."
+        showDirectContact
       />
     </div>
   );

@@ -9,6 +9,12 @@ interface Props {
   params: Promise<{ category: string }>;
 }
 
+const categoryTitles: Record<string, string> = {
+  stapelstuehle: "Stapelstühle für Gemeinden und Kirchen",
+  klapptische: "Klapptische für Gemeinden und Mehrzweckräume",
+  "transportwagen-zubehoer": "Transportwagen, Zubehör und Ersatzteile",
+};
+
 export function generateStaticParams() {
   return productCategories.map((category) => ({ category: category.id }));
 }
@@ -23,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return buildMetadata({
-    title: `${category.name} kaufen`,
+    title: categoryTitles[category.id] ?? category.name,
     description: category.description,
     path: `/produkte/kategorien/${category.id}`,
     image: category.image,

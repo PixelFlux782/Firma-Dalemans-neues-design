@@ -29,7 +29,7 @@ const slides = [
     softenedBackdrop: true,
   },
   {
-    src: "/neue bilder/Stoffe-Farben/makro-stoffe-farbig.png",
+    src: "/neue bilder/Stoffe-Farben/Singer-Nähmaschine-mit-frau.png",
     alt: "Nahaufnahme verschiedener farbiger Möbelstoffe",
     headline: "Materialien, die Atmosphäre schaffen und lange bestehen.",
     description: "Wir beraten persönlich bei Stoffen, Farben und belastbaren Ausführungen.",

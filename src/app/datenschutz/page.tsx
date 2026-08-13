@@ -60,10 +60,11 @@ export default function DatenschutzPage() {
                 Kontakt
               </Link>{" "}
               eine Nachricht senden, verwenden wir Ihre Angaben ausschließlich
-              zur Bearbeitung Ihrer Anfrage. Das Formular übermittelt Name,
-              Organisation, Kontaktdaten, Anliegen und Nachricht verschlüsselt
-              an unseren Server und von dort per E-Mail an die genannte
-              Kontaktadresse. Pflichtfelder sind als solche erkennbar.
+              zur Bearbeitung Ihrer Anfrage. Das Formular übermittelt
+              Ansprechpartner, Organisation, vollständige Anschrift,
+              Kontaktdaten, Anliegen und Nachricht verschlüsselt an unseren
+              Server und von dort per E-Mail an die genannte Kontaktadresse.
+              Pflichtfelder sind als solche erkennbar.
             </p>
           </section>
 

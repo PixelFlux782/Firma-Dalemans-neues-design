@@ -20,15 +20,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Die Anfrage konnte nicht gelesen werden." }, { status: 400 });
   }
 
-  const name = text(body.name);
+  const contactPerson = text(body.contactPerson);
   const organization = text(body.organization);
   const email = text(body.email);
   const phone = text(body.phone);
+  const street = text(body.street);
+  const postalCode = text(body.postalCode, 20);
+  const city = text(body.city, 120);
+  const country = text(body.country, 120);
   const subject = text(body.subject).replace(/[\r\n]+/g, " ");
   const message = text(body.message, 5000);
 
   if (text(body.website)) return NextResponse.json({ ok: true });
-  if (!name || !organization || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !subject || message.length < 10) {
+  if (
+    !contactPerson ||
+    !organization ||
+    !street ||
+    !postalCode ||
+    !city ||
+    !country ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+    !subject ||
+    message.length < 10
+  ) {
     return NextResponse.json(
       { error: "Bitte prüfen Sie die Pflichtfelder und Ihre E-Mail-Adresse." },
       { status: 422 },
@@ -65,7 +79,9 @@ export async function POST(request: Request) {
       replyTo: email,
       subject: `Website-Anfrage: ${subject}`,
       text: [
-        `Name: ${name}`, `Gemeinde / Organisation: ${organization}`,
+        `Ansprechpartner: ${contactPerson}`, `Gemeinde / Organisation: ${organization}`,
+        `Straße / Hausnummer: ${street}`, `PLZ / Ort: ${postalCode} ${city}`,
+        `Land: ${country}`,
         `E-Mail: ${email}`, `Telefon: ${phone || "nicht angegeben"}`,
         `Anliegen: ${subject}`, "", message,
       ].join("\n"),

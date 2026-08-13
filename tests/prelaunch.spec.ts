@@ -53,13 +53,27 @@ test("mobile Navigation ist per Tastatur bedienbar", async ({ page }) => {
 test("Kontaktformular validiert lokal und sendet keine Nachricht", async ({ page }) => {
   await page.goto("/kontakt");
   await page.getByRole("button", { name: "Anfrage senden" }).click();
-  await expect(page.locator("input[name=name]")).toBeFocused();
+  await expect(page.locator("input[name=contactPerson]")).toBeFocused();
+  for (const field of ["contactPerson", "organization", "street", "postalCode", "city", "country"]) {
+    await expect(page.locator(`[name=${field}]`)).toHaveAttribute("required", "");
+  }
   expect(await page.locator(":invalid").count()).toBeGreaterThan(0);
 });
 
 test("Kontakt-API weist ungültige und übergroße Anfragen ab", async ({ request }) => {
   const invalid = await request.post("/api/contact", { data: {} });
   expect(invalid.status()).toBe(422);
+
+  const missingAddress = await request.post("/api/contact", {
+    data: {
+      contactPerson: "Max Mustermann",
+      organization: "Musterstadt",
+      email: "max@example.de",
+      subject: "Stapelstühle",
+      message: "Bitte senden Sie uns ein Angebot.",
+    },
+  });
+  expect(missingAddress.status()).toBe(422);
 
   const oversized = await request.post("/api/contact", {
     data: { message: "x".repeat(10_001) },

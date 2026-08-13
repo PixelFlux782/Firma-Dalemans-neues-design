@@ -60,9 +60,9 @@ export function ContactForm() {
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2">
         <label className="block text-sm font-medium text-premium-charcoal">
-          Name
+          Ansprechpartner
           <span aria-hidden="true"> *</span>
-          <input name="name" type="text" autoComplete="name" className={inputClass} maxLength={200} required />
+          <input name="contactPerson" type="text" autoComplete="name" className={inputClass} maxLength={200} required />
         </label>
         <label className="block text-sm font-medium text-premium-charcoal">
           Gemeinde oder Organisation
@@ -77,6 +77,26 @@ export function ContactForm() {
         <label className="block text-sm font-medium text-premium-charcoal">
           Telefon <span className="font-normal text-premium-muted">(optional)</span>
           <input name="phone" type="tel" autoComplete="tel" className={inputClass} maxLength={200} />
+        </label>
+        <label className="block text-sm font-medium text-premium-charcoal sm:col-span-2">
+          Straße und Hausnummer
+          <span aria-hidden="true"> *</span>
+          <input name="street" type="text" autoComplete="street-address" className={inputClass} maxLength={200} required />
+        </label>
+        <label className="block text-sm font-medium text-premium-charcoal">
+          Postleitzahl
+          <span aria-hidden="true"> *</span>
+          <input name="postalCode" type="text" inputMode="text" autoComplete="postal-code" className={inputClass} maxLength={20} required />
+        </label>
+        <label className="block text-sm font-medium text-premium-charcoal">
+          Ort
+          <span aria-hidden="true"> *</span>
+          <input name="city" type="text" autoComplete="address-level2" className={inputClass} maxLength={120} required />
+        </label>
+        <label className="block text-sm font-medium text-premium-charcoal sm:col-span-2">
+          Land
+          <span aria-hidden="true"> *</span>
+          <input name="country" type="text" autoComplete="country-name" className={inputClass} defaultValue="Deutschland" maxLength={120} required />
         </label>
         <label className="block text-sm font-medium text-premium-charcoal sm:col-span-2">
           Anliegen oder gewünschter Bereich

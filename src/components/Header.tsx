@@ -102,6 +102,17 @@ export function Header() {
   }, [pathname]);
 
   useEffect(() => {
+    const desktopQuery = window.matchMedia("(min-width: 1280px)");
+    function handleBreakpointChange(event: MediaQueryListEvent) {
+      if (event.matches) setMobileMenuOpen(false);
+      else setMoreOpen(false);
+    }
+
+    desktopQuery.addEventListener("change", handleBreakpointChange);
+    return () => desktopQuery.removeEventListener("change", handleBreakpointChange);
+  }, []);
+
+  useEffect(() => {
     if (!moreOpen) return;
 
     function handlePointerDown(event: PointerEvent) {
@@ -140,7 +151,7 @@ export function Header() {
         return;
       }
       if (event.key !== "Tab") return;
-      const focusable = [...(mobileNavRef.current?.querySelectorAll<HTMLElement>(focusableSelector) ?? [])]
+      const focusable = [...(headerRef.current?.querySelectorAll<HTMLElement>(focusableSelector) ?? [])]
         .filter((element) => element.getClientRects().length > 0);
       if (!focusable.length) return;
       const first = focusable[0];
@@ -163,6 +174,37 @@ export function Header() {
   }, [mobileMenuOpen]);
 
   const moreActive = isMoreActive(pathname);
+
+  function handleMoreButtonKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
+    if (event.key !== "Tab" || event.shiftKey || !moreOpen) return;
+    const firstMegaMenuControl = headerRef.current
+      ?.querySelector<HTMLElement>("#desktop-mega-menu")
+      ?.querySelector<HTMLElement>(focusableSelector);
+    if (!firstMegaMenuControl) return;
+    event.preventDefault();
+    firstMegaMenuControl.focus();
+  }
+
+  function handleMegaMenuKeyDown(event: React.KeyboardEvent<HTMLElement>) {
+    if (event.key !== "Tab") return;
+    const controls = [...event.currentTarget.querySelectorAll<HTMLElement>(focusableSelector)]
+      .filter((element) => element.getClientRects().length > 0);
+    if (!controls.length) return;
+
+    if (event.shiftKey && document.activeElement === controls[0]) {
+      event.preventDefault();
+      moreButtonRef.current?.focus();
+      return;
+    }
+
+    if (!event.shiftKey && document.activeElement === controls[controls.length - 1]) {
+      const searchControl = [...(headerRef.current?.querySelectorAll<HTMLElement>("[data-testid='search-trigger']") ?? [])]
+        .find((element) => element.getClientRects().length > 0);
+      if (!searchControl) return;
+      event.preventDefault();
+      searchControl.focus();
+    }
+  }
 
   return (
     <header ref={headerRef} className="sticky top-0 z-50 border-b border-premium-beige/70 bg-premium-canvas/95 shadow-[0_1px_0_rgba(23,37,29,.03)] backdrop-blur-xl">
@@ -202,6 +244,7 @@ export function Header() {
               ref={moreButtonRef}
               type="button"
               onClick={() => setMoreOpen((value) => !value)}
+              onKeyDown={handleMoreButtonKeyDown}
               aria-expanded={moreOpen}
               aria-controls="desktop-mega-menu"
               className={`relative inline-flex min-h-10 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-2.5 text-[0.79rem] font-medium transition-colors after:absolute after:inset-x-2.5 after:bottom-1 after:h-px after:bg-premium-forest ${
@@ -216,8 +259,8 @@ export function Header() {
           </nav>
 
           <div className="flex shrink-0 items-center gap-1 border-l border-premium-beige/80 pl-3">
-            <SearchTrigger />
-            <CartTrigger />
+            <SearchTrigger onOpen={() => setMoreOpen(false)} />
+            <CartTrigger onOpen={() => setMoreOpen(false)} />
             <Link href="/kontakt?anliegen=Beratung" className="group/cta ml-1 inline-flex min-h-10 items-center gap-2 rounded-lg bg-premium-forest px-3.5 py-2.5 text-xs font-semibold tracking-[0.03em] text-white transition hover:bg-premium-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-2">
               Beratung <span aria-hidden className="transition-transform group-hover/cta:translate-x-0.5">→</span>
             </Link>
@@ -267,7 +310,7 @@ export function Header() {
 
       {moreOpen ? (
         <div id="desktop-mega-menu" className="mega-menu-panel absolute inset-x-0 top-full hidden border-y border-premium-beige/80 bg-premium-canvas shadow-premium-lg xl:block">
-          <nav aria-label="Weitere Navigation" className="container-premium grid grid-cols-[.85fr_1.15fr_1fr_1.05fr_1.35fr] gap-6 py-8">
+          <nav aria-label="Weitere Navigation" onKeyDown={handleMegaMenuKeyDown} className="container-premium grid grid-cols-[.85fr_1.15fr_1fr_1.05fr_1.35fr] gap-6 py-8">
             {moreGroups.map((group) => (
               <div key={group.title} className="min-w-0">
                 <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-premium-bronze">{group.title}</p>

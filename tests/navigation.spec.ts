@@ -45,6 +45,24 @@ test.describe("Premium-Navigation", () => {
     await expect(more).toHaveAttribute("aria-expanded", "false");
   });
 
+  test("Mega-Menü besitzt eine logische Tastaturreihenfolge und schließt für Utilities", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/");
+    const more = page.getByRole("button", { name: "Mehr", exact: true });
+
+    await more.focus();
+    await more.press("Enter");
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("link", { name: "Unternehmen & Geschichte" })).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(more).toBeFocused();
+
+    await page.getByTestId("search-trigger").filter({ visible: true }).click();
+    await expect(page.locator("#desktop-mega-menu")).toHaveCount(0);
+    await expect(page.getByRole("dialog", { name: "Was suchen Sie?" })).toBeVisible();
+    await page.keyboard.press("Escape");
+  });
+
   test("Mehr zeigt auf Sekundärseiten einen dezenten aktiven Zustand", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     for (const route of ["/firma", "/sonderposten", "/kontakt"]) {
@@ -71,6 +89,29 @@ test.describe("Premium-Navigation", () => {
     await page.keyboard.press("Escape");
     await expect(menuButton).toBeFocused();
     await expect(menuButton).toHaveAttribute("aria-expanded", "false");
+  });
+
+  test("Mobile Fokusreihenfolge umfasst Menüschalter und Header-Aktionen", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/");
+    const menuButton = page.getByRole("button", { name: "Menü", exact: true });
+    await menuButton.click();
+    await expect(page.getByRole("navigation", { name: "Mobile Hauptnavigation" }).getByRole("link", { name: "Produkte" })).toBeFocused();
+
+    await page.keyboard.press("Shift+Tab");
+    await expect(page.getByRole("link", { name: "Beratung anfragen" }).first()).toBeFocused();
+  });
+
+  test("Offene Menüs werden beim Breakpoint-Wechsel zurückgesetzt", async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 820 });
+    await page.goto("/");
+    const menuButton = page.locator('button[aria-controls="mobile-nav"]');
+    await menuButton.click();
+    await expect(menuButton).toHaveAttribute("aria-expanded", "true");
+
+    await page.setViewportSize({ width: 1280, height: 820 });
+    await expect(page.getByRole("navigation", { name: "Hauptnavigation", exact: true })).toBeVisible();
+    await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
   });
 
   for (const width of [320, 375, 768, 1024, 1280, 1440]) {

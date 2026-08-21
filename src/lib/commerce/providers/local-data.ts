@@ -121,6 +121,9 @@ function developmentFinderProduct(
     ],
     compatibility: ["Gestelle innerhalb des ausgewiesenen Entwicklungs-Passbereichs"],
     suitableFor: [itemLabel, "Finder- und Mengentests"],
+    searchAliases: fixture.handle === "filzgleiter-fuer-rundrohr"
+      ? ["Development Rundgleiter"]
+      : [],
     quantity: {
       unit: "piece",
       unitLabel: "Stück",

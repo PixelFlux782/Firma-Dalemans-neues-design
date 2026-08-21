@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import CartTrigger from "@/components/commerce/cart/CartTrigger";
+import SearchTrigger from "@/components/search/SearchTrigger";
 
 const primaryLinks = [
   { href: "/produkte", label: "Produkte" },
@@ -103,6 +104,7 @@ export function Header() {
             })}
           </nav>
           <div className="flex items-center gap-4 border-l border-premium-beige pl-5">
+            <SearchTrigger />
             <CartTrigger />
             <a href="tel:+499342915353" className="group/contact leading-none">
               <span className="block text-[0.6rem] uppercase tracking-[0.18em] text-premium-subtle">Direktkontakt</span>
@@ -119,6 +121,7 @@ export function Header() {
             <span className="block text-[0.58rem] uppercase tracking-[0.16em] text-premium-subtle">Direktkontakt</span>
             <span className="mt-1 block text-xs font-semibold text-premium-ink">+49 9342 9153-53</span>
           </a>
+          <SearchTrigger compact onOpen={() => setMenuOpen(false)} />
           <CartTrigger compact onOpen={() => setMenuOpen(false)} />
           <button
             ref={menuButtonRef}

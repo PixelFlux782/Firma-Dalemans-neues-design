@@ -152,6 +152,8 @@ export interface CommerceProduct {
   specifications: CommerceSpecification[];
   compatibility: string[];
   suitableFor: string[];
+  /** Provider-neutral aliases for former names or customer-facing search terms. */
+  searchAliases?: string[];
   quantity: CommerceQuantity;
   measureGuide: string[];
   applicationNotes: string[];

@@ -15,7 +15,7 @@ export default function SearchTrigger({ compact = false, onOpen }: { compact?: b
           onOpen?.();
           setOpen(true);
         }}
-        className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-premium-beige bg-white/40 text-sm font-medium text-premium-charcoal transition hover:border-premium-stone hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand ${compact ? "min-w-11 px-3" : "px-3"}`}
+        className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg text-sm font-medium text-premium-charcoal transition hover:bg-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand ${compact ? "min-w-11 px-2" : "px-2.5"}`}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label={compact ? "Suche öffnen" : undefined}

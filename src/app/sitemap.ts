@@ -1,14 +1,21 @@
 import type { MetadataRoute } from "next";
 import { productCategories } from "@/lib/product-categories";
 import { products } from "@/lib/products";
+import { getCollections, getProducts } from "@/lib/commerce/service";
 import { absoluteUrl, siteUrl } from "@/lib/seo";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const [shopCollections, shopProducts] = await Promise.all([
+    getCollections(),
+    getProducts(),
+  ]);
 
   const staticRoutes = [
     "/",
     "/produkte",
+    "/shop",
+    "/shop/gleiter-finder",
     "/produkte/rednerpulte",
     "/raeume-planung",
     "/raeume-planung/raumplanung",
@@ -42,5 +49,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticEntries, ...categoryEntries, ...productEntries];
+  const shopCollectionEntries = shopCollections.map((collection) => ({
+    url: `${siteUrl}/shop/${collection.handle}`,
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  const shopProductEntries = shopProducts.map((product) => ({
+    url: `${siteUrl}/shop/produkt/${product.handle}`,
+    lastModified: new Date(product.updatedAt),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [
+    ...staticEntries,
+    ...categoryEntries,
+    ...productEntries,
+    ...shopCollectionEntries,
+    ...shopProductEntries,
+  ];
 }

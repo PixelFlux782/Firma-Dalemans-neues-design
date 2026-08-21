@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const routes = [
-  "/", "/produkte", "/produkte/kategorien/stapelstuehle",
+  "/", "/produkte", "/shop", "/produkte/kategorien/stapelstuehle",
   "/produkte/kategorien/klapptische", "/produkte/kategorien/transportwagen-zubehoer",
   "/produkte/stapelstuhl-mod-1021c", "/produkte/rednerpulte", "/raeume-planung",
   "/raeume-planung/raumplanung", "/beratung-service", "/sonderloesungen",
@@ -35,9 +35,10 @@ test("alle Sitemap-Routen laden ohne Browser- oder Netzwerkfehler", async ({ pag
 });
 
 const mobileRoutes = [
-  "/", "/produkte", "/produkte/kategorien/stapelstuehle",
+  "/", "/produkte", "/shop", "/produkte/kategorien/stapelstuehle",
   "/produkte/kategorien/klapptische", "/raeume-planung", "/sonderloesungen",
-  "/sonderposten", "/firma", "/kontakt",
+  "/sonderposten", "/firma", "/kontakt", "/shop/gleiter-bodenschutz",
+  "/shop/produkt/kunststoff-gestellgleiter",
 ];
 
 for (const width of [320, 360, 375, 390, 430, 768]) {
@@ -83,7 +84,7 @@ test("inhaltliche Seiten-Heroes besitzen konkrete Bildbeschreibungen", async ({ 
 });
 
 test("wichtige Unterseiten liefern BreadcrumbList-Daten", async ({ page }) => {
-  for (const route of ["/produkte", "/produkte/kategorien/stapelstuehle", "/raeume-planung", "/kontakt", "/firma"]) {
+  for (const route of ["/produkte", "/shop", "/produkte/kategorien/stapelstuehle", "/raeume-planung", "/kontakt", "/firma"]) {
     await page.goto(route, { waitUntil: "domcontentloaded" });
     const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
     expect(jsonLd.some((entry) => entry.includes('"BreadcrumbList"')), route).toBe(true);
@@ -99,6 +100,24 @@ test("mobile Navigation ist per Tastatur bedienbar", async ({ page }) => {
   await page.keyboard.press("Escape");
   await expect(button).toBeFocused();
   await expect(button).toHaveAttribute("aria-expanded", "false");
+});
+
+test("Shop ist in Desktop- und Mobile-Navigation erreichbar", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/shop");
+  const desktopShopLink = page
+    .getByRole("navigation", { name: "Hauptnavigation", exact: true })
+    .getByRole("link", { name: "Shop", exact: true });
+  await expect(desktopShopLink).toHaveAttribute("href", "/shop");
+  await expect(desktopShopLink).toHaveAttribute("aria-current", "page");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "Menü" }).click();
+  const mobileShopLink = page
+    .getByRole("navigation", { name: "Mobile Hauptnavigation" })
+    .getByRole("link", { name: "Shop", exact: true });
+  await expect(mobileShopLink).toHaveAttribute("href", "/shop");
+  await expect(mobileShopLink).toHaveAttribute("aria-current", "page");
 });
 
 test("Kontaktformular validiert lokal und sendet keine Nachricht", async ({ page }) => {

@@ -4,6 +4,7 @@ import Link from "next/link";
 const pageLinks = [
   ["/", "Start"],
   ["/produkte", "Produkte"],
+  ["/shop", "Shop"],
   ["/raeume-planung", "Räume & Planung"],
   ["/beratung-service", "Beratung & Service"],
   ["/sonderloesungen", "Sonderlösungen"],

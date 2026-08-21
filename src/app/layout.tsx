@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { ReactNode } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import CartProvider from "@/components/commerce/cart/CartProvider";
 import {
   absoluteUrl,
   defaultDescription,
@@ -70,27 +71,31 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="de">
       <body>
-        <a
-          href="#main-content"
-          className="fixed left-4 top-4 z-[100] -translate-y-24 rounded-xl bg-premium-ink px-4 py-3 text-sm font-medium text-white transition focus:translate-y-0"
-        >
-          Zum Hauptinhalt
-        </a>
-        <Header />
-        <main id="main-content" className="min-h-screen pb-24 pt-6 md:py-10 lg:py-12">
-          <div className="container-premium">{children}</div>
-        </main>
-        <div className="fixed inset-x-0 bottom-0 z-50 border-t border-premium-beige/70 bg-premium-canvas/95 px-4 py-3 shadow-premium-lg backdrop-blur-md md:hidden">
-          <div className="grid grid-cols-2 gap-3">
-            <a href="tel:+499342915353" className="btn-primary px-4 py-3 text-center text-xs">
-              Anrufen
+        <CartProvider>
+          <div id="site-shell">
+            <a
+              href="#main-content"
+              className="fixed left-4 top-4 z-[100] -translate-y-24 rounded-xl bg-premium-ink px-4 py-3 text-sm font-medium text-white transition focus:translate-y-0"
+            >
+              Zum Hauptinhalt
             </a>
-            <a href="/kontakt?anliegen=Beratung" className="btn-secondary px-4 py-3 text-center text-xs">
-              Beratung
-            </a>
+            <Header />
+            <main id="main-content" className="min-h-screen pb-24 pt-6 md:py-10 lg:py-12">
+              <div className="container-premium">{children}</div>
+            </main>
+            <div className="fixed inset-x-0 bottom-0 z-50 border-t border-premium-beige/70 bg-premium-canvas/95 px-4 py-3 shadow-premium-lg backdrop-blur-md md:hidden">
+              <div className="grid grid-cols-2 gap-3">
+                <a href="tel:+499342915353" className="btn-primary px-4 py-3 text-center text-xs">
+                  Anrufen
+                </a>
+                <a href="/kontakt?anliegen=Beratung" className="btn-secondary px-4 py-3 text-center text-xs">
+                  Beratung
+                </a>
+              </div>
+            </div>
+            <Footer />
           </div>
-        </div>
-        <Footer />
+        </CartProvider>
       </body>
     </html>
   );

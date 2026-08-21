@@ -23,11 +23,11 @@ export function buildMetadata({
   title: string;
   description: string;
   path?: string;
-  image?: string;
+  image?: string | null;
   keywords?: string[];
 }): Metadata {
   const url = absoluteUrl(path);
-  const imageUrl = absoluteUrl(image);
+  const imageUrl = image ? absoluteUrl(image) : null;
 
   return {
     title,
@@ -43,20 +43,22 @@ export function buildMetadata({
       siteName,
       title,
       description,
-      images: [
-        {
-          url: imageUrl,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
+      images: imageUrl
+        ? [
+            {
+              url: imageUrl,
+              width: 1200,
+              height: 630,
+              alt: title,
+            },
+          ]
+        : [],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [imageUrl],
+      images: imageUrl ? [imageUrl] : [],
     },
   };
 }

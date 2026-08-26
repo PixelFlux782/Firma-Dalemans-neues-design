@@ -120,22 +120,83 @@ test("Shop ist in Desktop- und Mobile-Navigation erreichbar", async ({ page }) =
   await expect(mobileShopLink).toHaveAttribute("aria-current", "page");
 });
 
-test("Kontaktformular validiert lokal und sendet keine Nachricht", async ({ page }) => {
-  await page.goto("/kontakt");
-  await page.getByRole("button", { name: "Anfrage senden" }).click();
-  await expect(page.locator("input[name=firstName]")).toBeFocused();
-  for (const field of ["firstName", "lastName", "subject", "message"]) {
-    await expect(page.locator(`[name=${field}]`)).toHaveAttribute("required", "");
+test("Kontaktformular zeigt eigene deutsche Feldfehler und aktualisiert sie", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/kontakt?anliegen=Beratung");
+
+  const form = page.locator("form");
+  const firstName = page.locator("input[name=firstName]");
+  const lastName = page.locator("input[name=lastName]");
+  const email = page.locator("input[name=email]");
+  const phone = page.locator("input[name=phone]");
+  const subject = page.locator("input[name=subject]");
+  const message = page.locator("textarea[name=message]");
+
+  await expect(form).toHaveAttribute("novalidate", "");
+  await expect(subject).toHaveValue("Beratung");
+  await expect(form.locator("[role=alert]")).toHaveCount(0);
+
+  for (const field of [firstName, lastName, subject, message]) {
+    await expect(field).toHaveAttribute("required", "");
   }
   await expect(page.locator("input[name=organization]")).not.toHaveAttribute("required", "");
-  expect(await page.locator(":invalid").count()).toBeGreaterThan(0);
+
+  await subject.fill("");
+  await page.getByRole("button", { name: "Anfrage senden" }).click();
+
+  await expect(firstName).toBeFocused();
+  await expect(page.locator("#firstName-error")).toHaveText("Bitte geben Sie Ihren Vornamen ein.");
+  await expect(page.locator("#lastName-error")).toHaveText("Bitte geben Sie Ihren Nachnamen ein.");
+  await expect(page.locator("#email-error")).toHaveText("Bitte geben Sie eine E-Mail-Adresse oder Telefonnummer an.");
+  await expect(page.locator("#subject-error")).toHaveText("Bitte wählen Sie ein Anliegen aus.");
+  await expect(page.locator("#message-error")).toHaveText("Bitte geben Sie eine Nachricht ein.");
+  await expect(message).toHaveAttribute("aria-invalid", "true");
+  await expect(message).toHaveAttribute("aria-describedby", "message-error");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+
+  await firstName.fill("Max");
+  await lastName.fill("Mustermann");
+  await subject.fill("Beratung");
+  await email.fill("nicht-gueltig");
+  await message.fill("test");
+
+  await expect(page.locator("#firstName-error")).toHaveCount(0);
+  await expect(firstName).toHaveAttribute("aria-invalid", "false");
+  await expect(firstName).not.toHaveAttribute("aria-describedby", /.+/);
+  await expect(page.locator("#email-error")).toHaveText("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+  await expect(page.locator("#message-error")).toHaveText("Bitte beschreiben Sie Ihr Anliegen mit mindestens 10 Zeichen.");
+
+  await message.fill("Ausreichend lange Nachricht");
+  await expect(page.locator("#message-error")).toHaveCount(0);
+  await expect(message).toHaveAttribute("aria-invalid", "false");
+
+  await email.fill("");
+  await phone.fill("+49 9342 9153-53");
+  await expect(page.locator("#email-error")).toHaveCount(0);
+});
+
+test("Kontaktformular hält Feldfehler und Übermittlungsfehler getrennt", async ({ page }) => {
+  await page.route("**/api/contact", async (route) => {
+    await route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({
+        error: "Die Online-Übermittlung ist derzeit nicht eingerichtet. Bitte rufen Sie uns an oder schreiben Sie an info@dalemans.de.",
+      }),
+    });
+  });
+  await page.goto("/kontakt");
 
   await page.locator("input[name=firstName]").fill("Max");
   await page.locator("input[name=lastName]").fill("Mustermann");
+  await page.locator("input[name=email]").fill("max@example.de");
   await page.locator("textarea[name=message]").fill("Bitte beraten Sie uns zu unserer geplanten Bestuhlung.");
   await page.getByRole("button", { name: "Anfrage senden" }).click();
-  await expect(page.locator("form [role=alert]")).toContainText("E-Mail-Adresse oder Telefonnummer");
-  await expect(page.locator("input[name=email]")).toBeFocused();
+
+  const transmissionError = page.locator("form > div > [role=alert]");
+  await expect(transmissionError).toContainText("Online-Übermittlung ist derzeit nicht eingerichtet");
+  await expect(transmissionError).toBeFocused();
+  await expect(page.locator("#message-error")).toHaveCount(0);
 });
 
 test("Kontakt-API weist ungültige und übergroße Anfragen ab", async ({ request }) => {

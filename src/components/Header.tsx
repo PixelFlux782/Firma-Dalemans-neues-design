@@ -209,16 +209,17 @@ export function Header() {
   return (
     <header ref={headerRef} className="sticky top-0 z-50 border-b border-premium-beige/70 bg-premium-canvas/95 shadow-[0_1px_0_rgba(23,37,29,.03)] backdrop-blur-xl">
       <div className="container-premium flex min-h-[4.25rem] items-center justify-between gap-5 py-2">
-        <Link href="/" className="hidden shrink-0 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-2 xl:flex">
+        <Link href="/" className="hidden shrink-0 items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-2 xl:flex">
           <span className="sr-only">{company.brandName} – Startseite</span>
           <Image
-            src={encodeURI("/pictures/Über uns/dalemans_logo1.png")}
+            src={company.logoPath}
             alt=""
-            width={150}
-            height={52}
-            className="h-9 w-auto object-contain"
+            width={96}
+            height={54}
+            className="h-8 w-auto object-contain"
             priority
           />
+          <span aria-hidden="true" className="font-display text-lg font-semibold tracking-[0.06em] text-premium-ink">Dalemans</span>
         </Link>
 
         <div className="hidden min-w-0 flex-1 items-center justify-end gap-4 xl:flex">
@@ -281,16 +282,17 @@ export function Header() {
             <span className="hidden text-xs font-medium min-[390px]:inline">Menü</span>
           </button>
 
-          <Link href="/" className="min-w-0 justify-self-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">
+          <Link href="/" className="flex min-w-0 items-center justify-self-center gap-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">
             <span className="sr-only">{company.brandName} – Startseite</span>
             <Image
-              src={encodeURI("/pictures/Über uns/dalemans_logo1.png")}
+              src={company.logoPath}
               alt=""
-              width={150}
-              height={52}
-              className="h-8 w-auto max-w-[5.4rem] object-contain min-[390px]:max-w-[6.5rem] sm:h-9 sm:max-w-none"
+              width={72}
+              height={41}
+              className="h-5 w-auto object-contain min-[390px]:h-6 sm:h-7"
               priority
             />
+            <span aria-hidden="true" className="font-display text-[0.68rem] font-semibold tracking-[0.04em] text-premium-ink min-[390px]:text-xs sm:text-sm">Dalemans</span>
           </Link>
 
           <div className="flex items-center justify-end gap-0.5">

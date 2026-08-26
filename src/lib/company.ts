@@ -10,6 +10,7 @@ export const company = {
   telephoneHref: "tel:+499342915353",
   email: "info@dalemans.de",
   emailHref: "mailto:info@dalemans.de",
+  logoPath: "/Logos/logo_transp.png",
   address: {
     streetAddress: "Bollenwaldstraße 108a",
     postalCode: "63743",
@@ -24,7 +25,7 @@ export const organizationStructuredData = {
   name: company.name,
   alternateName: company.brandName,
   url: absoluteUrl("/"),
-  logo: absoluteUrl("/pictures/Über uns/dalemans_logo1.png"),
+  logo: absoluteUrl(company.logoPath),
   description:
     "Familienunternehmen für Stapelstühle, Klapptische, Raum- und Bestuhlungsplanung sowie langfristige Betreuung flexibler Räume.",
   foundingDate: company.founded,

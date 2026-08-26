@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { company } from "@/lib/company";
 
 const pageLinks = [
   ["/", "Start"],
@@ -28,15 +29,17 @@ export function Footer() {
     <footer aria-label="Fußbereich" className="mb-20 mt-20 border-t border-white/10 bg-premium-ink text-white/70 md:mb-0">
       <div className="container-premium grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.25fr_.75fr_1fr_.55fr]">
         <div className="sm:col-span-2 lg:col-span-1">
-          <div className="inline-flex rounded-xl bg-white px-3 py-2">
+          <Link href="/" className="inline-flex items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-4 focus-visible:ring-offset-premium-ink">
+            <span className="sr-only">{company.brandName} – Startseite</span>
             <Image
-              src={encodeURI("/pictures/Über uns/dalemans_logo1.png")}
-              alt="Dalemans"
-              width={150}
-              height={52}
-              className="h-10 w-auto object-contain"
+              src={company.logoPath}
+              alt=""
+              width={112}
+              height={63}
+              className="h-12 w-auto object-contain"
             />
-          </div>
+            <span aria-hidden="true" className="font-display text-2xl font-semibold tracking-[0.06em] text-white">Dalemans</span>
+          </Link>
           <p className="mt-5 max-w-sm text-sm leading-7 text-white/55">
             Persönlich geplante Ausstattung für Gemeinden, Säle und flexible Räume – seit 1994.
           </p>

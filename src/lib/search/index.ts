@@ -99,7 +99,9 @@ function productDocument(product: CommerceProduct): SearchDocument {
     type: "product",
     id: product.id,
     title: product.title,
-    url: `/shop/produkt/${product.handle}`,
+    url: product.stackingChair
+      ? `/produkte/stapelstuehle/${product.handle}`
+      : `/shop/produkt/${product.handle}`,
     description: product.shortDescription,
     image: product.featuredImage,
     priceStatus: product.priceStatus,
@@ -129,7 +131,9 @@ function collectionDocument(collection: SearchCollection): SearchDocument {
     type: "collection",
     id: collection.id,
     title: collection.title,
-    url: `/shop/${collection.handle}`,
+    url: collection.handle === "stapelstuehle"
+      ? "/produkte/stapelstuehle"
+      : `/shop/${collection.handle}`,
     description: collection.shortDescription,
     image: collection.image,
     priceStatus: null,

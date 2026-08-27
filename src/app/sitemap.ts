@@ -14,6 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     "/",
     "/produkte",
+    "/produkte/stapelstuehle",
     "/shop",
     "/shop/gleiter-finder",
     "/produkte/rednerpulte",
@@ -35,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: path === "/" ? 1 : 0.8,
   })) satisfies MetadataRoute.Sitemap;
 
-  const categoryEntries = productCategories.map((category) => ({
+  const categoryEntries = productCategories.filter((category) => category.id !== "stapelstuehle").map((category) => ({
     url: `${siteUrl}/produkte/kategorien/${category.id}`,
     lastModified: now,
     changeFrequency: "monthly" as const,
@@ -49,14 +50,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const shopCollectionEntries = shopCollections.map((collection) => ({
+  const shopCollectionEntries = shopCollections.filter((collection) => collection.handle !== "stapelstuehle").map((collection) => ({
     url: `${siteUrl}/shop/${collection.handle}`,
     lastModified: now,
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
 
-  const shopProductEntries = shopProducts.map((product) => ({
+  const shopProductEntries = shopProducts.filter((product) => !product.stackingChair).map((product) => ({
     url: `${siteUrl}/shop/produkt/${product.handle}`,
     lastModified: new Date(product.updatedAt),
     changeFrequency: "monthly" as const,
@@ -69,5 +70,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...productEntries,
     ...shopCollectionEntries,
     ...shopProductEntries,
+    ...shopProducts.filter((product) => product.stackingChair).map((product) => ({
+      url: `${siteUrl}/produkte/stapelstuehle/${product.handle}`,
+      lastModified: new Date(product.updatedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })),
   ];
 }

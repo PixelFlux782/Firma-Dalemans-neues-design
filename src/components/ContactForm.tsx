@@ -7,7 +7,7 @@ type FormStatus = { type: "success" | "error"; message: string } | null;
 type FormField = "firstName" | "lastName" | "organization" | "email" | "phone" | "subject" | "message";
 type FormErrors = Partial<Record<FormField, string>>;
 
-const contextKeys = ["produkt", "kategorie", "anliegen", "raum", "service"] as const;
+const contextKeys = ["produkt", "variante", "kategorie", "anliegen", "raum", "service"] as const;
 const fieldOrder: FormField[] = ["firstName", "lastName", "organization", "email", "phone", "subject", "message"];
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -80,6 +80,7 @@ export function ContactForm() {
         .join(" – ") || "Allgemeine Beratung",
     [searchParams],
   );
+  const initialMessage = searchParams.get("nachricht") ?? "";
 
   useEffect(() => {
     if (status) statusRef.current?.focus();
@@ -175,7 +176,7 @@ export function ContactForm() {
         <label className="block text-sm font-medium text-premium-charcoal sm:col-span-2">
           Nachricht
           <span aria-hidden="true"> *</span>
-          <textarea name="message" className={`${inputClass} min-h-[180px] resize-y`} minLength={10} maxLength={5000} required onChange={handleFieldChange} {...errorAttributes("message", errors)} />
+          <textarea name="message" className={`${inputClass} min-h-[180px] resize-y`} defaultValue={initialMessage} minLength={10} maxLength={5000} required onChange={handleFieldChange} {...errorAttributes("message", errors)} />
           <FieldError field="message" errors={errors} />
         </label>
         <label className="absolute -left-[9999px]" aria-hidden="true">

@@ -91,6 +91,22 @@ export interface CommerceSelectedOption {
   value: string;
 }
 
+export interface CommercePriceTier {
+  id: string;
+  price: CommerceMoney;
+  /** Source quantity boundaries are intentionally null until they are verified. */
+  minimumQuantity: number | null;
+  maximumQuantity: number | null;
+  label: string | null;
+}
+
+export interface CommerceStackingChairData {
+  modelCode: string;
+  source: "Preisliste_Stapelstuhl.ods";
+  sourcePriceTierMeaning: "undocumented";
+  editorialStatus: "reference" | "data-only";
+}
+
 export interface CommerceProductVariant {
   id: string;
   title: string;
@@ -105,6 +121,7 @@ export interface CommerceProductVariant {
   availability: CommerceAvailabilityStatus;
   availabilityNote: string | null;
   finderAttributes: CommerceFinderAttributes | null;
+  priceTiers?: CommercePriceTier[];
 }
 
 export interface CommerceSpecification {
@@ -128,6 +145,12 @@ export interface CommerceFaqItem {
 export interface CommerceProductReference {
   handle: string;
   title: string;
+}
+
+export interface CommerceDownload {
+  title: string;
+  url: string;
+  type: "data-sheet" | "drawing" | "specification" | "care" | "fabric-colors";
 }
 
 export interface CommerceProduct {
@@ -154,11 +177,13 @@ export interface CommerceProduct {
   suitableFor: string[];
   /** Provider-neutral aliases for former names or customer-facing search terms. */
   searchAliases?: string[];
+  stackingChair?: CommerceStackingChairData;
   quantity: CommerceQuantity;
   measureGuide: string[];
   applicationNotes: string[];
   notes: string[];
   accessories: CommerceProductReference[];
+  downloads?: CommerceDownload[];
   consultationNote: string | null;
   faq: CommerceFaqItem[];
   seo: {

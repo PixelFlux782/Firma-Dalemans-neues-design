@@ -10,7 +10,7 @@ import SectionHeader from "@/components/home/SectionHeader";
 import { products } from "@/lib/products";
 import { absoluteUrl, buildMetadata } from "@/lib/seo";
 
-const fittingProducts = ["stapelstuhl-mod-1021c", "klapptisch-310c", "stuhltransportwagen"]
+const fittingProducts = ["klapptisch-310c", "stuhltransportwagen"]
   .map((slug) => products.find((product) => product.slug === slug))
   .filter(Boolean);
 
@@ -123,6 +123,15 @@ export default function GemeindesaalPage() {
           align="editorial"
         />
         <div className="section-grid-top grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+          <article className="premium-card overflow-hidden">
+            <Image src={encodeURI("/images/curated/Stapelstühle/1021c.webp")} alt="Stapelstuhl Modell 1021" width={720} height={620} sizes="(min-width: 1280px) 30vw, (min-width: 768px) 50vw, 100vw" className="h-72 w-full bg-premium-warm/60 object-contain p-5" />
+            <div className="p-6">
+              <p className="section-eyebrow">Stapelstühle</p>
+              <h3 className="mt-3 font-display text-2xl font-medium text-premium-ink">Fünf Modelle vergleichen</h3>
+              <p className="mt-3 text-sm leading-7 text-premium-muted">Polsterung, Stoffgruppe und Reihenverbindung passend zum Raum konfigurieren.</p>
+              <Link href="/produkte/stapelstuehle" className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest">Stapelstühle ansehen →</Link>
+            </div>
+          </article>
           {fittingProducts.map((product) =>
             product ? <ProductCard key={product.slug} product={product} /> : null,
           )}
@@ -134,7 +143,7 @@ export default function GemeindesaalPage() {
         lead="Raumgröße, gewünschte Personenzahl und vorhandene Möbel reichen für eine erste Einschätzung."
         primaryHref="/kontakt"
         primaryLabel="Beratung anfragen"
-        secondaryHref="/produkte/kategorien/stapelstuehle"
+        secondaryHref="/produkte/stapelstuehle"
         secondaryLabel="Stapelstühle ansehen"
       />
     </div>

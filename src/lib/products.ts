@@ -698,7 +698,8 @@ const productCatalog: Product[] = [
 ];
 
 export const products = productCatalog.filter(
-  (product) => product.categoryId !== "gemeindestuehle-bankettmoebel",
+  (product) => product.categoryId !== "gemeindestuehle-bankettmoebel"
+    && product.categoryId !== "stapelstuehle",
 );
 
 export function getProductBySlug(slug: string) {

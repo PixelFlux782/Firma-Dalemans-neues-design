@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ProductVisual from "@/components/ProductVisual";
-import ProductCard from "@/components/ProductCard";
 import { StructuredData } from "@/components/StructuredData";
 import CinematicPageHero from "@/components/home/CinematicPageHero";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
-import { getProductsByCategory } from "@/lib/products";
 import { absoluteUrl, buildMetadata } from "@/lib/seo";
-
-const stapelstuehle = getProductsByCategory("stapelstuehle").slice(0, 3);
 
 const criteria = [
   {
@@ -100,7 +96,7 @@ export default function StapelstuehleKaufenPage() {
             <Link href="/kontakt" className="btn-hero-primary text-center">
               Auswahl besprechen
             </Link>
-            <Link href="/produkte/kategorien/stapelstuehle" className="btn-hero-secondary text-center">
+            <Link href="/produkte/stapelstuehle" className="btn-hero-secondary text-center">
               Stapelstühle ansehen
             </Link>
           </>
@@ -135,10 +131,9 @@ export default function StapelstuehleKaufenPage() {
           lead="Diese Modelle führen in die Kategorie. Die konkrete Auswahl klären wir nach Raum, Nutzung und Bestand."
           align="editorial"
         />
-        <div className="section-grid-top grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-          {stapelstuehle.map((product) => (
-            <ProductCard key={product.slug} product={product} />
-          ))}
+        <div className="section-grid-top grid gap-6 border-y border-premium-beige/80 py-8 md:grid-cols-[1fr_auto] md:items-center">
+          <p className="max-w-2xl text-sm leading-7 text-premium-muted">Die neue Modellübersicht zeigt 1021, Bünde, Coburg, Nürnberg und Erfurt als fünf Modellfamilien – mit Vergleich und direktem Einstieg in die Konfiguration.</p>
+          <Link href="/produkte/stapelstuehle#modelle" className="btn-primary text-center">Fünf Modelle vergleichen</Link>
         </div>
       </HomeSection>
 
@@ -166,7 +161,7 @@ export default function StapelstuehleKaufenPage() {
         lead="Nennen Sie Raumgröße, Stückzahl und gewünschte Nutzung. Wir schlagen passende Stapelstühle und Zubehör vor."
         primaryHref="/kontakt"
         primaryLabel="Beratung anfragen"
-        secondaryHref="/produkte/kategorien/stapelstuehle"
+        secondaryHref="/produkte/stapelstuehle"
         secondaryLabel="Kategorie öffnen"
       />
     </div>

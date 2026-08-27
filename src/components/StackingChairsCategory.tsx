@@ -86,7 +86,7 @@ export default function StackingChairsCategory({ heroImage, products, variant = 
       ? "/produkte/rednerpulte"
       : isTables
         ? "/produkte/kategorien/klapptische"
-        : "/produkte/kategorien/stapelstuehle";
+        : "/produkte/stapelstuehle";
 
   return (
     <div className="flex min-w-0 flex-col gap-12 md:gap-14">

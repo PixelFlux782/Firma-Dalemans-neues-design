@@ -9,6 +9,7 @@ import {
   developmentFinderFixtures,
   type DevelopmentFinderProductFixture,
 } from "@/lib/finder/development-fixtures";
+import { localStackingChairProducts } from "@/lib/commerce/providers/local-stacking-chairs";
 
 // Local development fixtures only. Finder products carry explicitly marked
 // test prices so cart totals can be exercised; none are final sales prices.
@@ -154,6 +155,7 @@ const developmentFinderProducts = developmentFinderFixtures.map(
 );
 
 export const localProducts: CommerceProduct[] = [
+  ...localStackingChairProducts,
   ...developmentFinderProducts,
   {
     id: "local-product-filzgleiter-mit-stift",
@@ -463,6 +465,18 @@ export const localProducts: CommerceProduct[] = [
 ];
 
 export const localCollectionRecords: Array<Omit<CommerceCollection, "products">> = [
+  {
+    id: "local-collection-stapelstuehle",
+    handle: "stapelstuehle",
+    title: "Stapelstühle",
+    shortDescription: "Fünf Modelle, verständlich konfiguriert nach Polsterung, Stoffgruppe und Reihenverbindung.",
+    description: "Stapelstühle für Gemeinden, Kirchen, Kommunen und flexibel genutzte Räume – mit persönlicher Beratung, Musterstuhl und Raumplanung.",
+    image: localStackingChairProducts[0]?.featuredImage ?? null,
+    seo: {
+      title: "Stapelstühle für flexible Räume",
+      description: "Fünf Stapelstuhlmodelle vergleichen, Polsterung und Reihenverbindung wählen und persönlich zu Menge, Musterstuhl und Raumplanung beraten lassen.",
+    },
+  },
   {
     id: "local-collection-gleiter-bodenschutz",
     handle: "gleiter-bodenschutz",

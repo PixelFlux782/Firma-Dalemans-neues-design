@@ -15,7 +15,7 @@ const pageLinks = [
 ] as const;
 
 const productLinks = [
-  ["/produkte/kategorien/stapelstuehle", "Stapelstühle"],
+  ["/produkte/stapelstuehle", "Stapelstühle"],
   ["/produkte/kategorien/klapptische", "Klapptische"],
   ["/produkte/buchablage", "Buchablagen"],
   ["/produkte/stuhltransportwagen", "Transportwagen"],

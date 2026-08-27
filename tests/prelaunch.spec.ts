@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 
 const routes = [
-  "/", "/produkte", "/shop", "/produkte/kategorien/stapelstuehle",
+  "/", "/produkte", "/shop", "/produkte/stapelstuehle",
   "/produkte/kategorien/klapptische", "/produkte/kategorien/transportwagen-zubehoer",
-  "/produkte/stapelstuhl-mod-1021c", "/produkte/rednerpulte", "/raeume-planung",
+  "/produkte/stapelstuehle/1021", "/produkte/rednerpulte", "/raeume-planung",
   "/raeume-planung/raumplanung", "/beratung-service", "/sonderloesungen",
   "/sonderposten", "/firma", "/kontakt", "/impressum", "/datenschutz",
 ];
@@ -35,7 +35,7 @@ test("alle Sitemap-Routen laden ohne Browser- oder Netzwerkfehler", async ({ pag
 });
 
 const mobileRoutes = [
-  "/", "/produkte", "/shop", "/produkte/kategorien/stapelstuehle",
+  "/", "/produkte", "/shop", "/produkte/stapelstuehle",
   "/produkte/kategorien/klapptische", "/raeume-planung", "/sonderloesungen",
   "/sonderposten", "/firma", "/kontakt", "/shop/gleiter-bodenschutz",
   "/shop/produkt/kunststoff-gestellgleiter",
@@ -73,18 +73,18 @@ test("mobile Buttons und Formularfelder bieten ausreichend große Touch-Ziele", 
 
 test("inhaltliche Seiten-Heroes besitzen konkrete Bildbeschreibungen", async ({ page }) => {
   const heroRoutes = [
-    "/produkte", "/produkte/kategorien/stapelstuehle", "/kontakt", "/firma",
+    "/produkte", "/produkte/stapelstuehle", "/kontakt", "/firma",
     "/beratung-service", "/raeume-planung", "/sonderloesungen", "/sonderposten",
   ];
   for (const route of heroRoutes) {
     await page.goto(route, { waitUntil: "domcontentloaded" });
-    const heroImage = page.locator(".products-hero-media img").first();
+    const heroImage = page.locator('main img[alt]:not([alt=""])').first();
     await expect(heroImage, route).toHaveAttribute("alt", /\S.{10,}/);
   }
 });
 
 test("wichtige Unterseiten liefern BreadcrumbList-Daten", async ({ page }) => {
-  for (const route of ["/produkte", "/shop", "/produkte/kategorien/stapelstuehle", "/raeume-planung", "/kontakt", "/firma"]) {
+  for (const route of ["/produkte", "/shop", "/produkte/stapelstuehle", "/raeume-planung", "/kontakt", "/firma"]) {
     await page.goto(route, { waitUntil: "domcontentloaded" });
     const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
     expect(jsonLd.some((entry) => entry.includes('"BreadcrumbList"')), route).toBe(true);

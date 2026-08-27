@@ -219,7 +219,7 @@ export function Header() {
             className="h-8 w-auto object-contain"
             priority
           />
-          <span aria-hidden="true" className="font-display text-lg font-semibold tracking-[0.06em] text-premium-ink">Dalemans</span>
+          <span aria-hidden="true" className="font-sans text-lg font-semibold tracking-[0.06em] text-premium-ink">Dalemans</span>
         </Link>
 
         <div className="hidden min-w-0 flex-1 items-center justify-end gap-4 xl:flex">
@@ -292,7 +292,7 @@ export function Header() {
               className="h-5 w-auto object-contain min-[390px]:h-6 sm:h-7"
               priority
             />
-            <span aria-hidden="true" className="font-display text-[0.68rem] font-semibold tracking-[0.04em] text-premium-ink min-[390px]:text-xs sm:text-sm">Dalemans</span>
+            <span aria-hidden="true" className="font-sans text-[0.68rem] font-semibold tracking-[0.04em] text-premium-ink min-[390px]:text-xs sm:text-sm">Dalemans</span>
           </Link>
 
           <div className="flex items-center justify-end gap-0.5">

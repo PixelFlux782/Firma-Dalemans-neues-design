@@ -38,7 +38,7 @@ export function Footer() {
               height={63}
               className="h-12 w-auto object-contain"
             />
-            <span aria-hidden="true" className="font-display text-2xl font-semibold tracking-[0.06em] text-white">Dalemans</span>
+            <span aria-hidden="true" className="font-sans text-2xl font-semibold tracking-[0.06em] text-white">Dalemans</span>
           </Link>
           <p className="mt-5 max-w-sm text-sm leading-7 text-white/55">
             Persönlich geplante Ausstattung für Gemeinden, Säle und flexible Räume – seit 1994.

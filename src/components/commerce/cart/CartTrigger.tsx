@@ -4,9 +4,11 @@ import { useCart } from "@/components/commerce/cart/CartProvider";
 
 export default function CartTrigger({
   compact = false,
+  showCompactLabel = false,
   onOpen,
 }: {
   compact?: boolean;
+  showCompactLabel?: boolean;
   onOpen?: () => void;
 }) {
   const { cart, hydrated, openCart } = useCart();
@@ -28,7 +30,10 @@ export default function CartTrigger({
         <path strokeLinecap="round" d="M9 9V6.8a3 3 0 0 1 6 0V9" />
       </svg>
       {compact ? (
-        <span className="absolute right-0.5 top-0.5 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full bg-premium-forest px-1 text-[0.58rem] font-semibold leading-none text-white" aria-hidden>{count}</span>
+        <>
+          {showCompactLabel ? <span>Warenkorb</span> : <span className="sr-only">Warenkorb</span>}
+          <span className="absolute right-0.5 top-0.5 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full bg-premium-forest px-1 text-[0.58rem] font-semibold leading-none text-white" aria-hidden>{count}</span>
+        </>
       ) : (
         <>
           <span>Warenkorb</span>

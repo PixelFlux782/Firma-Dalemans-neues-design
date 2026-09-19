@@ -18,6 +18,7 @@ const primaryLinks: readonly NavigationLink[] = [
   { href: "/produkte", label: "Produkte" },
   { href: "/shop", label: "Shop" },
   { href: "/raeume-planung", label: "Räume & Planung", activePrefixes: ["/raeume-planung", "/raumloesungen"] },
+  { href: "/raumplaner", label: "Raumplaner" },
   { href: "/beratung-service", label: "Beratung & Service" },
   { href: "/sonderloesungen", label: "Sonderlösungen" },
 ] as const;

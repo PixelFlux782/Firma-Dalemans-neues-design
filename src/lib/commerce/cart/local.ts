@@ -7,6 +7,7 @@ import type {
   CommerceMoney,
 } from "@/lib/commerce/types";
 import { multiplyCommerceMoney } from "@/lib/commerce/money";
+import type { CommercePriceTier } from "@/lib/commerce/types";
 
 export const LOCAL_CART_STORAGE_KEY = "dlmns-commerce-cart";
 export const LOCAL_CART_VERSION = 1;
@@ -45,6 +46,13 @@ function isMoney(value: unknown): value is CommerceMoney {
     && Number.isFinite(Number(money.amount))
     && typeof money.currencyCode === "string"
     && money.currencyCode.length === 3;
+}
+
+function tierPrice(tiers: CommercePriceTier[] | undefined, quantity: number, fallback: CommerceMoney | null) {
+  return tiers?.find((tier) =>
+    (tier.minimumQuantity === null || quantity >= tier.minimumQuantity)
+      && (tier.maximumQuantity === null || quantity <= tier.maximumQuantity),
+  )?.price ?? fallback;
 }
 
 function isPersistedLine(value: unknown): value is CartInputLineWithId {
@@ -92,11 +100,13 @@ function lineFromInput(input: CartInputLine, id: string): CommerceCartLine {
     input.minimumQuantity,
     input.quantityStep,
   );
+  const unitPrice = tierPrice(input.priceTiers, quantity, input.unitPrice);
   return {
     ...input,
     id,
     quantity,
-    lineTotal: multiplyCommerceMoney(input.unitPrice, quantity),
+    unitPrice,
+    lineTotal: multiplyCommerceMoney(unitPrice, quantity),
   };
 }
 

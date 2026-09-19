@@ -102,8 +102,8 @@ export interface CommercePriceTier {
 
 export interface CommerceStackingChairData {
   modelCode: string;
-  source: "Preisliste_Stapelstuhl.ods";
-  sourcePriceTierMeaning: "undocumented";
+  source: "Export_Flo";
+  sourcePriceTierMeaning: "documented";
   editorialStatus: "reference" | "data-only";
 }
 
@@ -112,6 +112,8 @@ export interface CommerceProductVariant {
   title: string;
   availableForSale: boolean;
   sku: string | null;
+  /** Unveränderte Artikelnummer aus dem ERP-Export; nicht als Shop-ID verwenden. */
+  erpArticleNumber?: string | null;
   selectedOptions: CommerceSelectedOption[];
   price: CommerceMoney | null;
   compareAtPrice: CommerceMoney | null;
@@ -231,9 +233,11 @@ export interface CartInputLine {
   productTitle: string;
   variantId: string;
   variantTitle: string;
+  erpArticleNumber: string | null;
   image: CommerceImage | null;
   quantity: number;
   unitPrice: CommerceMoney | null;
+  priceTiers?: CommercePriceTier[];
   priceStatus: CommercePriceStatus;
   priceDataStatus: CommerceDataStatus | null;
   packSize: number | null;

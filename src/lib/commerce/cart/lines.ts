@@ -28,6 +28,16 @@ export function cartQuantityRules(
   };
 }
 
+export function priceForQuantity(
+  variant: CommerceProductVariant,
+  quantity: number,
+) {
+  return variant.priceTiers?.find((tier) =>
+    (tier.minimumQuantity === null || quantity >= tier.minimumQuantity)
+      && (tier.maximumQuantity === null || quantity <= tier.maximumQuantity),
+  )?.price ?? variant.price;
+}
+
 export function cartLineFromProduct({
   product,
   variant,
@@ -50,7 +60,9 @@ export function cartLineFromProduct({
     variantTitle: variant.title,
     image: variant.image ?? product.featuredImage,
     quantity,
-    unitPrice: variant.price,
+    erpArticleNumber: variant.erpArticleNumber ?? null,
+    unitPrice: priceForQuantity(variant, quantity),
+    priceTiers: variant.priceTiers,
     priceStatus: variant.priceStatus,
     priceDataStatus: variant.priceDataStatus,
     ...rules,

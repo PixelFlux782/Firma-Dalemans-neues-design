@@ -26,6 +26,7 @@ function fixedLine(overrides: Partial<CartInputLine> = {}): CartInputLine {
     productTitle: "Testprodukt",
     variantId: "variant-1",
     variantTitle: "Standard",
+    erpArticleNumber: "TEST-ERP-1",
     image: null,
     quantity: 1,
     unitPrice: { amount: "2.50", currencyCode: "EUR" },
@@ -66,6 +67,49 @@ test.describe("provider-neutrale lokale Cart-Logik", () => {
       fixedLine({ variantId: "variant-2", variantTitle: "Alternative" }),
     ]);
     expect(result.lines.map((line) => line.variantId)).toEqual(["variant-1", "variant-2"]);
+  });
+
+  test("behält ERP-Artikelnummer und wechselt den Staffelpreis bei Mengenänderung", () => {
+    const table = localProducts.find((product) => product.handle === "klapptisch-310c")!;
+    const variant = table.variants.find((entry) => entry.erpArticleNumber === "T310C127")!;
+    const { cart } = provider();
+    const added = cart.addLines([cartLineFromProduct({ product: table, variant, quantity: 15 })]);
+    expect(added.lines[0]).toMatchObject({ erpArticleNumber: "T310C127", unitPrice: { amount: "355.93" } });
+    const updated = cart.updateLines([{ lineId: added.lines[0].id, quantity: 16 }]);
+    expect(updated.lines[0]).toMatchObject({ erpArticleNumber: "T310C127", unitPrice: { amount: "345.25" } });
+  });
+
+  test("ordnet die verschobene Buche-310c-Zeile mit Staffelpreisen korrekt zu", () => {
+    const table = localProducts.find((product) => product.handle === "klapptisch-310c")!;
+    expect(table.variants.filter((entry) => entry.title.endsWith("Buche natur")).map((entry) => [
+      entry.erpArticleNumber,
+      entry.title,
+      entry.priceTiers?.map((tier) => tier.price.amount),
+    ])).toEqual([
+      ["T310C127N", "120 × 70 cm · Buche natur", ["386.65", "375.05", "367.32"]],
+      ["T310C128N", "120 × 80 cm · Buche natur", ["396.18", "384.29", "376.37"]],
+      ["T310C147N", "140 × 70 cm · Buche natur", ["419.67", "407.08", "398.69"]],
+      ["T310C148N", "140 × 80 cm · Buche natur", ["423.13", "410.44", "401.97"]],
+      ["T310C157N", "150 × 70 cm · Buche natur", ["421.98", "409.32", "400.88"]],
+      ["T310C1575N", "150 × 75 cm · Buche natur", ["425.26", "412.50", "404.00"]],
+      ["T310C167N", "160 × 70 cm · Buche natur", ["424.44", "411.71", "403.22"]],
+      ["T310C168N", "160 × 80 cm · Buche natur", ["426.25", "413.46", "404.94"]],
+      ["T310C177N", "170 × 70 cm · Buche natur", ["427.89", "415.05", "406.50"]],
+      ["T310C178N", "170 × 80 cm · Buche natur", ["440.87", "427.64", "418.83"]],
+      ["T310C187N", "180 × 70 cm · Buche natur", ["427.89", "415.05", "406.50"]],
+      ["T310C188N", "180 × 80 cm · Buche natur", ["440.87", "427.64", "418.83"]],
+    ]);
+    const variant = table.variants.find((entry) => entry.erpArticleNumber === "T310C127N")!;
+    const { cart } = provider();
+    const added = cart.addLines([cartLineFromProduct({ product: table, variant, quantity: 21 })]);
+    expect(added.lines[0]).toMatchObject({ erpArticleNumber: "T310C127N", unitPrice: { amount: "367.32" } });
+  });
+
+  test("Preis-auf-Anfrage bleibt ohne Null-Euro-Position", () => {
+    const chairs = localProducts.find((product) => product.handle === "klappstuehle")!;
+    expect(chairs.variants[0].price).toBeNull();
+    const { cart } = provider();
+    expect(cart.addLines([cartLineFromProduct({ product: chairs, variant: chairs.variants[0], quantity: 4 })]).lines).toEqual([]);
   });
 
   test("erhöht, reduziert und setzt Mengen direkt", () => {
@@ -176,6 +220,29 @@ test.describe("DLMNS Cart Drawer", () => {
     await expect(drawer.getByLabel(/Menge für/)).toHaveValue("40");
     await drawer.getByRole("button", { name: /entfernen/ }).click();
     await expect(drawer).toContainText("Noch nichts ausgewählt.");
+  });
+
+  test("Tischvariante nutzt bei 16 Stück die zweite Staffel und persistiert die ERP-Nummer", async ({ page }) => {
+    await page.goto("/shop/produkt/klapptisch-310c");
+    await page.getByRole("button", { name: "140 × 70 cm" }).click();
+    await expect(page.getByTestId("selected-variant")).toContainText("140 × 70 cm · ABS");
+    await page.getByLabel("Bestellmenge").fill("16");
+    await page.getByRole("button", { name: "In den Warenkorb" }).click();
+    await expect(page.getByTestId("cart-drawer")).toContainText("372,50");
+    const persisted = await page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? "null"), LOCAL_CART_STORAGE_KEY);
+    expect(persisted.lines[0]).toMatchObject({ erpArticleNumber: "T310C147", quantity: 16, unitPrice: { amount: "372.50" } });
+  });
+
+  test("Buche-310c-Variante nutzt die korrigierte ERP-Zuordnung im Warenkorb", async ({ page }) => {
+    await page.goto("/shop/produkt/klapptisch-310c");
+    await page.getByRole("button", { name: "120 × 70 cm" }).click();
+    await page.getByRole("button", { name: "Buche natur" }).click();
+    await expect(page.getByTestId("selected-variant")).toContainText("120 × 70 cm · Buche natur");
+    await page.getByLabel("Bestellmenge").fill("21");
+    await page.getByRole("button", { name: "In den Warenkorb" }).click();
+    await expect(page.getByTestId("cart-drawer")).toContainText("367,32");
+    const persisted = await page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? "null"), LOCAL_CART_STORAGE_KEY);
+    expect(persisted.lines[0]).toMatchObject({ erpArticleNumber: "T310C127N", quantity: 21, unitPrice: { amount: "367.32" } });
   });
 
   test("Finder legt die bereits berechneten 450 Stück in den Cart", async ({ page }) => {

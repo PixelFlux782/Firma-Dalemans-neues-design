@@ -10,6 +10,7 @@ import {
   type DevelopmentFinderProductFixture,
 } from "@/lib/finder/development-fixtures";
 import { localStackingChairProducts } from "@/lib/commerce/providers/local-stacking-chairs";
+import { localPriceListProducts } from "@/lib/commerce/providers/local-price-list-products";
 
 // Local development fixtures only. Finder products carry explicitly marked
 // test prices so cart totals can be exercised; none are final sales prices.
@@ -31,6 +32,7 @@ function requestVariant(
     id: `local-variant-${id}`,
     title,
     sku,
+    erpArticleNumber: null,
     selectedOptions,
     price: null,
     compareAtPrice: null,
@@ -156,6 +158,7 @@ const developmentFinderProducts = developmentFinderFixtures.map(
 
 export const localProducts: CommerceProduct[] = [
   ...localStackingChairProducts,
+  ...localPriceListProducts,
   ...developmentFinderProducts,
   {
     id: "local-product-filzgleiter-mit-stift",
@@ -476,6 +479,33 @@ export const localCollectionRecords: Array<Omit<CommerceCollection, "products">>
       title: "Stapelstühle für flexible Räume",
       description: "Fünf Stapelstuhlmodelle vergleichen, Polsterung und Reihenverbindung wählen und persönlich zu Menge, Musterstuhl und Raumplanung beraten lassen.",
     },
+  },
+  {
+    id: "local-collection-klapptische",
+    handle: "klapptische",
+    title: "Klapptische",
+    shortDescription: "Klapptische, Seminartische und Trapeztische mit mengenabhängigen Preisen.",
+    description: "Tischfamilien und Maße aus der aktuellen Preisliste, gruppiert nach Modell und Bauform.",
+    image: localPriceListProducts.find((product) => product.handle === "klapptisch-310c")?.featuredImage ?? null,
+    seo: { title: "Klapptische", description: "Klapptische nach Modell, Tischmaß und Kantenart auswählen." },
+  },
+  {
+    id: "local-collection-klappstuehle",
+    handle: "klappstuehle",
+    title: "Klappstühle",
+    shortDescription: "Vier kompakte Klappstuhlmodelle, jeweils im Viererpack.",
+    description: "Klappstühle aus der aktuellen Preisliste; Preise und Lieferzeit werden persönlich geklärt.",
+    image: null,
+    seo: { title: "Klappstühle", description: "Klappstuhlmodelle für flexible Räume anfragen." },
+  },
+  {
+    id: "local-collection-rednerpulte",
+    handle: "rednerpulte",
+    title: "Rednerpulte",
+    shortDescription: "Rednerpulte aus Acrylglas oder massiver Furnierplatte.",
+    description: "Drei Rednerpult-Ausführungen aus der aktuellen Preisliste.",
+    image: localPriceListProducts.find((product) => product.handle === "rednerpulte")?.featuredImage ?? null,
+    seo: { title: "Rednerpulte", description: "Rednerpulte aus Acrylglas und Furnierplatte." },
   },
   {
     id: "local-collection-gleiter-bodenschutz",

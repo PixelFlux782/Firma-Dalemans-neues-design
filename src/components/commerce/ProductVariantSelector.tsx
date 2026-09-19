@@ -9,6 +9,7 @@ import {
   canAddVariantToCart,
   cartLineFromProduct,
   cartQuantityRules,
+  priceForQuantity,
 } from "@/lib/commerce/cart/lines";
 import type { CommerceProduct, CommerceProductVariant } from "@/lib/commerce/types";
 
@@ -72,7 +73,7 @@ export default function ProductVariantSelector({
   }
 
   const priceStatus = selectedVariant?.priceStatus ?? product.priceStatus;
-  const price = selectedVariant?.price ?? product.priceRange.min;
+  const price = selectedVariant ? priceForQuantity(selectedVariant, quantity) : product.priceRange.min;
   const availability = selectedVariant?.availability ?? product.availability;
   const availabilityNote = selectedVariant?.availabilityNote ?? product.availabilityNote;
   const cartable = canAddVariantToCart(selectedVariant);

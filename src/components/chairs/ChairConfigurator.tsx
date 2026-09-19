@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { recordChairAction } from "@/lib/analytics";
 import { formatCommerceMoney } from "@/lib/commerce/money";
+import { priceForQuantity } from "@/lib/commerce/cart/lines";
 import {
   CHAIR_OPTION_VALUES,
   resolveChairVariant,
@@ -75,8 +76,10 @@ export default function ChairConfigurator({
     () => resolveChairVariant(product, { ...configuration, rowConnector: true }),
     [configuration, product],
   );
-  const connectorDelta = baseVariant?.price && connectorVariant?.price
-    ? Number(connectorVariant.price.amount) - Number(baseVariant.price.amount)
+  const basePrice = baseVariant ? priceForQuantity(baseVariant, quantity) : null;
+  const connectorPrice = connectorVariant ? priceForQuantity(connectorVariant, quantity) : null;
+  const connectorDelta = basePrice && connectorPrice
+    ? Number(connectorPrice.amount) - Number(basePrice.amount)
     : null;
 
   useEffect(() => {
@@ -122,7 +125,8 @@ export default function ChairConfigurator({
     });
   }
 
-  const price = selectedVariant?.price ? formatCommerceMoney(selectedVariant.price) : null;
+  const selectedPrice = selectedVariant ? priceForQuantity(selectedVariant, quantity) : null;
+  const price = selectedPrice ? formatCommerceMoney(selectedPrice) : null;
   const configurationSummary = selectedVariant?.title ?? "Keine gültige Ausführung";
 
   return (
@@ -134,7 +138,7 @@ export default function ChairConfigurator({
         </div>
         <div className="shrink-0 text-right" aria-live="polite" data-testid="chair-price">
           <p className="text-xs uppercase tracking-[.14em] text-premium-subtle">Preis je Stück</p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums text-premium-forest">{price ? `ab ${price}` : "Auf Anfrage"}</p>
+          <p className="mt-1 text-2xl font-semibold tabular-nums text-premium-forest">{price ?? "Auf Anfrage"}</p>
         </div>
       </div>
 
@@ -264,7 +268,7 @@ export default function ChairConfigurator({
       )}
 
       <p className="mt-5 text-xs leading-5 text-premium-subtle">
-        * Niedrigster hinterlegter Preis dieser Ausführung. Die Preisliste enthält drei mengenabhängige Werte; ihre Staffelgrenzen sind noch nicht dokumentiert. Verbindlich wird der Preis im Angebot.
+        * Mengenpreis für die gewählte Stückzahl. Verbindlich wird der Preis im Angebot.
       </p>
     </div>
   );

@@ -39,6 +39,7 @@ function mapProductVariant(
     title: variant.title,
     availableForSale: variant.availableForSale,
     sku: variant.sku,
+    erpArticleNumber: null,
     selectedOptions: variant.selectedOptions.map((option) => ({ ...option })),
     price: mapMoney(variant.price),
     compareAtPrice: variant.compareAtPrice

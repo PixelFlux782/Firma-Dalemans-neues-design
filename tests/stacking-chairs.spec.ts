@@ -18,12 +18,12 @@ const configurations: ChairConfiguration[] = [
 ];
 
 test.describe("provider-neutrales Stapelstuhlmodell", () => {
-  test("enthält fünf Modelle und exakt 70 konkrete Varianten", () => {
+  test("enthält fünf Modelle und nur die in Export_Flo belegten Varianten", () => {
     expect(localStackingChairProducts.map((product) => product.stackingChair?.modelCode)).toEqual([
       "1021", "Bünde", "Coburg", "Nürnberg", "Erfurt",
     ]);
-    expect(localStackingChairProducts.every((product) => product.variants.length === 14)).toBe(true);
-    expect(localStackingChairProducts.flatMap((product) => product.variants)).toHaveLength(70);
+    expect(localStackingChairProducts.map((product) => product.variants.length)).toEqual([14, 14, 14, 14, 8]);
+    expect(localStackingChairProducts.flatMap((product) => product.variants)).toHaveLength(64);
   });
 
   test("löst alle 14 Konfigurationen von Modell 1021 eindeutig auf", () => {
@@ -36,22 +36,20 @@ test.describe("provider-neutrales Stapelstuhlmodell", () => {
     expect(ids.every(Boolean)).toBe(true);
     expect(new Set(ids).size).toBe(14);
     expect(prices).toEqual([
-      "64.44", "68.07",
-      "84.32", "87.95", "103.44", "107.07",
-      "88.19", "91.82", "108.94", "112.57",
-      "89.19", "92.82", "110.32", "110.32",
+      "67.13", "70.75",
+      "84.25", "87.88", "97.13", "100.75",
+      "87.50", "91.13", "101.25", "104.88",
+      "88.88", "92.50", "102.50", "106.13",
     ]);
     expect(resolveChairVariant(product, { upholstery: "none", fabricGroup: 2, rowConnector: false })).toBeNull();
   });
 
-  test("behält alle drei unbekannt benannten Preisstufen je Variante", () => {
+  test("ordnet allen Preisstufen die dokumentierten Mengengrenzen zu", () => {
     for (const product of localStackingChairProducts) {
       for (const variant of product.variants) {
         expect(variant.priceTiers).toHaveLength(3);
-        expect(variant.priceTiers?.every((tier) => tier.label === null && tier.minimumQuantity === null && tier.maximumQuantity === null)).toBe(true);
-        expect(variant.price?.amount).toBe(
-          Math.min(...(variant.priceTiers ?? []).map((tier) => Number(tier.price.amount))).toFixed(2),
-        );
+        expect(variant.priceTiers?.map((tier) => [tier.minimumQuantity, tier.maximumQuantity])).toEqual([[1, 100], [101, 250], [251, null]]);
+        expect(variant.erpArticleNumber).toBeTruthy();
       }
     }
   });

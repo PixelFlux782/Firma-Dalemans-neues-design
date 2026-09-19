@@ -32,6 +32,7 @@ interface LocalChairRecord {
   modelCode: string;
   handle: string;
   prices: readonly PriceRow[];
+  erpArticleNumbers: readonly string[];
   featuredImage: CommerceImage | null;
   images: CommerceImage[];
   shortDescription: string;
@@ -67,21 +68,21 @@ function buildVariant(
   handle: string,
   configuration: ChairConfiguration,
   prices: PriceRow,
+  erpArticleNumber: string,
 ): CommerceProductVariant {
   const tiers = prices.map((amount, index) => ({
     id: `source-tier-${index + 1}`,
     price: money(amount),
-    minimumQuantity: null,
-    maximumQuantity: null,
-    label: null,
+    minimumQuantity: index === 0 ? 1 : index === 1 ? 101 : 251,
+    maximumQuantity: index === 0 ? 100 : index === 1 ? 250 : null,
+    label: index === 0 ? "1–100 Stück" : index === 1 ? "101–250 Stück" : "ab 251 Stück",
   }));
-  const lowestPrice = Math.min(...prices);
-
   return {
     id: `local-chair-${handle}-${variantIdPart(configuration)}`,
     title: variantTitle(configuration),
     availableForSale: false,
     sku: null,
+    erpArticleNumber,
     selectedOptions: [
       {
         name: CHAIR_OPTION_NAMES.upholstery,
@@ -95,7 +96,7 @@ function buildVariant(
         value: CHAIR_OPTION_VALUES.rowConnector[String(configuration.rowConnector) as "true" | "false"],
       },
     ],
-    price: money(lowestPrice),
+    price: money(prices[0]),
     compareAtPrice: null,
     image: null,
     priceStatus: "from",
@@ -112,14 +113,15 @@ const chairRecords: LocalChairRecord[] = [
     modelCode: "1021",
     handle: "1021",
     prices: [
-      [67.13, 66.05, 64.44], [70.76, 69.68, 68.07],
-      [87.01, 85.93, 84.32], [90.64, 89.56, 87.95],
-      [90.88, 89.80, 88.19], [94.51, 93.43, 91.82],
-      [91.88, 90.80, 89.19], [95.51, 94.43, 92.82],
-      [106.13, 105.05, 103.44], [109.76, 108.68, 107.07],
-      [111.63, 110.55, 108.94], [115.26, 114.18, 112.57],
-      [113.01, 111.93, 110.32], [116.64, 111.93, 110.32],
+      [67.13, 66.05, 64.44], [70.755, 69.675, 68.065],
+      [84.25, 82.9, 80.88], [87.875, 86.525, 84.505],
+      [87.5, 86.1, 84], [91.125, 89.725, 87.625],
+      [88.88, 87.45, 85.32], [92.505, 91.075, 88.945],
+      [97.13, 95.57, 93.24], [100.755, 99.195, 96.865],
+      [101.25, 99.63, 97.2], [104.875, 103.255, 100.825],
+      [102.5, 100.86, 98.4], [106.125, 104.485, 102.025],
     ],
+    erpArticleNumbers: ["A1021ACO", "A1021ACO", "A1021BCO2", "A1021BCO2", "A1021BCO3", "A1021BCO3", "A1021BCO4", "A1021BCO4", "A1021CCO2", "A1021CCO2", "A1021CCO3", "A1021CCO3", "A1021CCO4", "A1021CCO4"],
     featuredImage: image(
       "/images/curated/Stapelstühle/1021c.webp",
       "Stapelstuhl Modell 1021 mit Holzschale und Sitzpolster",
@@ -139,14 +141,15 @@ const chairRecords: LocalChairRecord[] = [
     modelCode: "Bünde",
     handle: "buende",
     prices: [
-      [69.63, 68.51, 66.84], [73.26, 72.14, 70.47],
-      [89.51, 88.39, 86.72], [93.14, 92.02, 90.35],
-      [93.38, 92.26, 90.59], [97.01, 95.89, 94.22],
-      [94.38, 93.26, 91.59], [98.01, 96.89, 95.22],
-      [108.63, 107.51, 105.84], [112.26, 111.14, 109.47],
-      [114.13, 113.01, 111.34], [117.76, 116.64, 114.97],
-      [115.51, 114.39, 112.72], [119.14, 114.39, 112.72],
+      [68.38, 67.28, 65.64], [72.005, 70.905, 69.265],
+      [86.75, 85.36, 83.28], [90.375, 88.985, 86.905],
+      [92.5, 91.02, 88.8], [96.125, 94.645, 92.425],
+      [94.63, 93.11, 90.84], [98.255, 96.735, 94.465],
+      [99.63, 98.03, 95.64], [103.255, 101.655, 99.265],
+      [106.25, 104.55, 102], [109.875, 108.175, 105.625],
+      [108.25, 106.52, 103.92], [111.875, 110.145, 107.545],
     ],
+    erpArticleNumbers: ["ABUNDACO", "ABUNDACO", "ABUNDBCO2", "ABUNDBCO2", "ABUNDBCO3", "ABUNDBCO3", "ABUNDBCO4", "ABUNDBCO4", "ABUNDCCO2", "ABUNDCCO2", "ABUNDCCO3", "ABUNDCCO3", "ABUNDCCO4", "ABUNDCCO4"],
     featuredImage: image(
       "/images/curated/Stapelstühle/bünde.webp",
       "Stapelstuhl Modell Bünde mit gepolsterter Sitz- und Rückenfläche",
@@ -164,14 +167,15 @@ const chairRecords: LocalChairRecord[] = [
     modelCode: "Coburg",
     handle: "coburg",
     prices: [
-      [71.13, 69.99, 68.28], [74.76, 73.62, 71.91],
-      [91.01, 89.87, 88.16], [94.64, 93.50, 91.79],
-      [94.88, 93.74, 92.03], [98.51, 97.37, 95.66],
-      [95.88, 94.74, 93.03], [99.51, 98.37, 96.66],
-      [110.13, 108.99, 107.28], [113.76, 112.62, 110.91],
-      [115.63, 114.49, 112.78], [119.26, 118.12, 116.41],
-      [117.01, 115.87, 114.16], [120.64, 115.87, 114.16],
+      [72.5, 71.34, 69.6], [76.125, 74.965, 73.225],
+      [92.5, 91.02, 88.8], [96.125, 94.645, 92.425],
+      [96.25, 94.71, 92.4], [99.875, 98.335, 96.025],
+      [98.75, 97.17, 94.8], [102.375, 100.795, 98.425],
+      [110, 108.24, 105.6], [113.625, 111.865, 109.225],
+      [115, 113.16, 110.4], [118.625, 116.785, 114.025],
+      [117.5, 115.62, 112.8], [121.125, 119.245, 116.425],
     ],
+    erpArticleNumbers: ["ACOBUACO", "ACOBUACO", "ACOBUBCO2", "ACOBUBCO2", "ACOBUBCO3", "ACOBUBCO3", "ACOBUBCO4", "ACOBUBCO4", "ACOBUCCO2", "ACOBUCCO2", "ACOBUCCO3", "ACOBUCCO3", "ACOBUCCO4", "ACOBUCCO4"],
     featuredImage: null,
     images: [],
     shortDescription: "In 14 Polster- und Reihenverbindungsvarianten in der aktuellen Preisliste geführt.",
@@ -182,14 +186,15 @@ const chairRecords: LocalChairRecord[] = [
     modelCode: "Nürnberg",
     handle: "nuernberg",
     prices: [
-      [67.88, 66.79, 65.16], [71.51, 70.42, 68.79],
-      [87.76, 86.67, 85.04], [91.39, 90.30, 88.67],
-      [91.63, 90.54, 88.91], [95.26, 94.17, 92.54],
-      [92.63, 91.54, 89.91], [96.26, 95.17, 93.54],
-      [106.88, 105.79, 104.16], [110.51, 109.42, 107.79],
-      [112.38, 111.29, 109.66], [116.01, 114.92, 113.29],
-      [113.76, 112.67, 111.04], [117.39, 112.67, 111.04],
+      [75, 73.8, 72], [78.625, 77.425, 75.625],
+      [97.5, 95.94, 93.6], [101.125, 99.565, 97.225],
+      [101.25, 99.63, 97.2], [104.875, 103.255, 100.825],
+      [103.75, 102.09, 99.6], [107.375, 105.715, 103.225],
+      [115, 113.16, 110.4], [118.625, 116.785, 114.025],
+      [120, 118.08, 115.2], [123.625, 121.705, 118.825],
+      [122.5, 120.54, 117.6], [126.125, 124.165, 121.225],
     ],
+    erpArticleNumbers: ["ANURNACO", "ANURNACO", "ANURNBCO2", "ANURNBCO2", "ANURNBCO3", "ANURNBCO3", "ANURNBCO4", "ANURNBCO4", "ANURNCCO2", "ANURNCCO2", "ANURNCCO3", "ANURNCCO3", "ANURNCCO4", "ANURNCCO4"],
     featuredImage: null,
     images: [],
     shortDescription: "In 14 Polster- und Reihenverbindungsvarianten in der aktuellen Preisliste geführt.",
@@ -201,14 +206,12 @@ const chairRecords: LocalChairRecord[] = [
     modelCode: "Erfurt",
     handle: "erfurt",
     prices: [
-      [69.75, 68.63, 66.96], [73.38, 72.26, 70.59],
-      [89.63, 88.51, 86.84], [93.26, 92.14, 90.47],
-      [93.50, 92.38, 90.71], [97.13, 96.01, 94.34],
-      [94.50, 93.38, 91.71], [98.13, 97.01, 95.34],
-      [108.75, 107.63, 105.96], [112.38, 111.26, 109.59],
-      [114.25, 113.13, 111.46], [117.88, 116.76, 115.09],
-      [115.63, 114.51, 112.84], [119.26, 114.51, 112.84],
+      [80, 78.72, 76.8], [83.625, 82.345, 80.425],
+      [105, 103.32, 100.8], [108.625, 106.945, 104.425],
+      [108.75, 107.01, 104.4], [112.375, 110.635, 108.025],
+      [111.25, 109.47, 106.8], [114.875, 113.095, 110.425],
     ],
+    erpArticleNumbers: ["AERFUACO", "AERFUACO", "AERFUBCO2", "AERFUBCO2", "AERFUBCO3", "AERFUBCO3", "AERFUBCO4", "AERFUBCO4"],
     featuredImage: null,
     images: [],
     shortDescription: "In 14 Polster- und Reihenverbindungsvarianten in der aktuellen Preisliste geführt.",
@@ -218,12 +221,12 @@ const chairRecords: LocalChairRecord[] = [
 ];
 
 function buildChairProduct(record: LocalChairRecord): CommerceProduct {
-  if (record.prices.length !== configurations.length) {
-    throw new Error(`Expected 14 price rows for chair model ${record.modelCode}.`);
+  if (record.prices.length !== record.erpArticleNumbers.length) {
+    throw new Error(`Expected matching price and ERP rows for chair model ${record.modelCode}.`);
   }
 
-  const variants = configurations.map((configuration, index) =>
-    buildVariant(record.handle, configuration, record.prices[index]),
+  const variants = configurations.slice(0, record.prices.length).map((configuration, index) =>
+    buildVariant(record.handle, configuration, record.prices[index], record.erpArticleNumbers[index]),
   );
   const prices = variants
     .map((variant) => Number(variant.price?.amount))
@@ -261,12 +264,12 @@ function buildChairProduct(record: LocalChairRecord): CommerceProduct {
       unitLabel: "Stück",
       minimum: 1,
       step: 1,
-      note: "Die Mengenbereiche der drei Preisstufen sind in der Quelle noch nicht dokumentiert.",
+      note: "Preisstaffel: 1–100, 101–250 und ab 251 Stück.",
     },
     measureGuide: [],
     applicationNotes: [],
     notes: [
-      "Drei Preiswerte je Variante wurden unverändert aus der Preisliste übernommen; ihre Mengenstaffeln sind noch nicht benannt.",
+      "Drei mengenabhängige Preiswerte wurden aus dem Arbeitsblatt Export_Flo übernommen.",
     ],
     accessories: [],
     consultationNote: "Polsterung, Stoffgruppe, Reihenverbindung, Menge und Raumplanung klären wir persönlich.",
@@ -281,7 +284,7 @@ function buildChairProduct(record: LocalChairRecord): CommerceProduct {
       },
       {
         question: "Gibt es Mengenpreise?",
-        answer: "Die Preisliste enthält drei Preise je Ausführung. Die zugehörigen Mengenbereiche sind noch nicht dokumentiert und werden deshalb persönlich geklärt.",
+        answer: "Ja. Die Staffelbereiche sind 1–100, 101–250 und ab 251 Stück.",
       },
     ] : [],
     seo: {
@@ -291,8 +294,8 @@ function buildChairProduct(record: LocalChairRecord): CommerceProduct {
     updatedAt,
     stackingChair: {
       modelCode: record.modelCode,
-      source: "Preisliste_Stapelstuhl.ods",
-      sourcePriceTierMeaning: "undocumented",
+      source: "Export_Flo",
+      sourcePriceTierMeaning: "documented",
       editorialStatus: record.editorialStatus,
     },
   };

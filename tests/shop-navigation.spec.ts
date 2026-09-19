@@ -1,6 +1,39 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Shop-Schnellnavigation", () => {
+  for (const width of [1280, 1920]) {
+    test(`hält das Stühle-Flyout bei ${width}px sauber im Viewport`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/shop");
+
+      const nav = page.getByTestId("shop-navigation");
+      await expect(nav.getByRole("button", { name: "Shop", exact: true })).toHaveCount(0);
+
+      await nav.getByRole("button", { name: "Stühle" }).click();
+      const flyout = nav.locator("#shop-flyout-chairs");
+      await expect(flyout).toBeVisible();
+
+      const [flyoutBox, firstHeading, secondHeading, thirdHeading, ctaBox] = await Promise.all([
+        flyout.boundingBox(),
+        flyout.getByText("Stühle", { exact: true }).boundingBox(),
+        flyout.getByText("Direkt zu Modellen", { exact: true }).boundingBox(),
+        flyout.getByText("Passend dazu", { exact: true }).boundingBox(),
+        flyout.getByRole("link", { name: "Alle Stühle ansehen" }).boundingBox(),
+      ]);
+
+      expect(flyoutBox).not.toBeNull();
+      expect(firstHeading).not.toBeNull();
+      expect(secondHeading).not.toBeNull();
+      expect(thirdHeading).not.toBeNull();
+      expect(ctaBox).not.toBeNull();
+      expect(flyoutBox!.x).toBeGreaterThanOrEqual(0);
+      expect(flyoutBox!.x + flyoutBox!.width).toBeLessThanOrEqual(width);
+      expect(firstHeading!.x + firstHeading!.width).toBeLessThan(secondHeading!.x);
+      expect(secondHeading!.x + secondHeading!.width).toBeLessThan(thirdHeading!.x);
+      expect(ctaBox!.width).toBeGreaterThan(flyoutBox!.width - 50);
+    });
+  }
+
   test("öffnet Desktop-Flyouts, navigiert und nutzt Search und Cart", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/shop");

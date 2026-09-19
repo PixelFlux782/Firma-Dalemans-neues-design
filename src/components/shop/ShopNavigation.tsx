@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import CartTrigger from "@/components/commerce/cart/CartTrigger";
 import SearchTrigger from "@/components/search/SearchTrigger";
 
-type ShopSection = "shop" | "chairs" | "tables" | "gliders" | "retrofit" | "transport" | "lecterns";
+type ShopSection = "chairs" | "tables" | "gliders" | "retrofit" | "transport" | "lecterns";
 
 type ShopLink = { label: string; href: string };
 type ShopGroup = { title: string; links: readonly ShopLink[] };
@@ -22,37 +22,6 @@ const product = (handle: string) => `/shop/produkt/${handle}`;
 const chairProduct = (handle: string) => `/produkte/stapelstuehle/${handle}`;
 
 const shopItems: readonly ShopItem[] = [
-  {
-    id: "shop",
-    label: "Shop",
-    href: "/shop",
-    groups: [
-      {
-        title: "Produkte kaufen",
-        links: [
-          { label: "Stühle", href: "/produkte/stapelstuehle" },
-          { label: "Tische", href: "/shop/klapptische" },
-          { label: "Zubehör & Ersatzteile", href: "/shop/reihenverbinder-nachruestung" },
-        ],
-      },
-      {
-        title: "Problem lösen",
-        links: [
-          { label: "Passenden Gleiter finden", href: "/shop/gleiter-finder" },
-          { label: "Nachrüsten", href: "/shop/reihenverbinder-nachruestung" },
-          { label: "Transport & Lagerung", href: "/shop/transport-lagerung" },
-        ],
-      },
-      {
-        title: "Nicht sicher?",
-        links: [
-          { label: "Gleiter-Finder", href: "/shop/gleiter-finder" },
-          { label: "Beratung", href: "/kontakt?anliegen=Shop-Beratung" },
-        ],
-      },
-    ],
-    cta: { label: "Alle Produkte ansehen", href: "/shop" },
-  },
   {
     id: "chairs",
     label: "Stühle",
@@ -167,15 +136,14 @@ const mobileGroups: readonly ShopGroup[] = [
 
 const focusableSelector = "a[href], button:not([disabled]), [tabindex]:not([tabindex='-1'])";
 
-function activeSection(pathname: string): ShopSection {
-  if (pathname === "/shop") return "shop";
+function activeSection(pathname: string): ShopSection | null {
   if (/\/(stapelstuehle|klappstuehle)$/.test(pathname) || /\/produkt\/(1021|buende|coburg|nuernberg|erfurt|klappstuehle)$/.test(pathname)) return "chairs";
   if (pathname === "/shop/klapptische" || /\/produkt\/(klapptisch-310c|seminarklapptisch-210c|trapez-klapptisch-310c)$/.test(pathname)) return "tables";
   if (pathname.includes("gleiter") || pathname.endsWith("kunststoff-gestellgleiter")) return "gliders";
   if (pathname.includes("reihenverbinder") || pathname.includes("buchablage")) return "retrofit";
   if (pathname.includes("transport") || pathname.endsWith("stuhltransportwagen")) return "transport";
   if (pathname.includes("rednerpult")) return "lecterns";
-  return "shop";
+  return null;
 }
 
 export default function ShopNavigation() {
@@ -292,18 +260,18 @@ export default function ShopNavigation() {
                     {item.label}<span aria-hidden className={`text-[0.55rem] transition-transform ${isOpen ? "rotate-180" : ""}`}>⌄</span>
                   </button>
                   {isOpen ? (
-                    <div id={`shop-flyout-${item.id}`} className="absolute left-0 top-full min-w-[22rem] max-w-[min(46rem,calc(100vw-2rem))] rounded-b-2xl border border-t-0 border-premium-beige/80 bg-premium-canvas p-5 shadow-premium-lg motion-safe:animate-[mega-menu-in_140ms_cubic-bezier(.22,1,.36,1)_both]" onPointerEnter={cancelClose} onPointerLeave={queueClose}>
-                      <div className={`grid gap-7 ${item.groups.length > 1 ? "grid-cols-3" : "grid-cols-1"}`}>
+                    <div id={`shop-flyout-${item.id}`} className={`absolute left-0 top-full max-w-[calc(100vw-2rem)] rounded-b-2xl border border-t-0 border-premium-beige/80 bg-premium-canvas p-5 shadow-premium-lg motion-safe:animate-[mega-menu-in_140ms_cubic-bezier(.22,1,.36,1)_both] ${item.id === "chairs" ? "w-[46rem]" : "min-w-[22rem]"}`} onPointerEnter={cancelClose} onPointerLeave={queueClose}>
+                      <div className={`grid gap-7 ${item.id === "chairs" ? "grid-cols-[minmax(11.25rem,1fr)_minmax(12.5rem,1.15fr)_minmax(11.25rem,1fr)] gap-x-8" : item.groups.length > 1 ? "grid-cols-3" : "grid-cols-1"}`}>
                         {item.groups.map((group) => (
-                          <div key={group.title} className="min-w-[10rem]">
-                            <p className="text-[0.63rem] font-semibold uppercase tracking-[0.18em] text-premium-bronze">{group.title}</p>
+                          <div key={group.title} className={item.id === "chairs" ? "min-w-0" : "min-w-[10rem]"}>
+                            <p className="whitespace-nowrap text-[0.63rem] font-semibold uppercase tracking-[0.18em] text-premium-bronze">{group.title}</p>
                             <div className="mt-3 grid gap-0.5">
                               {group.links.map((link) => <Link key={link.href + link.label} href={link.href} className="rounded-lg px-2 py-2 text-[0.8rem] leading-5 text-premium-muted transition hover:bg-white/80 hover:text-premium-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">{link.label}</Link>)}
                             </div>
                           </div>
                         ))}
                       </div>
-                      {item.cta ? <Link href={item.cta.href} className="mt-4 inline-flex min-h-10 items-center border-t border-premium-beige/70 pt-4 text-xs font-semibold text-premium-forest underline-offset-4 hover:underline">{item.cta.label} <span className="ml-2" aria-hidden>→</span></Link> : null}
+                      {item.cta ? <Link href={item.cta.href} className="mt-4 flex min-h-10 w-full items-center border-t border-premium-beige/70 pt-4 text-xs font-semibold text-premium-forest underline-offset-4 hover:underline">{item.cta.label} <span className="ml-2" aria-hidden>→</span></Link> : null}
                     </div>
                   ) : null}
                 </div>

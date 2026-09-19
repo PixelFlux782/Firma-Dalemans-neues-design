@@ -1,5 +1,45 @@
 import { expect, test } from "@playwright/test";
 
+test("Raumplaner verbindet Stuhlmodell, Maße und Kaufbedarf", async ({ page }) => {
+  const consoleErrors: string[] = [];
+  page.on("console", (message) => { if (message.type() === "error") consoleErrors.push(message.text()); });
+  page.on("pageerror", (error) => consoleErrors.push(error.message));
+
+  await page.goto("/raumplaner");
+  await expect(page.getByLabel("Stuhlmodell")).toHaveValue("dalemans-chair");
+  await expect(page.getByLabel("Stuhlbreite")).toHaveValue("0.5");
+  await expect(page.getByLabel("Stuhltiefe")).toHaveValue("0.55");
+  await expect(page.locator("canvas")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Dalemans Planungsstuhl" })).toBeVisible();
+  await expect(page.getByTestId("required-quantity")).toHaveText("270 Stühle");
+  await expect(page.getByText("Produktzuordnung ausstehend")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Angebot für diese Planung anfragen" })).toHaveAttribute(
+    "href",
+    "/kontakt?source=raumplaner&product=dalemans-chair&quantity=270",
+  );
+
+  await page.getByLabel("Stuhlbreite").fill("0.6");
+  const updatedQuantity = Number(await page.getByTestId("chair-count").textContent());
+  expect(updatedQuantity).toBeLessThan(270);
+  await expect(page.getByTestId("required-quantity")).toHaveText(`${updatedQuantity} Stühle`);
+  await expect(page.getByRole("link", { name: "Angebot für diese Planung anfragen" })).toHaveAttribute(
+    "href",
+    `/kontakt?source=raumplaner&product=dalemans-chair&quantity=${updatedQuantity}`,
+  );
+
+  const box = await page.locator("canvas").boundingBox();
+  if (box) {
+    await page.mouse.move(box.x + box.width * 0.65, box.y + box.height * 0.5);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.45, box.y + box.height * 0.4, { steps: 8 });
+    await page.mouse.up();
+    await page.mouse.wheel(0, -350);
+  }
+  await page.getByRole("link", { name: "Angebot für diese Planung anfragen" }).click();
+  await expect(page).toHaveURL(`/kontakt?source=raumplaner&product=dalemans-chair&quantity=${updatedQuantity}`);
+  expect(consoleErrors).toEqual([]);
+});
+
 test("Raumplaner verwaltet mehrere Türen und Hindernisse", async ({ page }) => {
   const consoleErrors: string[] = [];
   page.on("console", (message) => { if (message.type() === "error") consoleErrors.push(message.text()); });

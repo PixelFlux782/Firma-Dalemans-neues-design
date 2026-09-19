@@ -4,6 +4,7 @@ import { ContactShadows, OrbitControls, useGLTF } from "@react-three/drei";
 import { Canvas, type ThreeEvent } from "@react-three/fiber";
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import type { PlannerChair } from "@/lib/room-planner/chairs";
 
 type PlannerValues = {
   roomWidth: number; roomLength: number; stageWidth: number; stageDepth: number;
@@ -64,8 +65,8 @@ function expandRect(rect: Rect, distance: number): Rect {
   return { minX: rect.minX - distance, maxX: rect.maxX + distance, minZ: rect.minZ - distance, maxZ: rect.maxZ + distance };
 }
 
-function ChairInstances({ positions, width, depth }: { positions: [number, number, number][]; width: number; depth: number }) {
-  const { scene } = useGLTF("/models/dalemans-chair.glb");
+function ChairInstances({ positions, width, depth, modelPath }: { positions: [number, number, number][]; width: number; depth: number; modelPath: string }) {
+  const { scene } = useGLTF(modelPath);
   const instancesRef = useRef<THREE.InstancedMesh>(null);
   const model = useMemo(() => {
     scene.updateMatrixWorld(true);
@@ -107,7 +108,7 @@ function AisleMarker({ x, z, width, length }: { x: number; z: number; width: num
   return <mesh position={[x, 0.012, z]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[width, length]} /><meshBasicMaterial color="#b8aa8c" transparent opacity={0.28} depthWrite={false} /></mesh>;
 }
 
-function RoomScene({ values, positions, placementMode, onPlaceObstacle, onPlaceDoor }: { values: PlannerValues; positions: [number, number, number][]; placementMode: PlacementMode; onPlaceObstacle: (id: string, x: number, z: number) => void; onPlaceDoor: (id: string, x: number, z: number) => void }) {
+function RoomScene({ values, positions, modelPath, placementMode, onPlaceObstacle, onPlaceDoor }: { values: PlannerValues; positions: [number, number, number][]; modelPath: string; placementMode: PlacementMode; onPlaceObstacle: (id: string, x: number, z: number) => void; onPlaceDoor: (id: string, x: number, z: number) => void }) {
   const stageWidth = Math.min(values.stageWidth, values.roomWidth);
   const stageDepth = Math.min(values.stageDepth, values.roomLength);
   const seatingStart = -values.roomLength / 2 + stageDepth;
@@ -140,7 +141,7 @@ function RoomScene({ values, positions, placementMode, onPlaceObstacle, onPlaceD
         <mesh position={[obstacle.x, 0.013, obstacle.y]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[clearance.maxX - clearance.minX, clearance.maxZ - clearance.minZ]} /><meshBasicMaterial color="#776f64" transparent opacity={0.18} depthWrite={false} /></mesh>
       </group>;
     })}
-    <Suspense fallback={null}><ChairInstances positions={positions} width={values.chairWidth} depth={values.chairDepth} /></Suspense>
+    <Suspense fallback={null}><ChairInstances key={modelPath} positions={positions} width={values.chairWidth} depth={values.chairDepth} modelPath={modelPath} /></Suspense>
     <ContactShadows position={[0, 0.01, 0]} opacity={0.22} scale={Math.max(values.roomWidth, values.roomLength)} blur={2.2} far={4} />
     <OrbitControls makeDefault enabled={placementMode === null} target={[0, 0, 0]} minDistance={5} maxDistance={45} maxPolarAngle={Math.PI / 2.05} />
   </>;
@@ -215,8 +216,11 @@ function calculateLayout(values: PlannerValues) {
   };
 }
 
-export default function RoomPlanner() {
-  const [values, setValues] = useState(initialValues);
+export default function RoomPlanner({ chairs }: { chairs: PlannerChair[] }) {
+  const initialChair = chairs[0];
+  const [selectedChairId, setSelectedChairId] = useState(initialChair.id);
+  const selectedChair = chairs.find((chair) => chair.id === selectedChairId) ?? initialChair;
+  const [values, setValues] = useState({ ...initialValues, chairWidth: initialChair.width, chairDepth: initialChair.depth });
   const [seatingOpen, setSeatingOpen] = useState(true);
   const [doorOpen, setDoorOpen] = useState(false);
   const [obstacleOpen, setObstacleOpen] = useState(false);
@@ -226,6 +230,12 @@ export default function RoomPlanner() {
   const nextDoorId = useRef(1);
   const nextObstacleId = useRef(1);
   const layout = useMemo(() => calculateLayout(values), [values]);
+  const selectChair = (id: string) => {
+    const chair = chairs.find((entry) => entry.id === id);
+    if (!chair) return;
+    setSelectedChairId(chair.id);
+    setValues((current) => ({ ...current, chairWidth: chair.width, chairDepth: chair.depth }));
+  };
   useEffect(() => {
     if (placementMode === null) return;
     const cancelPlacement = (event: KeyboardEvent) => { if (event.key === "Escape") setPlacementMode(null); };
@@ -276,13 +286,16 @@ export default function RoomPlanner() {
     <aside className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1" aria-label="Raum- und Bestuhlungsmaße">
       <PlannerSection title="Raum">{renderFields(["roomWidth", "roomLength"])}</PlannerSection>
       <PlannerSection title="Bühne">{renderFields(["stageWidth", "stageDepth"])}</PlannerSection>
-      <PlannerSection title="Bestuhlung" className="sm:col-span-2 lg:col-span-1" collapsible open={seatingOpen} onOpenChange={setSeatingOpen}>{renderFields(["chairWidth", "chairDepth", "rowSpacing", "aisleWidth", "leftSideAisle", "rightSideAisle"])}</PlannerSection>
+      <PlannerSection title="Bestuhlung" className="sm:col-span-2 lg:col-span-1" collapsible open={seatingOpen} onOpenChange={setSeatingOpen}>
+        <label className="grid gap-1 text-xs font-medium text-premium-charcoal"><span>Stuhlmodell</span><select aria-label="Stuhlmodell" value={selectedChair.id} onChange={(event) => selectChair(event.target.value)} className="min-h-9 rounded-lg border border-premium-beige bg-white/80 px-2.5 text-sm text-premium-ink">{chairs.map((chair) => <option key={chair.id} value={chair.id}>{chair.productName}</option>)}</select></label>
+        {renderFields(["chairWidth", "chairDepth", "rowSpacing", "aisleWidth", "leftSideAisle", "rightSideAisle"])}
+      </PlannerSection>
     </aside>
 
     <div className="min-w-0 lg:sticky lg:top-24">
       <section className="premium-card overflow-hidden" aria-label="Interaktive 3D-Raumansicht">
         {placementMode ? <div className="border-b border-premium-beige bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-900" role="status">{placementMode.type === "obstacle" ? "Position für Hindernis wählen – auf den Boden klicken" : "Türposition wählen – auf die markierte Wand klicken"} <span className="text-xs font-normal">(Esc zum Abbrechen)</span></div> : null}
-        <div className={`h-[26rem] sm:h-[34rem] lg:h-[min(62vh,36rem)] lg:min-h-[29rem] ${placementMode ? "cursor-crosshair" : ""}`}><Canvas shadows camera={{ position: [12, 13, 16], fov: 42, near: 0.1, far: 100 }} dpr={[1, 1.5]}><RoomScene values={values} positions={layout.positions} placementMode={placementMode} onPlaceObstacle={placeObstacle} onPlaceDoor={placeDoor} /></Canvas></div>
+        <div className={`h-[26rem] sm:h-[34rem] lg:h-[min(62vh,36rem)] lg:min-h-[29rem] ${placementMode ? "cursor-crosshair" : ""}`}><Canvas shadows camera={{ position: [12, 13, 16], fov: 42, near: 0.1, far: 100 }} dpr={[1, 1.5]}><RoomScene values={values} positions={layout.positions} modelPath={selectedChair.modelPath} placementMode={placementMode} onPlaceObstacle={placeObstacle} onPlaceDoor={placeDoor} /></Canvas></div>
         <p className="border-t border-premium-beige bg-white/70 px-4 py-2.5 text-xs text-premium-muted">{placementMode ? "Klicken: Position setzen · Esc: abbrechen" : "Ziehen: drehen · Mausrad: zoomen · Rechtsklick: verschieben"}</p>
       </section>
       <div className="premium-card mt-3 p-3 sm:p-4" aria-label="Planungsstatus">
@@ -290,6 +303,15 @@ export default function RoomPlanner() {
         {layout.warnings.length ? <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900" role="status"><p className="font-semibold">Planung prüfen</p><ul className="mt-1 list-disc space-y-0.5 pl-4">{layout.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul></div> : null}
         {layout.positions.length === 300 ? <p className="mt-2 text-xs text-premium-muted">Darstellung auf 300 Stühle begrenzt.</p> : null}
       </div>
+      <section className="premium-card mt-3 p-4" aria-label="Für Ihre Planung">
+        <p className="section-eyebrow">Für Ihre Planung</p>
+        <h2 className="mt-2 font-display text-xl font-medium text-premium-ink">{selectedChair.productName}</h2>
+        <p className="mt-3 text-sm text-premium-muted">Benötigte Menge: <strong data-testid="required-quantity" className="text-premium-ink">{layout.positions.length} Stühle</strong></p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {selectedChair.productUrl ? <a href={selectedChair.productUrl} className="btn-primary text-center">Produkt ansehen</a> : <span className="inline-flex min-h-10 items-center rounded-full border border-premium-beige px-4 text-xs text-premium-muted">Produktzuordnung ausstehend</span>}
+          <a href={`/kontakt?source=raumplaner&product=${encodeURIComponent(selectedChair.productHandle ?? selectedChair.id)}&quantity=${layout.positions.length}`} className="btn-secondary text-center">Angebot für diese Planung anfragen</a>
+        </div>
+      </section>
     </div>
 
     <aside className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1" aria-label="Tür und Hindernis">
@@ -344,5 +366,3 @@ function StatusItem({ label, value, testId }: { label: string; value: number; te
 function NumberInput({ label, ariaLabel, value, step, min, max, onChange }: { label: string; ariaLabel?: string; value: number; step: number; min?: number; max?: number; onChange: (value: number) => void }) {
   return <label className="grid gap-1 text-xs font-medium text-premium-charcoal"><span>{label}</span><span className="relative"><input aria-label={ariaLabel} type="number" min={min} max={max} step={step} value={value} onChange={(event) => { const parsed = Number(event.target.value); if (Number.isFinite(parsed)) onChange(Math.min(max ?? Infinity, Math.max(min ?? -Infinity, parsed))); }} className="min-h-9 w-full rounded-lg border border-premium-beige bg-white/80 px-2.5 pr-8 text-sm text-premium-ink outline-none transition focus:border-premium-sand focus:ring-2 focus:ring-premium-sand/30" /><span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[0.65rem] text-premium-muted">m</span></span></label>;
 }
-
-useGLTF.preload("/models/dalemans-chair.glb");

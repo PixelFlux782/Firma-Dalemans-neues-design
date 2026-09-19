@@ -16,9 +16,31 @@ test("Raumplaner berücksichtigt Stuhlmaße und Seitengänge", async ({ page }) 
   await expect(page.getByText("270", { exact: true })).toBeVisible();
   await expect(page.locator("canvas")).toBeVisible();
 
+  const seatingSection = page.getByRole("button", { name: "Bestuhlung" });
+  await seatingSection.click();
+  await expect(page.getByLabel("Stuhlbreite")).toBeHidden();
+  await seatingSection.click();
+  await expect(page.getByLabel("Stuhlbreite")).toHaveValue("0.5");
+
+  await page.getByRole("button", { name: /Tür Inaktiv/ }).click();
   await page.getByLabel("Tür aktiv").check();
   await expect(page.getByLabel("Türabstand")).toHaveValue("0.3");
   await page.getByLabel("Wand").selectOption("left");
+  await page.getByLabel("Türposition").fill("8");
+  await expect(page.getByTestId("chair-count")).not.toHaveText("270");
+  await page.getByRole("button", { name: "Position in 3D setzen" }).click();
+  await expect(page.getByText(/Türposition wählen/)).toBeVisible();
+  const doorCanvasBox = await page.locator("canvas").boundingBox();
+  expect(doorCanvasBox).not.toBeNull();
+  if (doorCanvasBox) {
+    for (let y = 0.15; y <= 0.85 && await page.getByText(/Türposition wählen/).isVisible(); y += 0.1) {
+      for (let x = 0.1; x <= 0.9 && await page.getByText(/Türposition wählen/).isVisible(); x += 0.1) {
+        await page.mouse.click(doorCanvasBox.x + doorCanvasBox.width * x, doorCanvasBox.y + doorCanvasBox.height * y);
+      }
+    }
+  }
+  await expect(page.getByText(/Türposition wählen/)).toBeHidden();
+  await expect(page.getByLabel("Türposition")).not.toHaveValue("8");
   await page.getByLabel("Türposition").fill("8");
   await expect(page.getByTestId("chair-count")).not.toHaveText("270");
   const chairsAtDoor = Number(await page.getByTestId("chair-count").textContent());
@@ -27,10 +49,18 @@ test("Raumplaner berücksichtigt Stuhlmaße und Seitengänge", async ({ page }) 
   await page.getByLabel("Tür aktiv").uncheck();
   await expect(page.getByTestId("chair-count")).toHaveText("270");
 
+  await page.getByRole("button", { name: /Hindernis Inaktiv/ }).click();
   await page.getByLabel("Hindernis aktiv").check();
   await expect(page.getByLabel("Hindernisabstand")).toHaveValue("0.3");
   await page.getByLabel("Hindernis Y-Position").fill("7");
   await expect(page.getByTestId("chair-count")).not.toHaveText("270");
+  await page.getByRole("button", { name: "Position in 3D setzen" }).click();
+  await expect(page.getByText(/Position für Hindernis wählen/)).toBeVisible();
+  const obstacleCanvasBox = await page.locator("canvas").boundingBox();
+  expect(obstacleCanvasBox).not.toBeNull();
+  if (obstacleCanvasBox) await page.mouse.click(obstacleCanvasBox.x + obstacleCanvasBox.width / 2, obstacleCanvasBox.y + obstacleCanvasBox.height / 2);
+  await expect(page.getByText(/Position für Hindernis wählen/)).toBeHidden();
+  await expect(page.getByLabel("Hindernis Y-Position")).not.toHaveValue("7");
   const chairsAtObstacle = Number(await page.getByTestId("chair-count").textContent());
   await page.getByLabel("Hindernisabstand").fill("1");
   await expect.poll(async () => Number(await page.getByTestId("chair-count").textContent())).toBeLessThan(chairsAtObstacle);

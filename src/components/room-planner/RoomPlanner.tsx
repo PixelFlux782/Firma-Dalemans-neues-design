@@ -1,8 +1,8 @@
 "use client";
 
 import { ContactShadows, OrbitControls, useGLTF } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
-import { Suspense, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Canvas, type ThreeEvent } from "@react-three/fiber";
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 type PlannerValues = {
@@ -36,6 +36,7 @@ const initialValues: PlannerValues = {
 };
 
 type Rect = { minX: number; maxX: number; minZ: number; maxZ: number };
+type PlacementMode = "door" | "obstacle" | null;
 
 function getDoorGeometry(values: PlannerValues) {
   const horizontal = values.doorWall === "front" || values.doorWall === "back";
@@ -104,7 +105,7 @@ function AisleMarker({ x, z, width, length }: { x: number; z: number; width: num
   return <mesh position={[x, 0.012, z]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[width, length]} /><meshBasicMaterial color="#b8aa8c" transparent opacity={0.28} depthWrite={false} /></mesh>;
 }
 
-function RoomScene({ values, positions }: { values: PlannerValues; positions: [number, number, number][] }) {
+function RoomScene({ values, positions, placementMode, onPlaceObstacle, onPlaceDoor }: { values: PlannerValues; positions: [number, number, number][]; placementMode: PlacementMode; onPlaceObstacle: (x: number, z: number) => void; onPlaceDoor: (x: number, z: number) => void }) {
   const stageWidth = Math.min(values.stageWidth, values.roomWidth);
   const stageDepth = Math.min(values.stageDepth, values.roomLength);
   const seatingStart = -values.roomLength / 2 + stageDepth;
@@ -116,7 +117,7 @@ function RoomScene({ values, positions }: { values: PlannerValues; positions: [n
     <color attach="background" args={["#f4f1e8"]} />
     <ambientLight intensity={1.25} />
     <directionalLight position={[5, 10, 7]} intensity={1.8} castShadow shadow-mapSize={[1024, 1024]} />
-    <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[values.roomWidth, values.roomLength]} /><meshStandardMaterial color="#ded9ca" roughness={0.95} /></mesh>
+    <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} onPointerDown={(event: ThreeEvent<PointerEvent>) => { if (placementMode === "obstacle" && event.button === 0) { event.stopPropagation(); onPlaceObstacle(event.point.x, event.point.z); } }}><planeGeometry args={[values.roomWidth, values.roomLength]} /><meshStandardMaterial color="#ded9ca" roughness={0.95} /></mesh>
     <gridHelper args={[Math.max(values.roomWidth, values.roomLength), Math.ceil(Math.max(values.roomWidth, values.roomLength)), "#aaa28e", "#cbc4b3"]} position={[0, 0.006, 0]} />
     <AisleMarker x={-values.roomWidth / 2 + Math.min(values.leftSideAisle, values.roomWidth) / 2} z={seatingStart + seatingLength / 2} width={Math.min(values.leftSideAisle, values.roomWidth)} length={seatingLength} />
     <AisleMarker x={values.roomWidth / 2 - Math.min(values.rightSideAisle, values.roomWidth) / 2} z={seatingStart + seatingLength / 2} width={Math.min(values.rightSideAisle, values.roomWidth)} length={seatingLength} />
@@ -127,12 +128,23 @@ function RoomScene({ values, positions }: { values: PlannerValues; positions: [n
       <mesh position={[(door.clearance.minX + door.clearance.maxX) / 2, 0.018, (door.clearance.minZ + door.clearance.maxZ) / 2]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[door.clearance.maxX - door.clearance.minX, door.clearance.maxZ - door.clearance.minZ]} /><meshBasicMaterial color="#55a8b5" transparent opacity={0.38} depthWrite={false} /></mesh>
       <mesh position={[(expandedDoorClearance.minX + expandedDoorClearance.maxX) / 2, 0.014, (expandedDoorClearance.minZ + expandedDoorClearance.maxZ) / 2]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[expandedDoorClearance.maxX - expandedDoorClearance.minX, expandedDoorClearance.maxZ - expandedDoorClearance.minZ]} /><meshBasicMaterial color="#55a8b5" transparent opacity={0.16} depthWrite={false} /></mesh>
     </> : null}
+    {placementMode === "door" ? <DoorPlacementTarget values={values} onPlace={onPlaceDoor} /> : null}
     {values.obstacleEnabled ? <mesh position={[values.obstacleX, 0.5, values.obstacleY]} castShadow receiveShadow><boxGeometry args={[values.obstacleWidth, 1, values.obstacleDepth]} /><meshStandardMaterial color="#776f64" roughness={0.85} /></mesh> : null}
     {values.obstacleEnabled ? <mesh position={[values.obstacleX, 0.013, values.obstacleY]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[obstacleClearance.maxX - obstacleClearance.minX, obstacleClearance.maxZ - obstacleClearance.minZ]} /><meshBasicMaterial color="#776f64" transparent opacity={0.18} depthWrite={false} /></mesh> : null}
     <Suspense fallback={null}><ChairInstances positions={positions} width={values.chairWidth} depth={values.chairDepth} /></Suspense>
     <ContactShadows position={[0, 0.01, 0]} opacity={0.22} scale={Math.max(values.roomWidth, values.roomLength)} blur={2.2} far={4} />
-    <OrbitControls makeDefault target={[0, 0, 0]} minDistance={5} maxDistance={45} maxPolarAngle={Math.PI / 2.05} />
+    <OrbitControls makeDefault enabled={placementMode === null} target={[0, 0, 0]} minDistance={5} maxDistance={45} maxPolarAngle={Math.PI / 2.05} />
   </>;
+}
+
+function DoorPlacementTarget({ values, onPlace }: { values: PlannerValues; onPlace: (x: number, z: number) => void }) {
+  const horizontal = values.doorWall === "front" || values.doorWall === "back";
+  const x = horizontal ? 0 : values.doorWall === "left" ? -values.roomWidth / 2 : values.roomWidth / 2;
+  const z = horizontal ? (values.doorWall === "front" ? -values.roomLength / 2 : values.roomLength / 2) : 0;
+  return <mesh position={[x, 1.2, z]} onPointerDown={(event: ThreeEvent<PointerEvent>) => { if (event.button === 0) { event.stopPropagation(); onPlace(event.point.x, event.point.z); } }}>
+    <boxGeometry args={[horizontal ? values.roomWidth : 0.22, 2.4, horizontal ? 0.22 : values.roomLength]} />
+    <meshBasicMaterial color="#c78b39" transparent opacity={0.26} depthWrite={false} side={THREE.DoubleSide} />
+  </mesh>;
 }
 
 function calculateLayout(values: PlannerValues) {
@@ -194,17 +206,47 @@ function calculateLayout(values: PlannerValues) {
 
 export default function RoomPlanner() {
   const [values, setValues] = useState(initialValues);
+  const [seatingOpen, setSeatingOpen] = useState(true);
+  const [doorOpen, setDoorOpen] = useState(initialValues.doorEnabled);
+  const [obstacleOpen, setObstacleOpen] = useState(initialValues.obstacleEnabled);
+  const [placementMode, setPlacementMode] = useState<PlacementMode>(null);
   const layout = useMemo(() => calculateLayout(values), [values]);
+  useEffect(() => {
+    if (placementMode === null) return;
+    const cancelPlacement = (event: KeyboardEvent) => { if (event.key === "Escape") setPlacementMode(null); };
+    window.addEventListener("keydown", cancelPlacement);
+    return () => window.removeEventListener("keydown", cancelPlacement);
+  }, [placementMode]);
+  const placeObstacle = (x: number, z: number) => {
+    const halfWidth = Math.min(values.obstacleWidth, values.roomWidth) / 2;
+    const halfDepth = Math.min(values.obstacleDepth, values.roomLength) / 2;
+    const obstacleX = Math.max(-values.roomWidth / 2 + halfWidth, Math.min(values.roomWidth / 2 - halfWidth, x));
+    const obstacleY = Math.max(-values.roomLength / 2 + halfDepth, Math.min(values.roomLength / 2 - halfDepth, z));
+    setValues((current) => ({ ...current, obstacleX: Number(obstacleX.toFixed(2)), obstacleY: Number(obstacleY.toFixed(2)) }));
+    setPlacementMode(null);
+  };
+  const placeDoor = (x: number, z: number) => {
+    const horizontal = values.doorWall === "front" || values.doorWall === "back";
+    const wallLength = horizontal ? values.roomWidth : values.roomLength;
+    const along = horizontal ? x : z;
+    const doorPosition = Math.max(0, Math.min(Math.max(0, wallLength - values.doorWidth), along + wallLength / 2 - values.doorWidth / 2));
+    setValues((current) => ({ ...current, doorPosition: Number(doorPosition.toFixed(2)) }));
+    setPlacementMode(null);
+  };
   const renderFields = (keys: NumericPlannerKey[]) => fields.filter((field) => keys.includes(field.key)).map((field) => <NumberInput key={field.key} label={field.label} value={values[field.key]} min={field.min} max={field.max} step={field.step} onChange={(value) => setValues((current) => ({ ...current, [field.key]: value }))} />);
   return <div className="grid items-start gap-4 lg:grid-cols-[12rem_minmax(0,1fr)_12rem] xl:grid-cols-[13.5rem_minmax(0,1fr)_13.5rem] xl:gap-5">
     <aside className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1" aria-label="Raum- und Bestuhlungsmaße">
       <PlannerSection title="Raum">{renderFields(["roomWidth", "roomLength"])}</PlannerSection>
       <PlannerSection title="Bühne">{renderFields(["stageWidth", "stageDepth"])}</PlannerSection>
-      <PlannerSection title="Bestuhlung" className="sm:col-span-2 lg:col-span-1">{renderFields(["chairWidth", "chairDepth", "rowSpacing", "aisleWidth", "leftSideAisle", "rightSideAisle"])}</PlannerSection>
+      <PlannerSection title="Bestuhlung" className="sm:col-span-2 lg:col-span-1" collapsible open={seatingOpen} onOpenChange={setSeatingOpen}>{renderFields(["chairWidth", "chairDepth", "rowSpacing", "aisleWidth", "leftSideAisle", "rightSideAisle"])}</PlannerSection>
     </aside>
 
     <div className="min-w-0 lg:sticky lg:top-24">
-      <section className="premium-card overflow-hidden" aria-label="Interaktive 3D-Raumansicht"><div className="h-[26rem] sm:h-[34rem] lg:h-[min(62vh,36rem)] lg:min-h-[29rem]"><Canvas shadows camera={{ position: [12, 13, 16], fov: 42, near: 0.1, far: 100 }} dpr={[1, 1.5]}><RoomScene values={values} positions={layout.positions} /></Canvas></div><p className="border-t border-premium-beige bg-white/70 px-4 py-2.5 text-xs text-premium-muted">Ziehen: drehen · Mausrad: zoomen · Rechtsklick: verschieben</p></section>
+      <section className="premium-card overflow-hidden" aria-label="Interaktive 3D-Raumansicht">
+        {placementMode ? <div className="border-b border-premium-beige bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-900" role="status">{placementMode === "obstacle" ? "Position für Hindernis wählen – auf den Boden klicken" : "Türposition wählen – auf die markierte Wand klicken"} <span className="text-xs font-normal">(Esc zum Abbrechen)</span></div> : null}
+        <div className={`h-[26rem] sm:h-[34rem] lg:h-[min(62vh,36rem)] lg:min-h-[29rem] ${placementMode ? "cursor-crosshair" : ""}`}><Canvas shadows camera={{ position: [12, 13, 16], fov: 42, near: 0.1, far: 100 }} dpr={[1, 1.5]}><RoomScene values={values} positions={layout.positions} placementMode={placementMode} onPlaceObstacle={placeObstacle} onPlaceDoor={placeDoor} /></Canvas></div>
+        <p className="border-t border-premium-beige bg-white/70 px-4 py-2.5 text-xs text-premium-muted">{placementMode ? "Klicken: Position setzen · Esc: abbrechen" : "Ziehen: drehen · Mausrad: zoomen · Rechtsklick: verschieben"}</p>
+      </section>
       <div className="premium-card mt-3 p-3 sm:p-4" aria-label="Planungsstatus">
         <dl className="grid grid-cols-3 gap-2"><StatusItem label="Reihen" value={layout.rows} /><StatusItem label="je Reihe" value={layout.chairsPerRow} /><StatusItem label="Stühle" value={layout.positions.length} testId="chair-count" /></dl>
         {layout.warnings.length ? <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900" role="status"><p className="font-semibold">Planung prüfen</p><ul className="mt-1 list-disc space-y-0.5 pl-4">{layout.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul></div> : null}
@@ -213,20 +255,28 @@ export default function RoomPlanner() {
     </div>
 
     <aside className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1" aria-label="Tür und Hindernis">
-      <PlannerSection title="Tür">
-        <ToggleInput label="Tür aktiv" checked={values.doorEnabled} onChange={(doorEnabled) => setValues((current) => ({ ...current, doorEnabled }))} />
-        {values.doorEnabled ? <><label className="grid gap-1 text-xs font-medium text-premium-charcoal"><span>Wand</span><select aria-label="Wand" value={values.doorWall} onChange={(event) => setValues((current) => ({ ...current, doorWall: event.target.value as PlannerValues["doorWall"] }))} className="min-h-9 rounded-lg border border-premium-beige bg-white/80 px-2.5 text-sm"><option value="front">vorne</option><option value="back">hinten</option><option value="left">links</option><option value="right">rechts</option></select></label><NumberInput label="Türposition" value={values.doorPosition} step={0.1} onChange={(doorPosition) => setValues((current) => ({ ...current, doorPosition }))} /><NumberInput label="Türbreite" value={values.doorWidth} step={0.1} onChange={(doorWidth) => setValues((current) => ({ ...current, doorWidth }))} /><NumberInput label="Türabstand" value={values.doorClearance} step={0.05} min={0} onChange={(doorClearance) => setValues((current) => ({ ...current, doorClearance }))} /></> : null}
+      <PlannerSection title="Tür" status={values.doorEnabled ? "Aktiv" : "Inaktiv"} collapsible open={doorOpen} onOpenChange={setDoorOpen}>
+        <ToggleInput label="Tür aktiv" checked={values.doorEnabled} onChange={(doorEnabled) => { setValues((current) => ({ ...current, doorEnabled })); if (doorEnabled) setDoorOpen(true); else if (placementMode === "door") setPlacementMode(null); }} />
+        {values.doorEnabled ? <><label className="grid gap-1 text-xs font-medium text-premium-charcoal"><span>Wand</span><select aria-label="Wand" value={values.doorWall} onChange={(event) => setValues((current) => ({ ...current, doorWall: event.target.value as PlannerValues["doorWall"] }))} className="min-h-9 rounded-lg border border-premium-beige bg-white/80 px-2.5 text-sm"><option value="front">vorne</option><option value="back">hinten</option><option value="left">links</option><option value="right">rechts</option></select></label><NumberInput label="Türposition" value={values.doorPosition} step={0.1} onChange={(doorPosition) => setValues((current) => ({ ...current, doorPosition }))} /><NumberInput label="Türbreite" value={values.doorWidth} step={0.1} onChange={(doorWidth) => setValues((current) => ({ ...current, doorWidth }))} /><NumberInput label="Türabstand" value={values.doorClearance} step={0.05} min={0} onChange={(doorClearance) => setValues((current) => ({ ...current, doorClearance }))} /><PlacementButton active={placementMode === "door"} onClick={() => setPlacementMode((current) => current === "door" ? null : "door")} /></> : null}
       </PlannerSection>
-      <PlannerSection title="Hindernis">
-        <ToggleInput label="Hindernis aktiv" checked={values.obstacleEnabled} onChange={(obstacleEnabled) => setValues((current) => ({ ...current, obstacleEnabled }))} />
-        {values.obstacleEnabled ? <><NumberInput label="Hindernis X-Position" value={values.obstacleX} step={0.1} onChange={(obstacleX) => setValues((current) => ({ ...current, obstacleX }))} /><NumberInput label="Hindernis Y-Position" value={values.obstacleY} step={0.1} onChange={(obstacleY) => setValues((current) => ({ ...current, obstacleY }))} /><NumberInput label="Hindernisbreite" value={values.obstacleWidth} step={0.1} onChange={(obstacleWidth) => setValues((current) => ({ ...current, obstacleWidth }))} /><NumberInput label="Hindernistiefe" value={values.obstacleDepth} step={0.1} onChange={(obstacleDepth) => setValues((current) => ({ ...current, obstacleDepth }))} /><NumberInput label="Hindernisabstand" value={values.obstacleClearance} step={0.05} min={0} onChange={(obstacleClearance) => setValues((current) => ({ ...current, obstacleClearance }))} /></> : null}
+      <PlannerSection title="Hindernis" status={values.obstacleEnabled ? "Aktiv" : "Inaktiv"} collapsible open={obstacleOpen} onOpenChange={setObstacleOpen}>
+        <ToggleInput label="Hindernis aktiv" checked={values.obstacleEnabled} onChange={(obstacleEnabled) => { setValues((current) => ({ ...current, obstacleEnabled })); if (obstacleEnabled) setObstacleOpen(true); else if (placementMode === "obstacle") setPlacementMode(null); }} />
+        {values.obstacleEnabled ? <><NumberInput label="Hindernis X-Position" value={values.obstacleX} step={0.1} onChange={(obstacleX) => setValues((current) => ({ ...current, obstacleX }))} /><NumberInput label="Hindernis Y-Position" value={values.obstacleY} step={0.1} onChange={(obstacleY) => setValues((current) => ({ ...current, obstacleY }))} /><NumberInput label="Hindernisbreite" value={values.obstacleWidth} step={0.1} onChange={(obstacleWidth) => setValues((current) => ({ ...current, obstacleWidth }))} /><NumberInput label="Hindernistiefe" value={values.obstacleDepth} step={0.1} onChange={(obstacleDepth) => setValues((current) => ({ ...current, obstacleDepth }))} /><NumberInput label="Hindernisabstand" value={values.obstacleClearance} step={0.05} min={0} onChange={(obstacleClearance) => setValues((current) => ({ ...current, obstacleClearance }))} /><PlacementButton active={placementMode === "obstacle"} onClick={() => setPlacementMode((current) => current === "obstacle" ? null : "obstacle")} /></> : null}
       </PlannerSection>
     </aside>
   </div>;
 }
 
-function PlannerSection({ title, className = "", children }: { title: string; className?: string; children: React.ReactNode }) {
-  return <section className={`premium-card p-4 ${className}`}><h2 className="font-display text-lg font-medium text-premium-ink">{title}</h2><div className="mt-3 grid gap-3">{children}</div></section>;
+function PlannerSection({ title, status, className = "", collapsible = false, open = true, onOpenChange, children }: { title: string; status?: string; className?: string; collapsible?: boolean; open?: boolean; onOpenChange?: (open: boolean) => void; children: React.ReactNode }) {
+  const heading = <><span className="font-display text-lg font-medium text-premium-ink">{title}</span>{status ? <span className={`ml-auto rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${status === "Aktiv" ? "bg-emerald-100 text-emerald-800" : "bg-premium-warm text-premium-muted"}`}>{status}</span> : null}</>;
+  return <section className={`premium-card p-4 ${className}`}>
+    {collapsible ? <button type="button" aria-expanded={open} onClick={() => onOpenChange?.(!open)} className="flex w-full items-center gap-2 text-left">{heading}<span aria-hidden="true" className={`text-premium-muted transition-transform ${open ? "rotate-180" : ""}`}>⌄</span></button> : <h2 className="flex items-center gap-2">{heading}</h2>}
+    {open ? <div className="mt-3 grid gap-3">{children}</div> : null}
+  </section>;
+}
+
+function PlacementButton({ active, onClick }: { active: boolean; onClick: () => void }) {
+  return <button type="button" aria-pressed={active} onClick={onClick} className={`min-h-9 rounded-lg border px-3 text-xs font-semibold transition ${active ? "border-amber-500 bg-amber-50 text-amber-900" : "border-premium-beige bg-white/70 text-premium-charcoal hover:border-premium-sand"}`}>{active ? "Positionierung abbrechen" : "Position in 3D setzen"}</button>;
 }
 
 function ToggleInput({ label, checked, onChange }: { label: string; checked: boolean; onChange: (checked: boolean) => void }) {

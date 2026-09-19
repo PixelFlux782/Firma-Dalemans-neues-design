@@ -9,9 +9,12 @@ type PlannerValues = {
   roomWidth: number; roomLength: number; stageWidth: number; stageDepth: number;
   aisleWidth: number; leftSideAisle: number; rightSideAisle: number;
   chairWidth: number; chairDepth: number; rowSpacing: number;
-  doorEnabled: boolean; doorWall: "front" | "back" | "left" | "right"; doorPosition: number; doorWidth: number; doorClearance: number;
-  obstacleEnabled: boolean; obstacleX: number; obstacleY: number; obstacleWidth: number; obstacleDepth: number; obstacleClearance: number;
+  doors: Door[];
+  obstacles: Obstacle[];
 };
+
+type Door = { id: string; enabled: boolean; wall: "front" | "back" | "left" | "right"; position: number; width: number; clearance: number };
+type Obstacle = { id: string; enabled: boolean; x: number; y: number; width: number; depth: number; clearance: number };
 
 type NumericPlannerKey = "roomWidth" | "roomLength" | "stageWidth" | "stageDepth" | "aisleWidth" | "leftSideAisle" | "rightSideAisle" | "chairWidth" | "chairDepth" | "rowSpacing";
 
@@ -31,26 +34,25 @@ const fields: { key: NumericPlannerKey; label: string; min: number; max: number;
 const initialValues: PlannerValues = {
   roomWidth: 12, roomLength: 18, stageWidth: 6, stageDepth: 3, aisleWidth: 1.2,
   leftSideAisle: 0.8, rightSideAisle: 0.8, chairWidth: 0.5, chairDepth: 0.55, rowSpacing: 0.9,
-  doorEnabled: false, doorWall: "back", doorPosition: 5.5, doorWidth: 1, doorClearance: 0.3,
-  obstacleEnabled: false, obstacleX: 1, obstacleY: 8, obstacleWidth: 1, obstacleDepth: 1, obstacleClearance: 0.3,
+  doors: [], obstacles: [],
 };
 
 type Rect = { minX: number; maxX: number; minZ: number; maxZ: number };
-type PlacementMode = "door" | "obstacle" | null;
+type PlacementMode = { type: "door" | "obstacle"; id: string } | null;
 
-function getDoorGeometry(values: PlannerValues) {
-  const horizontal = values.doorWall === "front" || values.doorWall === "back";
+function getDoorGeometry(values: PlannerValues, door: Door) {
+  const horizontal = door.wall === "front" || door.wall === "back";
   const wallLength = horizontal ? values.roomWidth : values.roomLength;
-  const along = -wallLength / 2 + values.doorPosition + values.doorWidth / 2;
-  const x = horizontal ? along : values.doorWall === "left" ? -values.roomWidth / 2 : values.roomWidth / 2;
-  const z = horizontal ? (values.doorWall === "front" ? -values.roomLength / 2 : values.roomLength / 2) : along;
-  const clearanceCenterX = horizontal ? x : x + (values.doorWall === "left" ? 0.5 : -0.5);
-  const clearanceCenterZ = horizontal ? z + (values.doorWall === "front" ? 0.5 : -0.5) : z;
+  const along = -wallLength / 2 + door.position + door.width / 2;
+  const x = horizontal ? along : door.wall === "left" ? -values.roomWidth / 2 : values.roomWidth / 2;
+  const z = horizontal ? (door.wall === "front" ? -values.roomLength / 2 : values.roomLength / 2) : along;
+  const clearanceCenterX = horizontal ? x : x + (door.wall === "left" ? 0.5 : -0.5);
+  const clearanceCenterZ = horizontal ? z + (door.wall === "front" ? 0.5 : -0.5) : z;
   return { x, z, horizontal, wallLength, clearance: {
-    minX: clearanceCenterX - (horizontal ? values.doorWidth : 1) / 2,
-    maxX: clearanceCenterX + (horizontal ? values.doorWidth : 1) / 2,
-    minZ: clearanceCenterZ - (horizontal ? 1 : values.doorWidth) / 2,
-    maxZ: clearanceCenterZ + (horizontal ? 1 : values.doorWidth) / 2,
+    minX: clearanceCenterX - (horizontal ? door.width : 1) / 2,
+    maxX: clearanceCenterX + (horizontal ? door.width : 1) / 2,
+    minZ: clearanceCenterZ - (horizontal ? 1 : door.width) / 2,
+    maxZ: clearanceCenterZ + (horizontal ? 1 : door.width) / 2,
   } satisfies Rect };
 }
 
@@ -105,42 +107,49 @@ function AisleMarker({ x, z, width, length }: { x: number; z: number; width: num
   return <mesh position={[x, 0.012, z]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[width, length]} /><meshBasicMaterial color="#b8aa8c" transparent opacity={0.28} depthWrite={false} /></mesh>;
 }
 
-function RoomScene({ values, positions, placementMode, onPlaceObstacle, onPlaceDoor }: { values: PlannerValues; positions: [number, number, number][]; placementMode: PlacementMode; onPlaceObstacle: (x: number, z: number) => void; onPlaceDoor: (x: number, z: number) => void }) {
+function RoomScene({ values, positions, placementMode, onPlaceObstacle, onPlaceDoor }: { values: PlannerValues; positions: [number, number, number][]; placementMode: PlacementMode; onPlaceObstacle: (id: string, x: number, z: number) => void; onPlaceDoor: (id: string, x: number, z: number) => void }) {
   const stageWidth = Math.min(values.stageWidth, values.roomWidth);
   const stageDepth = Math.min(values.stageDepth, values.roomLength);
   const seatingStart = -values.roomLength / 2 + stageDepth;
   const seatingLength = Math.max(0, values.roomLength - stageDepth);
-  const door = getDoorGeometry(values);
-  const expandedDoorClearance = expandRect(door.clearance, values.doorClearance);
-  const obstacleClearance = expandRect({ minX: values.obstacleX - values.obstacleWidth / 2, maxX: values.obstacleX + values.obstacleWidth / 2, minZ: values.obstacleY - values.obstacleDepth / 2, maxZ: values.obstacleY + values.obstacleDepth / 2 }, values.obstacleClearance);
+  const placementDoor = placementMode?.type === "door" ? values.doors.find((door) => door.id === placementMode.id) : undefined;
   return <>
     <color attach="background" args={["#f4f1e8"]} />
     <ambientLight intensity={1.25} />
     <directionalLight position={[5, 10, 7]} intensity={1.8} castShadow shadow-mapSize={[1024, 1024]} />
-    <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} onPointerDown={(event: ThreeEvent<PointerEvent>) => { if (placementMode === "obstacle" && event.button === 0) { event.stopPropagation(); onPlaceObstacle(event.point.x, event.point.z); } }}><planeGeometry args={[values.roomWidth, values.roomLength]} /><meshStandardMaterial color="#ded9ca" roughness={0.95} /></mesh>
+    <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} onPointerDown={(event: ThreeEvent<PointerEvent>) => { if (placementMode?.type === "obstacle" && event.button === 0) { event.stopPropagation(); onPlaceObstacle(placementMode.id, event.point.x, event.point.z); } }}><planeGeometry args={[values.roomWidth, values.roomLength]} /><meshStandardMaterial color="#ded9ca" roughness={0.95} /></mesh>
     <gridHelper args={[Math.max(values.roomWidth, values.roomLength), Math.ceil(Math.max(values.roomWidth, values.roomLength)), "#aaa28e", "#cbc4b3"]} position={[0, 0.006, 0]} />
     <AisleMarker x={-values.roomWidth / 2 + Math.min(values.leftSideAisle, values.roomWidth) / 2} z={seatingStart + seatingLength / 2} width={Math.min(values.leftSideAisle, values.roomWidth)} length={seatingLength} />
     <AisleMarker x={values.roomWidth / 2 - Math.min(values.rightSideAisle, values.roomWidth) / 2} z={seatingStart + seatingLength / 2} width={Math.min(values.rightSideAisle, values.roomWidth)} length={seatingLength} />
     <AisleMarker x={0} z={seatingStart + seatingLength / 2} width={Math.min(values.aisleWidth, values.roomWidth)} length={seatingLength} />
     <mesh position={[0, 0.2, -values.roomLength / 2 + stageDepth / 2]} castShadow receiveShadow><boxGeometry args={[stageWidth, 0.4, stageDepth]} /><meshStandardMaterial color="#6e5a45" roughness={0.8} /></mesh>
-    {values.doorEnabled ? <>
-      <mesh position={[door.x, 0.035, door.z]}><boxGeometry args={[door.horizontal ? values.doorWidth : 0.08, 0.07, door.horizontal ? 0.08 : values.doorWidth]} /><meshStandardMaterial color="#256b78" /></mesh>
-      <mesh position={[(door.clearance.minX + door.clearance.maxX) / 2, 0.018, (door.clearance.minZ + door.clearance.maxZ) / 2]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[door.clearance.maxX - door.clearance.minX, door.clearance.maxZ - door.clearance.minZ]} /><meshBasicMaterial color="#55a8b5" transparent opacity={0.38} depthWrite={false} /></mesh>
-      <mesh position={[(expandedDoorClearance.minX + expandedDoorClearance.maxX) / 2, 0.014, (expandedDoorClearance.minZ + expandedDoorClearance.maxZ) / 2]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[expandedDoorClearance.maxX - expandedDoorClearance.minX, expandedDoorClearance.maxZ - expandedDoorClearance.minZ]} /><meshBasicMaterial color="#55a8b5" transparent opacity={0.16} depthWrite={false} /></mesh>
-    </> : null}
-    {placementMode === "door" ? <DoorPlacementTarget values={values} onPlace={onPlaceDoor} /> : null}
-    {values.obstacleEnabled ? <mesh position={[values.obstacleX, 0.5, values.obstacleY]} castShadow receiveShadow><boxGeometry args={[values.obstacleWidth, 1, values.obstacleDepth]} /><meshStandardMaterial color="#776f64" roughness={0.85} /></mesh> : null}
-    {values.obstacleEnabled ? <mesh position={[values.obstacleX, 0.013, values.obstacleY]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[obstacleClearance.maxX - obstacleClearance.minX, obstacleClearance.maxZ - obstacleClearance.minZ]} /><meshBasicMaterial color="#776f64" transparent opacity={0.18} depthWrite={false} /></mesh> : null}
+    {values.doors.filter((door) => door.enabled).map((door) => {
+      const geometry = getDoorGeometry(values, door);
+      const expanded = expandRect(geometry.clearance, door.clearance);
+      return <group key={door.id}>
+        <mesh position={[geometry.x, 0.035, geometry.z]}><boxGeometry args={[geometry.horizontal ? door.width : 0.08, 0.07, geometry.horizontal ? 0.08 : door.width]} /><meshStandardMaterial color="#256b78" /></mesh>
+        <mesh position={[(geometry.clearance.minX + geometry.clearance.maxX) / 2, 0.018, (geometry.clearance.minZ + geometry.clearance.maxZ) / 2]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[geometry.clearance.maxX - geometry.clearance.minX, geometry.clearance.maxZ - geometry.clearance.minZ]} /><meshBasicMaterial color="#55a8b5" transparent opacity={0.38} depthWrite={false} /></mesh>
+        <mesh position={[(expanded.minX + expanded.maxX) / 2, 0.014, (expanded.minZ + expanded.maxZ) / 2]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[expanded.maxX - expanded.minX, expanded.maxZ - expanded.minZ]} /><meshBasicMaterial color="#55a8b5" transparent opacity={0.16} depthWrite={false} /></mesh>
+      </group>;
+    })}
+    {placementDoor ? <DoorPlacementTarget values={values} door={placementDoor} onPlace={(x, z) => onPlaceDoor(placementDoor.id, x, z)} /> : null}
+    {values.obstacles.filter((obstacle) => obstacle.enabled).map((obstacle) => {
+      const clearance = expandRect({ minX: obstacle.x - obstacle.width / 2, maxX: obstacle.x + obstacle.width / 2, minZ: obstacle.y - obstacle.depth / 2, maxZ: obstacle.y + obstacle.depth / 2 }, obstacle.clearance);
+      return <group key={obstacle.id}>
+        <mesh position={[obstacle.x, 0.5, obstacle.y]} castShadow receiveShadow><boxGeometry args={[obstacle.width, 1, obstacle.depth]} /><meshStandardMaterial color="#776f64" roughness={0.85} /></mesh>
+        <mesh position={[obstacle.x, 0.013, obstacle.y]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[clearance.maxX - clearance.minX, clearance.maxZ - clearance.minZ]} /><meshBasicMaterial color="#776f64" transparent opacity={0.18} depthWrite={false} /></mesh>
+      </group>;
+    })}
     <Suspense fallback={null}><ChairInstances positions={positions} width={values.chairWidth} depth={values.chairDepth} /></Suspense>
     <ContactShadows position={[0, 0.01, 0]} opacity={0.22} scale={Math.max(values.roomWidth, values.roomLength)} blur={2.2} far={4} />
     <OrbitControls makeDefault enabled={placementMode === null} target={[0, 0, 0]} minDistance={5} maxDistance={45} maxPolarAngle={Math.PI / 2.05} />
   </>;
 }
 
-function DoorPlacementTarget({ values, onPlace }: { values: PlannerValues; onPlace: (x: number, z: number) => void }) {
-  const horizontal = values.doorWall === "front" || values.doorWall === "back";
-  const x = horizontal ? 0 : values.doorWall === "left" ? -values.roomWidth / 2 : values.roomWidth / 2;
-  const z = horizontal ? (values.doorWall === "front" ? -values.roomLength / 2 : values.roomLength / 2) : 0;
+function DoorPlacementTarget({ values, door, onPlace }: { values: PlannerValues; door: Door; onPlace: (x: number, z: number) => void }) {
+  const horizontal = door.wall === "front" || door.wall === "back";
+  const x = horizontal ? 0 : door.wall === "left" ? -values.roomWidth / 2 : values.roomWidth / 2;
+  const z = horizontal ? (door.wall === "front" ? -values.roomLength / 2 : values.roomLength / 2) : 0;
   return <mesh position={[x, 1.2, z]} onPointerDown={(event: ThreeEvent<PointerEvent>) => { if (event.button === 0) { event.stopPropagation(); onPlace(event.point.x, event.point.z); } }}>
     <boxGeometry args={[horizontal ? values.roomWidth : 0.22, 2.4, horizontal ? 0.22 : values.roomLength]} />
     <meshBasicMaterial color="#c78b39" transparent opacity={0.26} depthWrite={false} side={THREE.DoubleSide} />
@@ -156,19 +165,19 @@ function calculateLayout(values: PlannerValues) {
   if (combinedAisles >= values.roomWidth) warnings.push("Die Gangbreiten belegen die gesamte Raumbreite oder mehr.");
   if (seatingWidth <= 0 || seatingDepth <= 0) warnings.push("Es bleibt keine nutzbare Restfläche für die Bestuhlung.");
   if (values.stageWidth > values.roomWidth || values.stageDepth >= values.roomLength) warnings.push("Die Bühne ist für die eingegebenen Raummaße zu groß.");
-  if (values.doorEnabled) {
-    const door = getDoorGeometry(values);
-    if (values.doorWidth <= 0) warnings.push("Die Türbreite muss größer als 0 sein.");
-    if (values.doorPosition < 0 || values.doorPosition + values.doorWidth > door.wallLength) warnings.push("Die Tür liegt außerhalb der gewählten Wand.");
-  }
-  if (values.obstacleEnabled) {
-    const obstacle = { minX: values.obstacleX - values.obstacleWidth / 2, maxX: values.obstacleX + values.obstacleWidth / 2, minZ: values.obstacleY - values.obstacleDepth / 2, maxZ: values.obstacleY + values.obstacleDepth / 2 };
-    if (values.obstacleWidth <= 0 || values.obstacleDepth <= 0) warnings.push("Die Hindernismaße müssen größer als 0 sein.");
-    if (obstacle.minX < -values.roomWidth / 2 || obstacle.maxX > values.roomWidth / 2 || obstacle.minZ < -values.roomLength / 2 || obstacle.maxZ > values.roomLength / 2) warnings.push("Das Hindernis liegt außerhalb des Raumes.");
+  values.doors.filter((door) => door.enabled).forEach((door) => {
+    const geometry = getDoorGeometry(values, door);
+    if (door.width <= 0) warnings.push("Die Türbreite muss größer als 0 sein.");
+    if (door.position < 0 || door.position + door.width > geometry.wallLength) warnings.push("Eine Tür liegt außerhalb der gewählten Wand.");
+  });
+  values.obstacles.filter((obstacle) => obstacle.enabled).forEach((item) => {
+    const obstacle = { minX: item.x - item.width / 2, maxX: item.x + item.width / 2, minZ: item.y - item.depth / 2, maxZ: item.y + item.depth / 2 };
+    if (item.width <= 0 || item.depth <= 0) warnings.push("Die Hindernismaße müssen größer als 0 sein.");
+    if (obstacle.minX < -values.roomWidth / 2 || obstacle.maxX > values.roomWidth / 2 || obstacle.minZ < -values.roomLength / 2 || obstacle.maxZ > values.roomLength / 2) warnings.push("Ein Hindernis liegt außerhalb des Raumes.");
     const stageWidth = Math.min(values.stageWidth, values.roomWidth);
     const stage = { minX: -stageWidth / 2, maxX: stageWidth / 2, minZ: -values.roomLength / 2, maxZ: -values.roomLength / 2 + Math.min(values.stageDepth, values.roomLength) };
-    if (overlaps(obstacle, stage)) warnings.push("Das Hindernis überlappt die Bühne.");
-  }
+    if (overlaps(obstacle, stage)) warnings.push("Ein Hindernis überlappt die Bühne.");
+  });
 
   const leftBlockWidth = Math.max(0, values.roomWidth / 2 - values.aisleWidth / 2 - values.leftSideAisle);
   const rightBlockWidth = Math.max(0, values.roomWidth / 2 - values.aisleWidth / 2 - values.rightSideAisle);
@@ -190,11 +199,13 @@ function calculateLayout(values: PlannerValues) {
     for (let column = 0; column < chairsRight && positions.length < 300; column += 1)
       positions.push([values.aisleWidth / 2 + values.chairWidth / 2 + column * values.chairWidth, 0.01, z]);
   }
-  const doorClearance = values.doorEnabled ? expandRect(getDoorGeometry(values).clearance, values.doorClearance) : null;
-  const obstacle = values.obstacleEnabled ? expandRect({ minX: values.obstacleX - values.obstacleWidth / 2, maxX: values.obstacleX + values.obstacleWidth / 2, minZ: values.obstacleY - values.obstacleDepth / 2, maxZ: values.obstacleY + values.obstacleDepth / 2 }, values.obstacleClearance) : null;
+  const exclusionZones = [
+    ...values.doors.filter((door) => door.enabled).map((door) => expandRect(getDoorGeometry(values, door).clearance, door.clearance)),
+    ...values.obstacles.filter((obstacle) => obstacle.enabled).map((obstacle) => expandRect({ minX: obstacle.x - obstacle.width / 2, maxX: obstacle.x + obstacle.width / 2, minZ: obstacle.y - obstacle.depth / 2, maxZ: obstacle.y + obstacle.depth / 2 }, obstacle.clearance)),
+  ];
   const filteredPositions = positions.filter(([x, , z]) => {
     const chair = { minX: x - values.chairWidth / 2, maxX: x + values.chairWidth / 2, minZ: z - values.chairDepth / 2, maxZ: z + values.chairDepth / 2 };
-    return !(doorClearance && overlaps(chair, doorClearance)) && !(obstacle && overlaps(chair, obstacle));
+    return !exclusionZones.some((zone) => overlaps(chair, zone));
   });
   return {
     positions: filteredPositions,
@@ -207,9 +218,13 @@ function calculateLayout(values: PlannerValues) {
 export default function RoomPlanner() {
   const [values, setValues] = useState(initialValues);
   const [seatingOpen, setSeatingOpen] = useState(true);
-  const [doorOpen, setDoorOpen] = useState(initialValues.doorEnabled);
-  const [obstacleOpen, setObstacleOpen] = useState(initialValues.obstacleEnabled);
+  const [doorOpen, setDoorOpen] = useState(false);
+  const [obstacleOpen, setObstacleOpen] = useState(false);
+  const [openDoors, setOpenDoors] = useState<string[]>([]);
+  const [openObstacles, setOpenObstacles] = useState<string[]>([]);
   const [placementMode, setPlacementMode] = useState<PlacementMode>(null);
+  const nextDoorId = useRef(1);
+  const nextObstacleId = useRef(1);
   const layout = useMemo(() => calculateLayout(values), [values]);
   useEffect(() => {
     if (placementMode === null) return;
@@ -217,20 +232,43 @@ export default function RoomPlanner() {
     window.addEventListener("keydown", cancelPlacement);
     return () => window.removeEventListener("keydown", cancelPlacement);
   }, [placementMode]);
-  const placeObstacle = (x: number, z: number) => {
-    const halfWidth = Math.min(values.obstacleWidth, values.roomWidth) / 2;
-    const halfDepth = Math.min(values.obstacleDepth, values.roomLength) / 2;
+  const addDoor = () => {
+    const id = `door-${nextDoorId.current++}`;
+    const door: Door = { id, enabled: true, wall: "back", position: Math.max(0, (values.roomWidth - 1) / 2), width: 1, clearance: 0.3 };
+    setValues((current) => ({ ...current, doors: [...current.doors, door] }));
+    setOpenDoors((current) => [...current, id]);
+    setDoorOpen(true);
+  };
+  const addObstacle = () => {
+    const id = `obstacle-${nextObstacleId.current++}`;
+    const offset = values.obstacles.length * 1.25;
+    const obstacle: Obstacle = { id, enabled: true, x: Math.min(values.roomWidth / 2 - 0.5, offset), y: Math.min(values.roomLength / 2 - 0.5, 2 + offset), width: 1, depth: 1, clearance: 0.3 };
+    setValues((current) => ({ ...current, obstacles: [...current.obstacles, obstacle] }));
+    setOpenObstacles((current) => [...current, id]);
+    setObstacleOpen(true);
+  };
+  const updateDoor = (id: string, update: Partial<Door>) => setValues((current) => ({ ...current, doors: current.doors.map((door) => door.id === id ? { ...door, ...update } : door) }));
+  const updateObstacle = (id: string, update: Partial<Obstacle>) => setValues((current) => ({ ...current, obstacles: current.obstacles.map((obstacle) => obstacle.id === id ? { ...obstacle, ...update } : obstacle) }));
+  const removeDoor = (id: string) => { setValues((current) => ({ ...current, doors: current.doors.filter((door) => door.id !== id) })); setOpenDoors((current) => current.filter((openId) => openId !== id)); if (placementMode?.type === "door" && placementMode.id === id) setPlacementMode(null); };
+  const removeObstacle = (id: string) => { setValues((current) => ({ ...current, obstacles: current.obstacles.filter((obstacle) => obstacle.id !== id) })); setOpenObstacles((current) => current.filter((openId) => openId !== id)); if (placementMode?.type === "obstacle" && placementMode.id === id) setPlacementMode(null); };
+  const placeObstacle = (id: string, x: number, z: number) => {
+    const obstacle = values.obstacles.find((item) => item.id === id);
+    if (!obstacle) return;
+    const halfWidth = Math.min(obstacle.width, values.roomWidth) / 2;
+    const halfDepth = Math.min(obstacle.depth, values.roomLength) / 2;
     const obstacleX = Math.max(-values.roomWidth / 2 + halfWidth, Math.min(values.roomWidth / 2 - halfWidth, x));
     const obstacleY = Math.max(-values.roomLength / 2 + halfDepth, Math.min(values.roomLength / 2 - halfDepth, z));
-    setValues((current) => ({ ...current, obstacleX: Number(obstacleX.toFixed(2)), obstacleY: Number(obstacleY.toFixed(2)) }));
+    updateObstacle(id, { x: Number(obstacleX.toFixed(2)), y: Number(obstacleY.toFixed(2)) });
     setPlacementMode(null);
   };
-  const placeDoor = (x: number, z: number) => {
-    const horizontal = values.doorWall === "front" || values.doorWall === "back";
+  const placeDoor = (id: string, x: number, z: number) => {
+    const door = values.doors.find((item) => item.id === id);
+    if (!door) return;
+    const horizontal = door.wall === "front" || door.wall === "back";
     const wallLength = horizontal ? values.roomWidth : values.roomLength;
     const along = horizontal ? x : z;
-    const doorPosition = Math.max(0, Math.min(Math.max(0, wallLength - values.doorWidth), along + wallLength / 2 - values.doorWidth / 2));
-    setValues((current) => ({ ...current, doorPosition: Number(doorPosition.toFixed(2)) }));
+    const doorPosition = Math.max(0, Math.min(Math.max(0, wallLength - door.width), along + wallLength / 2 - door.width / 2));
+    updateDoor(id, { position: Number(doorPosition.toFixed(2)) });
     setPlacementMode(null);
   };
   const renderFields = (keys: NumericPlannerKey[]) => fields.filter((field) => keys.includes(field.key)).map((field) => <NumberInput key={field.key} label={field.label} value={values[field.key]} min={field.min} max={field.max} step={field.step} onChange={(value) => setValues((current) => ({ ...current, [field.key]: value }))} />);
@@ -243,7 +281,7 @@ export default function RoomPlanner() {
 
     <div className="min-w-0 lg:sticky lg:top-24">
       <section className="premium-card overflow-hidden" aria-label="Interaktive 3D-Raumansicht">
-        {placementMode ? <div className="border-b border-premium-beige bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-900" role="status">{placementMode === "obstacle" ? "Position für Hindernis wählen – auf den Boden klicken" : "Türposition wählen – auf die markierte Wand klicken"} <span className="text-xs font-normal">(Esc zum Abbrechen)</span></div> : null}
+        {placementMode ? <div className="border-b border-premium-beige bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-900" role="status">{placementMode.type === "obstacle" ? "Position für Hindernis wählen – auf den Boden klicken" : "Türposition wählen – auf die markierte Wand klicken"} <span className="text-xs font-normal">(Esc zum Abbrechen)</span></div> : null}
         <div className={`h-[26rem] sm:h-[34rem] lg:h-[min(62vh,36rem)] lg:min-h-[29rem] ${placementMode ? "cursor-crosshair" : ""}`}><Canvas shadows camera={{ position: [12, 13, 16], fov: 42, near: 0.1, far: 100 }} dpr={[1, 1.5]}><RoomScene values={values} positions={layout.positions} placementMode={placementMode} onPlaceObstacle={placeObstacle} onPlaceDoor={placeDoor} /></Canvas></div>
         <p className="border-t border-premium-beige bg-white/70 px-4 py-2.5 text-xs text-premium-muted">{placementMode ? "Klicken: Position setzen · Esc: abbrechen" : "Ziehen: drehen · Mausrad: zoomen · Rechtsklick: verschieben"}</p>
       </section>
@@ -255,13 +293,19 @@ export default function RoomPlanner() {
     </div>
 
     <aside className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1" aria-label="Tür und Hindernis">
-      <PlannerSection title="Tür" status={values.doorEnabled ? "Aktiv" : "Inaktiv"} collapsible open={doorOpen} onOpenChange={setDoorOpen}>
-        <ToggleInput label="Tür aktiv" checked={values.doorEnabled} onChange={(doorEnabled) => { setValues((current) => ({ ...current, doorEnabled })); if (doorEnabled) setDoorOpen(true); else if (placementMode === "door") setPlacementMode(null); }} />
-        {values.doorEnabled ? <><label className="grid gap-1 text-xs font-medium text-premium-charcoal"><span>Wand</span><select aria-label="Wand" value={values.doorWall} onChange={(event) => setValues((current) => ({ ...current, doorWall: event.target.value as PlannerValues["doorWall"] }))} className="min-h-9 rounded-lg border border-premium-beige bg-white/80 px-2.5 text-sm"><option value="front">vorne</option><option value="back">hinten</option><option value="left">links</option><option value="right">rechts</option></select></label><NumberInput label="Türposition" value={values.doorPosition} step={0.1} onChange={(doorPosition) => setValues((current) => ({ ...current, doorPosition }))} /><NumberInput label="Türbreite" value={values.doorWidth} step={0.1} onChange={(doorWidth) => setValues((current) => ({ ...current, doorWidth }))} /><NumberInput label="Türabstand" value={values.doorClearance} step={0.05} min={0} onChange={(doorClearance) => setValues((current) => ({ ...current, doorClearance }))} /><PlacementButton active={placementMode === "door"} onClick={() => setPlacementMode((current) => current === "door" ? null : "door")} /></> : null}
+      <PlannerSection title="Tür" status={values.doors.some((door) => door.enabled) ? "Aktiv" : "Inaktiv"} collapsible open={doorOpen} onOpenChange={setDoorOpen}>
+        {values.doors.map((door, index) => <ObjectCard key={door.id} title={`Tür ${index + 1}`} open={openDoors.includes(door.id)} onOpenChange={(open) => setOpenDoors((current) => open ? [...current, door.id] : current.filter((id) => id !== door.id))} onRemove={() => removeDoor(door.id)}>
+          <ToggleInput label={`Tür ${index + 1} aktiv`} checked={door.enabled} onChange={(enabled) => { updateDoor(door.id, { enabled }); if (!enabled && placementMode?.type === "door" && placementMode.id === door.id) setPlacementMode(null); }} />
+          {door.enabled ? <><label className="grid gap-1 text-xs font-medium text-premium-charcoal"><span>Wand</span><select aria-label={`Tür ${index + 1} Wand`} value={door.wall} onChange={(event) => updateDoor(door.id, { wall: event.target.value as Door["wall"] })} className="min-h-9 rounded-lg border border-premium-beige bg-white/80 px-2.5 text-sm"><option value="front">vorne</option><option value="back">hinten</option><option value="left">links</option><option value="right">rechts</option></select></label><NumberInput label="Türposition" ariaLabel={`Tür ${index + 1} Position`} value={door.position} step={0.1} onChange={(position) => updateDoor(door.id, { position })} /><NumberInput label="Türbreite" ariaLabel={`Tür ${index + 1} Breite`} value={door.width} step={0.1} onChange={(width) => updateDoor(door.id, { width })} /><NumberInput label="Abstand" ariaLabel={`Tür ${index + 1} Abstand`} value={door.clearance} step={0.05} min={0} onChange={(clearance) => updateDoor(door.id, { clearance })} /><PlacementButton active={placementMode?.type === "door" && placementMode.id === door.id} onClick={() => setPlacementMode((current) => current?.type === "door" && current.id === door.id ? null : { type: "door", id: door.id })} /></> : null}
+        </ObjectCard>)}
+        <button type="button" onClick={addDoor} className="min-h-9 rounded-lg border border-dashed border-premium-sand bg-white/50 px-3 text-xs font-semibold text-premium-charcoal hover:bg-white">+ Tür{values.doors.length ? "" : " hinzufügen"}</button>
       </PlannerSection>
-      <PlannerSection title="Hindernis" status={values.obstacleEnabled ? "Aktiv" : "Inaktiv"} collapsible open={obstacleOpen} onOpenChange={setObstacleOpen}>
-        <ToggleInput label="Hindernis aktiv" checked={values.obstacleEnabled} onChange={(obstacleEnabled) => { setValues((current) => ({ ...current, obstacleEnabled })); if (obstacleEnabled) setObstacleOpen(true); else if (placementMode === "obstacle") setPlacementMode(null); }} />
-        {values.obstacleEnabled ? <><NumberInput label="Hindernis X-Position" value={values.obstacleX} step={0.1} onChange={(obstacleX) => setValues((current) => ({ ...current, obstacleX }))} /><NumberInput label="Hindernis Y-Position" value={values.obstacleY} step={0.1} onChange={(obstacleY) => setValues((current) => ({ ...current, obstacleY }))} /><NumberInput label="Hindernisbreite" value={values.obstacleWidth} step={0.1} onChange={(obstacleWidth) => setValues((current) => ({ ...current, obstacleWidth }))} /><NumberInput label="Hindernistiefe" value={values.obstacleDepth} step={0.1} onChange={(obstacleDepth) => setValues((current) => ({ ...current, obstacleDepth }))} /><NumberInput label="Hindernisabstand" value={values.obstacleClearance} step={0.05} min={0} onChange={(obstacleClearance) => setValues((current) => ({ ...current, obstacleClearance }))} /><PlacementButton active={placementMode === "obstacle"} onClick={() => setPlacementMode((current) => current === "obstacle" ? null : "obstacle")} /></> : null}
+      <PlannerSection title="Hindernis" status={values.obstacles.some((obstacle) => obstacle.enabled) ? "Aktiv" : "Inaktiv"} collapsible open={obstacleOpen} onOpenChange={setObstacleOpen}>
+        {values.obstacles.map((obstacle, index) => <ObjectCard key={obstacle.id} title={`Hindernis ${index + 1}`} open={openObstacles.includes(obstacle.id)} onOpenChange={(open) => setOpenObstacles((current) => open ? [...current, obstacle.id] : current.filter((id) => id !== obstacle.id))} onRemove={() => removeObstacle(obstacle.id)}>
+          <ToggleInput label={`Hindernis ${index + 1} aktiv`} checked={obstacle.enabled} onChange={(enabled) => { updateObstacle(obstacle.id, { enabled }); if (!enabled && placementMode?.type === "obstacle" && placementMode.id === obstacle.id) setPlacementMode(null); }} />
+          {obstacle.enabled ? <><NumberInput label="X" ariaLabel={`Hindernis ${index + 1} X-Position`} value={obstacle.x} step={0.1} onChange={(x) => updateObstacle(obstacle.id, { x })} /><NumberInput label="Y" ariaLabel={`Hindernis ${index + 1} Y-Position`} value={obstacle.y} step={0.1} onChange={(y) => updateObstacle(obstacle.id, { y })} /><NumberInput label="Breite" ariaLabel={`Hindernis ${index + 1} Breite`} value={obstacle.width} step={0.1} onChange={(width) => updateObstacle(obstacle.id, { width })} /><NumberInput label="Tiefe" ariaLabel={`Hindernis ${index + 1} Tiefe`} value={obstacle.depth} step={0.1} onChange={(depth) => updateObstacle(obstacle.id, { depth })} /><NumberInput label="Abstand" ariaLabel={`Hindernis ${index + 1} Abstand`} value={obstacle.clearance} step={0.05} min={0} onChange={(clearance) => updateObstacle(obstacle.id, { clearance })} /><PlacementButton active={placementMode?.type === "obstacle" && placementMode.id === obstacle.id} onClick={() => setPlacementMode((current) => current?.type === "obstacle" && current.id === obstacle.id ? null : { type: "obstacle", id: obstacle.id })} /></> : null}
+        </ObjectCard>)}
+        <button type="button" onClick={addObstacle} className="min-h-9 rounded-lg border border-dashed border-premium-sand bg-white/50 px-3 text-xs font-semibold text-premium-charcoal hover:bg-white">+ Hindernis{values.obstacles.length ? "" : " hinzufügen"}</button>
       </PlannerSection>
     </aside>
   </div>;
@@ -272,6 +316,16 @@ function PlannerSection({ title, status, className = "", collapsible = false, op
   return <section className={`premium-card p-4 ${className}`}>
     {collapsible ? <button type="button" aria-expanded={open} onClick={() => onOpenChange?.(!open)} className="flex w-full items-center gap-2 text-left">{heading}<span aria-hidden="true" className={`text-premium-muted transition-transform ${open ? "rotate-180" : ""}`}>⌄</span></button> : <h2 className="flex items-center gap-2">{heading}</h2>}
     {open ? <div className="mt-3 grid gap-3">{children}</div> : null}
+  </section>;
+}
+
+function ObjectCard({ title, open, onOpenChange, onRemove, children }: { title: string; open: boolean; onOpenChange: (open: boolean) => void; onRemove: () => void; children: React.ReactNode }) {
+  return <section className="rounded-xl border border-premium-beige bg-premium-warm/45 p-2.5">
+    <div className="flex items-center gap-2">
+      <button type="button" aria-expanded={open} onClick={() => onOpenChange(!open)} className="flex min-h-8 flex-1 items-center gap-2 text-left text-sm font-semibold text-premium-ink"><span>{title}</span><span aria-hidden="true" className={`ml-auto text-premium-muted transition-transform ${open ? "rotate-180" : ""}`}>⌄</span></button>
+      <button type="button" aria-label={`${title} entfernen`} onClick={onRemove} className="min-h-8 rounded-md px-2 text-xs font-medium text-premium-muted hover:bg-white hover:text-red-700">Entfernen</button>
+    </div>
+    {open ? <div className="mt-2 grid gap-2.5 border-t border-premium-beige pt-2.5">{children}</div> : null}
   </section>;
 }
 
@@ -287,8 +341,8 @@ function StatusItem({ label, value, testId }: { label: string; value: number; te
   return <div className="rounded-xl bg-premium-warm px-3 py-2"><dt className="text-[0.68rem] text-premium-muted">{label}</dt><dd data-testid={testId} className="mt-0.5 text-lg font-semibold leading-none text-premium-ink">{value}</dd></div>;
 }
 
-function NumberInput({ label, value, step, min, max, onChange }: { label: string; value: number; step: number; min?: number; max?: number; onChange: (value: number) => void }) {
-  return <label className="grid gap-1 text-xs font-medium text-premium-charcoal"><span>{label}</span><span className="relative"><input type="number" min={min} max={max} step={step} value={value} onChange={(event) => { const parsed = Number(event.target.value); if (Number.isFinite(parsed)) onChange(Math.min(max ?? Infinity, Math.max(min ?? -Infinity, parsed))); }} className="min-h-9 w-full rounded-lg border border-premium-beige bg-white/80 px-2.5 pr-8 text-sm text-premium-ink outline-none transition focus:border-premium-sand focus:ring-2 focus:ring-premium-sand/30" /><span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[0.65rem] text-premium-muted">m</span></span></label>;
+function NumberInput({ label, ariaLabel, value, step, min, max, onChange }: { label: string; ariaLabel?: string; value: number; step: number; min?: number; max?: number; onChange: (value: number) => void }) {
+  return <label className="grid gap-1 text-xs font-medium text-premium-charcoal"><span>{label}</span><span className="relative"><input aria-label={ariaLabel} type="number" min={min} max={max} step={step} value={value} onChange={(event) => { const parsed = Number(event.target.value); if (Number.isFinite(parsed)) onChange(Math.min(max ?? Infinity, Math.max(min ?? -Infinity, parsed))); }} className="min-h-9 w-full rounded-lg border border-premium-beige bg-white/80 px-2.5 pr-8 text-sm text-premium-ink outline-none transition focus:border-premium-sand focus:ring-2 focus:ring-premium-sand/30" /><span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[0.65rem] text-premium-muted">m</span></span></label>;
 }
 
 useGLTF.preload("/models/dalemans-chair.glb");

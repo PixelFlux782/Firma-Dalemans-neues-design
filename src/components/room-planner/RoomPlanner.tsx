@@ -100,7 +100,7 @@ function ChairInstances({ positions, width, depth, modelPath }: { positions: [nu
   }, [model, positions]);
 
   if (!model || positions.length === 0) return null;
-  return <instancedMesh ref={instancesRef} args={[model.geometry, model.material, positions.length]} castShadow receiveShadow />;
+  return <instancedMesh ref={instancesRef} args={[model.geometry, model.material, positions.length]} receiveShadow />;
 }
 
 function AisleMarker({ x, z, width, length }: { x: number; z: number; width: number; length: number }) {
@@ -117,7 +117,7 @@ function RoomScene({ values, positions, modelPath, placementMode, onPlaceObstacl
   return <>
     <color attach="background" args={["#f4f1e8"]} />
     <ambientLight intensity={1.25} />
-    <directionalLight position={[5, 10, 7]} intensity={1.8} castShadow shadow-mapSize={[1024, 1024]} />
+    <directionalLight position={[5, 10, 7]} intensity={1.8} />
     <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} onPointerDown={(event: ThreeEvent<PointerEvent>) => { if (placementMode?.type === "obstacle" && event.button === 0) { event.stopPropagation(); onPlaceObstacle(placementMode.id, event.point.x, event.point.z); } }}><planeGeometry args={[values.roomWidth, values.roomLength]} /><meshStandardMaterial color="#ded9ca" roughness={0.95} /></mesh>
     <gridHelper args={[Math.max(values.roomWidth, values.roomLength), Math.ceil(Math.max(values.roomWidth, values.roomLength)), "#aaa28e", "#cbc4b3"]} position={[0, 0.006, 0]} />
     <AisleMarker x={-values.roomWidth / 2 + Math.min(values.leftSideAisle, values.roomWidth) / 2} z={seatingStart + seatingLength / 2} width={Math.min(values.leftSideAisle, values.roomWidth)} length={seatingLength} />
@@ -142,7 +142,7 @@ function RoomScene({ values, positions, modelPath, placementMode, onPlaceObstacl
       </group>;
     })}
     <Suspense fallback={null}><ChairInstances key={modelPath} positions={positions} width={values.chairWidth} depth={values.chairDepth} modelPath={modelPath} /></Suspense>
-    <ContactShadows position={[0, 0.01, 0]} opacity={0.22} scale={Math.max(values.roomWidth, values.roomLength)} blur={2.2} far={4} />
+    <ContactShadows key={JSON.stringify(values)} frames={1} position={[0, 0.01, 0]} opacity={0.22} scale={Math.max(values.roomWidth, values.roomLength)} blur={2.2} far={4} />
     <OrbitControls makeDefault enabled={placementMode === null} target={[0, 0, 0]} minDistance={5} maxDistance={45} maxPolarAngle={Math.PI / 2.05} />
   </>;
 }

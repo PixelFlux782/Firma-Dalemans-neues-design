@@ -5,6 +5,7 @@ import type {
   CommerceProductVariant,
 } from "@/lib/commerce/types";
 import {
+  chairConfigurationFromVariant,
   CHAIR_OPTION_NAMES,
   CHAIR_OPTION_VALUES,
   type ChairConfiguration,
@@ -35,6 +36,7 @@ interface LocalChairRecord {
   erpArticleNumbers: readonly string[];
   featuredImage: CommerceImage | null;
   images: CommerceImage[];
+  variantImages?: Partial<Record<ChairConfiguration["upholstery"], CommerceImage>>;
   shortDescription: string;
   description: string;
   editorialStatus: "reference" | "data-only";
@@ -43,6 +45,10 @@ interface LocalChairRecord {
 
 function image(url: string, altText: string): CommerceImage {
   return { url: encodeURI(url), altText, width: null, height: null };
+}
+
+function newChairImage(filename: string, altText: string): CommerceImage {
+  return image(`/neue bilder/Stapelstühle/neu_beschriftet/${filename}`, altText);
 }
 
 function money(amount: number): CommerceMoney {
@@ -122,16 +128,18 @@ const chairRecords: LocalChairRecord[] = [
       [102.5, 100.86, 98.4], [106.125, 104.485, 102.025],
     ],
     erpArticleNumbers: ["A1021ACO", "A1021ACO", "A1021BCO2", "A1021BCO2", "A1021BCO3", "A1021BCO3", "A1021BCO4", "A1021BCO4", "A1021CCO2", "A1021CCO2", "A1021CCO3", "A1021CCO3", "A1021CCO4", "A1021CCO4"],
-    featuredImage: image(
-      "/images/curated/Stapelstühle/1021c.webp",
-      "Stapelstuhl Modell 1021 mit Holzschale und Sitzpolster",
-    ),
+    featuredImage: newChairImage("Stapelstuhl_1021_a.png", "Stapelstuhl Modell 1021, ungepolstert"),
     images: [
-      image("/images/curated/Stapelstühle/1021c.webp", "Stapelstuhl Modell 1021 mit Sitzpolster und Grifföffnung"),
-      image("/images/curated/Stapelstühle/1021.webp", "Stapelstuhl Modell 1021 in gepolsterter Ausführung"),
-      image("/images/curated/Stapelstühle/1021a.webp", "Stapelstuhl Modell 1021 mit Holzrücken und Sitzpolster"),
-      image("/images/curated/Stapelstühle/1021b.webp", "Stapelstuhl Modell 1021 mit geschlossenem gepolstertem Rücken"),
+      newChairImage("Stapelstuhl_1021_a.png", "Stapelstuhl Modell 1021, ungepolstert"),
+      newChairImage("Stapelstuhl_Stahlrohr_1021c_02.png", "Stapelstuhl Modell 1021c mit Polsterung"),
+      newChairImage("Stapelstuhl_1021_c_lila-stuhl.png", "Stapelstuhl Modell 1021 mit Sitz- und Rückenpolster"),
+      newChairImage("Stapelstuhl_1021-holzgestell-2-detail.png", "Detail des Holzgestells von Modell 1021"),
     ],
+    variantImages: {
+      none: newChairImage("Stapelstuhl_1021_a.png", "Stapelstuhl Modell 1021, ungepolstert"),
+      seat: newChairImage("Stapelstuhl_Stahlrohr_1021c_02.png", "Stapelstuhl Modell 1021c mit Polsterung"),
+      "seat-back": newChairImage("Stapelstuhl_1021_c_lila-stuhl.png", "Stapelstuhl Modell 1021 mit Sitz- und Rückenpolster"),
+    },
     shortDescription: "Bewährter Stapelstuhl für Gemeinden, Säle und Veranstaltungsräume mit hoher Beanspruchung.",
     description: "Modell 1021 ist auf häufiges Stellen, Stapeln und Umräumen in Gemeinde- und Veranstaltungsräumen ausgerichtet. Polsterung und Reihenverbindung lassen sich passend zur geplanten Nutzung konfigurieren.",
     editorialStatus: "reference",
@@ -150,14 +158,17 @@ const chairRecords: LocalChairRecord[] = [
       [108.25, 106.52, 103.92], [111.875, 110.145, 107.545],
     ],
     erpArticleNumbers: ["ABUNDACO", "ABUNDACO", "ABUNDBCO2", "ABUNDBCO2", "ABUNDBCO3", "ABUNDBCO3", "ABUNDBCO4", "ABUNDBCO4", "ABUNDCCO2", "ABUNDCCO2", "ABUNDCCO3", "ABUNDCCO3", "ABUNDCCO4", "ABUNDCCO4"],
-    featuredImage: image(
-      "/images/curated/Stapelstühle/bünde.webp",
-      "Stapelstuhl Modell Bünde mit gepolsterter Sitz- und Rückenfläche",
-    ),
+    featuredImage: newChairImage("Stapelstuhl_Buende_a.png", "Stapelstuhl Modell Bünde, ungepolstert"),
     images: [
-      image("/images/curated/Stapelstühle/bünde.webp", "Stapelstuhl Modell Bünde in gepolsterter Ausführung"),
-      image("/images/curated/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.webp", "Mehrere gestapelte Stühle des Modells Bünde"),
+      newChairImage("Stapelstuhl_Buende_a.png", "Stapelstuhl Modell Bünde, ungepolstert"),
+      newChairImage("Stapelstuhl_buende_c.png", "Stapelstuhl Modell Bünde mit Sitz- und Rückenpolster"),
+      newChairImage("Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.png", "Mehrere gestapelte Stühle des Modells Bünde"),
+      newChairImage("Stapelstuhl_Buende_a_1021_armlehne.png", "Stapelstuhl mit Armlehnen, Variantenzuordnung nicht verifiziert"),
     ],
+    variantImages: {
+      none: newChairImage("Stapelstuhl_Buende_a.png", "Stapelstuhl Modell Bünde, ungepolstert"),
+      "seat-back": newChairImage("Stapelstuhl_buende_c.png", "Stapelstuhl Modell Bünde mit Sitz- und Rückenpolster"),
+    },
     shortDescription: "Ausführung für geordnete Reihenbestuhlung in Gemeinde- und Veranstaltungsräumen.",
     description: "Das Modell Bünde ist in der aktuellen Preisliste mit denselben Polster- und Reihenverbindungsoptionen wie die übrigen Stapelstuhlmodelle geführt.",
     editorialStatus: "data-only",
@@ -176,8 +187,13 @@ const chairRecords: LocalChairRecord[] = [
       [117.5, 115.62, 112.8], [121.125, 119.245, 116.425],
     ],
     erpArticleNumbers: ["ACOBUACO", "ACOBUACO", "ACOBUBCO2", "ACOBUBCO2", "ACOBUBCO3", "ACOBUBCO3", "ACOBUBCO4", "ACOBUBCO4", "ACOBUCCO2", "ACOBUCCO2", "ACOBUCCO3", "ACOBUCCO3", "ACOBUCCO4", "ACOBUCCO4"],
-    featuredImage: null,
-    images: [],
+    featuredImage: newChairImage("Stapelstuhl_Coburg_a.png", "Stapelstuhl Modell Coburg, ungepolstert"),
+    images: [
+      newChairImage("Stapelstuhl_Coburg_a.png", "Stapelstuhl Modell Coburg, ungepolstert"),
+      newChairImage("Stapelstuhl_Coburg_a_mehrere-löcher.png", "Stapelstuhl Coburg mit mehreren Grifföffnungen"),
+      newChairImage("Stapelstuhl_Coburg_a_ovales-griffloch.png", "Stapelstuhl Coburg mit ovalem Griffloch"),
+    ],
+    variantImages: { none: newChairImage("Stapelstuhl_Coburg_a.png", "Stapelstuhl Modell Coburg, ungepolstert") },
     shortDescription: "In 14 Polster- und Reihenverbindungsvarianten in der aktuellen Preisliste geführt.",
     description: "Für Modell Coburg liegen Preis- und Variantendaten vor. Individuelle Produkttexte und eindeutig zugeordnete Bilder sind noch nicht hinterlegt.",
     editorialStatus: "data-only",
@@ -195,8 +211,25 @@ const chairRecords: LocalChairRecord[] = [
       [122.5, 120.54, 117.6], [126.125, 124.165, 121.225],
     ],
     erpArticleNumbers: ["ANURNACO", "ANURNACO", "ANURNBCO2", "ANURNBCO2", "ANURNBCO3", "ANURNBCO3", "ANURNBCO4", "ANURNBCO4", "ANURNCCO2", "ANURNCCO2", "ANURNCCO3", "ANURNCCO3", "ANURNCCO4", "ANURNCCO4"],
-    featuredImage: null,
-    images: [],
+    featuredImage: newChairImage("Stapelstuhl_Nuernberg_a.png", "Stapelstuhl Modell Nürnberg, ungepolstert"),
+    images: [
+      newChairImage("Stapelstuhl_Nuernberg_a.png", "Stapelstuhl Modell Nürnberg, ungepolstert"),
+      newChairImage("Stapelstuhl_Nuernberg_a_f01.png", "Stapelstuhl Nürnberg mit Holzrücken und Grifföffnungen"),
+      newChairImage("Stapelstuhl_Nuernberg_a_GL.png", "Stapelstuhl Nürnberg mit Sitzpolster"),
+      newChairImage("Stapelstuhl_Nuernberg_c.png", "Stapelstuhl Nürnberg mit Sitz- und Rückenpolster"),
+      newChairImage("Stapelstuhl_Nuernberg_a_HPL.png", "Nürnberg mit dunkler Sitz- und Rückenfläche"),
+      newChairImage("Stapelstuhl_Nuernberg_b_HPL_-eckiges-griffloch.png", "Nürnberg mit eckigem Griffloch"),
+      newChairImage("Stapelstuhl_Nuernberg_holzgestell.png", "Nürnberg mit Holzgestell"),
+      newChairImage("Stapelstuhl_Nuernberg_lederbezug.png", "Nürnberg mit Lederbezug"),
+      newChairImage("Stapelstuhl_Nuernberg_turkis-stuhl.png", "Nürnberg mit türkisfarbenem Sitzpolster"),
+      newChairImage("Stapelstuhl_Nuernberg_c_02.png", "Nürnberg mit dunkler Sitz- und Rückenpolsterung, alternative Ansicht"),
+      newChairImage("Stapelstuhl_Nuernberg_c_2.png", "Nürnberg mit dunkler Sitz- und Rückenpolsterung, Seitenansicht"),
+    ],
+    variantImages: {
+      none: newChairImage("Stapelstuhl_Nuernberg_a.png", "Stapelstuhl Modell Nürnberg, ungepolstert"),
+      seat: newChairImage("Stapelstuhl_Nuernberg_a_GL.png", "Stapelstuhl Nürnberg mit Sitzpolster"),
+      "seat-back": newChairImage("Stapelstuhl_Nuernberg_c.png", "Stapelstuhl Nürnberg mit Sitz- und Rückenpolster"),
+    },
     shortDescription: "In 14 Polster- und Reihenverbindungsvarianten in der aktuellen Preisliste geführt.",
     description: "Für Modell Nürnberg liegen Preis- und Variantendaten vor. Individuelle Produkttexte und eindeutig zugeordnete Bilder sind noch nicht hinterlegt.",
     editorialStatus: "data-only",
@@ -212,8 +245,15 @@ const chairRecords: LocalChairRecord[] = [
       [111.25, 109.47, 106.8], [114.875, 113.095, 110.425],
     ],
     erpArticleNumbers: ["AERFUACO", "AERFUACO", "AERFUBCO2", "AERFUBCO2", "AERFUBCO3", "AERFUBCO3", "AERFUBCO4", "AERFUBCO4"],
-    featuredImage: null,
-    images: [],
+    featuredImage: newChairImage("Stapelstuhl_Erfurt_a.png", "Stapelstuhl Modell Erfurt, ungepolstert"),
+    images: [
+      newChairImage("Stapelstuhl_Erfurt_a.png", "Stapelstuhl Modell Erfurt, ungepolstert"),
+      newChairImage("Stapelstuhl_Erfurt_b.png", "Stapelstuhl Modell Erfurt mit Sitzpolster"),
+    ],
+    variantImages: {
+      none: newChairImage("Stapelstuhl_Erfurt_a.png", "Stapelstuhl Modell Erfurt, ungepolstert"),
+      seat: newChairImage("Stapelstuhl_Erfurt_b.png", "Stapelstuhl Modell Erfurt mit Sitzpolster"),
+    },
     shortDescription: "In 14 Polster- und Reihenverbindungsvarianten in der aktuellen Preisliste geführt.",
     description: "Für Modell Erfurt liegen Preis- und Variantendaten vor. Individuelle Produkttexte und eindeutig zugeordnete Bilder sind noch nicht hinterlegt.",
     editorialStatus: "data-only",
@@ -242,7 +282,13 @@ function buildChairProduct(record: LocalChairRecord): CommerceProduct {
     availableForSale: false,
     featuredImage: record.featuredImage,
     images: record.images,
-    variants,
+    variants: variants.map((variant) => {
+      const configuration = chairConfigurationFromVariant(variant);
+      return {
+        ...variant,
+        image: configuration ? record.variantImages?.[configuration.upholstery] ?? null : null,
+      };
+    }),
     priceRange: {
       min: money(Math.min(...prices)),
       max: money(Math.max(...prices)),

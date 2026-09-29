@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -13,6 +13,7 @@ import {
   type ChairUpholstery,
 } from "@/lib/commerce/stacking-chairs";
 import type { CommerceProduct } from "@/lib/commerce/types";
+import type { CommerceImage } from "@/lib/commerce/types";
 
 const upholsteryOptions: Array<{ value: ChairUpholstery; label: string; note: string }> = [
   { value: "none", label: "Ungepolstert", note: "ohne Stoffgruppe" },
@@ -57,9 +58,11 @@ function contactHref(
 export default function ChairConfigurator({
   product,
   initialConfiguration,
+  onVariantImageChange,
 }: {
   product: CommerceProduct;
   initialConfiguration: ChairConfiguration;
+  onVariantImageChange?: (image: CommerceImage | null) => void;
 }) {
   const [configuration, setConfiguration] = useState(initialConfiguration);
   const [quantity, setQuantity] = useState(1);
@@ -68,6 +71,9 @@ export default function ChairConfigurator({
     () => resolveChairVariant(product, configuration),
     [configuration, product],
   );
+  useEffect(() => {
+    onVariantImageChange?.(selectedVariant?.image ?? null);
+  }, [onVariantImageChange, selectedVariant?.id, selectedVariant?.image]);
   const baseVariant = useMemo(
     () => resolveChairVariant(product, { ...configuration, rowConnector: false }),
     [configuration, product],

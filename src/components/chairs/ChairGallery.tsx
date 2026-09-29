@@ -4,10 +4,12 @@ import Image from "next/image";
 import { useState } from "react";
 import ProductVisual from "@/components/ProductVisual";
 import type { CommerceImage } from "@/lib/commerce/types";
+import { useChairVariantImage } from "@/components/chairs/ChairProductConfigurator";
 
 export default function ChairGallery({ images, modelCode }: { images: CommerceImage[]; modelCode: string }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const activeImage = images[activeIndex] ?? null;
+  const variantImageContext = useChairVariantImage();
+  const activeImage = variantImageContext?.image ?? images[activeIndex] ?? null;
 
   if (!activeImage) {
     return (

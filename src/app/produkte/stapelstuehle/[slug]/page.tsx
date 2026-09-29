@@ -1,8 +1,7 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ChairConfigurator from "@/components/chairs/ChairConfigurator";
-import ChairGallery from "@/components/chairs/ChairGallery";
+import ChairProductConfigurator from "@/components/chairs/ChairProductConfigurator";
 import ProductTechnicalData from "@/components/chairs/ProductTechnicalData";
 import { StructuredData } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
@@ -127,12 +126,7 @@ export default async function StackingChairModelPage({ params, searchParams }: P
           currentPath={modelPath(product.handle)}
         />
 
-        <div className="mt-8 grid items-start gap-10 lg:grid-cols-[1.06fr_.94fr] lg:gap-14">
-          <div className="min-w-0 lg:sticky lg:top-28">
-            <ChairGallery images={product.images} modelCode={product.stackingChair.modelCode} />
-          </div>
-
-          <div className="min-w-0 lg:pt-3">
+        <ChairProductConfigurator product={product} initialConfiguration={initialConfiguration}>
             <p className="section-eyebrow">Stapelstuhl</p>
             <h1 className="mt-4 font-display text-4xl font-medium leading-[1.04] tracking-[-0.035em] text-premium-ink sm:text-5xl lg:text-[3.65rem]">
               Modell {product.stackingChair.modelCode}
@@ -150,9 +144,7 @@ export default async function StackingChairModelPage({ params, searchParams }: P
               </p>
             ) : null}
 
-            <ChairConfigurator product={product} initialConfiguration={initialConfiguration} />
-          </div>
-        </div>
+        </ChairProductConfigurator>
       </section>
 
       {isReference ? (

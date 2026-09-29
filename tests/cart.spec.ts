@@ -210,6 +210,43 @@ test.describe("DLMNS Cart Drawer", () => {
     await page.evaluate(() => localStorage.clear());
   });
 
+  test("Bünde-Stapelstuhl übernimmt gewählte Variante und Preis trotz anderem Galerie-Bild", async ({ page }) => {
+    test.setTimeout(60_000);
+    const runtimeErrors: string[] = [];
+    page.on("pageerror", (error) => runtimeErrors.push(error.message));
+    page.on("console", (message) => {
+      if (message.type() === "error") runtimeErrors.push(message.text());
+    });
+
+    await page.goto("/produkte/stapelstuehle");
+    await expect(page.locator('a[href="/produkte/stapelstuehle/buende"]').first()).toBeVisible();
+    await page.goto("/produkte/stapelstuehle/buende");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Modell Bünde");
+    await page.locator('input[name="upholstery"][value="seat-back"]').check({ force: true });
+    await page.locator('input[name="fabricGroup"][value="3"]').check({ force: true });
+    await page.locator('input[name="rowConnector"][value="true"]').check({ force: true });
+    await expect(page.getByTestId("selected-chair-variant")).toContainText("Sitz- und Rückenpolster · Gruppe 3 · Mit Reihenverbindung");
+    await expect(page.getByTestId("chair-price")).toContainText("109,88");
+
+    await page.getByRole("button", { name: /Ansicht 3:/ }).click();
+    await page.getByRole("button", { name: "In den Warenkorb" }).click();
+
+    const drawer = page.getByTestId("cart-drawer");
+    await expect(drawer).toBeVisible();
+    await expect(drawer.getByTestId("cart-line")).toContainText("Stapelstuhl Modell Bünde");
+    await expect(drawer.getByTestId("cart-line")).toContainText("Sitz- und Rückenpolster · Gruppe 3 · Mit Reihenverbindung");
+    await expect(drawer.getByTestId("cart-line")).toContainText("109,88");
+
+    const persisted = await page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? "null"), LOCAL_CART_STORAGE_KEY);
+    expect(persisted.lines[0]).toMatchObject({
+      productTitle: "Stapelstuhl Modell Bünde",
+      variantTitle: "Sitz- und Rückenpolster · Gruppe 3 · Mit Reihenverbindung",
+      unitPrice: { amount: "109.88", currencyCode: "EUR" },
+      image: { url: expect.stringContaining("Stapelstuhl_buende_c.png") },
+    });
+    expect(runtimeErrors).toEqual([]);
+  });
+
   test("Produktvariante hinzufügen, Menge ändern und entfernen", async ({ page }) => {
     await page.goto("/shop/produkt/filzgleiter-fuer-rundrohr?variant=local-variant-rf-20");
     await page.getByRole("button", { name: "In den Warenkorb" }).click();

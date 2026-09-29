@@ -48,6 +48,16 @@ function isMoney(value: unknown): value is CommerceMoney {
     && money.currencyCode.length === 3;
 }
 
+function hasCartPrice(line: Partial<CartInputLine>) {
+  return isMoney(line.unitPrice)
+    && (line.priceStatus === "fixed"
+      || (line.priceStatus === "from" && Array.isArray(line.priceTiers) && line.priceTiers.length > 0));
+}
+
+function hasCartAvailability(line: Partial<CartInputLine>) {
+  return line.availability === "in_stock" || line.availability === "on_request";
+}
+
 function tierPrice(tiers: CommercePriceTier[] | undefined, quantity: number, fallback: CommerceMoney | null) {
   return tiers?.find((tier) =>
     (tier.minimumQuantity === null || quantity >= tier.minimumQuantity)
@@ -66,13 +76,12 @@ function isPersistedLine(value: unknown): value is CartInputLineWithId {
     && typeof line.variantTitle === "string"
     && isPositiveInteger(line.quantity)
     && line.quantity <= LOCAL_CART_MAX_QUANTITY
-    && line.priceStatus === "fixed"
-    && isMoney(line.unitPrice)
+    && hasCartPrice(line)
     && isPositiveInteger(line.minimumQuantity)
     && isPositiveInteger(line.quantityStep)
     && (line.packSize === null || isPositiveInteger(line.packSize))
     && typeof line.unitLabel === "string"
-    && line.availability === "in_stock"
+    && hasCartAvailability(line)
     && (line.source === "product" || line.source === "glider_finder");
 }
 
@@ -170,9 +179,8 @@ function canAddLine(line: CartInputLine) {
     line.productId
       && line.productHandle
       && line.variantId
-      && line.priceStatus === "fixed"
-      && isMoney(line.unitPrice)
-      && line.availability === "in_stock"
+      && hasCartPrice(line)
+      && hasCartAvailability(line)
       && isPositiveInteger(line.minimumQuantity)
       && isPositiveInteger(line.quantityStep),
   );

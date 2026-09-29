@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { recordChairAction } from "@/lib/analytics";
+import { useCart } from "@/components/commerce/cart/CartProvider";
 import { formatCommerceMoney } from "@/lib/commerce/money";
-import { priceForQuantity } from "@/lib/commerce/cart/lines";
+import { cartLineFromProduct, priceForQuantity } from "@/lib/commerce/cart/lines";
 import {
   CHAIR_OPTION_VALUES,
   resolveChairVariant,
@@ -66,6 +67,7 @@ export default function ChairConfigurator({
 }) {
   const [configuration, setConfiguration] = useState(initialConfiguration);
   const [quantity, setQuantity] = useState(1);
+  const { addLines, pending } = useCart();
   const firstVariantEffect = useRef(true);
   const selectedVariant = useMemo(
     () => resolveChairVariant(product, configuration),
@@ -252,6 +254,14 @@ export default function ChairConfigurator({
       ) : (
         <>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => addLines([cartLineFromProduct({ product, variant: selectedVariant, quantity })])}
+              disabled={pending || !selectedVariant?.price || !selectedVariant.priceTiers?.length}
+              className="btn-primary text-center disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              In den Warenkorb
+            </button>
             <Link
               href={contactHref(product, configuration, quantity, "Angebot")}
               onClick={() => recordChairAction({ action: "chair_quote_request", model: product.stackingChair?.modelCode, variantId: selectedVariant.id, quantity })}

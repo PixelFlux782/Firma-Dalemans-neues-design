@@ -1,7 +1,7 @@
 import { pointById, wallLength, type Point2D, type RoomGeometry, type RoomWall } from "./geometry";
 
 export type Position = { x: number; y: number };
-export type DoorObject = { id: string; type: "door"; wallId: string; offset: number; width: number; openingDirection?: "inside" | "outside"; hingeSide?: "left" | "right" };
+export type DoorObject = { id: string; type: "door"; wallId: string; offset: number; width: number; role?: "normal" | "exit" | "emergency_exit"; clearWidth?: number; openingDirection?: "inside" | "outside"; hingeSide?: "left" | "right" };
 export type ObstacleObject = { id: string; type: "obstacle"; obstacleType: "column" | "stage" | "technical" | "furniture" | "restricted"; x: number; y: number; width: number; depth: number; rotation: number };
 export type AisleObject = { id: string; type: "aisle"; start: Position; end: Position; width: number };
 export type RoomObject = DoorObject | ObstacleObject | AisleObject;
@@ -79,6 +79,7 @@ export function validateObjects(plan: RoomPlan): Issue[] {
     if (object.type === "door") {
       if (!wallEndpoints(plan.contour, object.wallId)) error("Tür: Zugehörige Wand fehlt.");
       else if (!doorFits(plan.contour, object)) error("Tür: Breite oder Position überschreitet die Wand.");
+      if (object.role && object.role !== "normal" && (!Number.isFinite(object.clearWidth) || !object.clearWidth || object.clearWidth <= 0 || object.clearWidth > object.width + EPS)) error("Ausgang: Lichte Breite muss größer als 0 und höchstens so groß wie die Türbreite sein.");
     } else if (object.type === "obstacle") {
       if (![object.x, object.y, object.width, object.depth, object.rotation].every(Number.isFinite) || object.width <= 0 || object.depth <= 0) error("Hindernis: Maße und Position müssen gültig sein; Breite und Tiefe größer als 0.");
       else if (!polygonInsideRoom(obstaclePolygon(object), plan.contour)) error("Hindernis liegt teilweise außerhalb des Raums oder schneidet eine Wand.");

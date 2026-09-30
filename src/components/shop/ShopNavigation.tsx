@@ -117,7 +117,7 @@ const shopItems: readonly ShopItem[] = [
     groups: [
       {
         title: "Transport & Lagerung",
-        links: [{ label: "Stuhltransportwagen", href: product("stuhltransportwagen") }],
+        links: [{ label: "Stuhltransportwagen", href: product("stuhltransportwagen") }, { label: "Tischtransportwagen", href: product("tischtransportwagen") }],
       },
     ],
     cta: { label: "Transportlösungen ansehen", href: "/produkte/sortiment/transport-lagerung" },
@@ -131,7 +131,7 @@ const mobileGroups: readonly ShopGroup[] = [
   { title: "Tische", links: [{ label: "Klapptische", href: "/produkte/sortiment/klapptische" }, { label: "Seminarklapptische", href: product("seminarklapptisch-210c") }, { label: "Trapeztische", href: product("trapez-klapptisch-310c") }] },
   { title: "Gleiter", links: [{ label: "Gleiter & Bodenschutz", href: "/produkte/sortiment/gleiter-bodenschutz" }, { label: "Gleiter-Finder", href: "/produkte/gleiter-finder" }] },
   { title: "Nachrüstung", links: [{ label: "Buchablagen", href: product("buchablage-nachruesten") }, { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") }, { label: "Ersatzteile", href: "/produkte/sortiment/reihenverbinder-nachruestung" }] },
-  { title: "Transport", links: [{ label: "Stuhltransportwagen", href: product("stuhltransportwagen") }, { label: "Transport & Lagerung", href: "/produkte/sortiment/transport-lagerung" }] },
+  { title: "Transport", links: [{ label: "Stuhltransportwagen", href: product("stuhltransportwagen") }, { label: "Tischtransportwagen", href: product("tischtransportwagen") }, { label: "Transport & Lagerung", href: "/produkte/sortiment/transport-lagerung" }] },
   { title: "Rednerpulte", links: [{ label: "Rednerpulte ansehen", href: "/produkte/sortiment/rednerpulte" }] },
   { title: "Muster & Beratung", links: [{ label: "Muster & Beratung", href: "/produkte/sortiment/muster-beratung" }] },
 ] as const;

@@ -71,6 +71,11 @@ const trolleyImage = image(
   "Stuhltransportwagen mit gestapelten Holzschalenstühlen",
 );
 
+const tableTrolleyImage = image(
+  "/images/curated/Zubehör/Tischtransportwagen_02.webp",
+  "Tischtransportwagen für zusammengeklappte Tische",
+);
+
 function developmentFinderProduct(
   fixture: DevelopmentFinderProductFixture,
 ): CommerceProduct {
@@ -424,6 +429,44 @@ export const localProducts: CommerceProduct[] = [
     updatedAt,
   },
   {
+    id: "local-product-tischtransportwagen",
+    handle: "tischtransportwagen",
+    title: "Tischtransportwagen",
+    shortDescription: "Transportwagen für Klapptische, abgestimmt auf Tischmaß, Stückzahl und Transportwege.",
+    description: "Der Tischtransportwagen erleichtert Lagerung und Saalumbauten. Auflagefläche, Haltebügel und Rollen werden passend zu den vorhandenen Tischen und Wegen geklärt.",
+    descriptionHtml: "<p>Transportwagen für die geordnete Lagerung und den internen Transport von Klapptischen.</p>",
+    availableForSale: false,
+    featuredImage: tableTrolleyImage,
+    images: [tableTrolleyImage],
+    variants: [requestVariant("table-trolley-check", "Ausführung nach Tischbestand", "DEV-TTW-CHECK", [
+      { name: "Ausführung", value: "Nach Bestandsprüfung" },
+    ])],
+    priceRange: { min: null, max: null },
+    priceStatus: "on_request",
+    availability: "on_request",
+    availabilityNote: "Ausführung und Lieferzeit werden projektbezogen geklärt.",
+    collectionHandles: ["transport-lagerung"],
+    specifications: [
+      { name: "Einsatz", value: "Transport und Lagerung von Klapptischen" },
+      { name: "Zuordnung", value: "nach Tischmaß und Bestandsmenge" },
+      { name: "Mengeneinheit", value: "Stück" },
+    ],
+    compatibility: ["Klapptische nach Maß- und Bestandsprüfung"],
+    suitableFor: ["Saalumbauten", "Veranstaltungsräume", "Lagerung und interner Transport"],
+    quantity: { unit: "piece", unitLabel: "Stück", minimum: 1, step: 1, note: null },
+    measureGuide: ["Tischmaße und Stückzahl dokumentieren.", "Türbreiten, Schwellen und Transportwege berücksichtigen."],
+    applicationNotes: ["Auflagefläche, Haltebügel und Rollen werden anhand der Tische und Wege abgestimmt."],
+    notes: [],
+    accessories: [],
+    consultationNote: "Für die Auswahl helfen Tischmaße, Bestandsmenge, Lagerort und Transportweg.",
+    faq: [],
+    seo: {
+      title: "Tischtransportwagen für Klapptische",
+      description: "Tischtransportwagen passend zu Tischmaß, Bestand und Transportwegen auswählen und Angebot anfragen.",
+    },
+    updatedAt,
+  },
+  {
     id: "local-product-stuhltransportwagen",
     handle: "stuhltransportwagen",
     title: "Stuhltransportwagen",
@@ -553,7 +596,7 @@ export const localCollectionRecords: Array<Omit<CommerceCollection, "products">>
     shortDescription: "Wenn Maß, Material oder Kompatibilität noch nicht sicher sind, klären wir den Bedarf gemeinsam.",
     description:
       "Mustersets werden vorbereitet. Bis dahin unterstützen wir persönlich bei der Zuordnung vorhandener Modelle und Maße.",
-    image: null,
+    image: image("/neue bilder/Stoffe-Farben/Textilproben.png", "Textilproben für die Auswahl von Stoffen und Farben"),
     seo: {
       title: "Muster & persönliche Produktberatung",
       description: "Persönliche Hilfe bei unklaren Maßen, Materialien und der Kompatibilität von Ersatzteilen und Zubehör.",

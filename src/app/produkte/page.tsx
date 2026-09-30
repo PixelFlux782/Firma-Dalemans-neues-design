@@ -67,7 +67,7 @@ export default async function ProductsPage() {
     <HomeSection id="alle-produktbereiche">
       <SectionHeader eyebrow="Gesamtes Sortiment" title="Weitere Produktbereiche" lead="Artikel und Ausführungen auswählen und ein persönliches Angebot anfragen." align="editorial" />
       <div className="section-grid-top grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {collections.filter((collection) => collection.handle !== "stapelstuehle").map((collection) => (
+        {collections.filter((collection) => !["stapelstuehle", "klapptische", "rednerpulte", "transport-lagerung"].includes(collection.handle)).map((collection) => (
           <Link key={collection.handle} href={`/produkte/sortiment/${collection.handle}`} className="premium-card premium-card-hover overflow-hidden">
             <CommerceMedia image={collection.image} fallbackLabel={collection.title} aspectRatio="5 / 3" />
             <div className="p-6"><h3 className="font-display text-2xl text-premium-ink">{collection.title}</h3><p className="mt-3 text-sm leading-6 text-premium-muted">{collection.shortDescription}</p><span className="mt-5 inline-block text-sm font-semibold text-premium-forest">Bereich ansehen →</span></div>

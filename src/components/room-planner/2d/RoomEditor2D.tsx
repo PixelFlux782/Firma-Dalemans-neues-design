@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as
 import { appendPoint, closeRoom, formatMeters, movePoint, orthogonalSnap, perimeter, pointById, polygonArea, snapPoint, validateRoom, wallLength, type Point2D } from "@/lib/room-planner/geometry";
 import { commit, createHistory, redo, undo } from "@/lib/room-planner/history";
 import { aislePolygon, doorSegment, emptyPlan, obstaclePolygon, validateObjects, wallEndpoints, wallOffset, type RoomObject, type RoomPlan, type ObstacleObject, type AisleObject } from "@/lib/room-planner/objects";
+import { DEFAULT_SEATING_RULES, generateSeatingPlan, type SeatingOrientation, type SeatingPlan, type SeatingRules } from "@/lib/room-planner/seating";
 
 const INITIAL_SCALE = 45;
 const MIN_SCALE = 12;
@@ -30,6 +31,10 @@ export default function RoomEditor2D() {
   const [shiftDown, setShiftDown] = useState(false);
   const [spaceDown, setSpaceDown] = useState(false);
   const [notice, setNotice] = useState("");
+  const [seatingRules, setSeatingRules] = useState<SeatingRules>({ ...DEFAULT_SEATING_RULES });
+  const [orientation, setOrientation] = useState<SeatingOrientation>("horizontal");
+  const [calculated, setCalculated] = useState<{ plan: RoomPlan; rules: SeatingRules; orientation: SeatingOrientation; result: SeatingPlan } | null>(null);
+  const seating = !previewPlan && calculated?.plan === plan && calculated.rules === seatingRules && calculated.orientation === orientation ? calculated.result : null;
   const svgRef = useRef<SVGSVGElement>(null);
   const dragRef = useRef<Drag | null>(null);
   const nextId = useRef(1);
@@ -218,6 +223,18 @@ export default function RoomEditor2D() {
   const wallStart = selectedWall && pointById(shownRoom, selectedWall.startPointId);
   const wallEnd = selectedWall && pointById(shownRoom, selectedWall.endPointId);
   const field = (label: string, value: number, change: (value: number) => void, min?: number) => <label className="flex items-center justify-between gap-2 text-sm"><span>{label}</span><input aria-label={label} type="number" step="0.1" min={min} value={value} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value) && (min === undefined || value >= min)) change(value); }} className="w-24 rounded border border-premium-beige px-2 py-1 text-right" /></label>;
+  const seatingField = (label: string, key: "chairWidth" | "chairDepth" | "rowPitch" | "maximumChairsPerRow", min: number, step: string) => <label className="flex items-center justify-between gap-2 text-sm"><span>{label}</span><input aria-label={label.replace("(m)", "in Metern")} type="number" step={step} min={min} value={seatingRules[key]} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value) && value >= min && (key !== "maximumChairsPerRow" || Number.isInteger(value))) setSeatingRules((current) => ({ ...current, [key]: value })); }} className="w-24 rounded border border-premium-beige px-2 py-1 text-right" /></label>;
+  const seatingPaths = useMemo(() => seating?.blocks.map((block) => {
+    const rectangles: string[] = [], backs: string[] = [];
+    const width = (orientation === "horizontal" ? seatingRules.chairWidth : seatingRules.chairDepth) * camera.scale;
+    const depth = (orientation === "horizontal" ? seatingRules.chairDepth : seatingRules.chairWidth) * camera.scale;
+    for (const seat of block.seats) {
+      const x = size.width / 2 + (seat.x - camera.x) * camera.scale, y = size.height / 2 + (seat.y - camera.y) * camera.scale;
+      rectangles.push(`M${x - width / 2} ${y - depth / 2}h${width}v${depth}h${-width}Z`);
+      backs.push(orientation === "horizontal" ? `M${x - width / 2 + 2} ${y - depth / 2 + 3}h${width - 4}` : `M${x - width / 2 + 3} ${y - depth / 2 + 2}v${depth - 4}`);
+    }
+    return { id: block.id, rectangles: rectangles.join(""), backs: backs.join("") };
+  }) ?? [], [seating, orientation, seatingRules, camera, size]);
 
   return <section aria-label="2D-Grundrisseditor" className="premium-card overflow-hidden">
     <div className="flex flex-wrap items-center gap-2 border-b border-premium-beige bg-white/80 p-3 sm:p-4">
@@ -235,6 +252,7 @@ export default function RoomEditor2D() {
         <rect width={size.width} height={size.height} fill="#f6f4ed" />
         <Grid camera={camera} size={size} />
         {shownRoom.closed && shownRoom.points.length >= 3 ? <polygon points={shownRoom.points.map((point) => { const p = coords.get(point.id)!; return `${p.x},${p.y}`; }).join(" ")} fill={errors.length ? "#c77c6c" : "#9ab393"} fillOpacity="0.24" /> : null}
+        <g pointerEvents="none" aria-label="Berechnete Sitzplätze">{seatingPaths.map((block, index) => <g key={block.id}><path d={block.rectangles} fill={index % 2 ? "#477b70" : "#405b49"} stroke="#fff" strokeWidth="1" /><path d={block.backs} fill="none" stroke="#d6ece0" strokeWidth="2" /></g>)}</g>
         {shownPlan.objects.filter((object): object is AisleObject => object.type === "aisle").map((object) => <g key={object.id}><polygon data-object-id={object.id} points={shapePoints(aislePolygon(object))} fill="#5596a0" fillOpacity="0.38" stroke={selection?.id === object.id ? "#bd7647" : "#357682"} strokeWidth={selection?.id === object.id ? 3 : 1.5} className={tool === "select" ? "cursor-move" : ""} /><line x1={screen(object.start).x} y1={screen(object.start).y} x2={screen(object.end).x} y2={screen(object.end).y} stroke="#357682" strokeDasharray="5 4" pointerEvents="none" /><Dimension a={screen(object.start)} b={screen(object.end)} label={`${formatMeters(wallLength(object.start, object.end))} · ${formatMeters(object.width)}`} />{selection?.id === object.id && (["start", "end"] as const).map((end) => <circle key={end} data-object-id={object.id} data-handle={end} cx={screen(object[end]).x} cy={screen(object[end]).y} r="7" fill="white" stroke="#bd7647" strokeWidth="3" className="cursor-move" />)}</g>)}
         {aisleStart && hover && <g pointerEvents="none"><polygon points={shapePoints(aislePolygon({ id: "preview", type: "aisle", start: aisleStart, end: aisleEnd(hover, shiftDown), width: 1.2 }))} fill="#5596a0" fillOpacity="0.3" stroke="#357682" strokeDasharray="6 4" /><Dimension a={screen(aisleStart)} b={screen(aisleEnd(hover, shiftDown))} label={`${formatMeters(wallLength(aisleStart, aisleEnd(hover, shiftDown)))} · 1,20 m`} /></g>}
         {shownPlan.objects.filter((object): object is ObstacleObject => object.type === "obstacle").map((object) => <g key={object.id}><polygon data-object-id={object.id} points={shapePoints(obstaclePolygon(object))} fill="#bb7558" fillOpacity="0.58" stroke={selection?.id === object.id ? "#81462e" : "#a75b42"} strokeWidth={selection?.id === object.id ? 3 : 1.5} className={tool === "select" ? "cursor-move" : ""} /><text x={screen(object).x} y={screen(object).y + 4} textAnchor="middle" fontSize="12" fontWeight="600" fill="#442f26" pointerEvents="none">{object.obstacleType === "column" ? "Säule" : object.obstacleType === "stage" ? "Bühne" : object.obstacleType === "technical" ? "Technik" : object.obstacleType === "furniture" ? "Möbel" : "Sperrfläche"}</text></g>)}
@@ -248,12 +266,22 @@ export default function RoomEditor2D() {
         {shownRoom.points.map((point) => { const p = coords.get(point.id)!; return <g key={point.id}><circle cx={p.x} cy={p.y} r={POINT_RADIUS + 8} fill="transparent" data-point-id={point.id} className={tool === "select" || point.id === room.points[0]?.id && tool === "wall" ? "cursor-pointer" : ""} /><circle cx={p.x} cy={p.y} r={selection?.id === point.id ? POINT_RADIUS + 2 : POINT_RADIUS} fill={selection?.id === point.id || nearestFirst && point.id === room.points[0]?.id ? "#bd7647" : "#fff"} stroke="#405b49" strokeWidth="2" pointerEvents="none" /></g>; })}
       </svg>
       {!room.points.length ? <div className="pointer-events-none absolute left-1/2 top-1/2 w-[min(85%,25rem)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-premium-beige bg-white/90 p-5 text-center shadow-sm"><p className="font-display text-xl text-premium-ink">Raumgrundriss zeichnen</p><p className="mt-2 text-sm text-premium-muted">{help}</p></div> : null}
-    </div><aside aria-label="Eigenschaften" className="w-full space-y-3 border-t border-premium-beige bg-white/90 p-4 lg:w-64 lg:border-l lg:border-t-0"><h3 className="font-semibold">Eigenschaften</h3>
+    </div><aside aria-label="Eigenschaften" className="w-full space-y-3 border-t border-premium-beige bg-white/90 p-4 lg:w-72 lg:border-l lg:border-t-0"><h3 className="font-semibold">Eigenschaften</h3>
       {selectedObject?.type === "door" && <><p className="text-sm font-semibold">Tür</p>{field("Breite (m)", selectedObject.width, (value) => updateObject(selectedObject.id, (object) => ({ ...object, width: value })), 0.01)}{field("Position auf Wand (m)", selectedObject.offset, (value) => updateObject(selectedObject.id, (object) => ({ ...object, offset: value })), 0)}</>}
       {selectedObject?.type === "obstacle" && <><label className="flex items-center justify-between gap-2 text-sm">Hindernistyp<select aria-label="Hindernistyp" value={selectedObject.obstacleType} onChange={(event) => updateObject(selectedObject.id, (object) => ({ ...object, obstacleType: event.target.value as ObstacleObject["obstacleType"] }))} className="max-w-32 rounded border border-premium-beige"><option value="column">Säule</option><option value="stage">Bühne</option><option value="technical">Technik / Mischpult</option><option value="furniture">Festes Möbel</option><option value="restricted">Sperrfläche</option></select></label>{field("X (m)", selectedObject.x, (v) => updateObject(selectedObject.id, (o) => ({ ...o, x: v })))}{field("Y (m)", selectedObject.y, (v) => updateObject(selectedObject.id, (o) => ({ ...o, y: v })))}{field("Breite (m)", selectedObject.width, (v) => updateObject(selectedObject.id, (o) => ({ ...o, width: v })), 0.01)}{field("Tiefe (m)", selectedObject.depth, (v) => updateObject(selectedObject.id, (o) => ({ ...o, depth: v })), 0.01)}{field("Rotation (°)", selectedObject.rotation, (v) => updateObject(selectedObject.id, (o) => ({ ...o, rotation: v })))}</>}
       {selectedObject?.type === "aisle" && <><p className="text-sm font-semibold">Gang / Freihaltezone</p>{field("Breite (m)", selectedObject.width, (v) => updateObject(selectedObject.id, (o) => ({ ...o, width: v })), 0.01)}<p className="text-sm">Länge: {formatMeters(wallLength(selectedObject.start, selectedObject.end))}</p>{(["start", "end"] as const).flatMap((end) => (["x", "y"] as const).map((axis) => field(`${end === "start" ? "Start" : "Ende"} ${axis.toUpperCase()} (m)`, selectedObject[end][axis], (v) => updateObject(selectedObject.id, (o) => o.type === "aisle" ? { ...o, [end]: { ...o[end], [axis]: v } } : o))))}</>}
       {selectedObject && <button type="button" onClick={() => removeObject(selectedObject.id)} className="rounded-lg border border-red-300 px-3 py-2 text-sm text-red-800">Objekt löschen</button>}
       {!selectedObject && <p className="text-sm text-premium-muted">Wählen Sie ein Objekt im Grundriss.</p>}
+      <div aria-label="Bestuhlung" className="space-y-3 border-t border-premium-beige pt-4"><h3 className="font-semibold">Bestuhlung</h3>
+        {seatingField("Stuhlbreite (m)", "chairWidth", 0.1, "0.05")}
+        {seatingField("Stuhltiefe (m)", "chairDepth", 0.1, "0.05")}
+        {seatingField("Reihenabstand (m)", "rowPitch", 0.1, "0.05")}
+        {seatingField("Max. Stühle pro Reihe", "maximumChairsPerRow", 1, "1")}
+        <label className="flex items-center justify-between gap-2 text-sm">Ausrichtung<select aria-label="Ausrichtung" value={orientation} onChange={(event) => setOrientation(event.target.value as SeatingOrientation)} className="rounded border border-premium-beige px-2 py-1"><option value="horizontal">Horizontal</option><option value="vertical">Vertikal</option></select></label>
+        <button type="button" disabled={!room.closed || errors.length > 0 || issues.some((issue) => issue.severity === "error") || seatingRules.rowPitch < seatingRules.chairDepth} onClick={() => setCalculated({ plan, rules: seatingRules, orientation, result: generateSeatingPlan(plan, seatingRules, orientation) })} className="w-full rounded-lg bg-premium-forest px-3 py-2 text-sm font-semibold text-white disabled:opacity-40">Bestuhlung berechnen</button>
+        {seatingRules.rowPitch < seatingRules.chairDepth && <p className="text-xs text-amber-800">Der Reihenabstand muss mindestens der Stuhltiefe entsprechen.</p>}
+        {seating && <div aria-live="polite" className="space-y-1 rounded-lg bg-[#f1f5ef] p-3 text-sm"><p className="font-semibold">{seating.totalSeats} Sitzplätze · {seating.blocks.length} Sitzblöcke</p><p>{seating.totalRows} Reihen · längste Reihe: {seating.longestRow} Plätze</p><p>Stuhl: {formatMeters(seatingRules.chairWidth)} × {formatMeters(seatingRules.chairDepth)}</p><p>Reihenabstand: {formatMeters(seatingRules.rowPitch)}</p>{seating.hints.map((hint) => <p key={hint} className="text-amber-900">Hinweis: {hint}</p>)}</div>}
+      </div>
     </aside></div>
     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-premium-beige bg-white/80 px-4 py-3 text-sm text-premium-charcoal">
       <span>{help}</span>

@@ -1,4 +1,4 @@
-import { aislePolygon, doorSegment, obstaclePolygon, pointInPolygon, polygonsOverlap, type AisleObject, type DoorObject, type Position, type RoomPlan } from "../objects";
+import { aislePolygon, doorSegment, isBlockingObject, obstaclePolygon, pointInPolygon, polygonsOverlap, type AisleObject, type DoorObject, type Position, type RoomPlan } from "../objects";
 import { seatPolygon, type SeatPlacement, type SeatingPlan } from "../seating";
 import type { RuleProfile } from "../rules/profiles";
 
@@ -26,7 +26,7 @@ function intersections(a: Position, b: Position, c: Position, d: Position): [num
 }
 function segmentClear(a: Position, b: Position, plan: RoomPlan, seating: SeatingPlan, ignoreSeatIds: Set<string> = new Set()): boolean {
   if (!pointInPolygon(pointOn(a, b, 0.5), plan.contour.points)) return false;
-  const obstacles = plan.objects.filter((o) => o.type === "obstacle").map(obstaclePolygon);
+  const obstacles = plan.objects.filter(isBlockingObject).map(obstaclePolygon);
   const chairWidth = seating.rules.chairWidth;
   const chairDepth = seating.rules.chairDepth;
   const minX = Math.min(a.x, b.x), maxX = Math.max(a.x, b.x), minY = Math.min(a.y, b.y), maxY = Math.max(a.y, b.y);
@@ -35,7 +35,7 @@ function segmentClear(a: Position, b: Position, plan: RoomPlan, seating: Seating
   return !polygons.some((polygon) => pointInPolygon(pointOn(a, b, 0.25), polygon) || pointInPolygon(pointOn(a, b, 0.5), polygon) || pointInPolygon(pointOn(a, b, 0.75), polygon) || polygon.some((p, i) => intersections(a, b, p, polygon[(i + 1) % polygon.length])));
 }
 export function buildEgressGraph(plan: RoomPlan, seating: SeatingPlan): EgressGraph {
-  const obstacles = plan.objects.filter((o) => o.type === "obstacle").map(obstaclePolygon);
+  const obstacles = plan.objects.filter(isBlockingObject).map(obstaclePolygon);
   const aisles = plan.objects.filter((o): o is AisleObject => o.type === "aisle" && !obstacles.some((polygon) => polygonsOverlap(aislePolygon(o), polygon)));
   const exits = plan.objects.filter((o): o is DoorObject => o.type === "door" && (o.role === "exit" || o.role === "emergency_exit"));
   const nodes: EgressNode[] = [], edges: EgressEdge[] = [];
@@ -108,7 +108,7 @@ function shortestPaths(graph: EgressGraph, exitId: string): Map<string, { distan
 
 export function analyzeEgress(plan: RoomPlan, seating: SeatingPlan, profile: RuleProfile): EgressAnalysis {
   const graph = buildEgressGraph(plan, seating);
-  const obstacles = plan.objects.filter((o) => o.type === "obstacle").map(obstaclePolygon);
+  const obstacles = plan.objects.filter(isBlockingObject).map(obstaclePolygon);
   const aisles = plan.objects.filter((o): o is AisleObject => o.type === "aisle" && !obstacles.some((polygon) => polygonsOverlap(aislePolygon(o), polygon)));
   const exits = plan.objects.filter((o): o is DoorObject => o.type === "door" && (o.role === "exit" || o.role === "emergency_exit"));
   const shortest = new Map(exits.map((door) => [door.id, shortestPaths(graph, `exit-${door.id}`)]));

@@ -1,5 +1,5 @@
 import { validateRoom } from "./geometry";
-import { aislePolygon, doorSegment, obstaclePolygon, pointInPolygon, polygonInsideRoom, polygonsOverlap, validateObjects, type Position, type RoomPlan } from "./objects";
+import { aislePolygon, doorSegment, isBlockingObject, obstaclePolygon, pointInPolygon, polygonInsideRoom, polygonsOverlap, validateObjects, type Position, type RoomPlan } from "./objects";
 
 export type SeatingOrientation = "horizontal" | "vertical";
 export type SeatingGridOffset = { along: number; cross: number };
@@ -73,7 +73,7 @@ export function seatPolygon(x: number, y: number, rules: SeatingRules, orientati
 type Exclusions = { obstacles: Position[][]; aisles: Position[][]; doors: { start: Position; end: Position }[] };
 function exclusions(plan: RoomPlan): Exclusions {
   return {
-    obstacles: plan.objects.filter((o) => o.type === "obstacle").map(obstaclePolygon),
+    obstacles: plan.objects.filter(isBlockingObject).map(obstaclePolygon),
     aisles: plan.objects.filter((o) => o.type === "aisle").map(aislePolygon),
     doors: plan.objects.filter((o) => o.type === "door").map((o) => doorSegment(plan.contour, o)).filter((o): o is { start: Position; end: Position } => o !== null),
   };

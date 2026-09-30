@@ -1,4 +1,4 @@
-import { aislePolygon, doorSegment, obstaclePolygon, polygonInsideRoom, polygonsOverlap, type AisleObject, type DoorObject, type Position, type RoomPlan } from "../objects";
+import { aislePolygon, doorSegment, isBlockingObject, obstaclePolygon, polygonInsideRoom, polygonsOverlap, type AisleObject, type DoorObject, type Position, type RoomPlan } from "../objects";
 import { generateSeatingPlan, type SeatingPlan } from "../seating";
 import { analyzeEgress, type EgressAnalysis } from "../egress/analyzeEgress";
 import { evaluateRules, type RuleReport } from "../rules/evaluateRules";
@@ -69,7 +69,7 @@ export function suggestAisles(plan: RoomPlan, seating: SeatingPlan, profile: Rul
     seen.add(signature);
     const aisle: AisleObject = { id: `suggestion-${candidate.id}`, type: "aisle", start: candidate.start, end: candidate.end, width };
     const polygon = aislePolygon(aisle);
-    if (!polygonInsideRoom(polygon, plan.contour) || plan.objects.some((o) => o.type === "obstacle" && polygonsOverlap(polygon, obstaclePolygon(o)))) continue;
+    if (!polygonInsideRoom(polygon, plan.contour) || plan.objects.some((o) => isBlockingObject(o) && polygonsOverlap(polygon, obstaclePolygon(o)))) continue;
     const proposed = { ...plan, objects: [...plan.objects, aisle] };
     const nextSeating = generateSeatingPlan(proposed, seating.rules, seating.orientation);
     if (!nextSeating.totalSeats) continue;

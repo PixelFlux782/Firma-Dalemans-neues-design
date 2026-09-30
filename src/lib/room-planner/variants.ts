@@ -5,6 +5,8 @@ import { evaluateRules, type RuleReport } from "./rules/evaluateRules";
 import type { RuleProfile } from "./rules/profiles";
 import { DEFAULT_SEATING_RULES, generateSeatingPlan, type SeatingGridOffset, type SeatingOrientation, type SeatingPlan, type SeatingRules } from "./seating";
 import { suggestAisles } from "./suggestions/aisleSuggestions";
+import { createVariantSummary, type VariantSummary } from "./variantSummary";
+import { nearDuplicate } from "./variantComparison";
 
 export type PlanningProfile = {
   id: "capacity" | "balanced" | "comfort";
@@ -29,6 +31,7 @@ export type VariantMetrics = {
 export type PlanVariant = {
   id: string; profileId: PlanningProfile["id"]; plan: RoomPlan; seatingPlan: SeatingPlan; analysis: EgressAnalysis; report: RuleReport;
   generatedAisles: AisleObject[]; gridOffset: SeatingGridOffset; metrics: VariantMetrics; feasible: boolean; reasons: string[];
+  summary: VariantSummary;
 };
 export type VariantResult = { variants: PlanVariant[]; fallback?: PlanVariant; evaluatedCandidates: number };
 
@@ -154,7 +157,7 @@ export function generatePlanVariants(inputPlan: RoomPlan, baseRules: SeatingRule
     const analysis = analyzeEgress(candidatePlan, seating, rule);
     const report = evaluateRules(candidatePlan, seating, analysis, rule);
     const metric = { ...metrics(candidatePlan, seating, analysis, report, candidate.generated), frontDeviation: frontDeviation(front, seating.rotation ?? (seating.orientation === "horizontal" ? 0 : 90)) };
-    evaluated.push({ id: `variant-${evaluated.length + 1}`, profileId: candidate.seed.profile.id, plan: candidatePlan, seatingPlan: seating, analysis, report, generatedAisles: candidate.generated,
+    evaluated.push({ id: `variant-${evaluated.length + 1}`, profileId: candidate.seed.profile.id, plan: candidatePlan, seatingPlan: seating, analysis, report, generatedAisles: candidate.generated, summary: createVariantSummary(candidatePlan, seating, analysis, report),
       gridOffset: candidate.seed.offset, metrics: metric, feasible: report.counts.fail === 0 && analysis.seatsWithoutRoute === 0, reasons: [] });
   }
   // One additional suggestion per promising incomplete plan. Each step is bounded by the shared candidate and aisle limits.
@@ -174,7 +177,7 @@ export function generatePlanVariants(inputPlan: RoomPlan, baseRules: SeatingRule
       const report = evaluateRules(proposed, seating, analysis, rule);
       const generatedAisles = [...source.generatedAisles, generated];
       const metric = { ...metrics(proposed, seating, analysis, report, generatedAisles), frontDeviation: frontDeviation(front, seating.rotation ?? (seating.orientation === "horizontal" ? 0 : 90)) };
-      evaluated.push({ id: `variant-${evaluated.length + 1}`, profileId: source.profileId, plan: proposed, seatingPlan: seating, analysis, report, generatedAisles,
+      evaluated.push({ id: `variant-${evaluated.length + 1}`, profileId: source.profileId, plan: proposed, seatingPlan: seating, analysis, report, generatedAisles, summary: createVariantSummary(proposed, seating, analysis, report),
         gridOffset: source.gridOffset, metrics: metric, feasible: report.counts.fail === 0 && analysis.seatsWithoutRoute === 0, reasons: [] });
     }
   }
@@ -185,9 +188,8 @@ export function generatePlanVariants(inputPlan: RoomPlan, baseRules: SeatingRule
   if (feasible.length) for (const profile of PLANNING_PROFILES) {
     const eligible = unique.filter((v) => v.profileId === profile.id && !selectedIds.has(v.id));
     const frontOrder = (a: PlanVariant, b: PlanVariant) => front && preference === "automatic" ? (a.metrics.frontDeviation ?? 90) - (b.metrics.frontDeviation ?? 90) : 0;
-    const choice = eligible.filter((v) => v.feasible).sort((a, b) => frontOrder(a, b) || utility(b, profile, preference) - utility(a, profile, preference) || a.id.localeCompare(b.id))[0]
-      ?? eligible.sort((a, b) => a.metrics.failures - b.metrics.failures || utility(b, profile, preference) - utility(a, profile, preference) || a.id.localeCompare(b.id))[0];
-    if (choice) { selectedIds.add(choice.id); selected.push(choice); }
+    const choice = eligible.filter((v) => v.feasible).sort((a, b) => frontOrder(a, b) || utility(b, profile, preference) - utility(a, profile, preference) || a.id.localeCompare(b.id))[0];
+    if (choice && !selected.some((other) => nearDuplicate(other.summary, choice.summary, other.seatingPlan.rotation ?? (other.seatingPlan.orientation === "horizontal" ? 0 : 90), choice.seatingPlan.rotation ?? (choice.seatingPlan.orientation === "horizontal" ? 0 : 90)))) { selectedIds.add(choice.id); selected.push(choice); }
   }
   const balanced = selected.find((v) => v.profileId === "balanced");
   const variants = selected.map((variant) => ({ ...variant, reasons: explain(variant, balanced) }));

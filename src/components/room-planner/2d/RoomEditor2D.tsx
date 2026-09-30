@@ -10,6 +10,8 @@ import { analyzeEgress } from "@/lib/room-planner/egress/analyzeEgress";
 import { evaluateRules } from "@/lib/room-planner/rules/evaluateRules";
 import { RULE_PROFILES } from "@/lib/room-planner/rules/profiles";
 import { applyAisleSuggestion, suggestAisles } from "@/lib/room-planner/suggestions/aisleSuggestions";
+import { planFingerprint } from "@/lib/room-planner/variantSummary";
+import { characteristic, compareVariants } from "@/lib/room-planner/variantComparison";
 
 const INITIAL_SCALE = 45;
 const MIN_SCALE = 12;
@@ -38,15 +40,19 @@ export default function RoomEditor2D() {
   const [orientation, setOrientation] = useState<SeatingOrientation>("horizontal");
   const [gridOffset, setGridOffset] = useState<SeatingGridOffset>({ along: 0, cross: 0 });
   const [orientationPreference, setOrientationPreference] = useState<OrientationPreference>("automatic");
-  const [variantCalculation, setVariantCalculation] = useState<{ plan: RoomPlan; rules: SeatingRules; profileId: string; preference: OrientationPreference; result: VariantResult } | null>(null);
+  const [variantCalculation, setVariantCalculation] = useState<{ fingerprint: string; rules: SeatingRules; profileId: string; preference: OrientationPreference; result: VariantResult } | null>(null);
   const [activeVariantId, setActiveVariantId] = useState<string | null>(null);
   const [variantsBusy, setVariantsBusy] = useState(false);
+  const [variantError, setVariantError] = useState("");
+  const generatingRef = useRef(false);
   const [profileId, setProfileId] = useState(RULE_PROFILES[0].id);
   const [applicabilityConfirmed, setApplicabilityConfirmed] = useState(false);
   const [activeCheckId, setActiveCheckId] = useState<string | null>(null);
   const [activeSuggestionId, setActiveSuggestionId] = useState<string | null>(null);
   const [calculated, setCalculated] = useState<{ plan: RoomPlan; rules: SeatingRules; orientation: SeatingOrientation; offset: SeatingGridOffset; result: SeatingPlan } | null>(null);
-  const variants = variantCalculation?.plan === plan && variantCalculation.rules === seatingRules && variantCalculation.profileId === profileId && variantCalculation.preference === orientationPreference ? variantCalculation.result : null;
+  const currentFingerprint = useMemo(() => planFingerprint(plan), [plan]);
+  const variantsCurrent = !!variantCalculation && variantCalculation.fingerprint === currentFingerprint && variantCalculation.rules === seatingRules && variantCalculation.profileId === profileId && variantCalculation.preference === orientationPreference;
+  const variants = variantsCurrent ? variantCalculation!.result : null;
   const activeVariant = variants?.variants.find((item) => item.id === activeVariantId) ?? (variants?.fallback?.id === activeVariantId ? variants.fallback : null);
   const shownPlan = previewPlan ?? activeVariant?.plan ?? plan;
   const shownRoom = shownPlan.contour;
@@ -275,15 +281,24 @@ export default function RoomEditor2D() {
   }) ?? [], [seating, camera, size]);
   const highlightedSeats = new Set(activeCheck?.affectedIds.filter((id) => id.startsWith("seat-")) ?? []);
   const highlightedBlocks = new Set(activeCheck?.affectedIds.filter((id) => id.startsWith("block-")) ?? []);
-  const highlightedObjects = new Set(activeCheck?.affectedIds.filter((id) => id.startsWith("object-")) ?? []);
+  const highlightedObjects = new Set(activeCheck?.affectedIds.filter((id) => shownPlan.objects.some((object) => object.id === id)) ?? []);
   const calculateVariants = () => {
+    if (generatingRef.current) return;
+    generatingRef.current = true;
+    setVariantError("");
     setVariantsBusy(true);
     setActiveVariantId(null);
     window.setTimeout(() => {
-      const result = generatePlanVariants(plan, seatingRules, profile, orientationPreference);
-      setVariantCalculation({ plan, rules: seatingRules, profileId, preference: orientationPreference, result });
-      setActiveVariantId(result.variants.find((item) => item.profileId === "balanced")?.id ?? result.variants[0]?.id ?? result.fallback?.id ?? null);
-      setVariantsBusy(false);
+      try {
+        const result = generatePlanVariants(plan, seatingRules, profile, orientationPreference);
+        setVariantCalculation({ fingerprint: currentFingerprint, rules: seatingRules, profileId, preference: orientationPreference, result });
+        setActiveVariantId(result.variants.find((item) => item.profileId === "balanced")?.id ?? result.variants[0]?.id ?? result.fallback?.id ?? null);
+      } catch {
+        setVariantError("Die Varianten konnten nicht berechnet werden. Bitte prüfen Sie Raum und Eingaben und versuchen Sie es erneut.");
+      } finally {
+        generatingRef.current = false;
+        setVariantsBusy(false);
+      }
     }, 0);
   };
   const adoptVariant = (variant: PlanVariant) => {
@@ -370,21 +385,28 @@ export default function RoomEditor2D() {
       <div aria-label="Planvarianten" className="space-y-3 border-t border-premium-beige pt-4"><h3 className="font-semibold">Planvarianten</h3>
         <label className="block space-y-1 text-sm"><span>Ausrichtung der Varianten</span><select aria-label="Ausrichtung der Varianten" value={orientationPreference} onChange={(event) => setOrientationPreference(event.target.value as OrientationPreference)} className="w-full rounded border border-premium-beige px-2 py-1"><option value="automatic">Automatisch</option><option value="horizontal">Horizontal bevorzugen</option><option value="vertical">Vertikal bevorzugen</option></select></label>
         <button type="button" disabled={variantsBusy || !room.closed || errors.length > 0 || issues.some((issue) => issue.severity === "error") || seatingRules.rowPitch < seatingRules.chairDepth} onClick={calculateVariants} className="w-full rounded-lg bg-premium-forest px-3 py-2 text-sm font-semibold text-white disabled:opacity-40">{variantsBusy ? "Varianten werden berechnet …" : "Planvarianten berechnen"}</button>
+        {variantsBusy && <p role="status" className="text-xs text-premium-muted">Varianten werden geprüft. Dies kann einen Moment dauern.</p>}
+        {variantError && <p role="alert" className="rounded bg-red-50 p-2 text-xs text-red-900">{variantError}</p>}
+        {variantCalculation && !variantsCurrent && <p role="status" className="rounded bg-amber-50 p-2 text-xs text-amber-900">Die berechneten Varianten sind nach einer Plan- oder Einstellungsänderung veraltet. Bitte neu berechnen.</p>}
         {variants && <div aria-live="polite" className="space-y-2 text-xs">
           <p className="text-premium-muted">{variants.evaluatedCandidates} Kandidaten mit dem gewählten Regelprofil geprüft.</p>
-          {!variants.variants.length && <p className="rounded bg-amber-50 p-2 text-amber-900">Keine Variante ohne technische Regelabweichung gefunden. Die beste berechnete Annäherung ist unten zur Prüfung sichtbar.</p>}
+          {!variants.variants.length && <p className="rounded bg-amber-50 p-2 text-amber-900">{variants.fallback ? "Keine Variante ohne technische Regelabweichung gefunden. Die beste berechnete Annäherung ist unten zur Prüfung sichtbar." : variants.evaluatedCandidates ? "Kein geeigneter Kandidat nach der Regelprüfung gefunden." : "Keine bestuhlbare Variante ermittelt. Prüfen Sie nutzbare Fläche, Sperrflächen und Raumkontur."}</p>}
           {(variants.variants.length ? variants.variants : variants.fallback ? [variants.fallback] : []).map((variant) => {
             const title = PLANNING_PROFILES.find((item) => item.id === variant.profileId)?.name ?? "Annäherung";
+            const s = variant.summary;
+            const difference = activeVariant && activeVariant.id !== variant.id ? compareVariants(activeVariant.summary, s) : [];
             return <div key={variant.id} className={`rounded-lg border p-2 ${activeVariantId === variant.id ? "border-premium-forest bg-[#f1f5ef]" : "border-premium-beige"}`}>
-              <button type="button" aria-pressed={activeVariantId === variant.id} onClick={() => { setActiveVariantId(variant.id); setActiveCheckId(null); setSelection(null); }} className="w-full text-left"><strong>{variants.variants.length ? title : "Beste Annäherung"}{!variant.feasible ? " · technische Annäherung" : ""}</strong><span className="block">{variant.metrics.seatCount} Plätze · {variant.metrics.blockCount} Blöcke · {variant.metrics.aisleCount} Gänge · Ausrichtung: {Number((variant.seatingPlan.rotation ?? 0).toFixed(1))}°</span><span className="block">Längster Weg: {variant.metrics.longestEgressRoute === undefined ? "nicht bestimmbar" : formatMeters(variant.metrics.longestEgressRoute)} · {variant.metrics.failures} Probleme</span></button>
-              {activeVariantId === variant.id && <div className="mt-2 space-y-1 border-t border-premium-beige pt-2">{variant.reasons.map((reason) => <p key={reason}>{reason}</p>)}{!variant.feasible && variant.report.checks.filter((check) => check.status === "fail").slice(0, 3).map((check) => <p key={check.id} className="text-red-800">{check.message}</p>)}{variant.feasible && <button type="button" onClick={() => adoptVariant(variant)} className="mt-1 rounded bg-premium-forest px-2 py-1 font-semibold text-white">Diese Variante übernehmen</button>}</div>}
+              <button type="button" aria-pressed={activeVariantId === variant.id} onClick={() => { setActiveVariantId(variant.id); setActiveCheckId(null); setSelection(null); }} className="w-full text-left"><strong>{variants.variants.length ? title : "Beste Annäherung"}{characteristic(s, variants.variants.map((item) => item.summary)) ? ` · ${characteristic(s, variants.variants.map((item) => item.summary))}` : ""}{!variant.feasible ? " · technische Annäherung" : ""}</strong><span className="block">{s.seatCount} Plätze · {s.blockCount} Blöcke · {s.aisleCount} Gänge ({s.manualAisleCount} manuell, {s.generatedAisleCount} automatisch)</span><span className="block">{s.unreachableSeatCount ? `${s.unreachableSeatCount} von ${s.seatCount} Sitzen ohne Weg` : "Alle Sitze erreichen einen Ausgang"} · {s.usedExitCount} von {s.exitCount} Ausgängen genutzt</span><span className="block">Längster Weg: {s.maxEgressDistance === undefined ? "nicht bestimmbar" : formatMeters(s.maxEgressDistance)} · {s.errors.length} Fehler · {s.warnings.length} Warnungen · {s.hints.length} Hinweise</span>{s.utilization !== undefined && <span className="block">Sitzplatzausbeute: {Math.round(s.utilization * 100)} % der nutzbaren Fläche</span>}</button>
+              {!!difference.length && <p className="mt-1 text-premium-muted">Gegenüber der Vorschau: {difference.slice(0, 4).map((item) => `${item.value > 0 ? "+" : ""}${item.value.toLocaleString("de-DE")} ${item.unit === "metres" ? "m " : item.unit === "squareMetres" ? "m² " : ""}${item.label}`).join(" · ")}</p>}
+              {activeVariantId === variant.id && <div className="mt-2 space-y-1 border-t border-premium-beige pt-2">{variant.reasons.map((reason) => <p key={reason}>{reason}</p>)}{s.unreachableBlockCount > 0 && <p>{s.unreachableBlockCount} ganze Sitzblöcke ohne Ausgangsweg.</p>}{s.exitCount > 1 && <p>Ausgangsnutzung: {s.exitLoads.map((load) => `${load.doorId}: ${load.seats} Plätze`).join(" · ")}</p>}{[...s.errors, ...s.warnings, ...s.hints].slice(0, 8).map((item) => <button key={item.id} type="button" onClick={() => { setActiveCheckId(item.id); const id = item.affectedIds.find((candidate) => variant.plan.objects.some((object) => object.id === candidate)) ?? item.affectedIds.find((candidate) => variant.seatingPlan.blocks.some((block) => block.id === candidate)); const object = variant.plan.objects.find((candidate) => candidate.id === id); const block = variant.seatingPlan.blocks.find((candidate) => candidate.id === id); const point = object && (object.type === "door" ? doorSegment(variant.plan.contour, object)?.start : object.type === "aisle" ? object.start : object) || block?.seats[0]; if (point) setCamera((current) => ({ ...current, x: point.x, y: point.y })); }} className={`block text-left ${item.category === "error" ? "text-red-800" : item.category === "warning" ? "text-amber-800" : "text-premium-muted"}`}>{item.category === "error" ? "Fehler" : item.category === "warning" ? "Warnung" : "Hinweis"}: {item.message}</button>)}{variant.feasible && <button type="button" onClick={() => adoptVariant(variant)} className="mt-1 rounded bg-premium-forest px-2 py-1 font-semibold text-white">Diese Variante übernehmen</button>}</div>}
             </div>;
           })}
           {!!variants.variants.length && <div className="overflow-x-auto"><table className="w-full border-collapse text-left"><caption className="mb-1 text-left font-semibold">Vergleich</caption><thead><tr><th className="pr-2">Kennzahl</th>{variants.variants.map((variant) => <th key={variant.id} className="pr-2">{PLANNING_PROFILES.find((item) => item.id === variant.profileId)?.name}</th>)}</tr></thead><tbody>{([
-            ["Sitzplätze", (v: PlanVariant) => String(v.metrics.seatCount)], ["Sitzblöcke", (v: PlanVariant) => String(v.metrics.blockCount)], ["Gänge", (v: PlanVariant) => String(v.metrics.aisleCount)],
-            ["Längster Weg", (v: PlanVariant) => v.metrics.longestEgressRoute === undefined ? "–" : formatMeters(v.metrics.longestEgressRoute)], ["Warnungen", (v: PlanVariant) => String(v.metrics.warnings)], ["Reihenabstand", (v: PlanVariant) => formatMeters(v.metrics.rowPitch)], ...(plan.objects.some((object) => object.type === "front") ? [["Abweichung zur Front", (v: PlanVariant) => `${v.metrics.frontDeviation ?? 0}°`] as [string, (v: PlanVariant) => string]] : []),
+            ["Sitzplätze", (v: PlanVariant) => String(v.summary.seatCount)], ["Sitzblöcke", (v: PlanVariant) => String(v.summary.blockCount)], ["Gänge", (v: PlanVariant) => String(v.summary.aisleCount)], ["Erreichbare Plätze", (v: PlanVariant) => `${v.summary.reachableSeatCount}/${v.summary.seatCount}`], ["Genutzte Ausgänge", (v: PlanVariant) => `${v.summary.usedExitCount}/${v.summary.exitCount}`],
+            ["Längster Weg", (v: PlanVariant) => v.summary.maxEgressDistance === undefined ? "–" : formatMeters(v.summary.maxEgressDistance)], ["Fehler", (v: PlanVariant) => String(v.summary.errors.length)], ["Warnungen", (v: PlanVariant) => String(v.summary.warnings.length)], ["Hinweise", (v: PlanVariant) => String(v.summary.hints.length)], ["Reihenabstand", (v: PlanVariant) => formatMeters(v.metrics.rowPitch)], ...(plan.objects.some((object) => object.type === "front") ? [["Abweichung zur Front", (v: PlanVariant) => `${v.metrics.frontDeviation ?? 0}°`] as [string, (v: PlanVariant) => string]] : []),
           ] as [string, (v: PlanVariant) => string][]).map(([label, get]) => <tr key={label} className="border-t border-premium-beige"><th className="py-1 pr-2 font-medium">{label}</th>{variants.variants.map((variant) => <td key={variant.id} className="pr-2">{get(variant)}</td>)}</tr>)}</tbody></table></div>}
         </div>}
+        <p className="text-xs text-premium-muted">Die automatische Planung unterstützt die Raum- und Bestuhlungsplanung. Sie ersetzt keine erforderliche behördliche, brandschutztechnische oder fachplanerische Prüfung.</p>
       </div>
     </aside></div>
     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-premium-beige bg-white/80 px-4 py-3 text-sm text-premium-charcoal">

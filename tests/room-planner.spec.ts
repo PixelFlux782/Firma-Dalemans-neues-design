@@ -8,8 +8,10 @@ test("Raumplaner verbindet Stuhlmodell, Maße und Kaufbedarf", async ({ page }) 
   await page.goto("/raumplaner");
   await page.getByRole("button", { name: "3D ansehen" }).click();
   await expect(page.getByLabel("Stuhlmodell")).toHaveValue("dalemans-chair");
-  await expect(page.getByLabel("Stuhlbreite")).toHaveValue("0.5");
-  await expect(page.getByLabel("Stuhltiefe")).toHaveValue("0.55");
+  const dimensions = page.getByRole("complementary", { name: "Raum- und Bestuhlungsmaße" });
+  const chairWidth = dimensions.getByRole("spinbutton", { name: "Stuhlbreite m" });
+  await expect(chairWidth).toHaveValue("0.5");
+  await expect(dimensions.getByRole("spinbutton", { name: "Stuhltiefe m" })).toHaveValue("0.55");
   await expect(page.locator("canvas")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Dalemans Planungsstuhl" })).toBeVisible();
   await expect(page.getByTestId("required-quantity")).toHaveText("270 Stühle");
@@ -19,7 +21,7 @@ test("Raumplaner verbindet Stuhlmodell, Maße und Kaufbedarf", async ({ page }) 
     "/kontakt?source=raumplaner&product=dalemans-chair&quantity=270",
   );
 
-  await page.getByLabel("Stuhlbreite").fill("0.6");
+  await chairWidth.fill("0.6");
   const updatedQuantity = Number(await page.getByTestId("chair-count").textContent());
   expect(updatedQuantity).toBeLessThan(270);
   await expect(page.getByTestId("required-quantity")).toHaveText(`${updatedQuantity} Stühle`);

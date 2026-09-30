@@ -39,6 +39,7 @@ export function buildEgressGraph(plan: RoomPlan, seating: SeatingPlan): EgressGr
   const exits = plan.objects.filter((o): o is DoorObject => o.type === "door" && (o.role === "exit" || o.role === "emergency_exit"));
   const nodes: EgressNode[] = [], edges: EgressEdge[] = [];
   const cuts = new Map(aisles.map((a) => [a.id, [0, 1]]));
+  const bridges: { first: AisleObject; second: AisleObject; firstPoint: Position; secondPoint: Position }[] = [];
   for (const aisle of aisles) {
     for (const seat of seating.seats) {
       const t = projection(seat, aisle.start, aisle.end);
@@ -53,6 +54,17 @@ export function buildEgressGraph(plan: RoomPlan, seating: SeatingPlan): EgressGr
     if (!polygonsOverlap(aislePolygon(aisles[i]), aislePolygon(aisles[j]))) continue;
     const hit = intersections(aisles[i].start, aisles[i].end, aisles[j].start, aisles[j].end);
     if (hit) { cuts.get(aisles[i].id)!.push(hit[0]); cuts.get(aisles[j].id)!.push(hit[1]); }
+    else {
+      const first = aisles[i], second = aisles[j];
+      const options = [first.start, first.end].map((p) => ({ firstPoint: p, secondPoint: pointOn(second.start, second.end, projection(p, second.start, second.end)) }))
+        .concat([second.start, second.end].map((p) => ({ firstPoint: pointOn(first.start, first.end, projection(p, first.start, first.end)), secondPoint: p })));
+      const closest = options.sort((a, b) => dist(a.firstPoint, a.secondPoint) - dist(b.firstPoint, b.secondPoint))[0];
+      if (dist(closest.firstPoint, closest.secondPoint) <= (first.width + second.width) / 2 + EPS) {
+        cuts.get(first.id)!.push(projection(closest.firstPoint, first.start, first.end));
+        cuts.get(second.id)!.push(projection(closest.secondPoint, second.start, second.end));
+        bridges.push({ first, second, ...closest });
+      }
+    }
   }
   const byPoint = new Map<string, string>();
   const addNode = (point: Position, type: EgressNode["type"], id?: string) => {
@@ -73,6 +85,11 @@ export function buildEgressGraph(plan: RoomPlan, seating: SeatingPlan): EgressGr
         edges.push({ from: addNode(previous, "aisle"), to: id, length: dist(previous, point), width: aisle.width, aisleId: aisle.id });
       }
     }
+  }
+  for (const bridge of bridges) {
+    if (!segmentClear(bridge.firstPoint, bridge.secondPoint, plan, seating)) continue;
+    const from = byPoint.get(key(bridge.firstPoint)), to = byPoint.get(key(bridge.secondPoint));
+    if (from && to && from !== to) edges.push({ from, to, length: dist(bridge.firstPoint, bridge.secondPoint), width: Math.min(bridge.first.width, bridge.second.width) });
   }
   for (const door of exits) {
     const segment = doorSegment(plan.contour, door);

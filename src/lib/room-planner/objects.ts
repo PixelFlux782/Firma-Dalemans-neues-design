@@ -6,7 +6,7 @@ export type ObstacleObject = { id: string; type: "obstacle"; obstacleType: "colu
 export type RoomFront = { id: string; type: "front"; x: number; y: number; width: number; rotation: number };
 export type Stage = { id: string; type: "stage"; x: number; y: number; width: number; depth: number; rotation: number };
 export type ReservedArea = { id: string; type: "reservedArea"; x: number; y: number; width: number; depth: number; rotation: number; name?: string };
-export type AisleObject = { id: string; type: "aisle"; start: Position; end: Position; width: number };
+export type AisleObject = { id: string; type: "aisle"; start: Position; end: Position; width: number; source?: "manual" | "generated" };
 export type RoomObject = DoorObject | ObstacleObject | AisleObject | RoomFront | Stage | ReservedArea;
 export type BlockingObject = ObstacleObject | Stage | ReservedArea;
 export const isBlockingObject = (object: RoomObject): object is BlockingObject => object.type === "obstacle" || object.type === "stage" || object.type === "reservedArea";

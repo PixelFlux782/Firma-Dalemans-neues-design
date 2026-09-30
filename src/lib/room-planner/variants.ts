@@ -1,4 +1,5 @@
-import { aislePolygon, isBlockingObject, obstaclePolygon, polygonInsideRoom, polygonsOverlap, type AisleObject, type Position, type RoomFront, type RoomPlan } from "./objects";
+import { type AisleObject, type RoomFront, type RoomPlan } from "./objects";
+import { generateAisleGroups, nearDuplicateAisle } from "./aisleGeneration";
 import { analyzeEgress, type EgressAnalysis } from "./egress/analyzeEgress";
 import { evaluateRules, type RuleReport } from "./rules/evaluateRules";
 import type { RuleProfile } from "./rules/profiles";
@@ -23,7 +24,7 @@ export type OrientationPreference = "automatic" | SeatingOrientation;
 export type VariantMetrics = {
   seatCount: number; blockCount: number; rowCount: number; aisleCount: number; generatedAisleCount: number; totalAisleArea: number;
   longestEgressRoute?: number; averageEgressRoute?: number; exitsUsed: number; maximumExitLoad?: number;
-  passedChecks: number; warnings: number; failures: number; averageRowLength?: number; rowPitch: number; frontDeviation?: number;
+  passedChecks: number; warnings: number; failures: number; unreachableSeats: number; inaccessibleBlocks: number; averageRowLength?: number; rowPitch: number; frontDeviation?: number;
 };
 export type PlanVariant = {
   id: string; profileId: PlanningProfile["id"]; plan: RoomPlan; seatingPlan: SeatingPlan; analysis: EgressAnalysis; report: RuleReport;
@@ -42,35 +43,6 @@ function rulesFor(base: SeatingRules, rule: RuleProfile, profile: PlanningProfil
     defaultAisleWidth: Math.max(base.defaultAisleWidth, rule.aisles.minimumWidth ?? 0),
   };
 }
-function aisleTemplates(plan: RoomPlan, seating: SeatingPlan, width: number, maximum: number): AisleObject[][] {
-  if (!seating.seats.length || maximum < 1) return [];
-  const horizontal = seating.orientation === "horizontal";
-  const rotated = seating.rotation !== undefined && seating.rotation !== 0 && seating.rotation !== 90;
-  const angle = (seating.rotation ?? 0) * Math.PI / 180, cosine = Math.cos(angle), sine = Math.sin(angle);
-  const along = (p: Position) => rotated ? p.x * cosine + p.y * sine : horizontal ? p.x : p.y;
-  const cross = (p: Position) => rotated ? -p.x * sine + p.y * cosine : horizontal ? p.y : p.x;
-  const point = (a: number, c: number): Position => rotated ? { x: a * cosine - c * sine, y: a * sine + c * cosine } : horizontal ? { x: a, y: c } : { x: c, y: a };
-  const roomAlong = plan.contour.points.map(along), roomCross = plan.contour.points.map(cross);
-  const minA = Math.min(...roomAlong), maxA = Math.max(...roomAlong), minC = Math.min(...roomCross), maxC = Math.max(...roomCross);
-  const margin = width / 2 + 0.02;
-  if (maxA - minA <= width + 0.04 || maxC - minC <= width + 0.04) return [];
-  const seatAlong = seating.seats.map(along), seatCross = seating.seats.map(cross);
-  const minSeatA = Math.min(...seatAlong), maxSeatA = Math.max(...seatAlong);
-  const clampA = (v: number) => Math.max(minA + margin, Math.min(maxA - margin, v));
-  const clampC = (v: number) => Math.max(minC + margin, Math.min(maxC - margin, v));
-  const make = (id: string, start: Position, end: Position): AisleObject => ({ id: `variant-${id}`, type: "aisle", start, end, width });
-  const c1 = clampC(Math.min(...seatCross) - seating.rules.rowPitch / 2), c2 = clampC(Math.max(...seatCross) + seating.rules.rowPitch / 2);
-  const longitudinal = (id: string, a: number) => make(id, point(clampA(a), c1), point(clampA(a), c2));
-  const sideGap = seating.rules.chairWidth / 2 + width / 2 + seating.rules.minimumSideClearance;
-  const left = longitudinal("left", minSeatA - sideGap), right = longitudinal("right", maxSeatA + sideGap);
-  const center = longitudinal("center", (minSeatA + maxSeatA) / 2);
-  const crossC = clampC((Math.min(...seatCross) + Math.max(...seatCross)) / 2);
-  const crossAisle = make("cross", point(clampA(minSeatA - sideGap), crossC), point(clampA(maxSeatA + sideGap), crossC));
-  const valid = (aisle: AisleObject) => polygonInsideRoom(aislePolygon(aisle), plan.contour)
-    && !plan.objects.some((object) => isBlockingObject(object) && polygonsOverlap(aislePolygon(aisle), obstaclePolygon(object)));
-  return [[center], [left], [right], [left, right], [crossAisle], [center, left], [center, right], [center, crossAisle]]
-    .filter((group) => group.length <= maximum && group.every(valid));
-}
 function metrics(plan: RoomPlan, seating: SeatingPlan, analysis: EgressAnalysis, report: RuleReport, generated: AisleObject[]): VariantMetrics {
   const routes = analysis.routes.filter((route) => route.valid);
   const aisleObjects = plan.objects.filter((object): object is AisleObject => object.type === "aisle");
@@ -82,6 +54,7 @@ function metrics(plan: RoomPlan, seating: SeatingPlan, analysis: EgressAnalysis,
     exitsUsed: analysis.exitLoads.filter((load) => load.persons > 0).length,
     maximumExitLoad: Math.max(0, ...analysis.exitLoads.map((load) => load.persons)),
     passedChecks: report.counts.pass, warnings: report.counts.warning, failures: report.counts.fail,
+    unreachableSeats: analysis.seatsWithoutRoute, inaccessibleBlocks: report.blocks.filter((block) => !block.reachableExit || !block.leftAisle && !block.rightAisle).length,
     averageRowLength: seating.totalRows ? round(seating.totalSeats / seating.totalRows) : undefined, rowPitch: seating.rules.rowPitch,
   };
 }
@@ -97,6 +70,7 @@ function utility(v: PlanVariant, profile: PlanningProfile, preference: Orientati
   const exitImbalance = m.seatCount && m.exitsUsed > 1 ? (m.maximumExitLoad ?? 0) / m.seatCount : 0;
   return w.capacity * m.seatCount - w.egress * (distance + average) - w.comfort * (m.averageRowLength ?? 0)
     - w.simplicity * (m.generatedAisleCount * 3 + m.blockCount) - w.exitBalance * exitImbalance * 20
+    - m.failures * 100 - m.warnings * 12 - m.unreachableSeats * 15 - m.inaccessibleBlocks * 40 - m.totalAisleArea * 0.1
     + (preference !== "automatic" && v.seatingPlan.orientation === preference ? 2 : 0);
 }
 function frontDeviation(front: RoomFront | undefined, rotation: number): number | undefined {
@@ -128,7 +102,9 @@ function explain(variant: PlanVariant, balanced?: PlanVariant): string[] {
   if (m.failures) reasons.push(`${m.failures} offene Regelabweichungen`);
   return reasons;
 }
-export function generatePlanVariants(plan: RoomPlan, baseRules: SeatingRules = DEFAULT_SEATING_RULES, rule: RuleProfile, preference: OrientationPreference = "automatic", config: VariantConfig = DEFAULT_VARIANT_CONFIG): VariantResult {
+export function generatePlanVariants(inputPlan: RoomPlan, baseRules: SeatingRules = DEFAULT_SEATING_RULES, rule: RuleProfile, preference: OrientationPreference = "automatic", config: VariantConfig = DEFAULT_VARIANT_CONFIG): VariantResult {
+  const plan = inputPlan.objects.some((object) => object.type === "aisle" && object.source === "generated")
+    ? { ...inputPlan, objects: inputPlan.objects.filter((object) => object.type !== "aisle" || object.source !== "generated") } : inputPlan;
   const front = plan.objects.find((object): object is RoomFront => object.type === "front");
   const limit = Math.min(48, Math.max(1, Math.floor(config.maximumCandidatePlans)));
   const offsets = config.gridOffsets.filter((value) => Number.isFinite(value) && value >= 0 && value < 1).slice(0, 4);
@@ -144,11 +120,11 @@ export function generatePlanVariants(plan: RoomPlan, baseRules: SeatingRules = D
       if (seating.totalSeats) seeds.push({ profile, orientation, rotation, offset, rules, seating });
     }
   }
-  const shortlisted = PLANNING_PROFILES.flatMap((profile) => (front ? angles : [0, 90]).flatMap((angle) =>
+  const shortlisted = PLANNING_PROFILES.flatMap((profile) => (front ? angles.slice(0, 3) : [0, 90]).flatMap((angle) =>
     seeds.filter((seed) => seed.profile.id === profile.id && (front ? seed.rotation === angle : seed.orientation === (angle === 0 ? "horizontal" : "vertical")))
       .sort((a, b) => b.seating.totalSeats - a.seating.totalSeats || a.offset.along - b.offset.along || a.offset.cross - b.offset.cross).slice(0, 1)));
   const candidates: { seed: Seed; generated: AisleObject[] }[] = shortlisted.map((seed) => ({ seed, generated: [] }));
-  const templates = shortlisted.map((seed) => aisleTemplates(plan, seed.seating, Math.max(seed.rules.defaultAisleWidth, rule.aisles.minimumWidth ?? 0), config.maximumGeneratedAisles));
+  const templates = shortlisted.map((seed) => generateAisleGroups(plan, seed.seating, Math.max(seed.rules.defaultAisleWidth, rule.aisles.minimumWidth ?? 0), config.maximumGeneratedAisles));
   for (let index = 0; index < Math.max(0, ...templates.map((groups) => groups.length)); index++) {
     shortlisted.forEach((seed, seedIndex) => { if (templates[seedIndex][index]) candidates.push({ seed, generated: templates[seedIndex][index] }); });
   }
@@ -159,7 +135,8 @@ export function generatePlanVariants(plan: RoomPlan, baseRules: SeatingRules = D
     const egress = analyzeEgress(plan, seed.seating, rule);
     const report = evaluateRules(plan, seed.seating, egress, rule);
     for (const suggestion of suggestAisles(plan, seed.seating, rule, egress, report).slice(0, 2)) {
-      candidates.push({ seed, generated: [{ id: `variant-suggestion-${suggestion.id}`, type: "aisle", start: suggestion.start, end: suggestion.end, width: suggestion.width }] });
+      const aisle: AisleObject = { id: `variant-suggestion-${suggestion.id}`, type: "aisle", source: "generated", start: suggestion.start, end: suggestion.end, width: suggestion.width };
+      if (!plan.objects.some((object) => object.type === "aisle" && nearDuplicateAisle(aisle, object))) candidates.push({ seed, generated: [aisle] });
     }
   }
   const evaluated: PlanVariant[] = [];
@@ -188,7 +165,8 @@ export function generatePlanVariants(plan: RoomPlan, baseRules: SeatingRules = D
     const suggestions = suggestAisles(source.plan, source.seatingPlan, rule, source.analysis, source.report);
     for (const suggestion of suggestions.slice(0, 2)) {
       if (evaluated.length >= limit) break;
-      const generated: AisleObject = { id: `variant-refined-${source.id}-${suggestion.id}`, type: "aisle", start: suggestion.start, end: suggestion.end, width: suggestion.width };
+      const generated: AisleObject = { id: `variant-refined-${source.id}-${suggestion.id}`, type: "aisle", source: "generated", start: suggestion.start, end: suggestion.end, width: suggestion.width };
+      if (source.plan.objects.some((object) => object.type === "aisle" && nearDuplicateAisle(generated, object))) continue;
       const proposed = { ...source.plan, objects: [...source.plan.objects, generated] };
       const seating = source.seatingPlan.rotation === undefined || !front ? faceFront(generateSeatingPlan(proposed, source.seatingPlan.rules, source.seatingPlan.orientation, source.gridOffset), front) : generateSeatingPlan(proposed, source.seatingPlan.rules, source.seatingPlan.orientation, source.gridOffset, source.seatingPlan.rotation);
       if (!seating.totalSeats) continue;
@@ -213,6 +191,6 @@ export function generatePlanVariants(plan: RoomPlan, baseRules: SeatingRules = D
   }
   const balanced = selected.find((v) => v.profileId === "balanced");
   const variants = selected.map((variant) => ({ ...variant, reasons: explain(variant, balanced) }));
-  const fallback = variants.length ? undefined : unique.sort((a, b) => a.metrics.failures - b.metrics.failures || (front && preference === "automatic" ? (a.metrics.frontDeviation ?? 90) - (b.metrics.frontDeviation ?? 90) : 0) || b.metrics.seatCount - a.metrics.seatCount || a.id.localeCompare(b.id))[0];
+  const fallback = variants.length ? undefined : unique.sort((a, b) => (front && preference === "automatic" ? (a.metrics.frontDeviation ?? 90) - (b.metrics.frontDeviation ?? 90) : 0) || a.metrics.failures - b.metrics.failures || b.metrics.seatCount - a.metrics.seatCount || a.id.localeCompare(b.id))[0];
   return { variants, fallback: fallback && { ...fallback, reasons: explain(fallback) }, evaluatedCandidates: evaluated.length };
 }

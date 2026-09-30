@@ -77,6 +77,7 @@ export default function HomePage() {
                 Beratung anfragen <span aria-hidden className="ml-2 transition-transform group-hover:translate-x-0.5">→</span>
               </Link>
               <Link href="/produkte/stapelstuehle" className="btn-secondary justify-center rounded-xl px-6">Produkte ansehen</Link>
+              <Link href="/raumplaner" className="btn-secondary justify-center rounded-xl px-6">3D-Raumplaner ausprobieren</Link>
             </div>
             <a href="tel:+499342915353" className="mt-6 inline-flex w-fit items-center gap-3 text-sm font-semibold text-premium-ink transition hover:text-premium-bronze">
               <span className="text-[0.62rem] font-medium uppercase tracking-[0.16em] text-premium-muted">Direktkontakt</span>
@@ -193,7 +194,10 @@ export default function HomePage() {
               <p className="section-eyebrow">Raum- und Bestuhlungsplanung</p>
               <h3 className="section-title-functional mt-4">Vor der Bestellung sehen, ob die Lösung im Raum funktioniert.</h3>
               <p className="mt-5 text-sm leading-7 text-premium-muted">2D- und 3D-Planung prüft je nach Projekt Stellpläne, Reihenabstände, Fluchtwege, Tischordnungen und schwierige Geometrien.</p>
-              <Link href="/raeume-planung/raumplanung" className="btn-primary mt-7 inline-flex">Raumplanung ansehen</Link>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Link href="/raeume-planung/raumplanung" className="btn-primary">Raumplanung ansehen</Link>
+                <Link href="/raumplaner" className="btn-secondary">3D-Raumplaner ausprobieren</Link>
+              </div>
             </div>
           </article>
           <article id="transport">

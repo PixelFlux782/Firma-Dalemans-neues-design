@@ -60,6 +60,7 @@ export default function RaeumePlanungPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/kontakt?raum=Raumplanung" className="btn-primary px-6 py-3">Raum besprechen</Link>
               <Link href="/raeume-planung/raumplanung" className="btn-secondary px-6 py-3">Planungsleistungen</Link>
+              <Link href="/raumplaner" className="btn-secondary px-6 py-3">3D-Raumplaner ausprobieren</Link>
             </div>
           </div>
         </div>
@@ -84,7 +85,7 @@ export default function RaeumePlanungPage() {
         <div className="grid gap-8 lg:grid-cols-2">
           <article className="premium-card overflow-hidden">
             <Image src={encodeURI("/neue bilder/planung-schritt-3.png")} alt="CAD-Planung für eine individuelle Raumlösung" width={760} height={440} sizes="(min-width: 1024px) 50vw, 100vw" className="h-64 w-full object-cover" />
-            <div className="p-7"><p className="section-eyebrow">Raum- & Bestuhlungsplanung</p><h2 className="mt-4 font-display text-3xl font-medium text-premium-ink">Nutzungsvarianten vor der Bestellung prüfen.</h2><p className="mt-4 text-sm leading-7 text-premium-muted">Je nach Projekt helfen 2D- oder 3D-Darstellungen, Stellpläne, Tischanordnungen und die Prüfung schwieriger Geometrien.</p><Link href="/raeume-planung/raumplanung" className="btn-primary mt-7 inline-flex">Raumplanung im Detail</Link></div>
+            <div className="p-7"><p className="section-eyebrow">Raum- & Bestuhlungsplanung</p><h2 className="mt-4 font-display text-3xl font-medium text-premium-ink">Nutzungsvarianten vor der Bestellung prüfen.</h2><p className="mt-4 text-sm leading-7 text-premium-muted">Je nach Projekt helfen 2D- oder 3D-Darstellungen, Stellpläne, Tischanordnungen und die Prüfung schwieriger Geometrien.</p><div className="mt-7 flex flex-wrap gap-3"><Link href="/raeume-planung/raumplanung" className="btn-primary">Raumplanung im Detail</Link><Link href="/raumplaner" className="btn-secondary">3D-Raumplaner ausprobieren</Link></div></div>
           </article>
           <article id="transport">
             <ProductVisual src="/neue bilder/Zubehör/Tischtransportwagen_02.png" alt="Tischtransportwagen für Lagerung und Saalumbau" sizes="(min-width: 1024px) 50vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />

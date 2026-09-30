@@ -3,6 +3,7 @@ import Link from "next/link";
 import { company } from "@/lib/company";
 
 const pageLinks = [
+  ["/raumplaner", "3D-Raumplaner"],
   ["/", "Start"],
   ["/produkte", "Produkte"],
   ["/shop", "Shop"],

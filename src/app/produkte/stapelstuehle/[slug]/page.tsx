@@ -219,7 +219,10 @@ export default async function StackingChairModelPage({ params, searchParams }: P
             <h2 id="planning-heading" className="section-title mt-4">Nicht nur den Stuhl planen – den ganzen Raum.</h2>
             <p className="mt-5 max-w-2xl text-sm leading-7 text-premium-muted sm:text-base">Stellpläne, 2D-/3D-Planung, Tischanordnungen, schwierige Geometrien sowie Lagerung und Transport bilden ein gemeinsames Konzept.</p>
           </div>
-          <Link href={`/raeume-planung/raumplanung?produkt=${encodeURIComponent(product.title)}`} className="btn-primary shrink-0 text-center">Raumplanung ansehen</Link>
+          <div className="flex flex-wrap gap-3">
+            <Link href={`/raeume-planung/raumplanung?produkt=${encodeURIComponent(product.title)}`} className="btn-primary shrink-0 text-center">Raumplanung ansehen</Link>
+            <Link href="/raumplaner" className="btn-secondary shrink-0 text-center">3D-Raumplaner ausprobieren</Link>
+          </div>
         </div>
       </section>
 

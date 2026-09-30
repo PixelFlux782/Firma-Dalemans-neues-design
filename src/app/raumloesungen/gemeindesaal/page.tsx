@@ -76,6 +76,9 @@ export default function GemeindesaalPage() {
             <Link href="/produkte" className="btn-hero-secondary text-center">
               Produkte ansehen
             </Link>
+            <Link href="/raumplaner" className="btn-hero-secondary text-center">
+              3D-Raumplaner ausprobieren
+            </Link>
           </>
         }
         visual={

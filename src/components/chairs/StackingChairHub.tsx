@@ -226,7 +226,10 @@ export default function StackingChairHub({ products }: { products: CommerceProdu
           <p className="mt-5 max-w-2xl text-base leading-8 text-premium-muted">
             Bestuhlungspläne, schwierige Geometrien, Säulen, Tischanordnungen, Lagerflächen und Transportwege gehören zusammen. Dalemans unterstützt mit 2D- und 3D-Planung für Räume, die sich im Alltag schnell verändern müssen.
           </p>
-          <Link href="/raeume-planung/raumplanung" className="btn-primary mt-7">Raumplanung ansehen</Link>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Link href="/raeume-planung/raumplanung" className="btn-primary">Raumplanung ansehen</Link>
+            <Link href="/raumplaner" className="btn-secondary">3D-Raumplaner ausprobieren</Link>
+          </div>
         </div>
         <ul className="grid gap-3 border-l border-premium-beige/80 pl-6 text-sm leading-7 text-premium-muted sm:grid-cols-2 lg:grid-cols-1">
           {[

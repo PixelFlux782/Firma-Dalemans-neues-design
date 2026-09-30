@@ -125,7 +125,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
   function openSearchPage() {
     const trimmed = query.trim();
     if (!trimmed) return;
-    router.push(`/shop/suche?q=${encodeURIComponent(trimmed)}`);
+    router.push(`/produkte/suche?q=${encodeURIComponent(trimmed)}`);
     onClose();
   }
 
@@ -191,7 +191,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
             </div>
             <button type="button" onClick={onClose} className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-premium-beige bg-white/60 text-xl text-premium-ink transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand" aria-label="Suche schließen">×</button>
           </div>
-          <form action="/shop/suche" method="get" onSubmit={handleSubmit} role="search" className="mt-5">
+          <form action="/produkte/suche" method="get" onSubmit={handleSubmit} role="search" className="mt-5">
             <label htmlFor="predictive-search" className="sr-only">Shop durchsuchen</label>
             <div className="flex min-w-0 items-center gap-2 rounded-2xl border border-premium-beige bg-white px-4 shadow-inner-soft focus-within:border-premium-sand focus-within:ring-2 focus-within:ring-premium-sand/15 sm:px-5">
               <span className="relative block size-4 shrink-0 rounded-full border-2 border-premium-forest after:absolute after:-bottom-1 after:-right-1 after:h-1.5 after:w-0.5 after:-rotate-45 after:rounded-full after:bg-premium-forest" aria-hidden />

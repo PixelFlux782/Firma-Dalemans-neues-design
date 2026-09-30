@@ -17,7 +17,7 @@ export default function CommerceProductCard({
   return (
     <article className="group min-w-0 border-t border-premium-beige/80 pt-5">
       <Link
-        href={`/shop/produkt/${product.handle}`}
+        href={`/produkte/artikel/${product.handle}`}
         className="block overflow-hidden rounded-[1.75rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-4 focus-visible:ring-offset-premium-canvas"
         aria-label={`${product.title} ansehen`}
       >
@@ -43,7 +43,7 @@ export default function CommerceProductCard({
         ) : null}
         <h2 className="font-display text-2xl font-medium leading-tight tracking-[-0.02em] text-premium-ink">
           <Link
-            href={`/shop/produkt/${product.handle}`}
+            href={`/produkte/artikel/${product.handle}`}
             className="rounded-sm underline-offset-4 transition hover:text-premium-bronze hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand"
           >
             {product.title}
@@ -53,7 +53,7 @@ export default function CommerceProductCard({
           {product.shortDescription}
         </p>
         <Link
-          href={`/shop/produkt/${product.handle}`}
+          href={`/produkte/artikel/${product.handle}`}
           className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 transition hover:text-premium-bronze hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand"
         >
           Details &amp; Ausführungen <span className="ml-2" aria-hidden>→</span>

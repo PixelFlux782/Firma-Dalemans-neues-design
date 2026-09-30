@@ -15,8 +15,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/",
     "/produkte",
     "/produkte/stapelstuehle",
-    "/shop",
-    "/shop/gleiter-finder",
+    "/produkte",
+    "/produkte/gleiter-finder",
     "/produkte/rednerpulte",
     "/raeume-planung",
     "/raeume-planung/raumplanung",
@@ -51,14 +51,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const shopCollectionEntries = shopCollections.filter((collection) => collection.handle !== "stapelstuehle").map((collection) => ({
-    url: `${siteUrl}/shop/${collection.handle}`,
+    url: `${siteUrl}/produkte/sortiment/${collection.handle}`,
     lastModified: now,
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
 
   const shopProductEntries = shopProducts.filter((product) => !product.stackingChair).map((product) => ({
-    url: `${siteUrl}/shop/produkt/${product.handle}`,
+    url: `${siteUrl}/produkte/artikel/${product.handle}`,
     lastModified: new Date(product.updatedAt),
     changeFrequency: "monthly" as const,
     priority: 0.7,

@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import CartTrigger from "@/components/commerce/cart/CartTrigger";
 import SearchTrigger from "@/components/search/SearchTrigger";
 
-type ShopSection = "chairs" | "tables" | "gliders" | "retrofit" | "transport" | "lecterns";
+type ShopSection = "chairs" | "tables" | "gliders" | "retrofit" | "transport" | "lecterns" | "advice";
 
 type ShopLink = { label: string; href: string };
 type ShopGroup = { title: string; links: readonly ShopLink[] };
@@ -18,7 +18,7 @@ type ShopItem = {
   cta?: ShopLink;
 };
 
-const product = (handle: string) => `/shop/produkt/${handle}`;
+const product = (handle: string) => `/produkte/artikel/${handle}`;
 const chairProduct = (handle: string) => `/produkte/stapelstuehle/${handle}`;
 
 const shopItems: readonly ShopItem[] = [
@@ -31,7 +31,7 @@ const shopItems: readonly ShopItem[] = [
         title: "Stühle",
         links: [
           { label: "Stapelstühle", href: "/produkte/stapelstuehle" },
-          { label: "Klappstühle", href: "/shop/klappstuehle" },
+          { label: "Klappstühle", href: "/produkte/sortiment/klappstuehle" },
         ],
       },
       {
@@ -49,7 +49,7 @@ const shopItems: readonly ShopItem[] = [
         links: [
           { label: "Buchablagen", href: product("buchablage-nachruesten") },
           { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") },
-          { label: "Gleiter", href: "/shop/gleiter-bodenschutz" },
+          { label: "Gleiter", href: "/produkte/sortiment/gleiter-bodenschutz" },
         ],
       },
     ],
@@ -58,12 +58,12 @@ const shopItems: readonly ShopItem[] = [
   {
     id: "tables",
     label: "Tische",
-    href: "/shop/klapptische",
+    href: "/produkte/sortiment/klapptische",
     groups: [
       {
         title: "Tische",
         links: [
-          { label: "Klapptische", href: "/shop/klapptische" },
+          { label: "Klapptische", href: "/produkte/sortiment/klapptische" },
           { label: "Seminarklapptische", href: product("seminarklapptisch-210c") },
           { label: "Trapeztische", href: product("trapez-klapptisch-310c") },
         ],
@@ -76,69 +76,71 @@ const shopItems: readonly ShopItem[] = [
         ],
       },
     ],
-    cta: { label: "Alle Tische ansehen", href: "/shop/klapptische" },
+    cta: { label: "Alle Tische ansehen", href: "/produkte/sortiment/klapptische" },
   },
   {
     id: "gliders",
     label: "Gleiter",
-    href: "/shop/gleiter-bodenschutz",
+    href: "/produkte/sortiment/gleiter-bodenschutz",
     groups: [
       {
         title: "Gleiter & Bodenschutz",
         links: [
           { label: "Filzgleiter", href: product("filzgleiter-mit-stift") },
           { label: "Kunststoffgleiter", href: product("kunststoff-gestellgleiter") },
-          { label: "Gleiter-Finder", href: "/shop/gleiter-finder" },
+          { label: "Gleiter-Finder", href: "/produkte/gleiter-finder" },
         ],
       },
     ],
-    cta: { label: "Gleiter ansehen", href: "/shop/gleiter-bodenschutz" },
+    cta: { label: "Gleiter ansehen", href: "/produkte/sortiment/gleiter-bodenschutz" },
   },
   {
     id: "retrofit",
     label: "Nachrüstung",
-    href: "/shop/reihenverbinder-nachruestung",
+    href: "/produkte/sortiment/reihenverbinder-nachruestung",
     groups: [
       {
         title: "Nachrüstung & Zubehör",
         links: [
           { label: "Buchablagen", href: product("buchablage-nachruesten") },
           { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") },
-          { label: "Ersatzteile & Zubehör", href: "/shop/reihenverbinder-nachruestung" },
+          { label: "Ersatzteile & Zubehör", href: "/produkte/sortiment/reihenverbinder-nachruestung" },
         ],
       },
     ],
-    cta: { label: "Nachrüstlösungen ansehen", href: "/shop/reihenverbinder-nachruestung" },
+    cta: { label: "Nachrüstlösungen ansehen", href: "/produkte/sortiment/reihenverbinder-nachruestung" },
   },
   {
     id: "transport",
     label: "Transport",
-    href: "/shop/transport-lagerung",
+    href: "/produkte/sortiment/transport-lagerung",
     groups: [
       {
         title: "Transport & Lagerung",
         links: [{ label: "Stuhltransportwagen", href: product("stuhltransportwagen") }],
       },
     ],
-    cta: { label: "Transportlösungen ansehen", href: "/shop/transport-lagerung" },
+    cta: { label: "Transportlösungen ansehen", href: "/produkte/sortiment/transport-lagerung" },
   },
-  { id: "lecterns", label: "Rednerpulte", href: "/shop/rednerpulte" },
+  { id: "lecterns", label: "Rednerpulte", href: "/produkte/sortiment/rednerpulte" },
+  { id: "advice", label: "Muster & Beratung", href: "/produkte/sortiment/muster-beratung" },
 ] as const;
 
 const mobileGroups: readonly ShopGroup[] = [
-  { title: "Stühle", links: [{ label: "Stapelstühle", href: "/produkte/stapelstuehle" }, { label: "Klappstühle", href: "/shop/klappstuehle" }] },
-  { title: "Tische", links: [{ label: "Klapptische", href: "/shop/klapptische" }, { label: "Seminarklapptische", href: product("seminarklapptisch-210c") }, { label: "Trapeztische", href: product("trapez-klapptisch-310c") }] },
-  { title: "Gleiter", links: [{ label: "Gleiter & Bodenschutz", href: "/shop/gleiter-bodenschutz" }, { label: "Gleiter-Finder", href: "/shop/gleiter-finder" }] },
-  { title: "Nachrüstung", links: [{ label: "Buchablagen", href: product("buchablage-nachruesten") }, { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") }, { label: "Ersatzteile", href: "/shop/reihenverbinder-nachruestung" }] },
-  { title: "Transport", links: [{ label: "Stuhltransportwagen", href: product("stuhltransportwagen") }, { label: "Transport & Lagerung", href: "/shop/transport-lagerung" }] },
-  { title: "Rednerpulte", links: [{ label: "Rednerpulte ansehen", href: "/shop/rednerpulte" }] },
+  { title: "Stühle", links: [{ label: "Stapelstühle", href: "/produkte/stapelstuehle" }, { label: "Klappstühle", href: "/produkte/sortiment/klappstuehle" }] },
+  { title: "Tische", links: [{ label: "Klapptische", href: "/produkte/sortiment/klapptische" }, { label: "Seminarklapptische", href: product("seminarklapptisch-210c") }, { label: "Trapeztische", href: product("trapez-klapptisch-310c") }] },
+  { title: "Gleiter", links: [{ label: "Gleiter & Bodenschutz", href: "/produkte/sortiment/gleiter-bodenschutz" }, { label: "Gleiter-Finder", href: "/produkte/gleiter-finder" }] },
+  { title: "Nachrüstung", links: [{ label: "Buchablagen", href: product("buchablage-nachruesten") }, { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") }, { label: "Ersatzteile", href: "/produkte/sortiment/reihenverbinder-nachruestung" }] },
+  { title: "Transport", links: [{ label: "Stuhltransportwagen", href: product("stuhltransportwagen") }, { label: "Transport & Lagerung", href: "/produkte/sortiment/transport-lagerung" }] },
+  { title: "Rednerpulte", links: [{ label: "Rednerpulte ansehen", href: "/produkte/sortiment/rednerpulte" }] },
+  { title: "Muster & Beratung", links: [{ label: "Muster & Beratung", href: "/produkte/sortiment/muster-beratung" }] },
 ] as const;
 
 const focusableSelector = "a[href], button:not([disabled]), [tabindex]:not([tabindex='-1'])";
 
 function activeSection(pathname: string): ShopSection | null {
-  if (/\/(stapelstuehle|klappstuehle)$/.test(pathname) || /\/produkt\/(1021|buende|coburg|nuernberg|erfurt|klappstuehle)$/.test(pathname)) return "chairs";
-  if (pathname === "/shop/klapptische" || /\/produkt\/(klapptisch-310c|seminarklapptisch-210c|trapez-klapptisch-310c)$/.test(pathname)) return "tables";
+  if (/\/(stapelstuehle|klappstuehle)$/.test(pathname) || /\/artikel\/(1021|buende|coburg|nuernberg|erfurt|klappstuehle)$/.test(pathname)) return "chairs";
+  if (pathname === "/produkte/sortiment/klapptische" || /\/artikel\/(klapptisch-310c|seminarklapptisch-210c|trapez-klapptisch-310c)$/.test(pathname)) return "tables";
   if (pathname.includes("gleiter") || pathname.endsWith("kunststoff-gestellgleiter")) return "gliders";
   if (pathname.includes("reihenverbinder") || pathname.includes("buchablage")) return "retrofit";
   if (pathname.includes("transport") || pathname.endsWith("stuhltransportwagen")) return "transport";
@@ -225,7 +227,7 @@ export default function ShopNavigation() {
     <>
       <nav
         ref={navRef}
-        aria-label="Shop-Navigation"
+        aria-label="Sortiment-Navigation"
         className="sticky top-[4.25rem] z-40 -mx-[max(1rem,calc((100vw-80rem)/2))] -mt-6 mb-6 border-b border-premium-beige/80 bg-premium-canvas/95 shadow-[0_4px_14px_rgba(23,37,29,.04)] backdrop-blur-xl md:-mt-10 md:mb-8 lg:-mt-12"
         data-testid="shop-navigation"
       >
@@ -277,7 +279,7 @@ export default function ShopNavigation() {
                 </div>
               );
             })}
-            <Link href="/shop" className="relative inline-flex items-center whitespace-nowrap px-3 text-[0.76rem] font-medium text-premium-muted transition hover:bg-white/60 hover:text-premium-ink">Alle Produkte</Link>
+            <Link href="/produkte" className="relative inline-flex items-center whitespace-nowrap px-3 text-[0.76rem] font-medium text-premium-muted transition hover:bg-white/60 hover:text-premium-ink">Alle Produkte</Link>
           </div>
           <div className="flex shrink-0 items-center border-l border-premium-beige/80 pl-2">
             <SearchTrigger label="Suche" onOpen={() => setOpenMenu(null)} />
@@ -300,10 +302,10 @@ export default function ShopNavigation() {
           <button type="button" aria-label="Sortiment schließen" className="absolute inset-0 bg-premium-ink/35 backdrop-blur-[2px]" onClick={() => setDrawerOpen(false)} />
           <div ref={drawerRef} id="shop-assortment-drawer" role="dialog" aria-modal="true" aria-labelledby="shop-drawer-title" className="absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto overscroll-contain rounded-t-[2rem] border-t border-premium-beige bg-premium-canvas px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-5 shadow-premium-xl motion-safe:animate-[mega-menu-in_160ms_cubic-bezier(.22,1,.36,1)_both]">
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-premium-beige/80 bg-premium-canvas/95 pb-4 backdrop-blur-xl">
-              <div><p className="section-eyebrow">DLMNS Shop</p><h2 id="shop-drawer-title" className="mt-1 font-display text-2xl font-medium text-premium-ink">Sortiment</h2></div>
+              <div><p className="section-eyebrow">Produkte</p><h2 id="shop-drawer-title" className="mt-1 font-display text-2xl font-medium text-premium-ink">Sortiment</h2></div>
               <button type="button" onClick={() => { setDrawerOpen(false); drawerButtonRef.current?.focus(); }} aria-label="Sortiment schließen" className="inline-flex size-11 items-center justify-center rounded-full border border-premium-beige text-xl text-premium-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">×</button>
             </div>
-            <nav aria-label="Mobiles Shop-Sortiment" className="grid gap-7 py-6 sm:grid-cols-2">
+            <nav aria-label="Mobiles Sortiment" className="grid gap-7 py-6 sm:grid-cols-2">
               {mobileGroups.map((group) => (
                 <section key={group.title}>
                   <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-premium-bronze">{group.title}</h3>
@@ -314,7 +316,7 @@ export default function ShopNavigation() {
               ))}
             </nav>
             <div className="grid gap-2 border-t border-premium-beige/80 pt-5 sm:grid-cols-2">
-              <Link href="/shop" className="btn-secondary text-center">Alle Produkte</Link>
+              <Link href="/produkte" className="btn-secondary text-center">Alle Produkte</Link>
               <Link href="/kontakt?anliegen=Shop-Beratung" className="btn-primary text-center">Beratung</Link>
             </div>
           </div>

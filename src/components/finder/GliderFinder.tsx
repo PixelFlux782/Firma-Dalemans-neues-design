@@ -233,7 +233,7 @@ function ProductMatch({ match, prominent = false }: { match: FinderMatch; promin
         </ul>
         <QuantitySummary quantity={match.quantity} />
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Link href={`/shop/produkt/${match.product.handle}?variant=${encodeURIComponent(match.variant.id)}`} className={prominent ? "btn-secondary w-full text-center" : "btn-primary w-full text-center"}>
+          <Link href={`/produkte/artikel/${match.product.handle}?variant=${encodeURIComponent(match.variant.id)}`} className={prominent ? "btn-secondary w-full text-center" : "btn-primary w-full text-center"}>
             Produkt ansehen
           </Link>
           {prominent && canAddVariantToCart(match.variant) ? (

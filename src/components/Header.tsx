@@ -16,7 +16,6 @@ type NavigationLink = {
 
 const primaryLinks: readonly NavigationLink[] = [
   { href: "/produkte", label: "Produkte" },
-  { href: "/shop", label: "Shop" },
   { href: "/raeume-planung", label: "Räume & Planung", activePrefixes: ["/raeume-planung", "/raumloesungen"] },
   { href: "/raumplaner", label: "Raumplaner" },
   { href: "/beratung-service", label: "Beratung & Service" },
@@ -32,7 +31,7 @@ const moreGroups = [
     title: "Wissen & Hilfe",
     links: [
       { href: "/beratung/stapelstuehle-kaufen", label: "Kaufberatung Stapelstühle" },
-      { href: "/shop/gleiter-finder", label: "Gleiter-Finder & Messhilfe" },
+      { href: "/produkte/gleiter-finder", label: "Gleiter-Finder & Messhilfe" },
     ],
   },
   {

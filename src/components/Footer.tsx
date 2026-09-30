@@ -6,7 +6,6 @@ const pageLinks = [
   ["/raumplaner", "3D-Raumplaner"],
   ["/", "Start"],
   ["/produkte", "Produkte"],
-  ["/shop", "Shop"],
   ["/raeume-planung", "Räume & Planung"],
   ["/beratung-service", "Beratung & Service"],
   ["/sonderloesungen", "Sonderlösungen"],

@@ -12,7 +12,7 @@ export const supportSearchEntries: SupportSearchEntry[] = [
   {
     id: "glider-finder",
     title: "Gleiter-Finder",
-    url: "/shop/gleiter-finder",
+    url: "/produkte/gleiter-finder",
     description: "Passende Gleiter anhand von Gestellform, Außenmaß und Boden eingrenzen.",
     keywords: ["Stuhl messen", "Rohrmaß", "Außenmaß", "passender Gleiter"],
     aliases: ["welcher Gleiter", "Gleiter finden", "passender Gleiter", "Stuhl messen"],
@@ -21,7 +21,7 @@ export const supportSearchEntries: SupportSearchEntry[] = [
   {
     id: "shop-overview",
     title: "Produkte entdecken",
-    url: "/shop",
+    url: "/produkte",
     description: "Zubehör, Ersatzteile und Nachrüstung in Ruhe ansehen.",
     keywords: ["Shop", "Produkte", "Sortiment", "Zubehör"],
     aliases: [],

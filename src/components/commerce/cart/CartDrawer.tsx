@@ -162,8 +162,8 @@ export default function CartDrawer() {
             <p className="font-display text-3xl font-medium text-premium-ink">Noch nichts ausgewählt.</p>
             <p className="mt-4 max-w-sm text-sm leading-7 text-premium-muted">Entdecken Sie in Ruhe das Sortiment oder lassen Sie sich vom Gleiter-Finder zur passenden Ausführung führen.</p>
             <div className="mt-8 flex w-full max-w-sm flex-col gap-3">
-              <Link href="/shop" onClick={closeCart} className="btn-primary">Produkte entdecken</Link>
-              <Link href="/shop/gleiter-finder" onClick={closeCart} className="btn-secondary">Gleiter-Finder starten</Link>
+              <Link href="/produkte" onClick={closeCart} className="btn-primary">Produkte entdecken</Link>
+              <Link href="/produkte/gleiter-finder" onClick={closeCart} className="btn-secondary">Gleiter-Finder starten</Link>
             </div>
           </div>
         )}

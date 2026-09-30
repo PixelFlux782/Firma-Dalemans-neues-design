@@ -9,6 +9,8 @@ import ProductCategoryFeature from "@/components/home/ProductCategoryFeature";
 import SectionHeader from "@/components/home/SectionHeader";
 import { productOverviewHero } from "@/lib/category-media";
 import { products } from "@/lib/products";
+import { getCollections } from "@/lib/commerce/service";
+import CommerceMedia from "@/components/commerce/CommerceMedia";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
@@ -27,7 +29,8 @@ const productGroups = [
   { title: "Zubehör & Transport", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und Transportlösungen für den praktischen Alltag.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör & Transport ansehen", image: "/neue bilder/Zubehör/zubehör-hero.png", alt: "Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.9 },
 ] as const;
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const collections = await getCollections();
   const featuredProducts = featuredSlugs.map((slug) => products.find((product) => product.slug === slug)).filter((product): product is (typeof products)[number] => Boolean(product));
   return <div className="flex min-w-0 flex-col gap-14 md:gap-20">
     <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
@@ -60,6 +63,18 @@ export default function ProductsPage() {
         {productGroups.map((group) => <ProductCategoryFeature key={group.title} title={group.title} description={group.text} href={group.href} image={group.image} alt={group.alt} linkLabel={group.cta} imageScale={group.imageScale} objectPosition={group.objectPosition} imageInset={group.imageInset} aspectRatio={group.aspectRatio} fadeStrength={group.fadeStrength} backgroundTone={group.backgroundTone} />)}
       </div>
     </section>
+
+    <HomeSection id="alle-produktbereiche">
+      <SectionHeader eyebrow="Gesamtes Sortiment" title="Weitere Produktbereiche" lead="Artikel und Ausführungen auswählen und ein persönliches Angebot anfragen." align="editorial" />
+      <div className="section-grid-top grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        {collections.filter((collection) => collection.handle !== "stapelstuehle").map((collection) => (
+          <Link key={collection.handle} href={`/produkte/sortiment/${collection.handle}`} className="premium-card premium-card-hover overflow-hidden">
+            <CommerceMedia image={collection.image} fallbackLabel={collection.title} aspectRatio="5 / 3" />
+            <div className="p-6"><h3 className="font-display text-2xl text-premium-ink">{collection.title}</h3><p className="mt-3 text-sm leading-6 text-premium-muted">{collection.shortDescription}</p><span className="mt-5 inline-block text-sm font-semibold text-premium-forest">Bereich ansehen →</span></div>
+          </Link>
+        ))}
+      </div>
+    </HomeSection>
 
     <HomeSection><SectionHeader eyebrow="Häufig nachgefragt" title="Direkt zu ausgewählten Produkten" lead="Ein schneller Einstieg in bewährte Lösungen aus den wichtigsten Sortimentsbereichen." align="editorial" /><div className="section-grid-top grid gap-6 md:grid-cols-2 xl:grid-cols-3">{featuredProducts.map((product) => <ProductCard key={product.slug} product={product} />)}</div></HomeSection>
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import CommerceMedia from "@/components/commerce/CommerceMedia";
 import CommerceProductCard from "@/components/commerce/CommerceProductCard";
 import ProductVariantSelector from "@/components/commerce/ProductVariantSelector";
@@ -20,18 +20,19 @@ interface ProductPageProps {
 
 export async function generateStaticParams() {
   const products = await getProducts();
-  return products.map((product) => ({ handle: product.handle }));
+  return products.filter((product) => !product.stackingChair).map((product) => ({ handle: product.handle }));
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { handle } = await params;
   const product = await getProductByHandle(handle);
   if (!product) return {};
+  if (product.stackingChair) return { alternates: { canonical: `/produkte/stapelstuehle/${handle}` } };
 
   return buildMetadata({
     title: product.seo.title ?? product.title,
     description: product.seo.description ?? product.shortDescription,
-    path: `/shop/produkt/${product.handle}`,
+    path: `/produkte/artikel/${product.handle}`,
     image: product.featuredImage?.url ?? null,
     keywords: [product.title, ...product.suitableFor],
   });
@@ -54,6 +55,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   const [{ handle }, query] = await Promise.all([params, searchParams]);
   const product = await getProductByHandle(handle);
   if (!product) notFound();
+  if (product.stackingChair) permanentRedirect(`/produkte/stapelstuehle/${handle}`);
 
   const collectionHandle = product.collectionHandles[0];
   const collection = collectionHandle ? await getCollectionByHandle(collectionHandle) : null;
@@ -64,10 +66,10 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   const productStructuredData = {
     "@context": "https://schema.org",
     "@type": "Product",
-    "@id": absoluteUrl(`/shop/produkt/${product.handle}#product`),
+    "@id": absoluteUrl(`/produkte/artikel/${product.handle}#product`),
     name: product.title,
     description: product.description,
-    url: absoluteUrl(`/shop/produkt/${product.handle}`),
+    url: absoluteUrl(`/produkte/artikel/${product.handle}`),
     ...(product.featuredImage ? { image: [absoluteUrl(product.featuredImage.url)] } : {}),
     ...(collection ? { category: collection.title } : {}),
     additionalProperty: product.specifications.map((specification) => ({
@@ -85,13 +87,13 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
         <Breadcrumbs
           items={[
             { label: "Start", href: "/" },
-            { label: "Shop", href: "/shop" },
+            { label: "Produkte", href: "/produkte" },
             ...(collection
-              ? [{ label: collection.title, href: `/shop/${collection.handle}` }]
+              ? [{ label: collection.title, href: `/produkte/sortiment/${collection.handle}` }]
               : []),
             { label: product.title },
           ]}
-          currentPath={`/shop/produkt/${product.handle}`}
+          currentPath={`/produkte/artikel/${product.handle}`}
         />
 
         <div className="mt-8 grid items-start gap-10 lg:grid-cols-[1.08fr_.92fr] lg:gap-14">
@@ -106,7 +108,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
           />
 
           <div className="min-w-0 lg:pt-4">
-            <p className="section-eyebrow">{collection?.title ?? "Shop-Produkt"}</p>
+            <p className="section-eyebrow">{collection?.title ?? "Produkt"}</p>
             <h1 className="mt-4 font-display text-4xl font-medium leading-[1.06] tracking-[-0.035em] text-premium-ink sm:text-5xl lg:text-[3.5rem]">
               {product.title}
             </h1>
@@ -182,7 +184,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
               <h2 className="section-title-functional mt-3">Welche Variante passt zu Ihrem Gestell?</h2>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-premium-muted">Der Gleiter-Finder führt durch Rohrform, Außenmaß, Boden und benötigte Menge.</p>
             </div>
-            <Link href="/shop/gleiter-finder" prefetch={false} className="btn-primary text-center">Gleiter-Finder starten</Link>
+            <Link href="/produkte/gleiter-finder" prefetch={false} className="btn-primary text-center">Gleiter-Finder starten</Link>
           </div>
         </section>
       ) : null}

@@ -34,6 +34,36 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/shop",
+        destination: "/produkte",
+        permanent: true,
+      },
+      {
+        source: "/shop/gleiter-finder",
+        destination: "/produkte/gleiter-finder",
+        permanent: true,
+      },
+      {
+        source: "/shop/suche",
+        destination: "/produkte/suche",
+        permanent: true,
+      },
+      {
+        source: "/shop/produkt/:handle",
+        destination: "/produkte/artikel/:handle",
+        permanent: true,
+      },
+      {
+        source: "/shop/:collection",
+        destination: "/produkte/sortiment/:collection",
+        permanent: true,
+      },
+      {
+        source: "/produkte/sortiment/stapelstuehle",
+        destination: "/produkte/stapelstuehle",
+        permanent: true,
+      },
+      {
         source: "/produkte/kategorien/gemeindestuehle-bankettmoebel",
         destination: "/produkte",
         permanent: true,

@@ -132,8 +132,8 @@ export default function SearchResultGroups({
         <h3 className="mt-3 font-display text-2xl font-medium text-premium-ink">Nichts Passendes gefunden?</h3>
         <p className="mt-3 text-sm leading-6 text-premium-muted">Ein Foto, das Rohrmaß oder ein kurzer persönlicher Hinweis bringt Sie oft schneller weiter.</p>
         <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          <Link href="/shop/gleiter-finder" className="btn-primary px-5 py-3 text-center" onClick={onNavigate}>Gleiter-Finder starten</Link>
-          <Link href="/shop" className="btn-secondary px-5 py-3 text-center" onClick={onNavigate}>Produkte ansehen</Link>
+          <Link href="/produkte/gleiter-finder" className="btn-primary px-5 py-3 text-center" onClick={onNavigate}>Gleiter-Finder starten</Link>
+          <Link href="/produkte" className="btn-secondary px-5 py-3 text-center" onClick={onNavigate}>Produkte ansehen</Link>
           <Link href="/kontakt?anliegen=Shop-Beratung" className="inline-flex min-h-11 items-center justify-center px-4 text-sm font-semibold text-premium-forest underline underline-offset-4" onClick={onNavigate}>Persönlich fragen</Link>
         </div>
       </section>

@@ -11,7 +11,7 @@ export const metadata: Metadata = buildMetadata({
   title: "Gleiter-Finder für Stühle und Tische",
   description:
     "Gleiter anhand von Gestellform, Außenmaß, Boden und benötigter Menge eingrenzen – mit persönlicher Hilfe bei unklarer Zuordnung.",
-  path: "/shop/gleiter-finder",
+  path: "/produkte/gleiter-finder",
   keywords: ["Gleiter finden", "Stuhlgleiter", "Rohrmaß", "Bodenschutz"],
 });
 
@@ -84,7 +84,7 @@ export default async function GliderFinderPage({ searchParams }: FinderPageProps
     "@context": "https://schema.org",
     "@type": "WebApplication",
     name: "DLMNS Gleiter-Finder",
-    url: absoluteUrl("/shop/gleiter-finder"),
+    url: absoluteUrl("/produkte/gleiter-finder"),
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description: metadata.description,
@@ -97,10 +97,10 @@ export default async function GliderFinderPage({ searchParams }: FinderPageProps
         <Breadcrumbs
           items={[
             { label: "Start", href: "/" },
-            { label: "Shop", href: "/shop" },
+            { label: "Produkte", href: "/produkte" },
             { label: "Gleiter-Finder" },
           ]}
-          currentPath="/shop/gleiter-finder"
+          currentPath="/produkte/gleiter-finder"
         />
         <div className="mt-8">
           <GliderFinder

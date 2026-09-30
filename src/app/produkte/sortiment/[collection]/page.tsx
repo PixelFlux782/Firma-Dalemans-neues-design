@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
   return buildMetadata({
     title: collection.seo.title ?? collection.title,
     description: collection.seo.description ?? collection.description,
-    path: `/shop/${collection.handle}`,
+    path: `/produkte/sortiment/${collection.handle}`,
     image: collection.image?.url ?? null,
     keywords: [collection.title, "Dalemans Zubehör", "Nachrüstung"],
   });
@@ -37,8 +37,8 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
     <div className="page-stack">
       <section className="grid overflow-hidden rounded-[2.5rem] border border-premium-beige/70 bg-white/55 shadow-premium lg:grid-cols-[.92fr_1.08fr]">
         <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-14">
-          <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Shop", href: "/shop" }, { label: collection.title }]} currentPath={`/shop/${collection.handle}`} />
-          <p className="section-eyebrow mt-10">Shop-Bereich</p>
+          <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: collection.title }]} currentPath={`/produkte/sortiment/${collection.handle}`} />
+          <p className="section-eyebrow mt-10">Produktbereich</p>
           <h1 className="mt-4 max-w-[14ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">{collection.title}</h1>
           <p className="section-lead mt-6 max-w-xl">{collection.description}</p>
           <Link href="#produkte" className="mt-8 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 hover:text-premium-bronze hover:underline">

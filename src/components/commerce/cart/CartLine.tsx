@@ -15,7 +15,7 @@ export default function CartLine({ line }: { line: CommerceCartLineModel }) {
   return (
     <article className="grid grid-cols-[5rem_minmax(0,1fr)] gap-4 border-b border-premium-beige/80 py-6" data-testid="cart-line">
       <Link
-        href={`/shop/produkt/${line.productHandle}?variant=${encodeURIComponent(line.variantId)}`}
+        href={`/produkte/artikel/${line.productHandle}?variant=${encodeURIComponent(line.variantId)}`}
         onClick={closeCart}
         className="relative h-20 overflow-hidden rounded-2xl bg-premium-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand"
       >
@@ -36,7 +36,7 @@ export default function CartLine({ line }: { line: CommerceCartLineModel }) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <Link
-              href={`/shop/produkt/${line.productHandle}?variant=${encodeURIComponent(line.variantId)}`}
+              href={`/produkte/artikel/${line.productHandle}?variant=${encodeURIComponent(line.variantId)}`}
               onClick={closeCart}
               className="font-semibold leading-5 text-premium-ink hover:text-premium-bronze focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand"
             >

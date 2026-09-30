@@ -262,10 +262,10 @@ export default function ShopNavigation() {
                     {item.label}<span aria-hidden className={`text-[0.55rem] transition-transform ${isOpen ? "rotate-180" : ""}`}>⌄</span>
                   </button>
                   {isOpen ? (
-                    <div id={`shop-flyout-${item.id}`} className={`absolute left-0 top-full max-w-[calc(100vw-2rem)] rounded-b-2xl border border-t-0 border-premium-beige/80 bg-premium-canvas p-5 shadow-premium-lg motion-safe:animate-[mega-menu-in_140ms_cubic-bezier(.22,1,.36,1)_both] ${item.id === "chairs" ? "w-[46rem]" : "min-w-[22rem]"}`} onPointerEnter={cancelClose} onPointerLeave={queueClose}>
-                      <div className={`grid gap-7 ${item.id === "chairs" ? "grid-cols-[minmax(11.25rem,1fr)_minmax(12.5rem,1.15fr)_minmax(11.25rem,1fr)] gap-x-8" : item.groups.length > 1 ? "grid-cols-3" : "grid-cols-1"}`}>
+                    <div id={`shop-flyout-${item.id}`} className={`absolute left-0 top-full max-w-[calc(100vw-2rem)] rounded-b-2xl border border-t-0 border-premium-beige/80 bg-premium-canvas p-5 shadow-premium-lg motion-safe:animate-[mega-menu-in_140ms_cubic-bezier(.22,1,.36,1)_both] ${item.id === "chairs" ? "w-[46rem]" : item.groups.length > 1 ? "w-[38rem]" : "min-w-[22rem]"}`} onPointerEnter={cancelClose} onPointerLeave={queueClose}>
+                      <div className={`grid gap-7 ${item.id === "chairs" ? "grid-cols-[minmax(11.25rem,1fr)_minmax(12.5rem,1.15fr)_minmax(11.25rem,1fr)] gap-x-8" : item.groups.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
                         {item.groups.map((group) => (
-                          <div key={group.title} className={item.id === "chairs" ? "min-w-0" : "min-w-[10rem]"}>
+                          <div key={group.title} className="min-w-0">
                             <p className="whitespace-nowrap text-[0.63rem] font-semibold uppercase tracking-[0.18em] text-premium-bronze">{group.title}</p>
                             <div className="mt-3 grid gap-0.5">
                               {group.links.map((link) => <Link key={link.href + link.label} href={link.href} className="rounded-lg px-2 py-2 text-[0.8rem] leading-5 text-premium-muted transition hover:bg-white/80 hover:text-premium-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">{link.label}</Link>)}

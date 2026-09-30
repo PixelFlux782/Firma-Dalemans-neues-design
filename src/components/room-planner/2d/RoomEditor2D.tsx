@@ -54,7 +54,7 @@ export default function RoomEditor2D() {
   const profile = RULE_PROFILES.find((item) => item.id === profileId) ?? RULE_PROFILES[0];
   const analysis = useMemo(() => activeVariant?.analysis ?? (seating ? analyzeEgress(plan, seating, profile) : null), [activeVariant, plan, seating, profile]);
   const report = useMemo(() => activeVariant?.report ?? (seating && analysis ? evaluateRules(plan, seating, analysis, profile) : null), [activeVariant, plan, seating, analysis, profile]);
-  const suggestions = useMemo(() => !activeVariant && seating && analysis && report ? suggestAisles(plan, seating, profile, analysis, report) : [], [activeVariant, plan, seating, profile, analysis, report]);
+  const suggestions = useMemo(() => !activeVariant && seating && analysis && report && (seating.rotation === undefined || seating.rotation === 0 || seating.rotation === 90) ? suggestAisles(plan, seating, profile, analysis, report) : [], [activeVariant, plan, seating, profile, analysis, report]);
   const activeCheck = report?.checks.find((check) => check.id === activeCheckId);
   const activeSuggestion = suggestions.find((suggestion) => suggestion.id === activeSuggestionId);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -262,13 +262,14 @@ export default function RoomEditor2D() {
   const seatingField = (label: string, key: "chairWidth" | "chairDepth" | "rowPitch" | "maximumChairsPerRow", min: number, step: string) => <label className="flex items-center justify-between gap-2 text-sm"><span>{label}</span><input aria-label={label.replace("(m)", "in Metern")} type="number" step={step} min={min} value={seatingRules[key]} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value) && value >= min && (key !== "maximumChairsPerRow" || Number.isInteger(value))) setSeatingRules((current) => ({ ...current, [key]: value })); }} className="w-24 rounded border border-premium-beige px-2 py-1 text-right" /></label>;
   const seatingPaths = useMemo(() => seating?.blocks.map((block) => {
     const rectangles: string[] = [], backs: string[] = [];
-    const displayedOrientation = seating.orientation;
-    const width = (displayedOrientation === "horizontal" ? seating.rules.chairWidth : seating.rules.chairDepth) * camera.scale;
-    const depth = (displayedOrientation === "horizontal" ? seating.rules.chairDepth : seating.rules.chairWidth) * camera.scale;
+    const width = seating.rules.chairWidth * camera.scale;
+    const depth = seating.rules.chairDepth * camera.scale;
     for (const seat of block.seats) {
       const x = size.width / 2 + (seat.x - camera.x) * camera.scale, y = size.height / 2 + (seat.y - camera.y) * camera.scale;
-      rectangles.push(`M${x - width / 2} ${y - depth / 2}h${width}v${depth}h${-width}Z`);
-      backs.push(displayedOrientation === "horizontal" ? `M${x - width / 2 + 2} ${seat.rotation === 180 ? y + depth / 2 - 3 : y - depth / 2 + 3}h${width - 4}` : `M${seat.rotation === 270 ? x + width / 2 - 3 : x - width / 2 + 3} ${y - depth / 2 + 2}v${depth - 4}`);
+      const angle = seat.rotation * Math.PI / 180, c = Math.cos(angle), s = Math.sin(angle);
+      const point = (dx: number, dy: number) => `${x + dx * c - dy * s} ${y + dx * s + dy * c}`;
+      rectangles.push(`M${point(-width / 2, -depth / 2)}L${point(width / 2, -depth / 2)}L${point(width / 2, depth / 2)}L${point(-width / 2, depth / 2)}Z`);
+      backs.push(`M${point(-width / 2 + 2, -depth / 2 + 3)}L${point(width / 2 - 2, -depth / 2 + 3)}`);
     }
     return { id: block.id, rectangles: rectangles.join(""), backs: backs.join("") };
   }) ?? [], [seating, camera, size]);
@@ -375,7 +376,7 @@ export default function RoomEditor2D() {
           {(variants.variants.length ? variants.variants : variants.fallback ? [variants.fallback] : []).map((variant) => {
             const title = PLANNING_PROFILES.find((item) => item.id === variant.profileId)?.name ?? "Annäherung";
             return <div key={variant.id} className={`rounded-lg border p-2 ${activeVariantId === variant.id ? "border-premium-forest bg-[#f1f5ef]" : "border-premium-beige"}`}>
-              <button type="button" aria-pressed={activeVariantId === variant.id} onClick={() => { setActiveVariantId(variant.id); setActiveCheckId(null); setSelection(null); }} className="w-full text-left"><strong>{variants.variants.length ? title : "Beste Annäherung"}{!variant.feasible ? " · technische Annäherung" : ""}</strong><span className="block">{variant.metrics.seatCount} Plätze · {variant.metrics.blockCount} Blöcke · {variant.metrics.aisleCount} Gänge</span><span className="block">Längster Weg: {variant.metrics.longestEgressRoute === undefined ? "nicht bestimmbar" : formatMeters(variant.metrics.longestEgressRoute)} · {variant.metrics.failures} Probleme</span></button>
+              <button type="button" aria-pressed={activeVariantId === variant.id} onClick={() => { setActiveVariantId(variant.id); setActiveCheckId(null); setSelection(null); }} className="w-full text-left"><strong>{variants.variants.length ? title : "Beste Annäherung"}{!variant.feasible ? " · technische Annäherung" : ""}</strong><span className="block">{variant.metrics.seatCount} Plätze · {variant.metrics.blockCount} Blöcke · {variant.metrics.aisleCount} Gänge · Ausrichtung: {Number((variant.seatingPlan.rotation ?? 0).toFixed(1))}°</span><span className="block">Längster Weg: {variant.metrics.longestEgressRoute === undefined ? "nicht bestimmbar" : formatMeters(variant.metrics.longestEgressRoute)} · {variant.metrics.failures} Probleme</span></button>
               {activeVariantId === variant.id && <div className="mt-2 space-y-1 border-t border-premium-beige pt-2">{variant.reasons.map((reason) => <p key={reason}>{reason}</p>)}{!variant.feasible && variant.report.checks.filter((check) => check.status === "fail").slice(0, 3).map((check) => <p key={check.id} className="text-red-800">{check.message}</p>)}{variant.feasible && <button type="button" onClick={() => adoptVariant(variant)} className="mt-1 rounded bg-premium-forest px-2 py-1 font-semibold text-white">Diese Variante übernehmen</button>}</div>}
             </div>;
           })}

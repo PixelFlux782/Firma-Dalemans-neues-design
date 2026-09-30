@@ -31,7 +31,7 @@ export type PlanVariant = {
 };
 export type VariantResult = { variants: PlanVariant[]; fallback?: PlanVariant; evaluatedCandidates: number };
 
-type Seed = { profile: PlanningProfile; orientation: SeatingOrientation; offset: SeatingGridOffset; rules: SeatingRules; seating: SeatingPlan };
+type Seed = { profile: PlanningProfile; orientation: SeatingOrientation; rotation?: number; offset: SeatingGridOffset; rules: SeatingRules; seating: SeatingPlan };
 const round = (value: number) => Number(value.toFixed(4));
 function rulesFor(base: SeatingRules, rule: RuleProfile, profile: PlanningProfile): SeatingRules {
   return {
@@ -45,9 +45,11 @@ function rulesFor(base: SeatingRules, rule: RuleProfile, profile: PlanningProfil
 function aisleTemplates(plan: RoomPlan, seating: SeatingPlan, width: number, maximum: number): AisleObject[][] {
   if (!seating.seats.length || maximum < 1) return [];
   const horizontal = seating.orientation === "horizontal";
-  const along = (p: Position) => horizontal ? p.x : p.y;
-  const cross = (p: Position) => horizontal ? p.y : p.x;
-  const point = (a: number, c: number): Position => horizontal ? { x: a, y: c } : { x: c, y: a };
+  const rotated = seating.rotation !== undefined && seating.rotation !== 0 && seating.rotation !== 90;
+  const angle = (seating.rotation ?? 0) * Math.PI / 180, cosine = Math.cos(angle), sine = Math.sin(angle);
+  const along = (p: Position) => rotated ? p.x * cosine + p.y * sine : horizontal ? p.x : p.y;
+  const cross = (p: Position) => rotated ? -p.x * sine + p.y * cosine : horizontal ? p.y : p.x;
+  const point = (a: number, c: number): Position => rotated ? { x: a * cosine - c * sine, y: a * sine + c * cosine } : horizontal ? { x: a, y: c } : { x: c, y: a };
   const roomAlong = plan.contour.points.map(along), roomCross = plan.contour.points.map(cross);
   const minA = Math.min(...roomAlong), maxA = Math.max(...roomAlong), minC = Math.min(...roomCross), maxC = Math.max(...roomCross);
   const margin = width / 2 + 0.02;
@@ -97,10 +99,10 @@ function utility(v: PlanVariant, profile: PlanningProfile, preference: Orientati
     - w.simplicity * (m.generatedAisleCount * 3 + m.blockCount) - w.exitBalance * exitImbalance * 20
     + (preference !== "automatic" && v.seatingPlan.orientation === preference ? 2 : 0);
 }
-function frontDeviation(front: RoomFront | undefined, orientation: SeatingOrientation): number | undefined {
+function frontDeviation(front: RoomFront | undefined, rotation: number): number | undefined {
   if (!front) return undefined;
   const angle = ((front.rotation % 180) + 180) % 180;
-  const target = orientation === "horizontal" ? 0 : 90;
+  const target = ((rotation % 180) + 180) % 180;
   const difference = Math.abs(angle - target);
   return Math.min(difference, 180 - difference);
 }
@@ -128,20 +130,22 @@ function explain(variant: PlanVariant, balanced?: PlanVariant): string[] {
 }
 export function generatePlanVariants(plan: RoomPlan, baseRules: SeatingRules = DEFAULT_SEATING_RULES, rule: RuleProfile, preference: OrientationPreference = "automatic", config: VariantConfig = DEFAULT_VARIANT_CONFIG): VariantResult {
   const front = plan.objects.find((object): object is RoomFront => object.type === "front");
-  const limit = Math.max(1, Math.floor(config.maximumCandidatePlans));
+  const limit = Math.min(48, Math.max(1, Math.floor(config.maximumCandidatePlans)));
   const offsets = config.gridOffsets.filter((value) => Number.isFinite(value) && value >= 0 && value < 1).slice(0, 4);
   if (!offsets.length || !plan.contour.closed) return { variants: [], evaluatedCandidates: 0 };
   const seeds: Seed[] = [];
-  for (const profile of PLANNING_PROFILES) for (const orientation of ["horizontal", "vertical"] as const) {
+  const angles = front ? [...new Set([0, -5, 5, -10, 10, -15, 15].map((delta) => ((front.rotation + delta) % 180 + 180) % 180))] : [];
+  for (const profile of PLANNING_PROFILES) for (const option of (front ? angles.map((rotation) => ({ orientation: (Math.abs(rotation - 90) < 1e-8 ? "vertical" : "horizontal") as SeatingOrientation, rotation })) : ([{ orientation: "horizontal" }, { orientation: "vertical" }] as { orientation: SeatingOrientation; rotation?: number }[]))) {
+    const { orientation, rotation } = option;
     const rules = rulesFor(baseRules, rule, profile);
-    for (const along of offsets) for (const cross of offsets) {
+    for (const along of (front ? offsets.slice(0, 2) : offsets)) for (const cross of (front ? offsets.slice(0, 2) : offsets)) {
       const offset = { along, cross };
-      const seating = generateSeatingPlan(plan, rules, orientation, offset);
-      if (seating.totalSeats) seeds.push({ profile, orientation, offset, rules, seating });
+      const seating = generateSeatingPlan(plan, rules, orientation, offset, rotation);
+      if (seating.totalSeats) seeds.push({ profile, orientation, rotation, offset, rules, seating });
     }
   }
-  const shortlisted = PLANNING_PROFILES.flatMap((profile) => (["horizontal", "vertical"] as const).flatMap((orientation) =>
-    seeds.filter((seed) => seed.profile.id === profile.id && seed.orientation === orientation)
+  const shortlisted = PLANNING_PROFILES.flatMap((profile) => (front ? angles : [0, 90]).flatMap((angle) =>
+    seeds.filter((seed) => seed.profile.id === profile.id && (front ? seed.rotation === angle : seed.orientation === (angle === 0 ? "horizontal" : "vertical")))
       .sort((a, b) => b.seating.totalSeats - a.seating.totalSeats || a.offset.along - b.offset.along || a.offset.cross - b.offset.cross).slice(0, 1)));
   const candidates: { seed: Seed; generated: AisleObject[] }[] = shortlisted.map((seed) => ({ seed, generated: [] }));
   const templates = shortlisted.map((seed) => aisleTemplates(plan, seed.seating, Math.max(seed.rules.defaultAisleWidth, rule.aisles.minimumWidth ?? 0), config.maximumGeneratedAisles));
@@ -150,7 +154,7 @@ export function generatePlanVariants(plan: RoomPlan, baseRules: SeatingRules = D
   }
   // WP04 suggestions are evaluated once per orientation and can complement geometric templates.
   for (const orientation of ["horizontal", "vertical"] as const) {
-    const seed = shortlisted.find((item) => item.profile.id === "balanced" && item.orientation === orientation);
+    const seed = shortlisted.find((item) => item.profile.id === "balanced" && item.orientation === orientation && (item.rotation === undefined || item.rotation === (orientation === "horizontal" ? 0 : 90)));
     if (!seed) continue;
     const egress = analyzeEgress(plan, seed.seating, rule);
     const report = evaluateRules(plan, seed.seating, egress, rule);
@@ -164,20 +168,20 @@ export function generatePlanVariants(plan: RoomPlan, baseRules: SeatingRules = D
   const queue = candidates.slice(0, limit - reserve);
   for (const candidate of queue) {
     if (evaluated.length >= limit) break;
-    const key = `${candidate.seed.profile.id}/${candidate.seed.orientation}/${candidate.seed.offset.along}/${candidate.generated.map((a) => a.id).join("+")}`;
+    const key = `${candidate.seed.profile.id}/${candidate.seed.orientation}/${candidate.seed.rotation ?? "axis"}/${candidate.seed.offset.along}/${candidate.seed.offset.cross}/${candidate.generated.map((a) => a.id).join("+")}`;
     if (seenCandidates.has(key)) continue;
     seenCandidates.add(key);
     const candidatePlan = candidate.generated.length ? { ...plan, objects: [...plan.objects, ...candidate.generated] } : plan;
-    const seating = faceFront(candidate.generated.length ? generateSeatingPlan(candidatePlan, candidate.seed.rules, candidate.seed.orientation, candidate.seed.offset) : candidate.seed.seating, front);
+    const seating = candidate.seed.rotation === undefined ? faceFront(candidate.generated.length ? generateSeatingPlan(candidatePlan, candidate.seed.rules, candidate.seed.orientation, candidate.seed.offset) : candidate.seed.seating, front) : candidate.generated.length ? generateSeatingPlan(candidatePlan, candidate.seed.rules, candidate.seed.orientation, candidate.seed.offset, candidate.seed.rotation) : candidate.seed.seating;
     if (!seating.totalSeats) continue;
     const analysis = analyzeEgress(candidatePlan, seating, rule);
     const report = evaluateRules(candidatePlan, seating, analysis, rule);
-    const metric = { ...metrics(candidatePlan, seating, analysis, report, candidate.generated), frontDeviation: frontDeviation(front, seating.orientation) };
+    const metric = { ...metrics(candidatePlan, seating, analysis, report, candidate.generated), frontDeviation: frontDeviation(front, seating.rotation ?? (seating.orientation === "horizontal" ? 0 : 90)) };
     evaluated.push({ id: `variant-${evaluated.length + 1}`, profileId: candidate.seed.profile.id, plan: candidatePlan, seatingPlan: seating, analysis, report, generatedAisles: candidate.generated,
       gridOffset: candidate.seed.offset, metrics: metric, feasible: report.counts.fail === 0 && analysis.seatsWithoutRoute === 0, reasons: [] });
   }
   // One additional suggestion per promising incomplete plan. Each step is bounded by the shared candidate and aisle limits.
-  const refinable = PLANNING_PROFILES.flatMap((profile) => evaluated.filter((variant) => variant.profileId === profile.id && !variant.feasible && variant.generatedAisles.length < config.maximumGeneratedAisles)
+  const refinable = PLANNING_PROFILES.flatMap((profile) => evaluated.filter((variant) => variant.profileId === profile.id && !variant.feasible && variant.generatedAisles.length < config.maximumGeneratedAisles && (!front || variant.seatingPlan.rotation === 0 || variant.seatingPlan.rotation === 90))
     .sort((a, b) => a.metrics.failures - b.metrics.failures || b.metrics.seatCount - a.metrics.seatCount || a.id.localeCompare(b.id)).slice(0, 2));
   for (const source of refinable) {
     if (evaluated.length >= limit) break;
@@ -186,12 +190,12 @@ export function generatePlanVariants(plan: RoomPlan, baseRules: SeatingRules = D
       if (evaluated.length >= limit) break;
       const generated: AisleObject = { id: `variant-refined-${source.id}-${suggestion.id}`, type: "aisle", start: suggestion.start, end: suggestion.end, width: suggestion.width };
       const proposed = { ...source.plan, objects: [...source.plan.objects, generated] };
-      const seating = faceFront(generateSeatingPlan(proposed, source.seatingPlan.rules, source.seatingPlan.orientation, source.gridOffset), front);
+      const seating = source.seatingPlan.rotation === undefined || !front ? faceFront(generateSeatingPlan(proposed, source.seatingPlan.rules, source.seatingPlan.orientation, source.gridOffset), front) : generateSeatingPlan(proposed, source.seatingPlan.rules, source.seatingPlan.orientation, source.gridOffset, source.seatingPlan.rotation);
       if (!seating.totalSeats) continue;
       const analysis = analyzeEgress(proposed, seating, rule);
       const report = evaluateRules(proposed, seating, analysis, rule);
       const generatedAisles = [...source.generatedAisles, generated];
-      const metric = { ...metrics(proposed, seating, analysis, report, generatedAisles), frontDeviation: frontDeviation(front, seating.orientation) };
+      const metric = { ...metrics(proposed, seating, analysis, report, generatedAisles), frontDeviation: frontDeviation(front, seating.rotation ?? (seating.orientation === "horizontal" ? 0 : 90)) };
       evaluated.push({ id: `variant-${evaluated.length + 1}`, profileId: source.profileId, plan: proposed, seatingPlan: seating, analysis, report, generatedAisles,
         gridOffset: source.gridOffset, metrics: metric, feasible: report.counts.fail === 0 && analysis.seatsWithoutRoute === 0, reasons: [] });
     }
@@ -209,6 +213,6 @@ export function generatePlanVariants(plan: RoomPlan, baseRules: SeatingRules = D
   }
   const balanced = selected.find((v) => v.profileId === "balanced");
   const variants = selected.map((variant) => ({ ...variant, reasons: explain(variant, balanced) }));
-  const fallback = variants.length ? undefined : unique.sort((a, b) => (front && preference === "automatic" ? (a.metrics.frontDeviation ?? 90) - (b.metrics.frontDeviation ?? 90) : 0) || a.metrics.failures - b.metrics.failures || b.metrics.seatCount - a.metrics.seatCount || a.id.localeCompare(b.id))[0];
+  const fallback = variants.length ? undefined : unique.sort((a, b) => a.metrics.failures - b.metrics.failures || (front && preference === "automatic" ? (a.metrics.frontDeviation ?? 90) - (b.metrics.frontDeviation ?? 90) : 0) || b.metrics.seatCount - a.metrics.seatCount || a.id.localeCompare(b.id))[0];
   return { variants, fallback: fallback && { ...fallback, reasons: explain(fallback) }, evaluatedCandidates: evaluated.length };
 }

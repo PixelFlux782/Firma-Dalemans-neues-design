@@ -24,7 +24,7 @@ export const DEFAULT_SEATING_RULES: Readonly<SeatingRules> = Object.freeze({
   maximumSeats: 5000, maximumCandidates: 30000,
 });
 export type SeatPlacement = { id: string; x: number; y: number; rotation: number; row: number; index: number };
-export type SeatingBlock = { id: string; seats: SeatPlacement[]; rowCount: number; seatsPerRow: number[] };
+export type SeatingBlock = { id: string; seats: SeatPlacement[]; rowCount: number; seatsPerRow: number[]; origin?: Position; rotation?: number; rowPitch?: number; seatPitch?: number };
 export type SeatingPlan = {
   blocks: SeatingBlock[];
   seats: SeatPlacement[];
@@ -34,6 +34,7 @@ export type SeatingPlan = {
   hints: string[];
   rules: SeatingRules;
   orientation: SeatingOrientation;
+  rotation?: number;
 };
 
 const EPS = 1e-8;
@@ -65,10 +66,13 @@ function segmentPolygonDistance(a: Position, b: Position, polygon: Position[]): 
     return Math.min(segmentDistance(a, p, q), segmentDistance(b, p, q), segmentDistance(p, a, b), segmentDistance(q, a, b));
   }));
 }
-export function seatPolygon(x: number, y: number, rules: SeatingRules, orientation: SeatingOrientation): Position[] {
-  const halfX = (orientation === "horizontal" ? rules.chairWidth : rules.chairDepth) / 2;
-  const halfY = (orientation === "horizontal" ? rules.chairDepth : rules.chairWidth) / 2;
-  return [{ x: x - halfX, y: y - halfY }, { x: x + halfX, y: y - halfY }, { x: x + halfX, y: y + halfY }, { x: x - halfX, y: y + halfY }];
+export function rotatePoint(point: Position, origin: Position, rotation: number): Position {
+  const angle = rotation * Math.PI / 180, c = Math.cos(angle), s = Math.sin(angle);
+  return { x: origin.x + point.x * c - point.y * s, y: origin.y + point.x * s + point.y * c };
+}
+export function seatPolygon(x: number, y: number, rules: SeatingRules, orientation: SeatingOrientation, rotation?: number): Position[] {
+  const angle = rotation ?? (orientation === "horizontal" ? 0 : 90);
+  return [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sy]) => rotatePoint({ x: sx * rules.chairWidth / 2, y: sy * rules.chairDepth / 2 }, { x, y }, angle));
 }
 type Exclusions = { obstacles: Position[][]; aisles: Position[][]; doors: { start: Position; end: Position }[] };
 function exclusions(plan: RoomPlan): Exclusions {
@@ -78,11 +82,11 @@ function exclusions(plan: RoomPlan): Exclusions {
     doors: plan.objects.filter((o) => o.type === "door").map((o) => doorSegment(plan.contour, o)).filter((o): o is { start: Position; end: Position } => o !== null),
   };
 }
-export function seatFits(plan: RoomPlan, rules: SeatingRules, orientation: SeatingOrientation, x: number, y: number): boolean {
-  return fits(plan, exclusions(plan), rules, orientation, x, y);
+export function seatFits(plan: RoomPlan, rules: SeatingRules, orientation: SeatingOrientation, x: number, y: number, rotation?: number): boolean {
+  return fits(plan, exclusions(plan), rules, orientation, x, y, rotation);
 }
-function fits(plan: RoomPlan, excluded: Exclusions, rules: SeatingRules, orientation: SeatingOrientation, x: number, y: number): boolean {
-  const seat = seatPolygon(x, y, rules, orientation);
+function fits(plan: RoomPlan, excluded: Exclusions, rules: SeatingRules, orientation: SeatingOrientation, x: number, y: number, rotation?: number): boolean {
+  const seat = seatPolygon(x, y, rules, orientation, rotation);
   if (!polygonInsideRoom(seat, plan.contour)) return false;
   if (boundaryDistance(seat, plan.contour.points) + EPS < rules.minimumWallClearance) return false;
   if (excluded.obstacles.some((polygon) => polygonDistance(seat, polygon) + EPS < rules.minimumObstacleClearance || polygonsOverlap(seat, polygon))) return false;
@@ -99,19 +103,23 @@ function validRules(rules: SeatingRules): boolean {
 }
 const empty = (rules: SeatingRules, orientation: SeatingOrientation, hints: string[]): SeatingPlan => ({ blocks: [], seats: [], totalSeats: 0, totalRows: 0, longestRow: 0, hints, rules, orientation });
 
-export function generateSeatingPlan(plan: RoomPlan, rules: SeatingRules = DEFAULT_SEATING_RULES, orientation: SeatingOrientation = "horizontal", offset: SeatingGridOffset = { along: 0, cross: 0 }): SeatingPlan {
+export function generateSeatingPlan(plan: RoomPlan, rules: SeatingRules = DEFAULT_SEATING_RULES, orientation: SeatingOrientation = "horizontal", offset: SeatingGridOffset = { along: 0, cross: 0 }, rotation?: number): SeatingPlan {
+  if (rotation !== undefined && !Number.isFinite(rotation)) return empty(rules, orientation, ["Rotation ist ungültig."]);
   if (!validRules(rules) || !["horizontal", "vertical"].includes(orientation)) return empty(rules, orientation, ["Bestuhlungsparameter sind ungültig."]);
   if (!plan.contour.closed || validateRoom(plan.contour).length || validateObjects(plan).some((issue) => issue.severity === "error")) return empty(rules, orientation, ["Raum oder Objekte sind ungültig. Bestuhlung kann nicht berechnet werden."]);
   const points = plan.contour.points;
+  const transformed = rotation !== undefined && rotation % 360 !== 0;
+  const origin = { x: points.reduce((sum, point) => sum + point.x, 0) / points.length, y: points.reduce((sum, point) => sum + point.y, 0) / points.length };
+  const localPoints = !transformed ? points : points.map((point) => rotatePoint({ x: point.x - origin.x, y: point.y - origin.y }, { x: 0, y: 0 }, -rotation!));
   const minX = Math.min(...points.map((p) => p.x)), maxX = Math.max(...points.map((p) => p.x));
   const minY = Math.min(...points.map((p) => p.y)), maxY = Math.max(...points.map((p) => p.y));
   const alongSize = rules.chairWidth;
   const crossSize = rules.chairDepth;
   const alongStep = alongSize + rules.minimumSideClearance;
-  const alongMin = orientation === "horizontal" ? minX : minY;
-  const alongMax = orientation === "horizontal" ? maxX : maxY;
-  const crossMin = orientation === "horizontal" ? minY : minX;
-  const crossMax = orientation === "horizontal" ? maxY : maxX;
+  const alongMin = !transformed ? (orientation === "horizontal" ? minX : minY) : Math.min(...localPoints.map((p) => p.x));
+  const alongMax = !transformed ? (orientation === "horizontal" ? maxX : maxY) : Math.max(...localPoints.map((p) => p.x));
+  const crossMin = !transformed ? (orientation === "horizontal" ? minY : minX) : Math.min(...localPoints.map((p) => p.y));
+  const crossMax = !transformed ? (orientation === "horizontal" ? maxY : maxX) : Math.max(...localPoints.map((p) => p.y));
   if (![offset.along, offset.cross].every((value) => Number.isFinite(value) && value >= 0 && value < 1)) return empty(rules, orientation, ["Rasteroffset ist ungültig."]);
   const columns = Math.max(0, Math.floor((alongMax - alongMin - alongSize - offset.along * alongStep + EPS) / alongStep) + 1);
   const rows = Math.max(0, Math.floor((crossMax - crossMin - crossSize - offset.cross * rules.rowPitch + EPS) / rules.rowPitch) + 1);
@@ -130,9 +138,9 @@ export function generateSeatingPlan(plan: RoomPlan, rules: SeatingRules = DEFAUL
     let runStart = -1;
     for (let column = 0; column <= columns; column++) {
       const along = alongMin + alongSize / 2 + (column + offset.along) * alongStep;
-      const x = orientation === "horizontal" ? along : cross;
-      const y = orientation === "horizontal" ? cross : along;
-      const allowed = column < columns && fits(plan, excluded, rules, orientation, x, y);
+      const position = !transformed ? (orientation === "horizontal" ? { x: along, y: cross } : { x: cross, y: along }) : rotatePoint({ x: along, y: cross }, origin, rotation!);
+      const { x, y } = position;
+      const allowed = column < columns && fits(plan, excluded, rules, orientation, x, y, rotation);
       if (allowed && runStart < 0) runStart = column;
       if (!allowed && runStart >= 0) { runs.push({ first: runStart, last: column - 1 }); runStart = -1; }
     }
@@ -148,16 +156,15 @@ export function generateSeatingPlan(plan: RoomPlan, rules: SeatingRules = DEFAUL
       for (let first = run.first; first <= run.last; first += rules.maximumChairsPerRow) {
         const last = Math.min(run.last, first + rules.maximumChairsPerRow - 1);
         const match = previous.find((item) => !occupied.has(item.block.id) && Math.min(item.last, last) >= Math.max(item.first, first));
-        const block = match?.block ?? { id: `block-${blocks.length + 1}`, seats: [], rowCount: 0, seatsPerRow: [] };
+        const block = match?.block ?? { id: `block-${blocks.length + 1}`, seats: [], rowCount: 0, seatsPerRow: [], origin: rotation === undefined ? undefined : origin, rotation: rotation ?? (orientation === "horizontal" ? 0 : 90), rowPitch: rules.rowPitch, seatPitch: alongStep };
         if (!match) blocks.push(block);
         occupied.add(block.id);
         let placed = 0;
         for (let column = first; column <= last; column++) {
           if (seats.length >= rules.maximumSeats) { stopped = true; break; }
           const along = alongMin + alongSize / 2 + (column + offset.along) * alongStep;
-          const x = orientation === "horizontal" ? along : cross;
-          const y = orientation === "horizontal" ? cross : along;
-          const seat = { id: `seat-${row}-${column}`, x, y, rotation: orientation === "horizontal" ? 0 : 90, row, index: column };
+          const { x, y } = !transformed ? (orientation === "horizontal" ? { x: along, y: cross } : { x: cross, y: along }) : rotatePoint({ x: along, y: cross }, origin, rotation!);
+          const seat = { id: `seat-${row}-${column}`, x, y, rotation: rotation ?? (orientation === "horizontal" ? 0 : 90), row, index: column };
           block.seats.push(seat); seats.push(seat); placed++;
         }
         if (placed) { block.rowCount++; block.seatsPerRow.push(placed); current.push({ first, last: first + placed - 1, block }); }
@@ -171,5 +178,5 @@ export function generateSeatingPlan(plan: RoomPlan, rules: SeatingRules = DEFAUL
   if (excluded.doors.length) hints.push("Türbereiche mit Freihalteabstand wurden von der Bestuhlung ausgenommen.");
   if (stopped) hints.push(`Die technische Obergrenze von ${rules.maximumSeats} Sitzplätzen wurde erreicht.`);
   if (!seats.length) hints.push("Keine gültige Bestuhlung möglich; der nutzbare Bereich ist zu klein oder vollständig freizuhalten.");
-  return { blocks, seats, totalSeats: seats.length, totalRows: new Set(seats.map((seat) => seat.row)).size, longestRow: Math.max(0, ...blocks.flatMap((block) => block.seatsPerRow)), hints, rules, orientation };
+  return { blocks, seats, totalSeats: seats.length, totalRows: new Set(seats.map((seat) => seat.row)).size, longestRow: Math.max(0, ...blocks.flatMap((block) => block.seatsPerRow)), hints, rules, orientation, rotation: rotation ?? (orientation === "horizontal" ? 0 : 90) };
 }

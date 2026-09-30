@@ -37,8 +37,9 @@ export function evaluateRules(plan: RoomPlan, seating: SeatingPlan, egress: Egre
     const maxDistance = profile.egress.maximumTravelDistance;
     blockChecks.push({ id: `${block.id}-distance`, ruleId: "travel-distance", status: maxDistance === undefined ? "not_applicable" : !routes.some((route) => route.valid) ? "warning" : longest > maxDistance + 1e-7 ? "fail" : "pass", message: maxDistance === undefined ? `${block.id}: Lauflänge nicht anwendbar.` : !routes.some((route) => route.valid) ? `${block.id}: Lauflänge ohne Ausgangsroute nicht bestimmbar.` : `${block.id}: längste modellierte Lauflinie ${longest.toFixed(2)} m; Profilwert ${maxDistance.toFixed(2)} m.`, affectedIds: [block.id], actualValue: longest, requiredValue: maxDistance });
     checks.push(...blockChecks);
-    const cross = seating.orientation === "horizontal" ? (seat: { x: number; y: number }) => seat.y : (seat: { x: number; y: number }) => seat.x;
-    const along = seating.orientation === "horizontal" ? (seat: { x: number; y: number }) => seat.x : (seat: { x: number; y: number }) => seat.y;
+    const angle = (seating.rotation ?? (seating.orientation === "horizontal" ? 0 : 90)) * Math.PI / 180;
+    const along = (seat: { x: number; y: number }) => seat.x * Math.cos(angle) + seat.y * Math.sin(angle);
+    const cross = (seat: { x: number; y: number }) => -seat.x * Math.sin(angle) + seat.y * Math.cos(angle);
     const minCross = Math.min(...block.seats.map(cross)), maxCross = Math.max(...block.seats.map(cross));
     const minAlong = Math.min(...block.seats.map(along)), maxAlong = Math.max(...block.seats.map(along));
     const nearbyCrossAisles = plan.objects.filter((o): o is AisleObject => o.type === "aisle" && Math.abs(along(o.end) - along(o.start)) > Math.abs(cross(o.end) - cross(o.start)) && Math.max(along(o.start), along(o.end)) >= minAlong && Math.min(along(o.start), along(o.end)) <= maxAlong);

@@ -27,11 +27,10 @@ function intersections(a: Position, b: Position, c: Position, d: Position): [num
 function segmentClear(a: Position, b: Position, plan: RoomPlan, seating: SeatingPlan, ignoreSeatIds: Set<string> = new Set()): boolean {
   if (!pointInPolygon(pointOn(a, b, 0.5), plan.contour.points)) return false;
   const obstacles = plan.objects.filter(isBlockingObject).map(obstaclePolygon);
-  const chairWidth = seating.rules.chairWidth;
-  const chairDepth = seating.rules.chairDepth;
+  const chairRadius = Math.hypot(seating.rules.chairWidth, seating.rules.chairDepth) / 2;
   const minX = Math.min(a.x, b.x), maxX = Math.max(a.x, b.x), minY = Math.min(a.y, b.y), maxY = Math.max(a.y, b.y);
-  const seats = seating.seats.filter((s) => !ignoreSeatIds.has(s.id) && s.x + chairWidth >= minX && s.x - chairWidth <= maxX && s.y + chairDepth >= minY && s.y - chairDepth <= maxY);
-  const polygons = [...obstacles, ...seats.map((s) => seatPolygon(s.x, s.y, seating.rules, seating.orientation))];
+  const seats = seating.seats.filter((s) => !ignoreSeatIds.has(s.id) && s.x + chairRadius >= minX && s.x - chairRadius <= maxX && s.y + chairRadius >= minY && s.y - chairRadius <= maxY);
+  const polygons = [...obstacles, ...seats.map((s) => seatPolygon(s.x, s.y, seating.rules, seating.orientation, s.rotation))];
   return !polygons.some((polygon) => pointInPolygon(pointOn(a, b, 0.25), polygon) || pointInPolygon(pointOn(a, b, 0.5), polygon) || pointInPolygon(pointOn(a, b, 0.75), polygon) || polygon.some((p, i) => intersections(a, b, p, polygon[(i + 1) % polygon.length])));
 }
 export function buildEgressGraph(plan: RoomPlan, seating: SeatingPlan): EgressGraph {
@@ -113,7 +112,9 @@ export function analyzeEgress(plan: RoomPlan, seating: SeatingPlan, profile: Rul
   const exits = plan.objects.filter((o): o is DoorObject => o.type === "door" && (o.role === "exit" || o.role === "emergency_exit"));
   const shortest = new Map(exits.map((door) => [door.id, shortestPaths(graph, `exit-${door.id}`)]));
   const rowAccess: RowAccess[] = [], routes: EscapeRouteResult[] = [];
-  const along = (s: SeatPlacement) => seating.orientation === "horizontal" ? s.x : s.y;
+  const angle = (seating.rotation ?? (seating.orientation === "horizontal" ? 0 : 90)) * Math.PI / 180;
+  const direction = { x: Math.cos(angle), y: Math.sin(angle) };
+  const along = (s: SeatPlacement) => seating.rotation === undefined && seating.orientation === "vertical" ? s.y : s.x * direction.x + s.y * direction.y;
   const seatHalf = seating.rules.chairWidth / 2;
   const nodeById = new Map(graph.nodes.map((n) => [n.id, n]));
   for (const block of seating.blocks) {
@@ -125,13 +126,13 @@ export function analyzeEgress(plan: RoomPlan, seating: SeatingPlan, profile: Rul
       const choices: { side: "left" | "right"; aisle: AisleObject; node: EgressNode; point: Position; outward: Position; distance: number }[] = [];
       for (const side of ["left", "right"] as const) {
         const seat = side === "left" ? seats[0] : seats.at(-1)!;
-        const outward: Position = seating.orientation === "horizontal" ? { x: seat.x + (side === "left" ? -seatHalf : seatHalf), y: seat.y } : { x: seat.x, y: seat.y + (side === "left" ? -seatHalf : seatHalf) };
+        const sign = side === "left" ? -1 : 1;
+        const outward: Position = { x: seat.x + sign * seatHalf * direction.x, y: seat.y + sign * seatHalf * direction.y };
         for (const aisle of aisles) {
           const t = projection(outward, aisle.start, aisle.end), point = pointOn(aisle.start, aisle.end, t);
           const gap = dist(outward, point) - aisle.width / 2;
           if (gap > seating.rules.defaultAisleWidth + EPS) continue;
-          if (seating.orientation === "horizontal" && (side === "left" ? point.x > outward.x + EPS : point.x < outward.x - EPS)) continue;
-          if (seating.orientation === "vertical" && (side === "left" ? point.y > outward.y + EPS : point.y < outward.y - EPS)) continue;
+          if (sign * ((point.x - outward.x) * direction.x + (point.y - outward.y) * direction.y) < -EPS) continue;
           if (!segmentClear(outward, point, plan, seating, new Set([seat.id]))) continue;
           const node = graph.nodes.filter((n) => n.type !== "exit" && dist(n.point, point) <= aisle.width / 2 + EPS).sort((a, b) => dist(a.point, point) - dist(b.point, point) || a.id.localeCompare(b.id))[0];
           if (node) choices.push({ side, aisle, node, point, outward, distance: dist(outward, point) + dist(point, node.point) + seatHalf });

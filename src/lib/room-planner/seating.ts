@@ -2,6 +2,7 @@ import { validateRoom } from "./geometry";
 import { aislePolygon, doorSegment, obstaclePolygon, pointInPolygon, polygonInsideRoom, polygonsOverlap, validateObjects, type Position, type RoomPlan } from "./objects";
 
 export type SeatingOrientation = "horizontal" | "vertical";
+export type SeatingGridOffset = { along: number; cross: number };
 export type SeatingRules = {
   chairWidth: number;
   chairDepth: number;
@@ -98,7 +99,7 @@ function validRules(rules: SeatingRules): boolean {
 }
 const empty = (rules: SeatingRules, orientation: SeatingOrientation, hints: string[]): SeatingPlan => ({ blocks: [], seats: [], totalSeats: 0, totalRows: 0, longestRow: 0, hints, rules, orientation });
 
-export function generateSeatingPlan(plan: RoomPlan, rules: SeatingRules = DEFAULT_SEATING_RULES, orientation: SeatingOrientation = "horizontal"): SeatingPlan {
+export function generateSeatingPlan(plan: RoomPlan, rules: SeatingRules = DEFAULT_SEATING_RULES, orientation: SeatingOrientation = "horizontal", offset: SeatingGridOffset = { along: 0, cross: 0 }): SeatingPlan {
   if (!validRules(rules) || !["horizontal", "vertical"].includes(orientation)) return empty(rules, orientation, ["Bestuhlungsparameter sind ungültig."]);
   if (!plan.contour.closed || validateRoom(plan.contour).length || validateObjects(plan).some((issue) => issue.severity === "error")) return empty(rules, orientation, ["Raum oder Objekte sind ungültig. Bestuhlung kann nicht berechnet werden."]);
   const points = plan.contour.points;
@@ -111,8 +112,9 @@ export function generateSeatingPlan(plan: RoomPlan, rules: SeatingRules = DEFAUL
   const alongMax = orientation === "horizontal" ? maxX : maxY;
   const crossMin = orientation === "horizontal" ? minY : minX;
   const crossMax = orientation === "horizontal" ? maxY : maxX;
-  const columns = Math.max(0, Math.floor((alongMax - alongMin - alongSize + EPS) / alongStep) + 1);
-  const rows = Math.max(0, Math.floor((crossMax - crossMin - crossSize + EPS) / rules.rowPitch) + 1);
+  if (![offset.along, offset.cross].every((value) => Number.isFinite(value) && value >= 0 && value < 1)) return empty(rules, orientation, ["Rasteroffset ist ungültig."]);
+  const columns = Math.max(0, Math.floor((alongMax - alongMin - alongSize - offset.along * alongStep + EPS) / alongStep) + 1);
+  const rows = Math.max(0, Math.floor((crossMax - crossMin - crossSize - offset.cross * rules.rowPitch + EPS) / rules.rowPitch) + 1);
   if (columns * rows > rules.maximumCandidates) return empty(rules, orientation, ["Raum ist für die konfigurierte Berechnungsgrenze zu groß. Maße oder Abstände anpassen."]);
   const excluded = exclusions(plan);
   const hints: string[] = [];
@@ -123,11 +125,11 @@ export function generateSeatingPlan(plan: RoomPlan, rules: SeatingRules = DEFAUL
   let interrupted = false;
   let stopped = false;
   for (let row = 0; row < rows && !stopped; row++) {
-    const cross = crossMin + crossSize / 2 + row * rules.rowPitch;
+    const cross = crossMin + crossSize / 2 + (row + offset.cross) * rules.rowPitch;
     const runs: { first: number; last: number }[] = [];
     let runStart = -1;
     for (let column = 0; column <= columns; column++) {
-      const along = alongMin + alongSize / 2 + column * alongStep;
+      const along = alongMin + alongSize / 2 + (column + offset.along) * alongStep;
       const x = orientation === "horizontal" ? along : cross;
       const y = orientation === "horizontal" ? cross : along;
       const allowed = column < columns && fits(plan, excluded, rules, orientation, x, y);
@@ -152,7 +154,7 @@ export function generateSeatingPlan(plan: RoomPlan, rules: SeatingRules = DEFAUL
         let placed = 0;
         for (let column = first; column <= last; column++) {
           if (seats.length >= rules.maximumSeats) { stopped = true; break; }
-          const along = alongMin + alongSize / 2 + column * alongStep;
+          const along = alongMin + alongSize / 2 + (column + offset.along) * alongStep;
           const x = orientation === "horizontal" ? along : cross;
           const y = orientation === "horizontal" ? cross : along;
           const seat = { id: `seat-${row}-${column}`, x, y, rotation: orientation === "horizontal" ? 0 : 90, row, index: column };

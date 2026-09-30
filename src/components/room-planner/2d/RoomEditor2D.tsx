@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as
 import { appendPoint, closeRoom, formatMeters, movePoint, orthogonalSnap, perimeter, pointById, polygonArea, snapPoint, validateRoom, wallLength, type Point2D } from "@/lib/room-planner/geometry";
 import { commit, createHistory, redo, undo } from "@/lib/room-planner/history";
 import { aislePolygon, doorSegment, emptyPlan, obstaclePolygon, validateObjects, wallEndpoints, wallOffset, type RoomObject, type RoomPlan, type ObstacleObject, type AisleObject } from "@/lib/room-planner/objects";
-import { DEFAULT_SEATING_RULES, generateSeatingPlan, type SeatingOrientation, type SeatingPlan, type SeatingRules } from "@/lib/room-planner/seating";
+import { DEFAULT_SEATING_RULES, generateSeatingPlan, type SeatingGridOffset, type SeatingOrientation, type SeatingPlan, type SeatingRules } from "@/lib/room-planner/seating";
+import { generatePlanVariants, PLANNING_PROFILES, type OrientationPreference, type PlanVariant, type VariantResult } from "@/lib/room-planner/variants";
 import { analyzeEgress } from "@/lib/room-planner/egress/analyzeEgress";
 import { evaluateRules } from "@/lib/room-planner/rules/evaluateRules";
 import { RULE_PROFILES } from "@/lib/room-planner/rules/profiles";
@@ -24,8 +25,6 @@ export default function RoomEditor2D() {
   const plan = history.present;
   const room = plan.contour;
   const [previewPlan, setPreviewPlan] = useState<RoomPlan | null>(null);
-  const shownPlan = previewPlan ?? plan;
-  const shownRoom = shownPlan.contour;
   const [tool, setTool] = useState<Tool>("wall");
   const [selection, setSelection] = useState<Selection>(null);
   const [camera, setCamera] = useState<Camera>({ x: 0, y: 0, scale: INITIAL_SCALE });
@@ -37,21 +36,31 @@ export default function RoomEditor2D() {
   const [notice, setNotice] = useState("");
   const [seatingRules, setSeatingRules] = useState<SeatingRules>({ ...DEFAULT_SEATING_RULES });
   const [orientation, setOrientation] = useState<SeatingOrientation>("horizontal");
+  const [gridOffset, setGridOffset] = useState<SeatingGridOffset>({ along: 0, cross: 0 });
+  const [orientationPreference, setOrientationPreference] = useState<OrientationPreference>("automatic");
+  const [variantCalculation, setVariantCalculation] = useState<{ plan: RoomPlan; rules: SeatingRules; profileId: string; preference: OrientationPreference; result: VariantResult } | null>(null);
+  const [activeVariantId, setActiveVariantId] = useState<string | null>(null);
+  const [variantsBusy, setVariantsBusy] = useState(false);
   const [profileId, setProfileId] = useState(RULE_PROFILES[0].id);
   const [applicabilityConfirmed, setApplicabilityConfirmed] = useState(false);
   const [activeCheckId, setActiveCheckId] = useState<string | null>(null);
   const [activeSuggestionId, setActiveSuggestionId] = useState<string | null>(null);
-  const [calculated, setCalculated] = useState<{ plan: RoomPlan; rules: SeatingRules; orientation: SeatingOrientation; result: SeatingPlan } | null>(null);
-  const seating = !previewPlan && calculated?.plan === plan && calculated.rules === seatingRules && calculated.orientation === orientation ? calculated.result : null;
+  const [calculated, setCalculated] = useState<{ plan: RoomPlan; rules: SeatingRules; orientation: SeatingOrientation; offset: SeatingGridOffset; result: SeatingPlan } | null>(null);
+  const variants = variantCalculation?.plan === plan && variantCalculation.rules === seatingRules && variantCalculation.profileId === profileId && variantCalculation.preference === orientationPreference ? variantCalculation.result : null;
+  const activeVariant = variants?.variants.find((item) => item.id === activeVariantId) ?? (variants?.fallback?.id === activeVariantId ? variants.fallback : null);
+  const shownPlan = previewPlan ?? activeVariant?.plan ?? plan;
+  const shownRoom = shownPlan.contour;
+  const seating = activeVariant?.seatingPlan ?? (!previewPlan && calculated?.plan === plan && calculated.rules === seatingRules && calculated.orientation === orientation ? calculated.result : null);
   const profile = RULE_PROFILES.find((item) => item.id === profileId) ?? RULE_PROFILES[0];
-  const analysis = useMemo(() => seating ? analyzeEgress(plan, seating, profile) : null, [plan, seating, profile]);
-  const report = useMemo(() => seating && analysis ? evaluateRules(plan, seating, analysis, profile) : null, [plan, seating, analysis, profile]);
-  const suggestions = useMemo(() => seating && analysis && report ? suggestAisles(plan, seating, profile, analysis, report) : [], [plan, seating, profile, analysis, report]);
+  const analysis = useMemo(() => activeVariant?.analysis ?? (seating ? analyzeEgress(plan, seating, profile) : null), [activeVariant, plan, seating, profile]);
+  const report = useMemo(() => activeVariant?.report ?? (seating && analysis ? evaluateRules(plan, seating, analysis, profile) : null), [activeVariant, plan, seating, analysis, profile]);
+  const suggestions = useMemo(() => !activeVariant && seating && analysis && report ? suggestAisles(plan, seating, profile, analysis, report) : [], [activeVariant, plan, seating, profile, analysis, report]);
   const activeCheck = report?.checks.find((check) => check.id === activeCheckId);
   const activeSuggestion = suggestions.find((suggestion) => suggestion.id === activeSuggestionId);
   const svgRef = useRef<SVGSVGElement>(null);
   const dragRef = useRef<Drag | null>(null);
   const nextId = useRef(1);
+  const parameterHistory = useRef(new WeakMap<RoomPlan, { rules: SeatingRules; orientation: SeatingOrientation; offset: SeatingGridOffset; seating: SeatingPlan | null }>());
   const roomRef = useRef(plan);
   roomRef.current = plan;
   const add = (next: RoomPlan) => setHistory((current) => commit(current, next));
@@ -91,8 +100,15 @@ export default function RoomEditor2D() {
     setAisleStart(null);
     setNotice("");
     setSelection(null);
-    setHistory((current) => action === "undo" ? undo(current) : redo(current));
-  }, []);
+    setActiveVariantId(null);
+    const next = action === "undo" ? undo(history) : redo(history);
+    const parameters = parameterHistory.current.get(next.present);
+    setHistory(next);
+    if (parameters) {
+      setSeatingRules(parameters.rules); setOrientation(parameters.orientation); setGridOffset(parameters.offset);
+      setCalculated(parameters.seating ? { plan: next.present, rules: parameters.rules, orientation: parameters.orientation, offset: parameters.offset, result: parameters.seating } : null);
+    }
+  }, [history]);
   useEffect(() => {
     const keyDown = (event: KeyboardEvent) => {
       if (event.code === "Space" && !(event.target instanceof HTMLInputElement)) { event.preventDefault(); setSpaceDown(true); }
@@ -157,6 +173,7 @@ export default function RoomEditor2D() {
     return { scale, x: wx - (x - size.width / 2) / scale, y: wy - (y - size.height / 2) / scale };
   });
   const onPointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
+    if (activeVariant) return;
     const at = local(event);
     const target = event.target as SVGElement;
     if (event.button === 1 || (event.button === 0 && spaceDown)) {
@@ -240,18 +257,45 @@ export default function RoomEditor2D() {
   const seatingField = (label: string, key: "chairWidth" | "chairDepth" | "rowPitch" | "maximumChairsPerRow", min: number, step: string) => <label className="flex items-center justify-between gap-2 text-sm"><span>{label}</span><input aria-label={label.replace("(m)", "in Metern")} type="number" step={step} min={min} value={seatingRules[key]} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value) && value >= min && (key !== "maximumChairsPerRow" || Number.isInteger(value))) setSeatingRules((current) => ({ ...current, [key]: value })); }} className="w-24 rounded border border-premium-beige px-2 py-1 text-right" /></label>;
   const seatingPaths = useMemo(() => seating?.blocks.map((block) => {
     const rectangles: string[] = [], backs: string[] = [];
-    const width = (orientation === "horizontal" ? seatingRules.chairWidth : seatingRules.chairDepth) * camera.scale;
-    const depth = (orientation === "horizontal" ? seatingRules.chairDepth : seatingRules.chairWidth) * camera.scale;
+    const displayedOrientation = seating.orientation;
+    const width = (displayedOrientation === "horizontal" ? seating.rules.chairWidth : seating.rules.chairDepth) * camera.scale;
+    const depth = (displayedOrientation === "horizontal" ? seating.rules.chairDepth : seating.rules.chairWidth) * camera.scale;
     for (const seat of block.seats) {
       const x = size.width / 2 + (seat.x - camera.x) * camera.scale, y = size.height / 2 + (seat.y - camera.y) * camera.scale;
       rectangles.push(`M${x - width / 2} ${y - depth / 2}h${width}v${depth}h${-width}Z`);
-      backs.push(orientation === "horizontal" ? `M${x - width / 2 + 2} ${y - depth / 2 + 3}h${width - 4}` : `M${x - width / 2 + 3} ${y - depth / 2 + 2}v${depth - 4}`);
+      backs.push(displayedOrientation === "horizontal" ? `M${x - width / 2 + 2} ${y - depth / 2 + 3}h${width - 4}` : `M${x - width / 2 + 3} ${y - depth / 2 + 2}v${depth - 4}`);
     }
     return { id: block.id, rectangles: rectangles.join(""), backs: backs.join("") };
-  }) ?? [], [seating, orientation, seatingRules, camera, size]);
+  }) ?? [], [seating, camera, size]);
   const highlightedSeats = new Set(activeCheck?.affectedIds.filter((id) => id.startsWith("seat-")) ?? []);
   const highlightedBlocks = new Set(activeCheck?.affectedIds.filter((id) => id.startsWith("block-")) ?? []);
   const highlightedObjects = new Set(activeCheck?.affectedIds.filter((id) => id.startsWith("object-")) ?? []);
+  const calculateVariants = () => {
+    setVariantsBusy(true);
+    setActiveVariantId(null);
+    window.setTimeout(() => {
+      const result = generatePlanVariants(plan, seatingRules, profile, orientationPreference);
+      setVariantCalculation({ plan, rules: seatingRules, profileId, preference: orientationPreference, result });
+      setActiveVariantId(result.variants.find((item) => item.profileId === "balanced")?.id ?? result.variants[0]?.id ?? result.fallback?.id ?? null);
+      setVariantsBusy(false);
+    }, 0);
+  };
+  const adoptVariant = (variant: PlanVariant) => {
+    if (!variant.feasible) return;
+    const adoptedPlan = { ...variant.plan, objects: [...variant.plan.objects] };
+    parameterHistory.current.set(plan, { rules: seatingRules, orientation, offset: gridOffset, seating: calculated?.plan === plan ? calculated.result : null });
+    parameterHistory.current.set(adoptedPlan, { rules: variant.seatingPlan.rules, orientation: variant.seatingPlan.orientation, offset: variant.gridOffset, seating: variant.seatingPlan });
+    add(adoptedPlan);
+    setSeatingRules(variant.seatingPlan.rules);
+    setOrientation(variant.seatingPlan.orientation);
+    setGridOffset(variant.gridOffset);
+    setCalculated({ plan: adoptedPlan, rules: variant.seatingPlan.rules, orientation: variant.seatingPlan.orientation, offset: variant.gridOffset, result: variant.seatingPlan });
+    setVariantCalculation(null);
+    setActiveVariantId(null);
+    setActiveCheckId(null);
+    setSelection(null);
+    setNotice("Variante übernommen. Der gesamte vorherige Plan ist mit einem Schritt rückgängig zu machen.");
+  };
 
   return <section aria-label="2D-Grundrisseditor" className="premium-card overflow-hidden">
     <div className="flex flex-wrap items-center gap-2 border-b border-premium-beige bg-white/80 p-3 sm:p-4">
@@ -271,7 +315,7 @@ export default function RoomEditor2D() {
         {shownRoom.closed && shownRoom.points.length >= 3 ? <polygon points={shownRoom.points.map((point) => { const p = coords.get(point.id)!; return `${p.x},${p.y}`; }).join(" ")} fill={errors.length ? "#c77c6c" : "#9ab393"} fillOpacity="0.24" /> : null}
         <g pointerEvents="none" aria-label="Berechnete Sitzplätze">{seatingPaths.map((block, index) => <g key={block.id}><path d={block.rectangles} fill={highlightedBlocks.has(block.id) ? "#bf6b30" : index % 2 ? "#477b70" : "#405b49"} stroke="#fff" strokeWidth="1" /><path d={block.backs} fill="none" stroke="#d6ece0" strokeWidth="2" /></g>)}{seating?.seats.filter((seat) => highlightedSeats.has(seat.id)).map((seat) => { const p = screen(seat); return <circle key={seat.id} cx={p.x} cy={p.y} r={Math.max(5, seatingRules.chairWidth * camera.scale / 2)} fill="#e58c39" fillOpacity="0.8" />; })}</g>
         {activeSuggestion && <g pointerEvents="none" aria-label="Vorschau des Gangvorschlags"><polygon points={shapePoints(aislePolygon({ id: activeSuggestion.id, type: "aisle", start: activeSuggestion.start, end: activeSuggestion.end, width: activeSuggestion.width }))} fill="#df9a45" fillOpacity="0.42" stroke="#ac5b1d" strokeWidth="3" strokeDasharray="8 5" /></g>}
-        {shownPlan.objects.filter((object): object is AisleObject => object.type === "aisle").map((object) => <g key={object.id}><polygon data-object-id={object.id} points={shapePoints(aislePolygon(object))} fill="#5596a0" fillOpacity="0.38" stroke={highlightedObjects.has(object.id) || selection?.id === object.id ? "#bd7647" : "#357682"} strokeWidth={highlightedObjects.has(object.id) || selection?.id === object.id ? 3 : 1.5} className={tool === "select" ? "cursor-move" : ""} /><line x1={screen(object.start).x} y1={screen(object.start).y} x2={screen(object.end).x} y2={screen(object.end).y} stroke="#357682" strokeDasharray="5 4" pointerEvents="none" /><Dimension a={screen(object.start)} b={screen(object.end)} label={`${formatMeters(wallLength(object.start, object.end))} · ${formatMeters(object.width)}`} />{selection?.id === object.id && (["start", "end"] as const).map((end) => <circle key={end} data-object-id={object.id} data-handle={end} cx={screen(object[end]).x} cy={screen(object[end]).y} r="7" fill="white" stroke="#bd7647" strokeWidth="3" className="cursor-move" />)}</g>)}
+        {shownPlan.objects.filter((object): object is AisleObject => object.type === "aisle").map((object) => { const proposed = !!activeVariant?.generatedAisles.some((aisle) => aisle.id === object.id); return <g key={object.id}><polygon data-object-id={object.id} points={shapePoints(aislePolygon(object))} fill={proposed ? "#df9a45" : "#5596a0"} fillOpacity="0.38" stroke={proposed ? "#ac5b1d" : highlightedObjects.has(object.id) || selection?.id === object.id ? "#bd7647" : "#357682"} strokeWidth={highlightedObjects.has(object.id) || selection?.id === object.id ? 3 : 1.5} strokeDasharray={proposed ? "8 5" : undefined} className={tool === "select" && !activeVariant ? "cursor-move" : ""} /><line x1={screen(object.start).x} y1={screen(object.start).y} x2={screen(object.end).x} y2={screen(object.end).y} stroke="#357682" strokeDasharray="5 4" pointerEvents="none" /><Dimension a={screen(object.start)} b={screen(object.end)} label={`${formatMeters(wallLength(object.start, object.end))} · ${formatMeters(object.width)}`} />{!activeVariant && selection?.id === object.id && (["start", "end"] as const).map((end) => <circle key={end} data-object-id={object.id} data-handle={end} cx={screen(object[end]).x} cy={screen(object[end]).y} r="7" fill="white" stroke="#bd7647" strokeWidth="3" className="cursor-move" />)}</g>; })}
         {aisleStart && hover && <g pointerEvents="none"><polygon points={shapePoints(aislePolygon({ id: "preview", type: "aisle", start: aisleStart, end: aisleEnd(hover, shiftDown), width: 1.2 }))} fill="#5596a0" fillOpacity="0.3" stroke="#357682" strokeDasharray="6 4" /><Dimension a={screen(aisleStart)} b={screen(aisleEnd(hover, shiftDown))} label={`${formatMeters(wallLength(aisleStart, aisleEnd(hover, shiftDown)))} · 1,20 m`} /></g>}
         {shownPlan.objects.filter((object): object is ObstacleObject => object.type === "obstacle").map((object) => <g key={object.id}><polygon data-object-id={object.id} points={shapePoints(obstaclePolygon(object))} fill="#bb7558" fillOpacity="0.58" stroke={selection?.id === object.id ? "#81462e" : "#a75b42"} strokeWidth={selection?.id === object.id ? 3 : 1.5} className={tool === "select" ? "cursor-move" : ""} /><text x={screen(object).x} y={screen(object).y + 4} textAnchor="middle" fontSize="12" fontWeight="600" fill="#442f26" pointerEvents="none">{object.obstacleType === "column" ? "Säule" : object.obstacleType === "stage" ? "Bühne" : object.obstacleType === "technical" ? "Technik" : object.obstacleType === "furniture" ? "Möbel" : "Sperrfläche"}</text></g>)}
         {shownRoom.walls.map((wall) => { const a = coords.get(wall.startPointId), b = coords.get(wall.endPointId); if (!a || !b) return null; const length = wallLength(pointById(shownRoom, wall.startPointId)!, pointById(shownRoom, wall.endPointId)!); return <g key={wall.id}>
@@ -297,9 +341,9 @@ export default function RoomEditor2D() {
         {seatingField("Reihenabstand (m)", "rowPitch", 0.1, "0.05")}
         {seatingField("Max. Stühle pro Reihe", "maximumChairsPerRow", 1, "1")}
         <label className="flex items-center justify-between gap-2 text-sm">Ausrichtung<select aria-label="Ausrichtung" value={orientation} onChange={(event) => setOrientation(event.target.value as SeatingOrientation)} className="rounded border border-premium-beige px-2 py-1"><option value="horizontal">Horizontal</option><option value="vertical">Vertikal</option></select></label>
-        <button type="button" disabled={!room.closed || errors.length > 0 || issues.some((issue) => issue.severity === "error") || seatingRules.rowPitch < seatingRules.chairDepth} onClick={() => setCalculated({ plan, rules: seatingRules, orientation, result: generateSeatingPlan(plan, seatingRules, orientation) })} className="w-full rounded-lg bg-premium-forest px-3 py-2 text-sm font-semibold text-white disabled:opacity-40">Bestuhlung berechnen</button>
+        <button type="button" disabled={!room.closed || errors.length > 0 || issues.some((issue) => issue.severity === "error") || seatingRules.rowPitch < seatingRules.chairDepth} onClick={() => { setActiveVariantId(null); setCalculated({ plan, rules: seatingRules, orientation, offset: gridOffset, result: generateSeatingPlan(plan, seatingRules, orientation, gridOffset) }); }} className="w-full rounded-lg bg-premium-forest px-3 py-2 text-sm font-semibold text-white disabled:opacity-40">Bestuhlung berechnen</button>
         {seatingRules.rowPitch < seatingRules.chairDepth && <p className="text-xs text-amber-800">Der Reihenabstand muss mindestens der Stuhltiefe entsprechen.</p>}
-        {seating && <div aria-live="polite" className="space-y-1 rounded-lg bg-[#f1f5ef] p-3 text-sm"><p className="font-semibold">{seating.totalSeats} Sitzplätze · {seating.blocks.length} Sitzblöcke</p><p>{seating.totalRows} Reihen · längste Reihe: {seating.longestRow} Plätze</p><p>Stuhl: {formatMeters(seatingRules.chairWidth)} × {formatMeters(seatingRules.chairDepth)}</p><p>Reihenabstand: {formatMeters(seatingRules.rowPitch)}</p>{seating.hints.map((hint) => <p key={hint} className="text-amber-900">Hinweis: {hint}</p>)}</div>}
+        {seating && <div aria-live="polite" className="space-y-1 rounded-lg bg-[#f1f5ef] p-3 text-sm"><p className="font-semibold">{seating.totalSeats} Sitzplätze · {seating.blocks.length} Sitzblöcke</p><p>{seating.totalRows} Reihen · längste Reihe: {seating.longestRow} Plätze</p><p>Stuhl: {formatMeters(seating.rules.chairWidth)} × {formatMeters(seating.rules.chairDepth)}</p><p>Reihenabstand: {formatMeters(seating.rules.rowPitch)}</p>{seating.hints.map((hint) => <p key={hint} className="text-amber-900">Hinweis: {hint}</p>)}</div>}
       </div>
       <div aria-label="Regelprüfung" className="space-y-3 border-t border-premium-beige pt-4"><h3 className="font-semibold">Regelprüfung</h3>
         <label className="block space-y-1 text-sm"><span>Regelprofil</span><select aria-label="Regelprofil" value={profileId} onChange={(event) => { setProfileId(event.target.value); setActiveCheckId(null); setActiveSuggestionId(null); }} className="w-full rounded border border-premium-beige px-2 py-1">{RULE_PROFILES.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
@@ -311,6 +355,25 @@ export default function RoomEditor2D() {
           <div className="space-y-1 rounded-lg border border-premium-beige p-3"><p className="font-semibold">Rettungswege</p><p>Ausgänge: {analysis.exitLoads.length} · Breite gesamt: {formatMeters(analysis.exitLoads.reduce((sum, load) => sum + load.clearWidth, 0))}</p><p>Längste modellierte Lauflinie: {analysis.longestRouteSeatId ? formatMeters(analysis.longestValidRoute) : "nicht bestimmbar"}</p><p>Plätze ohne Route: {analysis.seatsWithoutRoute}</p><p>Stärkste Ausgangsbelastung: {Math.max(0, ...analysis.exitLoads.map((load) => load.persons))} Personen</p><p>Schmalster Gang: {analysis.narrowestAisle === undefined ? "kein Gang" : formatMeters(analysis.narrowestAisle)}</p>{analysis.exitLoads.map((load) => <p key={load.doorId}>{load.doorId}: {load.persons} Personen · {formatMeters(load.clearWidth)} lichte Breite{load.requiredWidth !== undefined ? ` · rechnerisch ${formatMeters(load.requiredWidth)}` : ""}</p>)}{analysis.aisleLoads.map((load) => <p key={load.aisleId}>Gang {load.aisleId}: bis {load.persons} Personen · {formatMeters(load.width)}{load.requiredWidth !== undefined ? ` · rechnerisch ${formatMeters(load.requiredWidth)}` : ""}</p>)}</div>
           <div className="max-h-64 space-y-1 overflow-auto" aria-label="Prüfergebnisse">{report.checks.map((check) => <button key={check.id} type="button" aria-pressed={activeCheckId === check.id} onClick={() => setActiveCheckId((current) => current === check.id ? null : check.id)} className={`block w-full rounded border px-2 py-1 text-left text-xs ${activeCheckId === check.id ? "border-premium-forest" : "border-premium-beige"} ${check.status === "fail" ? "bg-red-50 text-red-900" : check.status === "warning" ? "bg-amber-50 text-amber-900" : check.status === "pass" ? "bg-green-50 text-green-900" : "bg-gray-50 text-gray-600"}`}>{check.status === "fail" ? "✕" : check.status === "warning" ? "!" : check.status === "pass" ? "✓" : "–"} {check.message}</button>)}</div>
           {!!suggestions.length && <div className="space-y-2 border-t border-premium-beige pt-3"><p className="font-semibold">Gangvorschläge</p>{suggestions.map((suggestion) => <div key={suggestion.id} className="rounded-lg border border-premium-beige p-2 text-xs"><button type="button" aria-pressed={activeSuggestionId === suggestion.id} onClick={() => setActiveSuggestionId((current) => current === suggestion.id ? null : suggestion.id)} className="w-full text-left font-semibold text-premium-forest">{suggestion.reason} · {formatMeters(suggestion.width)}</button><p>{suggestion.removedSeatIds.length} Plätze entfallen · neue Sitzplatzzahl: {suggestion.newSeatCount}</p><p>Im Modell behobene Regeln: {suggestion.resolvesRuleIds.length ? suggestion.resolvesRuleIds.join(", ") : "verbesserter Ausgangszugang"}</p><button type="button" onClick={() => { const next = applyAisleSuggestion(plan, suggestion, `object-${nextId.current++}`); add(next); setCalculated(null); setActiveSuggestionId(null); setActiveCheckId(null); setNotice("Gang übernommen. Bestuhlung bitte neu berechnen."); }} className="mt-2 rounded bg-premium-forest px-2 py-1 font-semibold text-white">Gang übernehmen</button></div>)}</div>}
+        </div>}
+      </div>
+      <div aria-label="Planvarianten" className="space-y-3 border-t border-premium-beige pt-4"><h3 className="font-semibold">Planvarianten</h3>
+        <label className="block space-y-1 text-sm"><span>Ausrichtung der Varianten</span><select aria-label="Ausrichtung der Varianten" value={orientationPreference} onChange={(event) => setOrientationPreference(event.target.value as OrientationPreference)} className="w-full rounded border border-premium-beige px-2 py-1"><option value="automatic">Automatisch</option><option value="horizontal">Horizontal bevorzugen</option><option value="vertical">Vertikal bevorzugen</option></select></label>
+        <button type="button" disabled={variantsBusy || !room.closed || errors.length > 0 || issues.some((issue) => issue.severity === "error") || seatingRules.rowPitch < seatingRules.chairDepth} onClick={calculateVariants} className="w-full rounded-lg bg-premium-forest px-3 py-2 text-sm font-semibold text-white disabled:opacity-40">{variantsBusy ? "Varianten werden berechnet …" : "Planvarianten berechnen"}</button>
+        {variants && <div aria-live="polite" className="space-y-2 text-xs">
+          <p className="text-premium-muted">{variants.evaluatedCandidates} Kandidaten mit dem gewählten Regelprofil geprüft.</p>
+          {!variants.variants.length && <p className="rounded bg-amber-50 p-2 text-amber-900">Keine Variante ohne technische Regelabweichung gefunden. Die beste berechnete Annäherung ist unten zur Prüfung sichtbar.</p>}
+          {(variants.variants.length ? variants.variants : variants.fallback ? [variants.fallback] : []).map((variant) => {
+            const title = PLANNING_PROFILES.find((item) => item.id === variant.profileId)?.name ?? "Annäherung";
+            return <div key={variant.id} className={`rounded-lg border p-2 ${activeVariantId === variant.id ? "border-premium-forest bg-[#f1f5ef]" : "border-premium-beige"}`}>
+              <button type="button" aria-pressed={activeVariantId === variant.id} onClick={() => { setActiveVariantId(variant.id); setActiveCheckId(null); setSelection(null); }} className="w-full text-left"><strong>{variants.variants.length ? title : "Beste Annäherung"}{!variant.feasible ? " · technische Annäherung" : ""}</strong><span className="block">{variant.metrics.seatCount} Plätze · {variant.metrics.blockCount} Blöcke · {variant.metrics.aisleCount} Gänge</span><span className="block">Längster Weg: {variant.metrics.longestEgressRoute === undefined ? "nicht bestimmbar" : formatMeters(variant.metrics.longestEgressRoute)} · {variant.metrics.failures} Probleme</span></button>
+              {activeVariantId === variant.id && <div className="mt-2 space-y-1 border-t border-premium-beige pt-2">{variant.reasons.map((reason) => <p key={reason}>{reason}</p>)}{!variant.feasible && variant.report.checks.filter((check) => check.status === "fail").slice(0, 3).map((check) => <p key={check.id} className="text-red-800">{check.message}</p>)}{variant.feasible && <button type="button" onClick={() => adoptVariant(variant)} className="mt-1 rounded bg-premium-forest px-2 py-1 font-semibold text-white">Diese Variante übernehmen</button>}</div>}
+            </div>;
+          })}
+          {!!variants.variants.length && <div className="overflow-x-auto"><table className="w-full border-collapse text-left"><caption className="mb-1 text-left font-semibold">Vergleich</caption><thead><tr><th className="pr-2">Kennzahl</th>{variants.variants.map((variant) => <th key={variant.id} className="pr-2">{PLANNING_PROFILES.find((item) => item.id === variant.profileId)?.name}</th>)}</tr></thead><tbody>{([
+            ["Sitzplätze", (v: PlanVariant) => String(v.metrics.seatCount)], ["Sitzblöcke", (v: PlanVariant) => String(v.metrics.blockCount)], ["Gänge", (v: PlanVariant) => String(v.metrics.aisleCount)],
+            ["Längster Weg", (v: PlanVariant) => v.metrics.longestEgressRoute === undefined ? "–" : formatMeters(v.metrics.longestEgressRoute)], ["Warnungen", (v: PlanVariant) => String(v.metrics.warnings)], ["Reihenabstand", (v: PlanVariant) => formatMeters(v.metrics.rowPitch)],
+          ] as [string, (v: PlanVariant) => string][]).map(([label, get]) => <tr key={label} className="border-t border-premium-beige"><th className="py-1 pr-2 font-medium">{label}</th>{variants.variants.map((variant) => <td key={variant.id} className="pr-2">{get(variant)}</td>)}</tr>)}</tbody></table></div>}
         </div>}
       </div>
     </aside></div>

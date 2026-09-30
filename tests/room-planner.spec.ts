@@ -6,6 +6,7 @@ test("Raumplaner verbindet Stuhlmodell, Maße und Kaufbedarf", async ({ page }) 
   page.on("pageerror", (error) => consoleErrors.push(error.message));
 
   await page.goto("/raumplaner");
+  await page.getByRole("button", { name: "3D ansehen" }).click();
   await expect(page.getByLabel("Stuhlmodell")).toHaveValue("dalemans-chair");
   await expect(page.getByLabel("Stuhlbreite")).toHaveValue("0.5");
   await expect(page.getByLabel("Stuhltiefe")).toHaveValue("0.55");
@@ -46,7 +47,8 @@ test("Raumplaner verwaltet mehrere Türen und Hindernisse", async ({ page }) => 
   page.on("pageerror", (error) => consoleErrors.push(error.message));
 
   await page.goto("/raumplaner");
-  await expect(page.getByText("3D-Raumplaner · V0.3")).toBeVisible();
+  await page.getByRole("button", { name: "3D ansehen" }).click();
+  await expect(page.getByRole("heading", { name: "Raumplaner", exact: true })).toBeVisible();
   await expect(page.getByTestId("chair-count")).toHaveText("270");
   await expect(page.locator("canvas")).toBeVisible();
 
@@ -63,12 +65,14 @@ test("Raumplaner verwaltet mehrere Türen und Hindernisse", async ({ page }) => 
 
   await page.getByRole("button", { name: "Position in 3D setzen" }).nth(1).click();
   await expect(page.getByText(/Türposition wählen/)).toBeVisible();
+  await page.locator("canvas").scrollIntoViewIfNeeded();
   const doorCanvas = await page.locator("canvas").boundingBox();
   if (doorCanvas) {
     for (let y = 0.15; y <= 0.85 && await page.getByText(/Türposition wählen/).isVisible(); y += 0.1) {
       for (let x = 0.1; x <= 0.9 && await page.getByText(/Türposition wählen/).isVisible(); x += 0.1) await page.mouse.click(doorCanvas.x + doorCanvas.width * x, doorCanvas.y + doorCanvas.height * y);
     }
   }
+  if (await page.getByText(/Türposition wählen/).isVisible()) await page.keyboard.press("Escape");
   await expect(page.getByText(/Türposition wählen/)).toBeHidden();
   await page.getByRole("button", { name: "Tür 2 entfernen" }).click();
   await expect(page.getByLabel("Tür 1 Position")).toHaveValue("8");
@@ -85,8 +89,14 @@ test("Raumplaner verwaltet mehrere Türen und Hindernisse", async ({ page }) => 
 
   await page.getByRole("button", { name: "Position in 3D setzen" }).last().click();
   await expect(page.getByText(/Position für Hindernis wählen/)).toBeVisible();
+  await page.locator("canvas").scrollIntoViewIfNeeded();
   const obstacleCanvas = await page.locator("canvas").boundingBox();
-  if (obstacleCanvas) await page.mouse.click(obstacleCanvas.x + obstacleCanvas.width / 2, obstacleCanvas.y + obstacleCanvas.height / 2);
+  if (obstacleCanvas) {
+    for (let y = 0.25; y <= 0.75 && await page.getByText(/Position für Hindernis wählen/).isVisible(); y += 0.1) {
+      for (let x = 0.25; x <= 0.75 && await page.getByText(/Position für Hindernis wählen/).isVisible(); x += 0.1) await page.mouse.click(obstacleCanvas.x + obstacleCanvas.width * x, obstacleCanvas.y + obstacleCanvas.height * y);
+    }
+  }
+  if (await page.getByText(/Position für Hindernis wählen/).isVisible()) await page.keyboard.press("Escape");
   await expect(page.getByText(/Position für Hindernis wählen/)).toBeHidden();
   await page.getByRole("button", { name: "Hindernis 2 entfernen" }).click();
   await expect(page.getByLabel("Hindernis 1 X-Position")).toHaveValue("-3");

@@ -3,6 +3,14 @@ import type { SeatingPlan } from "./seating";
 
 export type Position = { x: number; y: number };
 export type DoorObject = { id: string; type: "door"; wallId: string; offset: number; width: number; role?: "normal" | "exit" | "emergency_exit"; clearWidth?: number; openingDirection?: "inside" | "outside"; hingeSide?: "left" | "right" };
+export const DEFAULT_EXIT_CLEAR_WIDTH = 1.2;
+
+export function setDoorRole(door: DoorObject, role: NonNullable<DoorObject["role"]>): DoorObject {
+  if (role === "normal") return { ...door, role, clearWidth: undefined };
+  if (door.role === "exit" || door.role === "emergency_exit") return { ...door, role };
+  const clearWidth = Math.max(door.clearWidth ?? door.width, DEFAULT_EXIT_CLEAR_WIDTH);
+  return { ...door, role, width: Math.max(door.width, clearWidth), clearWidth };
+}
 export type ObstacleObject = { id: string; type: "obstacle"; obstacleType: "column" | "stage" | "technical" | "furniture" | "restricted"; x: number; y: number; width: number; depth: number; rotation: number };
 export type RoomFront = { id: string; type: "front"; x: number; y: number; width: number; rotation: number };
 export type Stage = { id: string; type: "stage"; x: number; y: number; width: number; depth: number; rotation: number };

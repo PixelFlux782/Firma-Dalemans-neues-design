@@ -161,7 +161,7 @@ export default function RoomEditor2D() {
   }, [snapshot, activeProjectId, storageReady]);
   const hasUnsavedChanges = () => {
     const active = projectsRef.current.find((project) => project.id === activeProjectId);
-    return saveStatus !== "saved" || !!active && (active.plan !== snapshot.plan || active.settings.seatingRules !== snapshot.settings.seatingRules || active.settings.orientation !== snapshot.settings.orientation || active.settings.gridOffset !== snapshot.settings.gridOffset || active.settings.orientationPreference !== snapshot.settings.orientationPreference || active.settings.profileId !== snapshot.settings.profileId || active.settings.applicabilityConfirmed !== snapshot.settings.applicabilityConfirmed);
+    return saveStatus !== "saved" || !!active && (JSON.stringify(active.plan) !== JSON.stringify(snapshot.plan) || JSON.stringify(active.settings) !== JSON.stringify(snapshot.settings));
   };
   const saveProject = () => {
     const active = projectsRef.current.find((project) => project.id === activeProjectId);

@@ -156,6 +156,18 @@ test("Browser speichert und lädt den Raum nach Neuladen ohne alte Undo-History"
   await expect(editor.getByRole("button", { name: "Rückgängig" })).toBeDisabled();
   await projects.getByRole("button", { name: "Neues Projekt" }).click();
   await expect(editor.getByText("Raumgrundriss zeichnen")).toBeVisible();
+  await expect(editor.getByText("0 Eckpunkte")).toBeVisible();
+  await expect(editor.getByRole("button", { name: "Rückgängig" })).toBeDisabled();
+  await expect(editor.getByRole("button", { name: "Wiederholen" })).toBeDisabled();
+  await expect(editor.getByLabel("Aktueller Plan")).toHaveCount(0);
+  await expect(svg.locator("[data-block-id], [data-seat-id]")).toHaveCount(0);
+  const fresh = await page.evaluate(() => {
+    const store = JSON.parse(localStorage.getItem("dalemans-room-planner-projects-v1")!);
+    return store.projects.find((project: { id: string }) => project.id === store.activeProjectId);
+  });
+  expect(fresh.plan.contour).toEqual({ points: [], walls: [], closed: false });
+  expect(fresh.plan.objects).toEqual([]);
+  expect(fresh.plan.seating).toBeUndefined();
   await projects.getByText(/Gespeicherte Projekte/).click();
   await projects.getByRole("button", { name: "Öffnen" }).first().click();
   await expect(editor.getByText(/Raumfläche:/)).toBeVisible();

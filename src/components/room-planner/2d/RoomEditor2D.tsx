@@ -14,6 +14,8 @@ import { planFingerprint } from "@/lib/room-planner/variantSummary";
 import { characteristic, compareVariants } from "@/lib/room-planner/variantComparison";
 import { editRow, moveBlock, removeBlock, removeSeat, rotateBlock, rowsOf } from "@/lib/room-planner/seatingEditing";
 import { analyzeCurrentPlan } from "@/lib/room-planner/currentPlanAnalysis";
+import { createProject, parseProject, parseProjectStore, projectFileName, PROJECT_SCHEMA_VERSION, PROJECT_STORAGE_KEY, type PlannerSettings, type RoomPlannerProject } from "@/lib/room-planner/projects";
+import ProjectControls from "./ProjectControls";
 
 const INITIAL_SCALE = 45;
 const MIN_SCALE = 12;
@@ -53,6 +55,13 @@ export default function RoomEditor2D() {
   const [activeCheckId, setActiveCheckId] = useState<string | null>(null);
   const [activeSuggestionId, setActiveSuggestionId] = useState<string | null>(null);
   const [calculated, setCalculated] = useState<{ plan: RoomPlan; rules: SeatingRules; orientation: SeatingOrientation; offset: SeatingGridOffset; result: SeatingPlan } | null>(null);
+  const [projects, setProjects] = useState<RoomPlannerProject[]>([]);
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [storageReady, setStorageReady] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"saved" | "dirty" | "saving">("saved");
+  const [projectError, setProjectError] = useState("");
+  const projectsRef = useRef<RoomPlannerProject[]>([]);
+  const skipNextAutosave = useRef(false);
   const currentFingerprint = useMemo(() => planFingerprint(plan), [plan]);
   const variantsCurrent = !!variantCalculation && variantCalculation.fingerprint === currentFingerprint && variantCalculation.rules === seatingRules && variantCalculation.profileId === profileId && variantCalculation.preference === orientationPreference;
   const variants = variantsCurrent ? variantCalculation!.result : null;
@@ -73,6 +82,133 @@ export default function RoomEditor2D() {
   const parameterHistory = useRef(new WeakMap<RoomPlan, { rules: SeatingRules; orientation: SeatingOrientation; offset: SeatingGridOffset; seating: SeatingPlan | null }>());
   const roomRef = useRef(plan);
   roomRef.current = plan;
+  const snapshot = useMemo(() => ({ plan, settings: { seatingRules, orientation, gridOffset, orientationPreference, profileId, applicabilityConfirmed } satisfies PlannerSettings }), [plan, seatingRules, orientation, gridOffset, orientationPreference, profileId, applicabilityConfirmed]);
+  const initialSnapshot = useRef(snapshot);
+  const writeProjects = (next: RoomPlannerProject[], activeId: string | null, markSaved = true): boolean => {
+    try {
+      if (next.length > 100) throw new Error("project-limit");
+      localStorage.setItem(PROJECT_STORAGE_KEY, JSON.stringify({ schemaVersion: PROJECT_SCHEMA_VERSION, activeProjectId: activeId, projects: next }));
+      projectsRef.current = next;
+      setProjects(next);
+      setActiveProjectId(activeId);
+      setProjectError("");
+      if (markSaved) setSaveStatus("saved");
+      return true;
+    } catch { setProjectError("Der lokale Speicher ist nicht verfügbar oder voll. Bitte exportieren Sie das Projekt als JSON."); setSaveStatus("dirty"); return false; }
+  };
+  const restoreProject = (project: RoomPlannerProject) => {
+    skipNextAutosave.current = true;
+    setHistory(createHistory(project.plan));
+    setSeatingRules(project.settings.seatingRules);
+    setOrientation(project.settings.orientation);
+    setGridOffset(project.settings.gridOffset);
+    setOrientationPreference(project.settings.orientationPreference);
+    setProfileId(RULE_PROFILES.some((profile) => profile.id === project.settings.profileId) ? project.settings.profileId : RULE_PROFILES[0].id);
+    setApplicabilityConfirmed(project.settings.applicabilityConfirmed);
+    setCalculated(null); setVariantCalculation(null); setActiveVariantId(null); setPreviewPlan(null);
+    setSelection(null); setAisleStart(null); setHover(null); setActiveCheckId(null); setActiveSuggestionId(null); setNotice("");
+    parameterHistory.current = new WeakMap();
+    nextId.current = Math.max(0, ...[...project.plan.contour.points, ...project.plan.objects].map((item) => Number(item.id.match(/^(?:point|object)-(\d+)$/)?.[1] ?? 0))) + 1;
+    setSaveStatus("saved");
+  };
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PROJECT_STORAGE_KEY);
+      if (raw) {
+        const stored = parseProjectStore(raw);
+        projectsRef.current = stored.projects;
+        setProjects(stored.projects);
+        setActiveProjectId(stored.activeProjectId);
+        const active = stored.projects.find((project) => project.id === stored.activeProjectId);
+        if (active) restoreProject(active);
+      } else {
+        const first = createProject("Unbenanntes Projekt", initialSnapshot.current.plan, initialSnapshot.current.settings);
+        writeProjects([first], first.id);
+      }
+    } catch (error) { setProjectError(error instanceof Error ? error.message : "Gespeicherte Projekte konnten nicht geladen werden."); }
+    skipNextAutosave.current = true;
+    setStorageReady(true);
+  }, []);
+  useEffect(() => {
+    if (!storageReady || !activeProjectId) return;
+    if (skipNextAutosave.current) { skipNextAutosave.current = false; return; }
+    setSaveStatus("dirty");
+    const timer = window.setTimeout(() => {
+      setSaveStatus("saving");
+      const next = projectsRef.current.map((project) => project.id === activeProjectId ? { ...project, plan: snapshot.plan, settings: snapshot.settings, updatedAt: new Date().toISOString() } : project);
+      writeProjects(next, activeProjectId);
+    }, 800);
+    return () => window.clearTimeout(timer);
+  }, [snapshot, activeProjectId, storageReady]);
+  useEffect(() => {
+    const flush = () => {
+      if (!storageReady || !activeProjectId) return;
+      try {
+        const next = projectsRef.current.map((project) => project.id === activeProjectId ? { ...project, ...snapshot, updatedAt: new Date().toISOString() } : project);
+        localStorage.setItem(PROJECT_STORAGE_KEY, JSON.stringify({ schemaVersion: PROJECT_SCHEMA_VERSION, activeProjectId, projects: next }));
+      } catch { /* The visible save/export error handles unavailable storage. */ }
+    };
+    window.addEventListener("pagehide", flush);
+    return () => window.removeEventListener("pagehide", flush);
+  }, [snapshot, activeProjectId, storageReady]);
+  const hasUnsavedChanges = () => {
+    const active = projectsRef.current.find((project) => project.id === activeProjectId);
+    return saveStatus !== "saved" || !!active && (active.plan !== snapshot.plan || active.settings.seatingRules !== snapshot.settings.seatingRules || active.settings.orientation !== snapshot.settings.orientation || active.settings.gridOffset !== snapshot.settings.gridOffset || active.settings.orientationPreference !== snapshot.settings.orientationPreference || active.settings.profileId !== snapshot.settings.profileId || active.settings.applicabilityConfirmed !== snapshot.settings.applicabilityConfirmed);
+  };
+  const saveProject = () => {
+    const active = projectsRef.current.find((project) => project.id === activeProjectId);
+    const nextProject = active ? { ...active, plan: snapshot.plan, settings: snapshot.settings, updatedAt: new Date().toISOString() } : createProject("Unbenanntes Projekt", snapshot.plan, snapshot.settings);
+    writeProjects(active ? projectsRef.current.map((project) => project.id === active.id ? nextProject : project) : [...projectsRef.current, nextProject], nextProject.id);
+  };
+  const newProject = () => {
+    if (hasUnsavedChanges() && !window.confirm("Ungespeicherte Änderungen verwerfen?")) return;
+    const project = createProject("Unbenanntes Projekt");
+    if (writeProjects([...projectsRef.current, project], project.id)) restoreProject(project);
+  };
+  const saveAsProject = (name: string) => {
+    const project = createProject(name, snapshot.plan, snapshot.settings);
+    if (writeProjects([...projectsRef.current, project], project.id)) skipNextAutosave.current = true;
+  };
+  const openProject = (id: string) => {
+    const project = projectsRef.current.find((item) => item.id === id);
+    if (!project || hasUnsavedChanges() && !window.confirm("Ungespeicherte Änderungen verwerfen?")) return;
+    if (writeProjects(projectsRef.current, id)) restoreProject(project);
+  };
+  const renameProject = (id: string, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed || trimmed.length > 120) { setProjectError("Der Projektname muss 1 bis 120 Zeichen enthalten."); return; }
+    writeProjects(projectsRef.current.map((project) => project.id === id ? { ...project, name: trimmed, updatedAt: new Date().toISOString(), ...(id === activeProjectId ? snapshot : {}) } : project), activeProjectId);
+  };
+  const duplicateProject = (id: string) => {
+    const source = projectsRef.current.find((project) => project.id === id);
+    if (!source) return;
+    const project = createProject(`${source.name} Kopie`, id === activeProjectId ? snapshot.plan : source.plan, id === activeProjectId ? snapshot.settings : source.settings);
+    writeProjects([...projectsRef.current, project], activeProjectId, false);
+  };
+  const deleteProject = (id: string) => {
+    const source = projectsRef.current.find((project) => project.id === id);
+    if (!source || !window.confirm(`Projekt „${source.name}“ wirklich löschen?`)) return;
+    const remaining = projectsRef.current.filter((project) => project.id !== id);
+    if (id !== activeProjectId) { writeProjects(remaining, activeProjectId, false); return; }
+    const next = remaining[0] ?? createProject("Unbenanntes Projekt");
+    if (writeProjects(remaining.length ? remaining : [next], next.id)) restoreProject(next);
+  };
+  const exportProject = () => {
+    const active = projectsRef.current.find((project) => project.id === activeProjectId);
+    if (!active) return;
+    const file = new Blob([JSON.stringify({ ...active, ...snapshot, updatedAt: new Date().toISOString() }, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(file);
+    const anchor = document.createElement("a"); anchor.href = url; anchor.download = projectFileName(active.name); document.body.append(anchor); anchor.click(); anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  const importProject = (text: string) => {
+    try {
+      const parsed = parseProject(text);
+      if (hasUnsavedChanges() && !window.confirm("Ungespeicherte Änderungen verwerfen?")) return;
+      const project = projectsRef.current.some((item) => item.id === parsed.id) ? createProject(parsed.name, parsed.plan, parsed.settings) : parsed;
+      if (writeProjects([...projectsRef.current, project], project.id)) restoreProject(project);
+    } catch (error) { setProjectError(error instanceof Error ? error.message : "Die Projektdatei konnte nicht importiert werden."); }
+  };
   const add = (next: RoomPlan) => setHistory((current) => commit(current, next));
   const applySeating = (next: SeatingPlan) => {
     if (!plan.seating || next === plan.seating) return;
@@ -360,6 +496,7 @@ export default function RoomEditor2D() {
   };
 
   return <section aria-label="2D-Grundrisseditor" className="premium-card overflow-hidden">
+    {storageReady && <ProjectControls projects={projects} activeId={activeProjectId} status={saveStatus} error={projectError} onNew={newProject} onSave={saveProject} onSaveAs={saveAsProject} onOpen={openProject} onRename={renameProject} onDuplicate={duplicateProject} onDelete={deleteProject} onExport={exportProject} onImport={importProject} onImportError={setProjectError} />}
     <div className="flex flex-wrap items-center gap-2 border-b border-premium-beige bg-white/80 p-3 sm:p-4">
       <div className="mr-auto flex gap-2" aria-label="Werkzeuge">
         <button type="button" aria-pressed={tool === "select"} onClick={() => setTool("select")} className={`rounded-lg px-4 py-2 text-sm font-semibold ${tool === "select" ? "bg-premium-forest text-white" : "border border-premium-beige text-premium-charcoal"}`}>Auswahl</button>

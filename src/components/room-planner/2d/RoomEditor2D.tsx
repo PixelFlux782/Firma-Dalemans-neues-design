@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { appendPoint, closeRoom, formatMeters, movePoint, orthogonalSnap, perimeter, pointById, polygonArea, snapPoint, validateRoom, wallLength, type Point2D } from "@/lib/room-planner/geometry";
@@ -17,7 +17,7 @@ import { analyzeCurrentPlan } from "@/lib/room-planner/currentPlanAnalysis";
 import { createProject, parseProject, parseProjectStore, projectFileName, PROJECT_SCHEMA_VERSION, PROJECT_STORAGE_KEY, type PlannerSettings, type RoomPlannerProject } from "@/lib/room-planner/projects";
 import ProjectControls from "./ProjectControls";
 import PlanOutputView from "./PlanOutputView";
-import { calculatePlanDemand, changeChairSelection, chairProducts, DEFAULT_CHAIR_SELECTION } from "@/lib/room-planner/chairSelection";
+import { calculatePlanDemand, changeChairSelection, chairProducts, DEFAULT_CHAIR_SELECTION, resolveChairShopTarget } from "@/lib/room-planner/chairSelection";
 
 const INITIAL_SCALE = 45;
 const MIN_SCALE = 12;
@@ -34,6 +34,7 @@ export default function RoomEditor2D() {
   const room = plan.contour;
   const chairSelection = plan.chairSelection ?? DEFAULT_CHAIR_SELECTION;
   const demand = calculatePlanDemand(plan);
+  const shopTarget = resolveChairShopTarget(plan);
   const [previewPlan, setPreviewPlan] = useState<RoomPlan | null>(null);
   const [tool, setTool] = useState<Tool>("wall");
   const [selection, setSelection] = useState<Selection>(null);
@@ -61,6 +62,8 @@ export default function RoomEditor2D() {
   const [calculated, setCalculated] = useState<{ plan: RoomPlan; rules: SeatingRules; orientation: SeatingOrientation; offset: SeatingGridOffset; result: SeatingPlan } | null>(null);
   const [projects, setProjects] = useState<RoomPlannerProject[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const projectName = projects.find((project) => project.id === activeProjectId)?.name ?? "Unbenanntes Projekt";
+  const inquiryHref = `/kontakt?${new URLSearchParams({ anliegen: "Raumplaner-Bedarf", produkt: demand.product?.title ?? "", variante: demand.variant?.title ?? "", nachricht: `Projekt: ${projectName}\nStuhlmodell: ${demand.product?.title ?? ""}\nVariante: ${demand.variant?.title ?? ""}\nBenötigt: ${demand.quantity} Stück\nBedarf aus dem Raumplaner.` })}#anfrage`;
   const [storageReady, setStorageReady] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"saved" | "dirty" | "saving">("saved");
   const [projectError, setProjectError] = useState("");
@@ -565,7 +568,7 @@ export default function RoomEditor2D() {
         <label className="block text-sm">Stuhlmodell<select aria-label="Stuhlmodell" value={chairSelection.productId} onChange={(event) => { const product = chairProducts.find((item) => item.id === event.target.value)!; selectChair(product.id, product.variants[0].id); }} className="mt-1 w-full rounded border border-premium-beige p-1">{chairProducts.map((product) => <option key={product.id} value={product.id}>{product.title}</option>)}</select></label>
         <label className="block text-sm">Variante<select aria-label="Stuhlvariante" value={chairSelection.variantId} onChange={(event) => selectChair(chairSelection.productId, event.target.value)} className="mt-1 w-full rounded border border-premium-beige p-1">{(demand.product?.variants ?? []).map((variant) => <option key={variant.id} value={variant.id}>{variant.title}</option>)}</select></label>
         <p className="text-xs text-premium-muted">Breite {formatMeters(chairSelection.width)} / Tiefe {formatMeters(chairSelection.depth)}. Produktmaße sind nicht verifiziert; Werte als Planungsannahme prüfen.</p>
-        <div aria-label="Bedarf" className="rounded-lg border border-premium-beige p-3 text-sm"><h4 className="font-semibold">Bedarf</h4><p>{demand.product?.title} / {demand.variant?.title}</p><p>Benötigt: {demand.quantity} Stühle / Sitzblöcke: {demand.blocks}</p>{demand.product && demand.variant && <a className="text-premium-forest underline" href={`/produkte/artikel/${demand.product.handle}?variant=${encodeURIComponent(demand.variant.id)}`}>Produkt ansehen und anfragen</a>}</div>
+        <div aria-label="Bedarf" aria-live="polite" className="space-y-2 rounded-lg border border-premium-beige p-3 text-sm"><h4 className="font-semibold">Bedarf</h4><p>{demand.product?.title} / {demand.variant?.title}</p><p>Benötigt: {demand.quantity} Stühle</p><p>Planungsmaß: {formatMeters(chairSelection.width)} × {formatMeters(chairSelection.depth)}</p><p className="text-xs text-premium-muted">Die verwendeten Abmessungen sind Planungsannahmen und keine verifizierten Produktmaße.</p>{shopTarget && <a className="block text-premium-forest underline" href={shopTarget.href}>Produkt im Shop ansehen</a>}{!shopTarget?.canAddToCart && <a className="block text-premium-forest underline" href={inquiryHref}>Bedarf anfragen</a>}</div>
         {seatingField("Stuhlbreite (m)", "chairWidth", 0.1, "0.05")}
         {seatingField("Stuhltiefe (m)", "chairDepth", 0.1, "0.05")}
         {seatingField("Reihenabstand (m)", "rowPitch", 0.1, "0.05")}

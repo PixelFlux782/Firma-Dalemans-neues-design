@@ -126,7 +126,7 @@ export default async function StackingChairModelPage({ params, searchParams }: P
           currentPath={modelPath(product.handle)}
         />
 
-        <ChairProductConfigurator product={product} initialConfiguration={initialConfiguration}>
+        <ChairProductConfigurator product={product} initialConfiguration={initialConfiguration} initialQuantity={Number(Array.isArray(query.menge) ? query.menge[0] : query.menge) || 1}>
             <p className="section-eyebrow">Stapelstuhl</p>
             <h1 className="mt-4 font-display text-4xl font-medium leading-[1.04] tracking-[-0.035em] text-premium-ink sm:text-5xl lg:text-[3.65rem]">
               Modell {product.stackingChair.modelCode}

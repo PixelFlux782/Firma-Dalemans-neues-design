@@ -59,14 +59,16 @@ function contactHref(
 export default function ChairConfigurator({
   product,
   initialConfiguration,
+  initialQuantity = 1,
   onVariantImageChange,
 }: {
   product: CommerceProduct;
   initialConfiguration: ChairConfiguration;
+  initialQuantity?: number;
   onVariantImageChange?: (image: CommerceImage | null) => void;
 }) {
   const [configuration, setConfiguration] = useState(initialConfiguration);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(() => normalizedQuantity(initialQuantity));
   const { addLines, pending } = useCart();
   const firstVariantEffect = useRef(true);
   const selectedVariant = useMemo(

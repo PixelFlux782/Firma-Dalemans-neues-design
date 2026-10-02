@@ -1,5 +1,7 @@
 ﻿import { localStackingChairProducts } from "@/lib/commerce/providers/local-stacking-chairs";
 import type { RoomPlan } from "./objects";
+import { canAddVariantToCart } from "@/lib/commerce/cart/lines";
+import { chairConfigurationFromVariant } from "@/lib/commerce/stacking-chairs";
 
 export type ChairSelection = { productId: string; variantId: string; width: number; depth: number };
 export const chairProducts = localStackingChairProducts;
@@ -22,6 +24,19 @@ export function calculatePlanDemand(plan: RoomPlan) {
     quantity: plan.seating?.blocks.reduce((sum, block) => sum + block.seats.length, 0) ?? 0,
     blocks: plan.seating?.blocks.filter((block) => block.seats.length > 0).length ?? 0,
   };
+}
+export function resolveChairShopTarget(plan: RoomPlan) {
+  const { product, variant, quantity } = calculatePlanDemand(plan);
+  if (!product || !variant) return null;
+  const configuration = chairConfigurationFromVariant(variant);
+  if (!configuration) return null;
+  const params = new URLSearchParams({
+    polster: configuration.upholstery === "seat" ? "sitz" : configuration.upholstery === "seat-back" ? "sitz-ruecken" : "ohne",
+    reihe: configuration.rowConnector ? "ja" : "nein",
+    ...(configuration.fabricGroup ? { gruppe: String(configuration.fabricGroup) } : {}),
+    ...(quantity > 0 ? { menge: String(quantity) } : {}),
+  });
+  return { href: `/produkte/stapelstuehle/${product.handle}?${params}`, canAddToCart: canAddVariantToCart(variant) };
 }
 export function changeChairSelection(plan: RoomPlan, selection: ChairSelection): RoomPlan {
   return {

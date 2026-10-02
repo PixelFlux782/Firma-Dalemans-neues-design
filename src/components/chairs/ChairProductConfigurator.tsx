@@ -15,10 +15,12 @@ const ChairVariantImageContext = createContext<{
 export default function ChairProductConfigurator({
   product,
   initialConfiguration,
+  initialQuantity,
   children,
 }: {
   product: CommerceProduct;
   initialConfiguration: ChairConfiguration;
+  initialQuantity?: number;
   children?: ReactNode;
 }) {
   const [image, setImage] = useState<CommerceImage | null>(null);
@@ -29,7 +31,7 @@ export default function ChairProductConfigurator({
       </div>
       <div className="min-w-0 lg:pt-3">
         {children}
-        <ChairConfigurator product={product} initialConfiguration={initialConfiguration} onVariantImageChange={setImage} />
+        <ChairConfigurator product={product} initialConfiguration={initialConfiguration} initialQuantity={initialQuantity} onVariantImageChange={setImage} />
       </div>
     </div>
   </ChairVariantImageContext.Provider>;

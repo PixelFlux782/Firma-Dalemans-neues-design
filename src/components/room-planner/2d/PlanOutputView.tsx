@@ -3,16 +3,17 @@
 import { aislePolygon, doorSegment, frontSegment, isBlockingObject, obstaclePolygon, type Position, type RoomPlan } from "@/lib/room-planner/objects";
 import { formatMeters } from "@/lib/room-planner/geometry";
 import { seatPolygon } from "@/lib/room-planner/seating";
-import { calculatePlanDemand } from "@/lib/room-planner/chairSelection";
+import { calculatePlanDemand, calculateRecommendedDemand } from "@/lib/room-planner/chairSelection";
 import type { analyzeCurrentPlan } from "@/lib/room-planner/currentPlanAnalysis";
 
 type ReturnTypeAnalysis = ReturnType<typeof analyzeCurrentPlan>;
-type Props = { plan: RoomPlan; name: string; issuedAt: Date; profileName: string; analysis: ReturnTypeAnalysis | null; onClose: () => void };
+type Props = { plan: RoomPlan; name: string; issuedAt: Date; profileName: string; analysis: ReturnTypeAnalysis | null; reservePercent: number; inquiryHref: string; shopHref?: string; onClose: () => void };
 const polygon = (points: Position[]) => points.map((p) => `${p.x},${p.y}`).join(" ");
 
-export default function PlanOutputView({ plan, name, issuedAt, profileName, analysis, onClose }: Props) {
+export default function PlanOutputView({ plan, name, issuedAt, profileName, analysis, reservePercent, inquiryHref, shopHref, onClose }: Props) {
   const seating = plan.seating;
   const demand = calculatePlanDemand(plan);
+  const recommended = calculateRecommendedDemand(plan, reservePercent);
   const points = [...plan.contour.points, ...plan.objects.flatMap((object) => object.type === "aisle" ? aislePolygon(object) : isBlockingObject(object) ? obstaclePolygon(object) : object.type === "front" ? Object.values(frontSegment(object)) : object.type === "door" ? Object.values(doorSegment(plan.contour, object) ?? {}) : []), ...(seating?.seats ?? [])];
   const minX = points.length ? Math.min(...points.map((p) => p.x)) : 0, maxX = points.length ? Math.max(...points.map((p) => p.x)) : 1;
   const minY = points.length ? Math.min(...points.map((p) => p.y)) : 0, maxY = points.length ? Math.max(...points.map((p) => p.y)) : 1;
@@ -26,7 +27,7 @@ export default function PlanOutputView({ plan, name, issuedAt, profileName, anal
   const important = checks.filter((check) => check.status === "fail" || check.status === "warning");
   const legend = [["Sitz", "#405b49"], ["Gang", "#5596a0"], ["Tür", "#347b7a"], ["Ausgang", "#13714a"], ["Hindernis", "#bb7558"], ["Bühne", "#aa7854"], ["Sperrfläche", "#957bb4"], ["Front", "#235e89"], ...(routes?.some((r) => r.valid && r.path?.length > 1) ? [["Rettungsweg", "#d97706"]] : [])];
   return <section className="plan-output" aria-label="Plan-Ausgabe">
-    <div className="plan-output-actions"><button type="button" onClick={onClose}>Zurück zum Editor</button><button type="button" onClick={() => window.print()}>Drucken / als PDF speichern</button></div>
+    <div className="plan-output-actions"><button type="button" onClick={onClose}>Zurück zum Editor</button><button type="button" onClick={() => window.print()}>Drucken / als PDF speichern</button><a href={inquiryHref}>Angebot für diese Bestuhlung anfordern</a>{shopHref && <a href={shopHref}>Stuhl konfigurieren</a>}</div>
     <header><p>Raumplan · Planungsansicht</p><h1>{name}</h1><p>Ausgabe: {issuedAt.toLocaleString("de-DE")}</p></header>
     <div className="plan-output-sheet"><div className="plan-output-drawing">
       <svg role="img" aria-label="Grundriss mit Sitzen, Gängen, Objekten und Ausgängen" viewBox={`${minX - margin} ${minY - margin} ${width + 2 * margin} ${height + 2 * margin}`} preserveAspectRatio="xMidYMid meet">
@@ -40,7 +41,7 @@ export default function PlanOutputView({ plan, name, issuedAt, profileName, anal
         {plan.objects.filter((o) => o.type === "door").map((o) => { if (o.type !== "door") return null; const s = doorSegment(plan.contour, o); if (!s) return null; const exit = o.role === "exit" || o.role === "emergency_exit"; const x = (s.start.x + s.end.x) / 2, y = (s.start.y + s.end.y) / 2; return <g key={o.id}><line x1={s.start.x} y1={s.start.y} x2={s.end.x} y2={s.end.y} stroke="#fff" strokeWidth=".14" /><line x1={s.start.x} y1={s.start.y} x2={s.end.x} y2={s.end.y} stroke={exit ? "#13714a" : "#347b7a"} strokeWidth=".08" /><text x={x} y={y - .18} textAnchor="middle" fontSize=".25" fill={exit ? "#13714a" : "#347b7a"}>{exit ? "Ausgang" : "Tür"}</text></g>; })}
       </svg>
       <p>Raumausdehnung: {formatMeters(roomWidth)} × {formatMeters(roomHeight)} · Maßangaben in Metern · Zeichnung proportional eingepasst, kein fester Druckmaßstab</p>
-    </div><div className="plan-output-details"><h2>Planinformationen</h2><dl>{[["Stuhlmodell", demand.product?.title ?? "Unbekannt"], ["Variante", demand.variant?.title ?? "Unbekannt"], ["Stuhlmaße", `${formatMeters(demand.selection.width)} × ${formatMeters(demand.selection.depth)} (Planungsannahme)`], ["Benötigte Stühle", demand.quantity]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}{[["Sitzplätze", seating?.seats.length ?? 0], ["Sitzblöcke", seating?.blocks.length ?? 0], ["Gänge", plan.objects.filter((o) => o.type === "aisle").length], ["Markierte Ausgänge", exitCount], ["Erreichbare Sitzplätze", unreachable === undefined ? "nicht berechnet" : Math.max(0, (seating?.seats.length ?? 0) - unreachable)], ["Nicht erreichbare Sitzplätze", unreachable ?? "nicht berechnet"], ["Längster Rettungsweg", analysis?.egress?.longestRouteSeatId ? formatMeters(analysis.egress.longestValidRoute) : "nicht bestimmbar"]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+    </div><div className="plan-output-details"><h2>Ihre Bestuhlung</h2><p>{recommended.quantity} geplante Sitzplätze · Projekt: {name}</p><dl>{[["Stuhlmodell", demand.product?.title ?? "Unbekannt"], ["Variante", demand.variant?.title ?? "Unbekannt"], ["Stuhlmaße", `${formatMeters(demand.selection.width)} × ${formatMeters(demand.selection.depth)} (Planungsannahme)`], ["Grundbedarf", recommended.quantity], [`Reserve (${reservePercent} %)`, recommended.reserveQuantity], ["Empfohlene Gesamtmenge", recommended.recommendedQuantity]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}{[["Sitzplätze", seating?.seats.length ?? 0], ["Sitzblöcke", seating?.blocks.length ?? 0], ["Gänge", plan.objects.filter((o) => o.type === "aisle").length], ["Markierte Ausgänge", exitCount], ["Erreichbare Sitzplätze", unreachable === undefined ? "nicht berechnet" : Math.max(0, (seating?.seats.length ?? 0) - unreachable)], ["Nicht erreichbare Sitzplätze", unreachable ?? "nicht berechnet"], ["Längster Rettungsweg", analysis?.egress?.longestRouteSeatId ? formatMeters(analysis.egress.longestValidRoute) : "nicht bestimmbar"]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><p>Reserve ist eine Bedarfsempfehlung und verändert keine Sitzplätze.</p>
       <h2>Regelstatus</h2><p>Planungs-/Referenzprüfung anhand des Regelprofils „{profileName}“.</p><p>{analysis?.report ? `${checks.filter((c) => c.status === "fail").length} Fehler · ${checks.filter((c) => c.status === "warning").length} Warnungen · ${checks.filter((c) => c.status === "not_applicable").length} Hinweise` : "Keine aktuelle Regelanalyse verfügbar."}</p><ul>{important.map((check) => <li key={check.id}>{check.message}</li>)}</ul>
       <h2>Legende</h2><div className="plan-output-legend">{legend.map(([label, color]) => <span key={label}><i style={{ background: color }} />{label}</span>)}</div></div></div>
   </section>;

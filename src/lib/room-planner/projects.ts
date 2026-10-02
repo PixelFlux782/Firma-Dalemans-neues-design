@@ -13,6 +13,7 @@ const position = (value: unknown) => record(value) && finite(value.x) && finite(
 const named = (value: unknown): value is string => typeof value === "string" && value.length > 0 && value.length <= 120;
 
 export type PlannerSettings = {
+  reservePercent: 0 | 2 | 5 | 10;
   seatingRules: SeatingRules;
   orientation: SeatingOrientation;
   gridOffset: SeatingGridOffset;
@@ -24,7 +25,7 @@ export type RoomPlannerProject = { id: string; name: string; createdAt: string; 
 export type ProjectStore = { schemaVersion: number; activeProjectId: string | null; projects: RoomPlannerProject[] };
 
 export function defaultPlannerSettings(): PlannerSettings {
-  return { seatingRules: { ...DEFAULT_SEATING_RULES }, orientation: "horizontal", gridOffset: { along: 0, cross: 0 }, orientationPreference: "automatic", profileId: "bavstaettv-reference", applicabilityConfirmed: false };
+  return { reservePercent: 5, seatingRules: { ...DEFAULT_SEATING_RULES }, orientation: "horizontal", gridOffset: { along: 0, cross: 0 }, orientationPreference: "automatic", profileId: "bavstaettv-reference", applicabilityConfirmed: false };
 }
 
 function normalizeSettings(raw: unknown): PlannerSettings {
@@ -40,6 +41,7 @@ function normalizeSettings(raw: unknown): PlannerSettings {
   }
   const offset = record(raw.gridOffset) && finite(raw.gridOffset.along) && finite(raw.gridOffset.cross) && raw.gridOffset.along >= 0 && raw.gridOffset.along < 1 && raw.gridOffset.cross >= 0 && raw.gridOffset.cross < 1 ? { along: raw.gridOffset.along, cross: raw.gridOffset.cross } : defaults.gridOffset;
   return {
+    reservePercent: [0, 2, 5, 10].includes(raw.reservePercent as number) ? raw.reservePercent as PlannerSettings["reservePercent"] : defaults.reservePercent,
     seatingRules,
     orientation: raw.orientation === "vertical" ? "vertical" : "horizontal",
     gridOffset: offset,

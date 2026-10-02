@@ -25,7 +25,12 @@ export function calculatePlanDemand(plan: RoomPlan) {
     blocks: plan.seating?.blocks.filter((block) => block.seats.length > 0).length ?? 0,
   };
 }
-export function resolveChairShopTarget(plan: RoomPlan) {
+export function calculateRecommendedDemand(plan: RoomPlan, reservePercent: number) {
+  const quantity = calculatePlanDemand(plan).quantity;
+  const reserveQuantity = Math.ceil(quantity * reservePercent / 100);
+  return { quantity, reservePercent, reserveQuantity, recommendedQuantity: quantity + reserveQuantity };
+}
+export function resolveChairShopTarget(plan: RoomPlan, quantityOverride?: number) {
   const { product, variant, quantity } = calculatePlanDemand(plan);
   if (!product || !variant) return null;
   const configuration = chairConfigurationFromVariant(variant);
@@ -34,7 +39,7 @@ export function resolveChairShopTarget(plan: RoomPlan) {
     polster: configuration.upholstery === "seat" ? "sitz" : configuration.upholstery === "seat-back" ? "sitz-ruecken" : "ohne",
     reihe: configuration.rowConnector ? "ja" : "nein",
     ...(configuration.fabricGroup ? { gruppe: String(configuration.fabricGroup) } : {}),
-    ...(quantity > 0 ? { menge: String(quantity) } : {}),
+    ...((quantityOverride ?? quantity) > 0 ? { menge: String(quantityOverride ?? quantity) } : {}),
   });
   return { href: `/produkte/stapelstuehle/${product.handle}?${params}`, canAddToCart: canAddVariantToCart(variant) };
 }

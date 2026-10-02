@@ -630,8 +630,10 @@
 }
 /* Raumplaner plan output */
 .plan-output{background:#fff;color:#24362b;padding:24px;max-width:1400px;margin:auto;font-family:Arial,sans-serif}
-.plan-output-actions{display:flex;justify-content:flex-end;gap:10px;margin-bottom:16px}
+.plan-output-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;margin-bottom:16px}
 .plan-output-actions button{border:1px solid #54705b;border-radius:6px;padding:8px 12px;font-weight:600}
+.plan-output-actions a{display:inline-flex;align-items:center;border:1px solid #54705b;border-radius:6px;padding:8px 12px;font-weight:600;color:#314c3a}
+.plan-output-actions a[href^="/kontakt"]{background:#314c3a;color:white}
 .plan-output h1{font-size:26px;font-weight:700;margin:3px 0}
 .plan-output h2{font-size:17px;font-weight:700;margin:18px 0 6px}
 .plan-output header{border-bottom:2px solid #405b49;padding-bottom:12px;margin-bottom:15px}

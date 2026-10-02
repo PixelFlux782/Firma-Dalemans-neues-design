@@ -17,7 +17,7 @@ import { analyzeCurrentPlan } from "@/lib/room-planner/currentPlanAnalysis";
 import { createProject, parseProject, parseProjectStore, projectFileName, PROJECT_SCHEMA_VERSION, PROJECT_STORAGE_KEY, type PlannerSettings, type RoomPlannerProject } from "@/lib/room-planner/projects";
 import ProjectControls from "./ProjectControls";
 import PlanOutputView from "./PlanOutputView";
-import { calculatePlanDemand, changeChairSelection, chairProducts, DEFAULT_CHAIR_SELECTION, resolveChairShopTarget } from "@/lib/room-planner/chairSelection";
+import { calculatePlanDemand, calculateRecommendedDemand, changeChairSelection, chairProducts, DEFAULT_CHAIR_SELECTION, resolveChairShopTarget } from "@/lib/room-planner/chairSelection";
 
 const INITIAL_SCALE = 45;
 const MIN_SCALE = 12;
@@ -34,7 +34,9 @@ export default function RoomEditor2D() {
   const room = plan.contour;
   const chairSelection = plan.chairSelection ?? DEFAULT_CHAIR_SELECTION;
   const demand = calculatePlanDemand(plan);
-  const shopTarget = resolveChairShopTarget(plan);
+  const [reservePercent, setReservePercent] = useState<PlannerSettings["reservePercent"]>(5);
+  const recommended = calculateRecommendedDemand(plan, reservePercent);
+  const shopTarget = resolveChairShopTarget(plan, recommended.recommendedQuantity);
   const [previewPlan, setPreviewPlan] = useState<RoomPlan | null>(null);
   const [tool, setTool] = useState<Tool>("wall");
   const [selection, setSelection] = useState<Selection>(null);
@@ -63,7 +65,7 @@ export default function RoomEditor2D() {
   const [projects, setProjects] = useState<RoomPlannerProject[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const projectName = projects.find((project) => project.id === activeProjectId)?.name ?? "Unbenanntes Projekt";
-  const inquiryHref = `/kontakt?${new URLSearchParams({ anliegen: "Raumplaner-Bedarf", produkt: demand.product?.title ?? "", variante: demand.variant?.title ?? "", nachricht: `Projekt: ${projectName}\nStuhlmodell: ${demand.product?.title ?? ""}\nVariante: ${demand.variant?.title ?? ""}\nBenötigt: ${demand.quantity} Stück\nBedarf aus dem Raumplaner.` })}#anfrage`;
+  const inquiryHref = `/kontakt?${new URLSearchParams({ anliegen: "Raumplaner-Bedarf", produkt: demand.product?.title ?? "", variante: demand.variant?.title ?? "", nachricht: `Anfrage aus dem Raumplaner\nProjekt: ${projectName}\nStuhlmodell: ${demand.product?.title ?? ""}\nVariante: ${demand.variant?.title ?? ""}\nGeplante Sitzplätze / Grundbedarf: ${recommended.quantity}\nReserve: ${reservePercent} % (${recommended.reserveQuantity} Stück)\nEmpfohlene Gesamtmenge: ${recommended.recommendedQuantity} Stück\nSitzblöcke: ${demand.blocks}\nGänge: ${plan.objects.filter((object) => object.type === "aisle").length}\nAusgänge: ${plan.objects.filter((object) => object.type === "door" && (object.role === "exit" || object.role === "emergency_exit")).length}\nRaumfläche: ${plan.contour.closed ? formatMeters(polygonArea(plan.contour.points)) + " m²" : "nicht bestimmt"}\nStuhlmaße: ${formatMeters(chairSelection.width)} × ${formatMeters(chairSelection.depth)} m (Planungsannahme)\nRegel-/Referenzprofil: ${RULE_PROFILES.find((item) => item.id === profileId)?.name ?? "nicht gewählt"}; keine behördliche Freigabe.` })}#anfrage`;
   const [storageReady, setStorageReady] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"saved" | "dirty" | "saving">("saved");
   const [projectError, setProjectError] = useState("");
@@ -90,7 +92,7 @@ export default function RoomEditor2D() {
   const parameterHistory = useRef(new WeakMap<RoomPlan, { rules: SeatingRules; orientation: SeatingOrientation; offset: SeatingGridOffset; seating: SeatingPlan | null }>());
   const roomRef = useRef(plan);
   roomRef.current = plan;
-  const snapshot = useMemo(() => ({ plan, settings: { seatingRules, orientation, gridOffset, orientationPreference, profileId, applicabilityConfirmed } satisfies PlannerSettings }), [plan, seatingRules, orientation, gridOffset, orientationPreference, profileId, applicabilityConfirmed]);
+  const snapshot = useMemo(() => ({ plan, settings: { seatingRules, orientation, gridOffset, orientationPreference, profileId, applicabilityConfirmed, reservePercent } satisfies PlannerSettings }), [plan, seatingRules, orientation, gridOffset, orientationPreference, profileId, applicabilityConfirmed, reservePercent]);
   const initialSnapshot = useRef(snapshot);
   const writeProjects = (next: RoomPlannerProject[], activeId: string | null, markSaved = true): boolean => {
     try {
@@ -113,6 +115,7 @@ export default function RoomEditor2D() {
     setOrientationPreference(project.settings.orientationPreference);
     setProfileId(RULE_PROFILES.some((profile) => profile.id === project.settings.profileId) ? project.settings.profileId : RULE_PROFILES[0].id);
     setApplicabilityConfirmed(project.settings.applicabilityConfirmed);
+    setReservePercent(project.settings.reservePercent);
     setCalculated(null); setVariantCalculation(null); setActiveVariantId(null); setPreviewPlan(null);
     setSelection(null); setAisleStart(null); setHover(null); setActiveCheckId(null); setActiveSuggestionId(null); setNotice("");
     parameterHistory.current = new WeakMap();
@@ -516,7 +519,7 @@ export default function RoomEditor2D() {
     setNotice("Variante übernommen. Der gesamte vorherige Plan ist mit einem Schritt rückgängig zu machen.");
   };
 
-  if (outputIssuedAt) return <PlanOutputView plan={plan} name={projects.find((project) => project.id === activeProjectId)?.name ?? "Unbenanntes Projekt"} issuedAt={outputIssuedAt} profileName={profile.name} analysis={currentAnalysis} onClose={() => setOutputIssuedAt(null)} />;
+  if (outputIssuedAt) return <PlanOutputView plan={plan} name={projects.find((project) => project.id === activeProjectId)?.name ?? "Unbenanntes Projekt"} issuedAt={outputIssuedAt} profileName={profile.name} analysis={currentAnalysis} reservePercent={reservePercent} inquiryHref={inquiryHref} shopHref={shopTarget?.href} onClose={() => setOutputIssuedAt(null)} />;
 
   return <section aria-label="2D-Grundrisseditor" className="premium-card overflow-hidden">
     {storageReady && <ProjectControls projects={projects} activeId={activeProjectId} status={saveStatus} error={projectError} onNew={newProject} onSave={saveProject} onSaveAs={saveAsProject} onOpen={openProject} onRename={renameProject} onDuplicate={duplicateProject} onDelete={deleteProject} onExport={exportProject} onImport={importProject} onImportError={setProjectError} />}
@@ -568,7 +571,7 @@ export default function RoomEditor2D() {
         <label className="block text-sm">Stuhlmodell<select aria-label="Stuhlmodell" value={chairSelection.productId} onChange={(event) => { const product = chairProducts.find((item) => item.id === event.target.value)!; selectChair(product.id, product.variants[0].id); }} className="mt-1 w-full rounded border border-premium-beige p-1">{chairProducts.map((product) => <option key={product.id} value={product.id}>{product.title}</option>)}</select></label>
         <label className="block text-sm">Variante<select aria-label="Stuhlvariante" value={chairSelection.variantId} onChange={(event) => selectChair(chairSelection.productId, event.target.value)} className="mt-1 w-full rounded border border-premium-beige p-1">{(demand.product?.variants ?? []).map((variant) => <option key={variant.id} value={variant.id}>{variant.title}</option>)}</select></label>
         <p className="text-xs text-premium-muted">Breite {formatMeters(chairSelection.width)} / Tiefe {formatMeters(chairSelection.depth)}. Produktmaße sind nicht verifiziert; Werte als Planungsannahme prüfen.</p>
-        <div aria-label="Bedarf" aria-live="polite" className="space-y-2 rounded-lg border border-premium-beige p-3 text-sm"><h4 className="font-semibold">Bedarf</h4><p>{demand.product?.title} / {demand.variant?.title}</p><p>Benötigt: {demand.quantity} Stühle</p><p>Planungsmaß: {formatMeters(chairSelection.width)} × {formatMeters(chairSelection.depth)}</p><p className="text-xs text-premium-muted">Die verwendeten Abmessungen sind Planungsannahmen und keine verifizierten Produktmaße.</p>{shopTarget && <a className="block text-premium-forest underline" href={shopTarget.href}>Produkt im Shop ansehen</a>}{!shopTarget?.canAddToCart && <a className="block text-premium-forest underline" href={inquiryHref}>Bedarf anfragen</a>}</div>
+        <div aria-label="Bedarf" aria-live="polite" className="space-y-2 rounded-lg border border-premium-beige p-3 text-sm"><h4 className="font-display text-lg font-medium">Ihre Bestuhlung</h4><p className="text-xs text-premium-muted">Projekt: {projectName}</p><p className="text-xl font-semibold">{recommended.quantity} geplante Sitzplätze</p><p>Stuhlmodell: {demand.product?.title}</p><p>Variante: {demand.variant?.title}</p><label className="flex items-center justify-between gap-2">Reserve für den Bedarf<select aria-label="Reserve in Prozent" value={reservePercent} onChange={(event) => setReservePercent(Number(event.target.value) as PlannerSettings["reservePercent"])} className="rounded border border-premium-beige bg-white p-1">{[0, 2, 5, 10].map((value) => <option key={value} value={value}>{value} %</option>)}</select></label><dl className="grid grid-cols-2 gap-1"><dt>Grundbedarf</dt><dd className="text-right">{recommended.quantity}</dd><dt>Reserve</dt><dd className="text-right">{recommended.reserveQuantity}</dd><dt className="font-semibold">Empfohlene Gesamtmenge</dt><dd className="text-right font-semibold">{recommended.recommendedQuantity}</dd></dl><p className="text-xs text-premium-muted">Die Reserve ist nur eine Bedarfsempfehlung und verändert den Raumplan nicht.</p><p>Planungsmaß: {formatMeters(chairSelection.width)} × {formatMeters(chairSelection.depth)}</p><p className="text-xs text-premium-muted">Die verwendeten Abmessungen sind Planungsannahmen und keine verifizierten Produktmaße. Die Regel-/Referenzprüfung ist keine behördliche Freigabe.</p><div className="grid gap-2"><a className="btn-primary text-center" href={inquiryHref}>Angebot für diese Bestuhlung anfordern</a>{shopTarget && <a className="btn-secondary text-center" href={shopTarget.href}>Stuhl konfigurieren</a>}</div></div>
         {seatingField("Stuhlbreite (m)", "chairWidth", 0.1, "0.05")}
         {seatingField("Stuhltiefe (m)", "chairDepth", 0.1, "0.05")}
         {seatingField("Reihenabstand (m)", "rowPitch", 0.1, "0.05")}

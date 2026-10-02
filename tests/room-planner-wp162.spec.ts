@@ -10,6 +10,8 @@ test("WP16.2 switches the same editor between 2D and 3D without changing history
   const before = await page.evaluate(() => localStorage.getItem("dalemans-room-planner-projects-v1"));
   await page.getByRole("button", { name: "3D", exact: true }).click();
   await expect(page.getByLabel("3D-Raumansicht")).toBeVisible();
+  await page.getByRole("button", { name: "Ansicht zurücksetzen" }).click();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("dalemans-room-planner-projects-v1"))).toBe(before);
   await expect(page.getByRole("button", { name: /Rückgängig/ })).toBeEnabled();
   await page.getByRole("button", { name: "2D", exact: true }).click();
   await expect(canvas).toBeVisible();

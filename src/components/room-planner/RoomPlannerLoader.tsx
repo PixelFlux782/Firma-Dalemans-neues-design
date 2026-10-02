@@ -9,5 +9,6 @@ const RoomPlanner = dynamic(() => import("./RoomPlannerModes"), {
 });
 
 export default function RoomPlannerLoader({ chairs }: { chairs: PlannerChair[] }) {
-  return <RoomPlanner chairs={chairs} />;
+  void chairs;
+  return <RoomPlanner />;
 }

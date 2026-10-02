@@ -16,6 +16,8 @@ import { editRow, moveBlock, removeBlock, removeSeat, rotateBlock, rowsOf } from
 import { analyzeCurrentPlan } from "@/lib/room-planner/currentPlanAnalysis";
 import { createProject, parseProject, parseProjectStore, projectFileName, PROJECT_SCHEMA_VERSION, PROJECT_STORAGE_KEY, type PlannerSettings, type RoomPlannerProject } from "@/lib/room-planner/projects";
 import ProjectControls from "./ProjectControls";
+import dynamic from "next/dynamic";
+const RoomView3D = dynamic(() => import("../3d/RoomView3D"), { ssr: false });
 import PlanOutputView from "./PlanOutputView";
 import { calculatePlanDemand, calculateRecommendedDemand, changeChairSelection, chairProducts, DEFAULT_CHAIR_SELECTION, resolveChairShopTarget } from "@/lib/room-planner/chairSelection";
 
@@ -29,6 +31,7 @@ type Camera = { x: number; y: number; scale: number };
 type Drag = { type: "pan"; startX: number; startY: number; camera: Camera } | { type: "point" | "object" | "start" | "end" | "block"; id: string; at: { x: number; y: number }; original: RoomPlan };
 
 export default function RoomEditor2D() {
+  const [view, setView] = useState<"2d" | "3d">("2d");
   const [history, setHistory] = useState(() => createHistory(emptyPlan()));
   const plan = history.present;
   const room = plan.contour;
@@ -545,6 +548,12 @@ export default function RoomEditor2D() {
         <div className="flex items-center justify-between gap-1 text-xs"><button type="button" aria-label="Ansicht verkleinern" onClick={() => zoomAt(1 / 1.25, size.width / 2, size.height / 2)} className="rounded border border-premium-beige px-2 py-1">−</button><span>{Math.round(camera.scale / INITIAL_SCALE * 100)} %</span><button type="button" aria-label="Ansicht vergrößern" onClick={() => zoomAt(1.25, size.width / 2, size.height / 2)} className="rounded border border-premium-beige px-2 py-1">+</button></div>
       </aside>
       <div className="planner-canvas relative min-w-0 bg-[#f6f4ed]">
+      <div className="absolute right-3 top-3 z-10 flex rounded-full border border-premium-beige bg-white p-1 shadow-sm" aria-label="Ansichtsmodus">
+        <button type="button" aria-pressed={view === "2d"} onClick={() => setView("2d")} className={`rounded-full px-4 py-1 text-xs font-semibold ${view === "2d" ? "bg-premium-forest text-white" : "text-premium-charcoal"}`}>2D</button>
+        <button type="button" aria-pressed={view === "3d"} onClick={() => setView("3d")} className={`rounded-full px-4 py-1 text-xs font-semibold ${view === "3d" ? "bg-premium-forest text-white" : "text-premium-charcoal"}`}>3D</button>
+      </div>
+      {view === "3d" && <div className="absolute inset-0" aria-label="3D-Raumansicht"><RoomView3D plan={plan} /></div>}
+      <div hidden={view !== "2d"} className="h-full">
       <svg ref={svgRef} role="img" aria-label="Grundriss Zeichenfläche" className={`block h-full min-h-[420px] w-full touch-none ${spaceDown ? "cursor-grab" : tool === "wall" ? "cursor-crosshair" : "cursor-default"}`} viewBox={`0 0 ${size.width} ${size.height}`} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onPointerLeave={() => { if (!dragRef.current) setHover(null); }}>
         <rect width={size.width} height={size.height} fill="#f6f4ed" />
         <Grid camera={camera} size={size} />
@@ -568,6 +577,7 @@ export default function RoomEditor2D() {
         {shownRoom.points.map((point) => { const p = coords.get(point.id)!; return <g key={point.id}><circle cx={p.x} cy={p.y} r={POINT_RADIUS + 8} fill="transparent" data-point-id={point.id} className={tool === "select" || point.id === room.points[0]?.id && tool === "wall" ? "cursor-pointer" : ""} /><circle cx={p.x} cy={p.y} r={selection?.id === point.id ? POINT_RADIUS + 2 : POINT_RADIUS} fill={selection?.id === point.id || nearestFirst && point.id === room.points[0]?.id ? "#bd7647" : "#fff"} stroke="#405b49" strokeWidth="2" pointerEvents="none" /></g>; })}
       </svg>
       {!room.points.length ? <div className="pointer-events-none absolute left-1/2 top-1/2 w-[min(85%,25rem)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-premium-beige bg-white/90 p-5 text-center shadow-sm"><p className="font-display text-xl text-premium-ink">Raumgrundriss zeichnen</p><p className="mt-2 text-sm text-premium-muted">{help}</p></div> : null}
+      </div>
     </div><aside aria-label="Eigenschaften" className="planner-properties flex min-h-0 flex-col gap-2 overflow-y-auto border-t border-premium-beige bg-white/90 p-3 lg:border-l lg:border-t-0"><details className="rounded border border-premium-beige p-2" open={!!selection}><summary className="cursor-pointer text-xs font-semibold">Eigenschaften {selection ? "· Auswahl" : "· keine Auswahl"}</summary><div className="mt-2 space-y-2">
       {selectedObject?.type === "door" && <><p className="text-sm font-semibold">Tür</p>{field("Breite (m)", selectedObject.width, (value) => updateObject(selectedObject.id, (object) => ({ ...object, width: value })), 0.01)}{field("Position auf Wand (m)", selectedObject.offset, (value) => updateObject(selectedObject.id, (object) => ({ ...object, offset: value })), 0)}<label className="flex items-center justify-between gap-2 text-sm">Rolle<select aria-label="Türrolle" value={selectedObject.role ?? "normal"} onChange={(event) => updateObject(selectedObject.id, (object) => object.type === "door" ? setDoorRole(object, event.target.value as "normal" | "exit" | "emergency_exit") : object)} className="rounded border border-premium-beige px-2 py-1"><option value="normal">Normale Tür</option><option value="exit">Ausgang</option><option value="emergency_exit">Notausgang</option></select></label>{selectedObject.role && selectedObject.role !== "normal" && field("Lichte Breite (m)", selectedObject.clearWidth ?? selectedObject.width, (value) => updateObject(selectedObject.id, (object) => ({ ...object, clearWidth: value })), 0.01)}</>}
       {selectedObject?.type === "obstacle" && <><label className="flex items-center justify-between gap-2 text-sm">Hindernistyp<select aria-label="Hindernistyp" value={selectedObject.obstacleType} onChange={(event) => updateObject(selectedObject.id, (object) => ({ ...object, obstacleType: event.target.value as ObstacleObject["obstacleType"] }))} className="max-w-32 rounded border border-premium-beige"><option value="column">Säule</option><option value="stage">Bühne</option><option value="technical">Technik / Mischpult</option><option value="furniture">Festes Möbel</option><option value="restricted">Sperrfläche</option></select></label>{field("X (m)", selectedObject.x, (v) => updateObject(selectedObject.id, (o) => ({ ...o, x: v })))}{field("Y (m)", selectedObject.y, (v) => updateObject(selectedObject.id, (o) => ({ ...o, y: v })))}{field("Breite (m)", selectedObject.width, (v) => updateObject(selectedObject.id, (o) => ({ ...o, width: v })), 0.01)}{field("Tiefe (m)", selectedObject.depth, (v) => updateObject(selectedObject.id, (o) => ({ ...o, depth: v })), 0.01)}{field("Rotation (°)", selectedObject.rotation, (v) => updateObject(selectedObject.id, (o) => ({ ...o, rotation: v })))}</>}

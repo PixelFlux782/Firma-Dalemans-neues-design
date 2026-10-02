@@ -662,3 +662,29 @@
   .plan-output-details ul{max-height:none;overflow:visible}
   .plan-output-details,.plan-output-drawing{break-inside:avoid}
 }
+/* Room planner workspace */
+.planner-page { max-width: none; }
+.planner-workspace { display: flex; flex-direction: column; }
+.planner-grid { display: grid; grid-template-columns: minmax(170px, 200px) minmax(0, 1fr) minmax(320px, 365px); min-height: 0; flex: 1; }
+.planner-tools, .planner-properties { min-height: 0; }
+.planner-canvas { min-height: 0; }
+.planner-canvas svg { height: 100%; }
+.planner-properties > details, .planner-properties > div { flex-shrink: 0; }
+.planner-properties select, .planner-properties input { min-width: 0; }
+.planner-conversion { z-index: 2; }
+@media (min-width: 1200px) {
+  .planner-workspace { height: max(550px, calc(100dvh - 225px)); }
+  .planner-tools, .planner-properties { overflow-y: auto; }
+  .planner-canvas svg { min-height: 0; }
+}
+@media (min-width: 900px) and (max-width: 1199px) {
+  .planner-grid { grid-template-columns: minmax(140px, 170px) minmax(0, 1fr) minmax(285px, 320px); }
+  .planner-workspace { height: max(550px, calc(100dvh - 225px)); }
+  .planner-tools, .planner-properties { overflow-y: auto; }
+}
+@media (max-width: 899px) {
+  .planner-grid { grid-template-columns: minmax(0, 1fr); }
+  .planner-tools { display: none; }
+  .planner-canvas svg { height: min(60dvh, 600px); }
+  .planner-properties { overflow: visible; }
+}

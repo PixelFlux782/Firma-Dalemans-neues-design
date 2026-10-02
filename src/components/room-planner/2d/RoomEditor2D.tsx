@@ -594,7 +594,7 @@ export default function RoomEditor2D() {
         <button type="button" aria-pressed={view === "2d"} onClick={() => setView("2d")} className={`rounded-full px-4 py-1 text-xs font-semibold ${view === "2d" ? "bg-premium-forest text-white" : "text-premium-charcoal"}`}>2D</button>
         <button type="button" aria-pressed={view === "3d"} onClick={() => setView("3d")} className={`rounded-full px-4 py-1 text-xs font-semibold ${view === "3d" ? "bg-premium-forest text-white" : "text-premium-charcoal"}`}>3D</button>
       </div>
-      {view === "3d" && <div className="absolute inset-0" aria-label="3D-Raumansicht"><RoomView3D plan={plan} /></div>}
+      {view === "3d" && <div className="absolute inset-0" aria-label="3D-Raumansicht"><RoomView3D plan={seating && !shownPlan.seating ? { ...shownPlan, seating } : shownPlan} /></div>}
       <div hidden={view !== "2d"} className="h-full">
       <svg ref={svgRef} role="img" aria-label="Grundriss Zeichenfläche" className={`block h-full min-h-[420px] w-full touch-none ${spaceDown ? "cursor-grab" : tool === "wall" ? "cursor-crosshair" : "cursor-default"}`} viewBox={`0 0 ${size.width} ${size.height}`} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onPointerLeave={() => { if (!dragRef.current) setHover(null); }}>
         <rect width={size.width} height={size.height} fill="#f6f4ed" />

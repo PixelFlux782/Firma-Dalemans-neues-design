@@ -1,24 +1,19 @@
 ﻿"use client";
 
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { OrbitControls, useGLTF } from "@react-three/drei";
+import { Component, Suspense, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
 import { doorSegment, frontSegment, type DoorObject, type RoomPlan } from "@/lib/room-planner/objects";
-import { chairDisplayAngle } from "@/lib/room-planner/visualization3d";
+import { chairDisplayAngle, planBounds } from "@/lib/room-planner/visualization3d";
 
-const DEFAULT_WALL_HEIGHT = 3;
+const DEFAULT_WALL_HEIGHT = 2.9;
+const CHAIR_MODEL = "/models/dalemans-chair-low.glb";
 const chairGeometry = new THREE.BoxGeometry(1, 1, 1);
 const seatMaterial = new THREE.MeshStandardMaterial({ color: "#64776c", roughness: 0.82 });
 const frameMaterial = new THREE.MeshStandardMaterial({ color: "#514f49", roughness: 0.76 });
-
-function planBounds(plan: RoomPlan) {
-  const points = plan.contour.points;
-  if (!points.length) return { x: 0, z: 0, span: 12 };
-  const xs = points.map(p => p.x), zs = points.map(p => p.y);
-  return { x: (Math.min(...xs) + Math.max(...xs)) / 2, z: (Math.min(...zs) + Math.max(...zs)) / 2, span: Math.max(4, Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs)) };
-}
 
 function CameraControls({ plan, reset }: { plan: RoomPlan; reset: number }) {
   const bounds = useMemo(() => planBounds(plan), [plan]);
@@ -26,16 +21,56 @@ function CameraControls({ plan, reset }: { plan: RoomPlan; reset: number }) {
   const { camera, size } = useThree();
   useLayoutEffect(() => {
     const fov = (camera as THREE.PerspectiveCamera).fov * Math.PI / 180;
-    const distance = bounds.span * 1.35 / Math.tan(fov / 2) * Math.max(1, size.height / Math.max(size.width, 1));
-    camera.position.set(bounds.x + distance * 0.62, distance * 0.72, bounds.z + distance * 0.62);
-    camera.lookAt(bounds.x, 0, bounds.z);
-    controls.current?.target.set(bounds.x, 0, bounds.z);
+    const fitFov = Math.min(fov, 2 * Math.atan(Math.tan(fov / 2) * size.width / Math.max(size.height, 1)));
+    const radius = Math.hypot(bounds.width, bounds.depth, DEFAULT_WALL_HEIGHT) / 2;
+    const distance = Math.max(5, radius * 1.45 / Math.sin(fitFov / 2));
+    camera.position.set(bounds.x + distance * 0.56, distance * 0.62, bounds.z + distance * 0.56);
+    camera.lookAt(bounds.x, DEFAULT_WALL_HEIGHT * 0.35, bounds.z);
+    controls.current?.target.set(bounds.x, DEFAULT_WALL_HEIGHT * 0.35, bounds.z);
     controls.current?.update();
   }, [bounds, camera, reset, size.width, size.height]);
-  return <OrbitControls ref={controls} makeDefault target={[bounds.x, 0, bounds.z]} minDistance={2} maxDistance={bounds.span * 10} maxPolarAngle={Math.PI / 2.05} />;
+  return <OrbitControls ref={controls} makeDefault target={[bounds.x, DEFAULT_WALL_HEIGHT * 0.35, bounds.z]} minDistance={Math.max(2, bounds.span * 0.3)} maxDistance={bounds.span * 6} maxPolarAngle={Math.PI / 2.08} />;
 }
 
-function Seats({ plan }: { plan: RoomPlan }) {
+class ChairErrorBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() { return this.state.failed ? this.props.fallback : this.props.children; }
+}
+
+function ModelSeats({ plan }: { plan: RoomPlan }) {
+  const { scene } = useGLTF(CHAIR_MODEL);
+  const chair = useMemo(() => {
+    let mesh: THREE.Mesh | null = null;
+    scene.traverse(object => { if (!mesh && (object as THREE.Mesh).isMesh) mesh = object as THREE.Mesh; });
+    if (!mesh) throw new Error("Chair GLB contains no mesh");
+    const source: THREE.Mesh = mesh;
+    source.geometry.computeBoundingBox();
+    const box = source.geometry.boundingBox!;
+    return { geometry: source.geometry, material: source.material, width: box.max.x - box.min.x, depth: box.max.z - box.min.z, floorOffset: -box.min.y };
+  }, [scene]);
+  const seats = useMemo(() => plan.seating?.seats ?? [], [plan.seating?.seats]);
+  const width = plan.seating?.rules.chairWidth ?? plan.chairSelection?.width ?? 0.5;
+  const depth = plan.seating?.rules.chairDepth ?? plan.chairSelection?.depth ?? 0.55;
+  const ref = useRef<THREE.InstancedMesh>(null);
+  useLayoutEffect(() => {
+    const mesh = ref.current;
+    if (!mesh) return;
+    const matrix = new THREE.Matrix4(), position = new THREE.Vector3(), rotation = new THREE.Quaternion();
+    const scale = new THREE.Vector3(width / chair.width, Math.min(width / chair.width, depth / chair.depth), depth / chair.depth);
+    const axis = new THREE.Vector3(0, 1, 0);
+    seats.forEach((seat, index) => {
+      rotation.setFromAxisAngle(axis, chairDisplayAngle(seat.rotation));
+      position.set(seat.x, chair.floorOffset * scale.y, seat.y);
+      mesh.setMatrixAt(index, matrix.compose(position, rotation, scale));
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.computeBoundingSphere();
+  }, [seats, width, depth, chair]);
+  return seats.length ? <instancedMesh ref={ref} args={[chair.geometry, chair.material, seats.length]} /> : null;
+}
+
+function FallbackSeats({ plan }: { plan: RoomPlan }) {
   const seats = useMemo(() => plan.seating?.seats ?? [], [plan.seating?.seats]);
   const width = plan.seating?.rules.chairWidth ?? plan.chairSelection?.width ?? 0.5;
   const depth = plan.seating?.rules.chairDepth ?? plan.chairSelection?.depth ?? 0.55;
@@ -82,7 +117,7 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
   }, [plan.contour.closed, points]);
   return <>
     <color attach="background" args={["#f5f3ee"]} />
-    <hemisphereLight args={["#ffffff", "#b8afa1", 2]} /><directionalLight position={[8, 15, 10]} intensity={2.2} />
+    <hemisphereLight args={["#ffffff", "#b8afa1", 1.5]} /><directionalLight position={[8, 15, 10]} intensity={2.1} />
     {floor && <mesh geometry={floor} rotation={[-Math.PI / 2, 0, 0]}><meshStandardMaterial color="#dcd6c9" roughness={0.94} side={THREE.DoubleSide} /></mesh>}
     {plan.contour.walls.map(wall => {
       const a = points.find(p => p.id === wall.startPointId), b = points.find(p => p.id === wall.endPointId);
@@ -107,7 +142,7 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
       }
       if (object.type === "aisle") {
         const dx = object.end.x - object.start.x, dz = object.end.y - object.start.y;
-        return <mesh key={object.id} renderOrder={2 + index} position={[(object.start.x + object.end.x) / 2, 0.016, (object.start.y + object.end.y) / 2]} rotation={[0, -Math.atan2(dz, dx), 0]}><boxGeometry args={[Math.hypot(dx, dz), 0.025, object.width]} /><meshStandardMaterial color={object.source === "generated" ? "#d6a964" : "#67a3a7"} transparent opacity={0.6} depthWrite={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} /></mesh>;
+        return <mesh key={object.id} renderOrder={2 + index} position={[(object.start.x + object.end.x) / 2, 0.016, (object.start.y + object.end.y) / 2]} rotation={[0, -Math.atan2(dz, dx), 0]}><boxGeometry args={[Math.hypot(dx, dz), 0.025, object.width]} /><meshStandardMaterial color={object.source === "generated" ? "#d6a964" : "#67a3a7"} transparent opacity={0.32} depthWrite={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} /></mesh>;
       }
       if (object.type === "front") {
         const segment = frontSegment(object);
@@ -117,9 +152,9 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
       const stage = object.type === "stage" || object.type === "obstacle" && object.obstacleType === "stage";
       const reserved = object.type === "reservedArea" || object.type === "obstacle" && object.obstacleType === "restricted";
       const height = reserved ? 0.035 : stage ? 0.35 : 1.2;
-      return <mesh key={object.id} renderOrder={reserved ? 1 : 0} position={[object.x, height / 2, object.y]} rotation={[0, -object.rotation * Math.PI / 180, 0]}><boxGeometry args={[object.width, height, object.depth]} /><meshStandardMaterial color={reserved ? "#947bb2" : stage ? "#a47752" : "#81776d"} transparent={reserved} opacity={reserved ? 0.65 : 1} depthWrite={!reserved} /></mesh>;
+      return <mesh key={object.id} renderOrder={reserved ? 1 : 0} position={[object.x, height / 2, object.y]} rotation={[0, -object.rotation * Math.PI / 180, 0]}><boxGeometry args={[object.width, height, object.depth]} /><meshStandardMaterial color={reserved ? "#947bb2" : stage ? "#a47752" : "#81776d"} transparent={reserved} opacity={reserved ? 0.4 : 1} depthWrite={!reserved} /></mesh>;
     })}
-    <Seats plan={plan} />
+    {!!plan.seating?.seats.length && <ChairErrorBoundary fallback={<FallbackSeats plan={plan} />}><Suspense fallback={<FallbackSeats plan={plan} />}><ModelSeats plan={plan} /></Suspense></ChairErrorBoundary>}
     <CameraControls plan={plan} reset={reset} />
   </>;
 }

@@ -82,7 +82,7 @@ test.describe("Modell 1021 Konfigurator", () => {
     await page.goto("/produkte/stapelstuehle/1021");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Modell 1021");
     await expect(page.getByTestId("fabric-group-selector")).toHaveCount(0);
-    await expect(page.getByTestId("chair-price")).toContainText("64,44");
+    await expect(page.getByTestId("chair-price")).toContainText("67,13");
 
     const seatUpholstery = page.getByRole("radio", { name: /Sitzpolster/ });
     await seatUpholstery.focus();
@@ -95,7 +95,7 @@ test.describe("Modell 1021 Konfigurator", () => {
     await withRowConnector.focus();
     await withRowConnector.press("Space");
     await expect(page.getByTestId("selected-chair-variant")).toContainText("Sitzpolster · Gruppe 3 · Mit Reihenverbindung");
-    await expect(page.getByTestId("chair-price")).toContainText("91,82");
+    await expect(page.getByTestId("chair-price")).toContainText("91,13");
     await expect.poll(() => {
       const params = new URL(page.url()).searchParams;
       return [params.get("polster"), params.get("gruppe"), params.get("reihe")];

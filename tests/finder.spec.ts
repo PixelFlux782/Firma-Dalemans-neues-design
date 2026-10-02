@@ -133,7 +133,7 @@ test.describe("Gleiter-Finder im Browser", () => {
     await expect(result).toContainText("21 × 20");
     await expect(result).toContainText("Gesamt");
     await result.getByRole("link", { name: "Produkt ansehen" }).click();
-    await expect(page).toHaveURL(/\/shop\/produkt\/filzgleiter-fuer-rundrohr\?variant=local-variant-rf-20/);
+    await expect(page).toHaveURL(/\/produkte\/artikel\/filzgleiter-fuer-rundrohr\?variant=local-variant-rf-20/);
     await expect(page.getByTestId("selected-variant")).toContainText("Rundrohr 20 mm");
   });
 

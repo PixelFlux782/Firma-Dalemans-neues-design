@@ -21,13 +21,13 @@ test.describe("deterministische Search-Logik", () => {
 
   test("unterscheidet Titel-Prefix und Titel-Partial", () => {
     expect(search("Filzgleiter für").groups.products[0].matchKind).toBe("title_prefix");
-    expect(search("Gestellgleiter").groups.products[0].document.url).toBe("/shop/produkt/kunststoff-gestellgleiter");
+    expect(search("Gestellgleiter").groups.products[0].document.url).toBe("/produkte/artikel/kunststoff-gestellgleiter");
     expect(search("Gestellgleiter").groups.products[0].matchKind).toBe("title_partial");
   });
 
   test("rankt eine exakte SKU vor allen anderen Treffern", () => {
     const results = search("DEV-RF-20").groups.products;
-    expect(results[0].document.url).toBe("/shop/produkt/filzgleiter-fuer-rundrohr");
+    expect(results[0].document.url).toBe("/produkte/artikel/filzgleiter-fuer-rundrohr");
     expect(results[0].matchKind).toBe("exact_sku");
     expect(results[0].matchedVariant?.sku).toBe("DEV-RF-20");
     expect(results[0].score).toBeGreaterThan(results[1]?.score ?? 0);
@@ -41,25 +41,25 @@ test.describe("deterministische Search-Logik", () => {
   test("findet Collections getrennt von Produkten", () => {
     const result = search("Transport & Lagerung").groups.collections[0];
     expect(result.document.id).toBe("local-collection-transport-lagerung");
-    expect(result.document.url).toBe("/shop/transport-lagerung");
+    expect(result.document.url).toBe("/produkte/sortiment/transport-lagerung");
   });
 
   test("nennt eine passende Variante bei Variantensuche", () => {
     const result = search("Rundrohr 20 mm").groups.products.find(
-      (entry) => entry.document.url === "/shop/produkt/filzgleiter-fuer-rundrohr",
+      (entry) => entry.document.url === "/produkte/artikel/filzgleiter-fuer-rundrohr",
     );
     expect(result?.matchedVariant?.sku).toBe("DEV-RF-20");
   });
 
   test("nutzt strukturierte Maße unabhängig von der Wortreihenfolge", () => {
     const result = search("20 mm rund").groups.products[0];
-    expect(result.document.url).toBe("/shop/produkt/filzgleiter-fuer-rundrohr");
+    expect(result.document.url).toBe("/produkte/artikel/filzgleiter-fuer-rundrohr");
     expect(result.matchedVariant?.sku).toBe("DEV-RF-20");
   });
 
   test("findet den Development-Alias aus dem Commerce-Modell", () => {
     const result = search("Development Rundgleiter").groups.products[0];
-    expect(result.document.url).toBe("/shop/produkt/filzgleiter-fuer-rundrohr");
+    expect(result.document.url).toBe("/produkte/artikel/filzgleiter-fuer-rundrohr");
     expect(result.matchKind).toBe("alias");
   });
 
@@ -81,7 +81,7 @@ test.describe("deterministische Search-Logik", () => {
 
   test("promotet den Finder bei beratungsnahen Suchanfragen", () => {
     expect(search("welcher gleiter").groups.help[0].document.id).toBe("help-glider-finder");
-    expect(search("stuhl messen").groups.help[0].document.url).toBe("/shop/gleiter-finder");
+    expect(search("stuhl messen").groups.help[0].document.url).toBe("/produkte/gleiter-finder");
   });
 
   test("kann Development-Dokumente für verified_only ausfiltern", () => {
@@ -91,18 +91,18 @@ test.describe("deterministische Search-Logik", () => {
 
 test.describe("DLMNS Predictive Search", () => {
   test("öffnet am Desktop, sucht während der Eingabe und öffnet ein Produkt", async ({ page }) => {
-    await page.goto("/shop");
+    await page.goto("/produkte");
     await page.getByRole("button", { name: "Suchen", exact: true }).click();
     const input = page.getByRole("combobox", { name: "Shop durchsuchen" });
     await expect(input).toBeFocused();
     await input.fill("gleiter");
     await expect(page.getByRole("heading", { name: "Produkte", exact: true })).toBeVisible();
     await page.locator("[data-search-result='local-product-filzgleiter-fuer-rundrohr']").click();
-    await expect(page).toHaveURL(/\/shop\/produkt\/filzgleiter-fuer-rundrohr$/);
+    await expect(page).toHaveURL(/\/produkte\/artikel\/filzgleiter-fuer-rundrohr$/);
   });
 
   test("zeigt bei exakter SKU den richtigen Variantentreffer zuerst", async ({ page }) => {
-    await page.goto("/shop");
+    await page.goto("/produkte");
     await page.getByRole("button", { name: "Suchen", exact: true }).click();
     await page.getByRole("combobox", { name: "Shop durchsuchen" }).fill("DEV-RF-20");
     const firstResult = page.locator("[data-search-result]").first();
@@ -111,14 +111,14 @@ test.describe("DLMNS Predictive Search", () => {
   });
 
   test("führt bei Finder-Suche prominent zum Gleiter-Finder", async ({ page }) => {
-    await page.goto("/shop");
+    await page.goto("/produkte");
     await page.getByRole("button", { name: "Suchen", exact: true }).click();
     await page.getByRole("combobox", { name: "Shop durchsuchen" }).fill("welcher gleiter");
     await expect(page.locator("[data-search-result='help-glider-finder']")).toBeVisible();
   });
 
   test("macht aus null Treffern keine Sackgasse", async ({ page }) => {
-    await page.goto("/shop");
+    await page.goto("/produkte");
     await page.getByRole("button", { name: "Suchen", exact: true }).click();
     await page.getByRole("combobox", { name: "Shop durchsuchen" }).fill("qxzv-991-niemals");
     const emptyState = page.getByTestId("search-no-results");
@@ -128,12 +128,12 @@ test.describe("DLMNS Predictive Search", () => {
   });
 
   test("öffnet mit Enter die URL-basierte Suchseite mit noindex", async ({ page }) => {
-    await page.goto("/shop");
+    await page.goto("/produkte");
     await page.getByRole("button", { name: "Suchen", exact: true }).click();
     const input = page.getByRole("combobox", { name: "Shop durchsuchen" });
     await input.fill("gleiter");
     await input.press("Enter");
-    await expect(page).toHaveURL(/\/shop\/suche\?q=gleiter$/);
+    await expect(page).toHaveURL(/\/produkte\/suche\?q=gleiter$/);
     await expect(page.getByRole("heading", { name: "Ergebnisse für „gleiter“" })).toBeVisible();
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   });
@@ -141,7 +141,7 @@ test.describe("DLMNS Predictive Search", () => {
   for (const width of [320, 375]) {
     test(`bleibt bei ${width}px ohne horizontalen Overflow nutzbar`, async ({ page }) => {
       await page.setViewportSize({ width, height: 720 });
-      await page.goto("/shop");
+      await page.goto("/produkte");
       await page.getByRole("button", { name: "Suche öffnen" }).click();
       await page.getByRole("combobox", { name: "Shop durchsuchen" }).fill("20 mm rund");
       await expect(page.getByTestId("search-overlay")).toBeVisible();
@@ -151,7 +151,7 @@ test.describe("DLMNS Predictive Search", () => {
   }
 
   test("unterstützt Pfeiltasten, Enter, Escape und Fokusrückgabe", async ({ page }) => {
-    await page.goto("/shop");
+    await page.goto("/produkte");
     const trigger = page.getByRole("button", { name: "Suchen", exact: true });
     await trigger.click();
     const input = page.getByRole("combobox", { name: "Shop durchsuchen" });
@@ -169,6 +169,6 @@ test.describe("DLMNS Predictive Search", () => {
     await expect(page.locator("[data-search-result]").first()).toBeVisible();
     await reopenedInput.press("ArrowDown");
     await reopenedInput.press("Enter");
-    await expect(page).toHaveURL(/\/shop\/produkt\/filzgleiter-fuer-rundrohr$/);
+    await expect(page).toHaveURL(/\/produkte\/artikel\/filzgleiter-fuer-rundrohr$/);
   });
 });

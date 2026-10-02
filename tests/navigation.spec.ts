@@ -7,7 +7,7 @@ test.describe("Premium-Navigation", () => {
 
     const primary = page.getByRole("navigation", { name: "Hauptnavigation", exact: true });
     await expect(primary.getByRole("link")).toHaveCount(5);
-    for (const label of ["Produkte", "Shop", "Räume & Planung", "Beratung & Service", "Sonderlösungen"]) {
+    for (const label of ["Produkte", "Räume & Planung", "Raumplaner", "Beratung & Service", "Sonderlösungen"]) {
       await expect(primary.getByRole("link", { name: label, exact: true })).toBeVisible();
     }
 

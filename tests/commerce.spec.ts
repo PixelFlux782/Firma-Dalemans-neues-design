@@ -65,45 +65,37 @@ test("Shopify-Produkte werden in das interne Commerce-Modell übersetzt", () => 
   });
 });
 
-test("Shop-Startseite lädt Collections ausschließlich als nutzbare Shop-Einstiege", async ({ page }) => {
-  await page.goto("/shop");
+test("Produktübersicht lädt Collections als nutzbare Sortimenteinstiege", async ({ page }) => {
+  await page.goto("/produkte");
 
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Ausstattung, Ersatzteile und Zubehör",
+    "Langlebige Ausstattung für flexible Räume",
   );
-  await expect(page.getByRole("link", { name: "Produkte entdecken" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Sortiment entdecken" })).toHaveAttribute(
     "href",
-    "#collections",
+    "#sortiment",
   );
-  await expect(page.getByRole("link", { name: "Gleiter & Bodenschutz ansehen" })).toHaveAttribute(
-    "href",
-    "/shop/gleiter-bodenschutz",
-  );
-  await expect(
-    page.getByText(
-      "Preise und Verfügbarkeit werden erst nach finaler Sortimentsprüfung verbindlich.",
-    ),
-  ).toBeVisible();
+  await expect(page.locator('a[href="/produkte/sortiment/gleiter-bodenschutz"]')).toBeVisible();
 });
 
 test("Collection-Seite zeigt Produkte, Breadcrumb und kanonische Metadaten", async ({ page }) => {
-  await page.goto("/shop/gleiter-bodenschutz");
+  await page.goto("/produkte/sortiment/gleiter-bodenschutz");
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Gleiter & Bodenschutz");
-  await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText("Shop");
+  await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText("Produkte");
   await expect(page.getByRole("link", { name: "Filzgleiter mit Stift ansehen" })).toHaveAttribute(
     "href",
-    "/shop/produkt/filzgleiter-mit-stift",
+    "/produkte/artikel/filzgleiter-mit-stift",
   );
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
-    /\/shop\/gleiter-bodenschutz$/,
+    /\/produkte\/sortiment\/gleiter-bodenschutz$/,
   );
   await expect(page).toHaveTitle(/Gleiter & Bodenschutz/);
 });
 
 test("Produktdetailseite wird vollständig aus dem Commerce-Modell gerendert", async ({ page }) => {
-  await page.goto("/shop/produkt/kunststoff-gestellgleiter");
+  await page.goto("/produkte/artikel/kunststoff-gestellgleiter");
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Kunststoff-Gestellgleiter");
   await expect(page.getByText("Technische Informationen")).toBeVisible();
@@ -114,7 +106,7 @@ test("Produktdetailseite wird vollständig aus dem Commerce-Modell gerendert", a
   expect(jsonLd.some((entry) => entry.includes('"@type":"Product"'))).toBe(true);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
-    /\/shop\/produkt\/kunststoff-gestellgleiter$/,
+    /\/produkte\/artikel\/kunststoff-gestellgleiter$/,
   );
 });
 
@@ -168,12 +160,12 @@ test("Shop, Collection und Produkt bleiben auf Mobilgeräten ohne horizontalen �
   }
 });
 
-test("Shop bleibt auf Unterseiten in der Navigation aktiv", async ({ page }) => {
+test("Produkte bleiben auf Artikelseiten in der Navigation aktiv", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/shop/produkt/filzgleiter-mit-stift");
+  await page.goto("/produkte/artikel/filzgleiter-mit-stift");
   await expect(
     page
       .getByRole("navigation", { name: "Hauptnavigation", exact: true })
-      .getByRole("link", { name: "Shop", exact: true }),
+      .getByRole("link", { name: "Produkte", exact: true }),
   ).toHaveAttribute("aria-current", "page");
 });

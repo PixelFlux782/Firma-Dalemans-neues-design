@@ -102,21 +102,21 @@ test("mobile Navigation ist per Tastatur bedienbar", async ({ page }) => {
   await expect(button).toHaveAttribute("aria-expanded", "false");
 });
 
-test("Shop ist in Desktop- und Mobile-Navigation erreichbar", async ({ page }) => {
+test("Produkte sind in Desktop- und Mobile-Navigation erreichbar", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/shop");
+  await page.goto("/produkte");
   const desktopShopLink = page
     .getByRole("navigation", { name: "Hauptnavigation", exact: true })
-    .getByRole("link", { name: "Shop", exact: true });
-  await expect(desktopShopLink).toHaveAttribute("href", "/shop");
+    .getByRole("link", { name: "Produkte", exact: true });
+  await expect(desktopShopLink).toHaveAttribute("href", "/produkte");
   await expect(desktopShopLink).toHaveAttribute("aria-current", "page");
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Menü" }).click();
   const mobileShopLink = page
     .getByRole("navigation", { name: "Mobile Hauptnavigation" })
-    .getByRole("link", { name: "Shop", exact: true });
-  await expect(mobileShopLink).toHaveAttribute("href", "/shop");
+    .getByRole("link", { name: "Produkte", exact: true });
+  await expect(mobileShopLink).toHaveAttribute("href", "/produkte");
   await expect(mobileShopLink).toHaveAttribute("aria-current", "page");
 });
 

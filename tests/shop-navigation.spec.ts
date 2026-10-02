@@ -74,7 +74,7 @@ test.describe("Shop-Schnellnavigation", () => {
     const drawer = page.getByRole("dialog", { name: "Sortiment" });
     await expect(drawer).toBeVisible();
     await drawer.getByRole("link", { name: "Gleiter & Bodenschutz" }).click();
-    await expect(page).toHaveURL(/\/shop\/gleiter-bodenschutz$/);
+    await expect(page).toHaveURL(/\/produkte\/sortiment\/gleiter-bodenschutz$/);
     await expect(drawer).toHaveCount(0);
   });
 

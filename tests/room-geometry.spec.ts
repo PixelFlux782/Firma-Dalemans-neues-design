@@ -46,7 +46,7 @@ test("invalid polygon, zero wall and self intersection are reported", () => {
 test("2D editor draws, closes, edits and undoes a room", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/raumplaner");
-  await expect(page.getByRole("button", { name: "2D planen" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "2D", exact: true })).toHaveAttribute("aria-pressed", "true");
   const surface = page.getByRole("img", { name: "Grundriss Zeichenfläche" });
   await expect(surface).toBeVisible();
   await surface.scrollIntoViewIfNeeded();
@@ -66,18 +66,18 @@ test("2D editor draws, closes, edits and undoes a room", async ({ page }) => {
   await expect(page.getByText("Raumfläche: 80,00 m²")).toBeVisible();
   await page.getByRole("button", { name: "Wiederholen" }).click();
   await expect(page.getByText("Raumfläche: 84,00 m²")).toBeVisible();
-  await page.getByRole("button", { name: "Vergrößern" }).click();
-  await expect(page.getByText("125 %")).toBeVisible();
+  await page.getByRole("button", { name: "Vergrößern", exact: true }).click();
+  await expect(page.getByLabel("Raum und Werkzeuge").getByText("125 %")).toBeVisible();
   await expect(page.getByText("Raumfläche: 84,00 m²")).toBeVisible();
   await surface.scrollIntoViewIfNeeded();
   const zoomBox = await surface.boundingBox();
   await page.mouse.move(zoomBox!.x + zoomBox!.width / 2, zoomBox!.y + zoomBox!.height / 2);
   await page.mouse.wheel(0, -100);
-  await expect(page.getByText("145 %")).toBeVisible();
+  await expect(page.getByLabel("Raum und Werkzeuge").getByText("145 %")).toBeVisible();
   await expect(page.getByText("Raumfläche: 84,00 m²")).toBeVisible();
-  await page.getByRole("button", { name: "3D ansehen" }).click();
+  await page.getByRole("button", { name: "3D", exact: true }).click();
   await expect(page.locator("canvas")).toBeVisible();
-  await page.getByRole("button", { name: "2D planen" }).click();
+  await page.getByRole("button", { name: "2D", exact: true }).click();
   await expect(page.getByText("Raumfläche: 84,00 m²")).toBeVisible();
   await page.getByRole("button", { name: "Planung zurücksetzen" }).click();
   await expect(page.getByText("Raumgrundriss zeichnen")).toBeVisible();

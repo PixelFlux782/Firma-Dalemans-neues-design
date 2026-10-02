@@ -81,6 +81,6 @@ test("2D editor creates, edits, deletes and undoes objects", async ({ page }) =>
   await page.getByRole("button", { name: "Rückgängig" }).click();
   await expect(surface.locator("[data-object-id]").count()).resolves.toBeGreaterThan(0);
   await page.getByRole("button", { name: "Wiederholen" }).click();
-  await page.getByRole("button", { name: "3D ansehen" }).click();
+  await page.getByRole("button", { name: "3D", exact: true }).click();
   await expect(page.locator("canvas")).toBeVisible();
 });

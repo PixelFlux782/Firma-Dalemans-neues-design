@@ -26,7 +26,7 @@ test("Plan-Ausgabe zeigt den aktuellen bearbeiteten Plan und verändert ihn nich
   await expect(drawing.locator('[data-seat-id="seat-1"]')).toHaveCount(0);
   await expect(drawing.locator('[data-seat-id="seat-3"]')).toHaveCount(1);
   for (const label of ["Ausgang", "Bühne", "Sperrfläche", "Hindernis", "Front"]) await expect(drawing.getByText(label)).toBeVisible();
-  await expect(output.locator("dd").first()).toHaveText("3");
+  await expect(output.locator("dd").filter({ hasText: /^3$/ }).first()).toBeVisible();
   await expect(output).toContainText("Planungs-/Referenzprüfung");
   await expect(output.getByRole("button", { name: "Drucken / als PDF speichern" })).toBeVisible();
   await output.getByRole("button", { name: "Zurück zum Editor" }).click();

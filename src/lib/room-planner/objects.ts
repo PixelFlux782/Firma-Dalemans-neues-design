@@ -11,7 +11,7 @@ export type AisleObject = { id: string; type: "aisle"; start: Position; end: Pos
 export type RoomObject = DoorObject | ObstacleObject | AisleObject | RoomFront | Stage | ReservedArea;
 export type BlockingObject = ObstacleObject | Stage | ReservedArea;
 export const isBlockingObject = (object: RoomObject): object is BlockingObject => object.type === "obstacle" || object.type === "stage" || object.type === "reservedArea";
-export type RoomPlan = { contour: RoomGeometry; objects: RoomObject[]; seating?: SeatingPlan };
+export type RoomPlan = { chairSelection?: import("./chairSelection").ChairSelection; contour: RoomGeometry; objects: RoomObject[]; seating?: SeatingPlan };
 export type Issue = { objectId: string; severity: "error" | "warning"; message: string };
 export const emptyPlan = (): RoomPlan => ({ contour: { points: [], walls: [], closed: false }, objects: [] });
 

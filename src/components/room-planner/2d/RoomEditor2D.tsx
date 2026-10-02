@@ -17,6 +17,7 @@ import { analyzeCurrentPlan } from "@/lib/room-planner/currentPlanAnalysis";
 import { createProject, parseProject, parseProjectStore, projectFileName, PROJECT_SCHEMA_VERSION, PROJECT_STORAGE_KEY, type PlannerSettings, type RoomPlannerProject } from "@/lib/room-planner/projects";
 import ProjectControls from "./ProjectControls";
 import PlanOutputView from "./PlanOutputView";
+import { calculatePlanDemand, changeChairSelection, chairProducts, DEFAULT_CHAIR_SELECTION } from "@/lib/room-planner/chairSelection";
 
 const INITIAL_SCALE = 45;
 const MIN_SCALE = 12;
@@ -31,6 +32,8 @@ export default function RoomEditor2D() {
   const [history, setHistory] = useState(() => createHistory(emptyPlan()));
   const plan = history.present;
   const room = plan.contour;
+  const chairSelection = plan.chairSelection ?? DEFAULT_CHAIR_SELECTION;
+  const demand = calculatePlanDemand(plan);
   const [previewPlan, setPreviewPlan] = useState<RoomPlan | null>(null);
   const [tool, setTool] = useState<Tool>("wall");
   const [selection, setSelection] = useState<Selection>(null);
@@ -101,7 +104,7 @@ export default function RoomEditor2D() {
   const restoreProject = (project: RoomPlannerProject) => {
     skipNextAutosave.current = true;
     setHistory(createHistory(project.plan));
-    setSeatingRules(project.settings.seatingRules);
+    setSeatingRules({ ...project.settings.seatingRules, chairWidth: (project.plan.chairSelection ?? DEFAULT_CHAIR_SELECTION).width, chairDepth: (project.plan.chairSelection ?? DEFAULT_CHAIR_SELECTION).depth });
     setOrientation(project.settings.orientation);
     setGridOffset(project.settings.gridOffset);
     setOrientationPreference(project.settings.orientationPreference);
@@ -212,6 +215,19 @@ export default function RoomEditor2D() {
     } catch (error) { setProjectError(error instanceof Error ? error.message : "Die Projektdatei konnte nicht importiert werden."); }
   };
   const add = (next: RoomPlan) => setHistory((current) => commit(current, next));
+  const selectChair = (productId: string, variantId: string, width = chairSelection.width, depth = chairSelection.depth) => {
+    const previous = { rules: seatingRules, orientation, offset: gridOffset, seating: calculated?.plan === plan ? calculated.result : null };
+    const next = changeChairSelection(plan, { productId, variantId, width, depth });
+    const rules = { ...seatingRules, chairWidth: width, chairDepth: depth };
+    parameterHistory.current.set(plan, previous);
+    parameterHistory.current.set(next, { rules, orientation, offset: gridOffset, seating: null });
+    add(next);
+    setSeatingRules(rules);
+    setCalculated(null);
+    setVariantCalculation(null);
+    setActiveVariantId(null);
+    setNotice("Stuhlmodell geändert. Bestehende Sitze bleiben erhalten; Geometrie und Regeln wurden neu geprüft. Maße sind bis zur Produktdatenpflege Planungsannahmen.");
+  };
   const applySeating = (next: SeatingPlan) => {
     if (!plan.seating || next === plan.seating) return;
     add({ ...plan, seating: next });
@@ -444,7 +460,7 @@ export default function RoomEditor2D() {
   const wallStart = selectedWall && pointById(shownRoom, selectedWall.startPointId);
   const wallEnd = selectedWall && pointById(shownRoom, selectedWall.endPointId);
   const field = (label: string, value: number, change: (value: number) => void, min?: number) => <label className="flex items-center justify-between gap-2 text-sm"><span>{label}</span><input aria-label={label} type="number" step="0.1" min={min} value={value} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value) && (min === undefined || value >= min)) change(value); }} className="w-24 rounded border border-premium-beige px-2 py-1 text-right" /></label>;
-  const seatingField = (label: string, key: "chairWidth" | "chairDepth" | "rowPitch" | "maximumChairsPerRow", min: number, step: string) => <label className="flex items-center justify-between gap-2 text-sm"><span>{label}</span><input aria-label={label.replace("(m)", "in Metern")} type="number" step={step} min={min} value={seatingRules[key]} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value) && value >= min && (key !== "maximumChairsPerRow" || Number.isInteger(value))) setSeatingRules((current) => ({ ...current, [key]: value })); }} className="w-24 rounded border border-premium-beige px-2 py-1 text-right" /></label>;
+  const seatingField = (label: string, key: "chairWidth" | "chairDepth" | "rowPitch" | "maximumChairsPerRow", min: number, step: string) => <label className="flex items-center justify-between gap-2 text-sm"><span>{label}</span><input aria-label={label.replace("(m)", "in Metern")} type="number" step={step} min={min} value={seatingRules[key]} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value) && value >= min && (key !== "maximumChairsPerRow" || Number.isInteger(value))) { if (key === "chairWidth") selectChair(chairSelection.productId, chairSelection.variantId, value, chairSelection.depth); else if (key === "chairDepth") selectChair(chairSelection.productId, chairSelection.variantId, chairSelection.width, value); else setSeatingRules((current) => ({ ...current, [key]: value })); } }} className="w-24 rounded border border-premium-beige px-2 py-1 text-right" /></label>;
   const seatingPaths = useMemo(() => seating?.blocks.map((block) => {
     const rectangles: string[] = [], backs: string[] = [];
     const width = seating.rules.chairWidth * camera.scale;
@@ -546,6 +562,10 @@ export default function RoomEditor2D() {
       {selectedSeat && <div className="space-y-2 text-sm"><p className="font-semibold">Sitz {selectedSeat.id}</p><p>Reihe {selectedSeat.row} · Position {selectedSeat.index}</p><p>Block {selectedSeatBlock?.id}</p><button type="button" onClick={() => selectedSeatBlock && setSelection({ type: "block", id: selectedSeatBlock.id })} className="rounded border px-2 py-1">Block auswählen</button><button type="button" onClick={deleteSelection} className="rounded border border-red-300 px-2 py-1 text-red-800">Sitz entfernen</button></div>}
       {!selectedObject && !selectedBlock && !selectedSeat && <p className="text-sm text-premium-muted">Wählen Sie ein Objekt im Grundriss.</p>}
       <div aria-label="Bestuhlung" className="space-y-3 border-t border-premium-beige pt-4"><h3 className="font-semibold">Bestuhlung</h3>
+        <label className="block text-sm">Stuhlmodell<select aria-label="Stuhlmodell" value={chairSelection.productId} onChange={(event) => { const product = chairProducts.find((item) => item.id === event.target.value)!; selectChair(product.id, product.variants[0].id); }} className="mt-1 w-full rounded border border-premium-beige p-1">{chairProducts.map((product) => <option key={product.id} value={product.id}>{product.title}</option>)}</select></label>
+        <label className="block text-sm">Variante<select aria-label="Stuhlvariante" value={chairSelection.variantId} onChange={(event) => selectChair(chairSelection.productId, event.target.value)} className="mt-1 w-full rounded border border-premium-beige p-1">{(demand.product?.variants ?? []).map((variant) => <option key={variant.id} value={variant.id}>{variant.title}</option>)}</select></label>
+        <p className="text-xs text-premium-muted">Breite {formatMeters(chairSelection.width)} / Tiefe {formatMeters(chairSelection.depth)}. Produktmaße sind nicht verifiziert; Werte als Planungsannahme prüfen.</p>
+        <div aria-label="Bedarf" className="rounded-lg border border-premium-beige p-3 text-sm"><h4 className="font-semibold">Bedarf</h4><p>{demand.product?.title} / {demand.variant?.title}</p><p>Benötigt: {demand.quantity} Stühle / Sitzblöcke: {demand.blocks}</p>{demand.product && demand.variant && <a className="text-premium-forest underline" href={`/produkte/artikel/${demand.product.handle}?variant=${encodeURIComponent(demand.variant.id)}`}>Produkt ansehen und anfragen</a>}</div>
         {seatingField("Stuhlbreite (m)", "chairWidth", 0.1, "0.05")}
         {seatingField("Stuhltiefe (m)", "chairDepth", 0.1, "0.05")}
         {seatingField("Reihenabstand (m)", "rowPitch", 0.1, "0.05")}

@@ -1,5 +1,6 @@
 import { DEFAULT_SEATING_RULES, type SeatPlacement, type SeatingBlock, type SeatingGridOffset, type SeatingOrientation, type SeatingRules } from "./seating";
 import { emptyPlan, type RoomPlan } from "./objects";
+import { DEFAULT_CHAIR_SELECTION, resolveChair } from "./chairSelection";
 import type { OrientationPreference } from "./variants";
 import { RULE_PROFILES } from "./rules/profiles";
 
@@ -61,6 +62,9 @@ function normalizePlan(raw: unknown): RoomPlan {
   if (!record(raw) || !record(raw.contour) || !Array.isArray(raw.contour.points) || !Array.isArray(raw.contour.walls) || typeof raw.contour.closed !== "boolean" || !Array.isArray(raw.objects)) throw new Error("Die Projektdatei enthält keinen gültigen Raumplan.");
   if (raw.contour.points.length > 5000 || raw.contour.walls.length > 5000 || raw.objects.length > 5000 || !raw.contour.points.every((point: unknown) => record(point) && named(point.id) && position(point)) || !raw.contour.walls.every((wall: unknown) => record(wall) && named(wall.id) && named(wall.startPointId) && named(wall.endPointId)) || !raw.objects.every(validObject)) throw new Error("Die Projektdatei enthält beschädigte Geometrie oder Objekte.");
   const plan = raw as RoomPlan;
+  const selected = record(raw.chairSelection) ? raw.chairSelection : null;
+  const chairSelection = selected && typeof selected.productId === "string" && typeof selected.variantId === "string" && finite(selected.width) && selected.width > 0 && selected.width <= 2 && finite(selected.depth) && selected.depth > 0 && selected.depth <= 2 && resolveChair(selected as unknown as typeof DEFAULT_CHAIR_SELECTION).variant ? selected as unknown as typeof DEFAULT_CHAIR_SELECTION : DEFAULT_CHAIR_SELECTION;
+  plan.chairSelection = chairSelection;
   if (plan.contour.closed && plan.contour.points.length < 3 || raw.seating !== undefined && !plan.contour.closed) throw new Error("Die Projektdatei enthält eine unvollständige Raumkontur.");
   const pointIds = new Set(plan.contour.points.map((point) => point.id));
   const wallIds = new Set(plan.contour.walls.map((wall) => wall.id));
@@ -68,7 +72,7 @@ function normalizePlan(raw: unknown): RoomPlan {
   if (raw.seating === undefined) return plan;
   if (!record(raw.seating) || !Array.isArray(raw.seating.blocks) || !record(raw.seating.rules) || !["horizontal", "vertical"].includes(String(raw.seating.orientation)) || raw.seating.blocks.length > 5000) throw new Error("Die gespeicherte Bestuhlung ist ungültig.");
   const seating = raw.seating as Record<string, unknown> & { blocks: unknown[] };
-  const rules = normalizeSettings({ seatingRules: seating.rules }).seatingRules;
+  const rules = { ...normalizeSettings({ seatingRules: seating.rules }).seatingRules, chairWidth: chairSelection.width, chairDepth: chairSelection.depth };
   const ids = new Set<string>();
   const blocks = seating.blocks.map((block: unknown) => {
     if (!record(block) || !named(block.id) || !Array.isArray(block.seats) || block.seats.length > rules.maximumSeats || block.rotation !== undefined && !finite(block.rotation) || block.source !== undefined && !["generated", "manual"].includes(String(block.source)) || block.edited !== undefined && typeof block.edited !== "boolean") throw new Error("Ein Sitzblock ist beschädigt.");

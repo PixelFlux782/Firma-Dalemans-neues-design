@@ -6,6 +6,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
 import { doorSegment, frontSegment, type DoorObject, type RoomPlan } from "@/lib/room-planner/objects";
+import { chairDisplayAngle } from "@/lib/room-planner/visualization3d";
 
 const DEFAULT_WALL_HEIGHT = 3;
 const chairGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -47,7 +48,7 @@ function Seats({ plan }: { plan: RoomPlan }) {
     if (!seatMesh || !backMesh || !legsMesh) return;
     const matrix = new THREE.Matrix4(), position = new THREE.Vector3(), rotation = new THREE.Quaternion(), scale = new THREE.Vector3();
     for (let i = 0; i < seats.length; i++) {
-      const item = seats[i], angle = -item.rotation * Math.PI / 180;
+      const item = seats[i], angle = chairDisplayAngle(item.rotation);
       rotation.setFromAxisAngle(new THREE.Vector3(0, 1, 0), angle);
       position.set(item.x, 0.43, item.y); scale.set(width, 0.12, depth);
       seatMesh.setMatrixAt(i, matrix.compose(position, rotation, scale));
@@ -96,7 +97,7 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
         return <mesh key={index} position={[a.x + (b.x - a.x) * t, DEFAULT_WALL_HEIGHT / 2, a.y + (b.y - a.y) * t]} rotation={[0, -Math.atan2(b.y - a.y, b.x - a.x), 0]}><boxGeometry args={[part.end - part.start, DEFAULT_WALL_HEIGHT, 0.1]} /><meshStandardMaterial color="#e8e4db" transparent opacity={0.72} roughness={0.95} /></mesh>;
       })}</group>;
     })}
-    {plan.objects.map(object => {
+    {plan.objects.map((object, index) => {
       if (object.type === "door") {
         const segment = doorSegment(plan.contour, object); if (!segment) return null;
         const emergency = object.role === "emergency_exit", exit = emergency || object.role === "exit";
@@ -106,7 +107,7 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
       }
       if (object.type === "aisle") {
         const dx = object.end.x - object.start.x, dz = object.end.y - object.start.y;
-        return <mesh key={object.id} position={[(object.start.x + object.end.x) / 2, 0.015, (object.start.y + object.end.y) / 2]} rotation={[0, -Math.atan2(dz, dx), 0]}><boxGeometry args={[Math.hypot(dx, dz), 0.025, object.width]} /><meshStandardMaterial color={object.source === "generated" ? "#d6a964" : "#67a3a7"} transparent opacity={0.6} /></mesh>;
+        return <mesh key={object.id} renderOrder={2 + index} position={[(object.start.x + object.end.x) / 2, 0.016, (object.start.y + object.end.y) / 2]} rotation={[0, -Math.atan2(dz, dx), 0]}><boxGeometry args={[Math.hypot(dx, dz), 0.025, object.width]} /><meshStandardMaterial color={object.source === "generated" ? "#d6a964" : "#67a3a7"} transparent opacity={0.6} depthWrite={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} /></mesh>;
       }
       if (object.type === "front") {
         const segment = frontSegment(object);
@@ -116,7 +117,7 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
       const stage = object.type === "stage" || object.type === "obstacle" && object.obstacleType === "stage";
       const reserved = object.type === "reservedArea" || object.type === "obstacle" && object.obstacleType === "restricted";
       const height = reserved ? 0.035 : stage ? 0.35 : 1.2;
-      return <mesh key={object.id} position={[object.x, height / 2, object.y]} rotation={[0, -object.rotation * Math.PI / 180, 0]}><boxGeometry args={[object.width, height, object.depth]} /><meshStandardMaterial color={reserved ? "#947bb2" : stage ? "#a47752" : "#81776d"} transparent={reserved} opacity={reserved ? 0.65 : 1} /></mesh>;
+      return <mesh key={object.id} renderOrder={reserved ? 1 : 0} position={[object.x, height / 2, object.y]} rotation={[0, -object.rotation * Math.PI / 180, 0]}><boxGeometry args={[object.width, height, object.depth]} /><meshStandardMaterial color={reserved ? "#947bb2" : stage ? "#a47752" : "#81776d"} transparent={reserved} opacity={reserved ? 0.65 : 1} depthWrite={!reserved} /></mesh>;
     })}
     <Seats plan={plan} />
     <CameraControls plan={plan} reset={reset} />

@@ -39,6 +39,22 @@ export function movePoint(room: RoomGeometry, id: string, position: Pick<Point2D
   return { ...room, points: room.points.map((point) => point.id === id ? { ...point, ...position } : point) };
 }
 
+export function resizeWall(room: RoomGeometry, wallId: string, length: number): { room?: RoomGeometry; error?: string } {
+  const wall = room.walls.find((item) => item.id === wallId);
+  const start = wall && pointById(room, wall.startPointId);
+  const end = wall && pointById(room, wall.endPointId);
+  if (!start || !end) return { error: "Wand nicht gefunden." };
+  if (!Number.isFinite(length) || length <= 0) return { error: "Bitte eine Wandlänge größer als 0 eingeben." };
+  const previous = wallLength(start, end);
+  if (previous < 1e-9) return { error: "Diese Wand hat keine gültige Richtung." };
+  const next = movePoint(room, end.id, {
+    x: Number((start.x + (end.x - start.x) * length / previous).toFixed(4)),
+    y: Number((start.y + (end.y - start.y) * length / previous).toFixed(4)),
+  });
+  const errors = validateRoom(next);
+  return errors.length ? { error: errors[0] } : { room: next };
+}
+
 const cross = (a: Point2D, b: Point2D, c: Point2D) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
 const onSegment = (a: Point2D, b: Point2D, p: Point2D) =>
   Math.abs(cross(a, b, p)) < 1e-9 && p.x >= Math.min(a.x, b.x) - 1e-9 && p.x <= Math.max(a.x, b.x) + 1e-9 && p.y >= Math.min(a.y, b.y) - 1e-9 && p.y <= Math.max(a.y, b.y) + 1e-9;

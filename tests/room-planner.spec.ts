@@ -23,7 +23,7 @@ test("Raumplaner behält Türen und Hindernisse beim Ansichtswechsel", async ({ 
   await canvas.click({ position: { x: 420, y: 360 } });
   await canvas.click({ position: { x: 160, y: 360 } });
   await canvas.click({ position: { x: 160, y: 140 } });
-  await editor.getByLabel("Raum und Werkzeuge").getByRole("button", { name: /Tür in Seitenleiste/ }).click();
+  await editor.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Tür" }).click();
   await canvas.click({ position: { x: 280, y: 140 } });
   await expect(editor.getByRole("button", { name: /Rückgängig/ })).toBeEnabled();
   await editor.getByRole("button", { name: "3D", exact: true }).click();

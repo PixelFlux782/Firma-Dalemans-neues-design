@@ -37,9 +37,9 @@ test("WP16.1 reserve updates the existing inquiry and product handoff", async ({
 test("WP16.1 tools, history and project actions reuse the existing state", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/raumplaner");
-  await page.getByLabel("Raum und Werkzeuge").getByRole("button", { name: "Tür in Seitenleiste" }).click();
+  await page.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Tür" }).click();
   await expect(page.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Tür" })).toHaveAttribute("aria-pressed", "true");
-  await page.getByLabel("Raum und Werkzeuge").getByRole("button", { name: "Raum / Kontur in Seitenleiste" }).click();
+  await page.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Raum / Kontur" }).click();
   const canvas = page.getByRole("img", { name: "Grundriss Zeichenfläche" });
   await canvas.click({ position: { x: 240, y: 190 } });
   await expect(page.getByRole("button", { name: "Rückgängig" })).toBeEnabled();

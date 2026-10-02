@@ -59,7 +59,7 @@ test("Editor legt Front, Bühne und Reservierung an und macht jeden Schritt rüc
   const click = (x: number, y: number) => svg.click({ position: { x, y } });
   const x = box!.width / 2, y = box!.height / 2;
   await click(x - 180, y - 140); await click(x + 180, y - 140); await click(x + 180, y + 140); await click(x - 180, y + 140); await click(x - 180, y - 140);
-  for (const [name, dx, dy] of [["Front", 0, -85], ["Bühne", 0, -45], ["Reservierte Fläche", 90, 25]] as const) {
+  for (const [name, dx, dy] of [["Front", 0, -85], ["Bühne", 0, -45], ["Sperrfläche", 90, 25]] as const) {
     await editor.getByRole("button", { name, exact: true }).click();
     await click(x + dx, y + dy);
   }

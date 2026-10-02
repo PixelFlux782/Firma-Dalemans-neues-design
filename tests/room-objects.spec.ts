@@ -56,7 +56,7 @@ test("2D editor creates, edits, deletes and undoes objects", async ({ page }) =>
   await page.getByLabel("Breite (m)").fill("1.5");
   await page.getByRole("button", { name: "Hindernis", exact: true }).click();
   await click(0, 0);
-  await expect(page.getByLabel("Hindernistyp")).toBeVisible();
+  await expect(page.getByLabel("Hindernistyp", { exact: true })).toBeVisible();
   await page.getByLabel("Rotation (°)").fill("45");
   await page.getByRole("button", { name: "Gang", exact: true }).click();
   await click(-2, 2); await click(3, 2);

@@ -16,6 +16,7 @@ import { editRow, moveBlock, removeBlock, removeSeat, rotateBlock, rowsOf } from
 import { analyzeCurrentPlan } from "@/lib/room-planner/currentPlanAnalysis";
 import { createProject, parseProject, parseProjectStore, projectFileName, PROJECT_SCHEMA_VERSION, PROJECT_STORAGE_KEY, type PlannerSettings, type RoomPlannerProject } from "@/lib/room-planner/projects";
 import ProjectControls from "./ProjectControls";
+import PlanOutputView from "./PlanOutputView";
 
 const INITIAL_SCALE = 45;
 const MIN_SCALE = 12;
@@ -60,6 +61,7 @@ export default function RoomEditor2D() {
   const [storageReady, setStorageReady] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"saved" | "dirty" | "saving">("saved");
   const [projectError, setProjectError] = useState("");
+  const [outputIssuedAt, setOutputIssuedAt] = useState<Date | null>(null);
   const projectsRef = useRef<RoomPlannerProject[]>([]);
   const skipNextAutosave = useRef(false);
   const currentFingerprint = useMemo(() => planFingerprint(plan), [plan]);
@@ -495,6 +497,8 @@ export default function RoomEditor2D() {
     setNotice("Variante übernommen. Der gesamte vorherige Plan ist mit einem Schritt rückgängig zu machen.");
   };
 
+  if (outputIssuedAt) return <PlanOutputView plan={plan} name={projects.find((project) => project.id === activeProjectId)?.name ?? "Unbenanntes Projekt"} issuedAt={outputIssuedAt} profileName={profile.name} analysis={currentAnalysis} onClose={() => setOutputIssuedAt(null)} />;
+
   return <section aria-label="2D-Grundrisseditor" className="premium-card overflow-hidden">
     {storageReady && <ProjectControls projects={projects} activeId={activeProjectId} status={saveStatus} error={projectError} onNew={newProject} onSave={saveProject} onSaveAs={saveAsProject} onOpen={openProject} onRename={renameProject} onDuplicate={duplicateProject} onDelete={deleteProject} onExport={exportProject} onImport={importProject} onImportError={setProjectError} />}
     <div className="flex flex-wrap items-center gap-2 border-b border-premium-beige bg-white/80 p-3 sm:p-4">
@@ -504,6 +508,7 @@ export default function RoomEditor2D() {
         {(["door", "obstacle", "aisle", "front", "stage", "reservedArea"] as const).map((name) => <button key={name} type="button" aria-pressed={tool === name} onClick={() => { setTool(name); setAisleStart(null); }} className={`rounded-lg px-4 py-2 text-sm font-semibold ${tool === name ? "bg-premium-forest text-white" : "border border-premium-beige text-premium-charcoal"}`}>{{ door: "Tür", obstacle: "Hindernis", aisle: "Gang", front: "Front", stage: "Bühne", reservedArea: "Reservierte Fläche" }[name]}</button>)}
       </div>
       <button type="button" disabled={!history.past.length} onClick={() => historyAction("undo")} className="rounded-lg border border-premium-beige px-3 py-2 text-xs font-semibold disabled:opacity-40">Rückgängig</button>
+      <button type="button" onClick={() => setOutputIssuedAt(new Date())} className="rounded-lg border border-premium-beige px-3 py-2 text-xs font-semibold">Plan ausgeben</button>
       <button type="button" disabled={!history.future.length} onClick={() => historyAction("redo")} className="rounded-lg border border-premium-beige px-3 py-2 text-xs font-semibold disabled:opacity-40">Wiederholen</button>
       <button type="button" disabled={!room.points.length && !plan.objects.length} onClick={reset} className="rounded-lg border border-premium-beige px-3 py-2 text-xs font-semibold disabled:opacity-40">Planung zurücksetzen</button>
     </div>

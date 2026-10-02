@@ -628,3 +628,35 @@
   inset: 0;
   pointer-events: none;
 }
+/* Raumplaner plan output */
+.plan-output{background:#fff;color:#24362b;padding:24px;max-width:1400px;margin:auto;font-family:Arial,sans-serif}
+.plan-output-actions{display:flex;justify-content:flex-end;gap:10px;margin-bottom:16px}
+.plan-output-actions button{border:1px solid #54705b;border-radius:6px;padding:8px 12px;font-weight:600}
+.plan-output h1{font-size:26px;font-weight:700;margin:3px 0}
+.plan-output h2{font-size:17px;font-weight:700;margin:18px 0 6px}
+.plan-output header{border-bottom:2px solid #405b49;padding-bottom:12px;margin-bottom:15px}
+.plan-output-sheet{display:grid;grid-template-columns:minmax(0,2fr) minmax(270px,1fr);gap:20px}
+.plan-output-drawing svg{width:100%;height:auto;max-height:70vh;border:1px solid #cad7ca;background:#fff}
+.plan-output-drawing p{font-size:11px;margin-top:5px}
+.plan-output-details{font-size:12px}
+.plan-output-details dl>div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #ddd;padding:4px 0}
+.plan-output-details dd{font-weight:700;text-align:right}
+.plan-output-details ul{padding-left:18px;max-height:230px;overflow:auto}
+.plan-output-details li{margin:3px 0}
+.plan-output-legend{display:flex;flex-wrap:wrap;gap:6px 12px}
+.plan-output-legend span{display:inline-flex;align-items:center;gap:5px}
+.plan-output-legend i{width:12px;height:12px;border:1px solid #777}
+@media(max-width:750px){.plan-output-sheet{grid-template-columns:1fr}}
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  body{background:#fff!important}
+  #site-shell>a,#site-shell>header,#site-shell>footer,#site-shell>.fixed,.page-stack>header,.page-stack>div>div>div.mb-5{display:none!important}
+  #main-content{padding:0!important;min-height:0!important}
+  #main-content .container-premium{max-width:none!important;padding:0!important}
+  .plan-output{max-width:none;padding:0;color:#111}
+  .plan-output-actions{display:none!important}
+  .plan-output-sheet{grid-template-columns:minmax(0,2fr) minmax(240px,1fr)}
+  .plan-output-drawing svg{max-height:165mm;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .plan-output-details ul{max-height:none;overflow:visible}
+  .plan-output-details,.plan-output-drawing{break-inside:avoid}
+}

@@ -25,7 +25,7 @@ export const DEFAULT_SEATING_RULES: Readonly<SeatingRules> = Object.freeze({
   maximumSeats: 5000, maximumCandidates: 30000,
 });
 export type SeatPlacement = { id: string; x: number; y: number; rotation: number; row: number; index: number };
-export type SeatingBlock = { id: string; seats: SeatPlacement[]; rowCount: number; seatsPerRow: number[]; origin?: Position; rotation?: number; rowPitch?: number; seatPitch?: number };
+export type SeatingBlock = { id: string; seats: SeatPlacement[]; rowCount: number; seatsPerRow: number[]; origin?: Position; rotation?: number; rowPitch?: number; seatPitch?: number; source?: "generated" | "manual"; edited?: boolean };
 export type SeatingPlan = {
   blocks: SeatingBlock[];
   seats: SeatPlacement[];
@@ -186,7 +186,7 @@ export function generateSeatingPlan(plan: RoomPlan, rules: SeatingRules = DEFAUL
   regionIndex++;
   if (stopped) break;
   }
-  if (interrupted) hints.push("Ein Gang unterbricht Sitzreihen und trennt Sitzblöcke.");
+  if (interrupted || excluded.aisles.length && blocks.length > 1) hints.push("Ein Gang unterbricht Sitzreihen und trennt Sitzblöcke.");
   const undersized = new Set(regions.length > 1 ? blocks.filter((block) => block.seats.length < SEATING_REGION_LIMITS.minimumSeats).map((block) => block.id) : []);
   if (undersized.size) {
     const discardedSeats = new Set(blocks.filter((block) => undersized.has(block.id)).flatMap((block) => block.seats));

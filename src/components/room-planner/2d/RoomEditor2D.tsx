@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { appendPoint, closeRoom, formatMeters, movePoint, orthogonalSnap, perimeter, pointById, polygonArea, snapPoint, validateRoom, wallLength, type Point2D } from "@/lib/room-planner/geometry";
@@ -12,15 +12,17 @@ import { RULE_PROFILES } from "@/lib/room-planner/rules/profiles";
 import { applyAisleSuggestion, suggestAisles } from "@/lib/room-planner/suggestions/aisleSuggestions";
 import { planFingerprint } from "@/lib/room-planner/variantSummary";
 import { characteristic, compareVariants } from "@/lib/room-planner/variantComparison";
+import { editRow, moveBlock, removeBlock, removeSeat, rotateBlock, rowsOf } from "@/lib/room-planner/seatingEditing";
+import { analyzeCurrentPlan } from "@/lib/room-planner/currentPlanAnalysis";
 
 const INITIAL_SCALE = 45;
 const MIN_SCALE = 12;
 const MAX_SCALE = 240;
 const POINT_RADIUS = 5;
 type Tool = "wall" | "select" | "door" | "obstacle" | "aisle" | "front" | "stage" | "reservedArea";
-type Selection = { type: "point" | "wall" | "object"; id: string } | null;
+type Selection = { type: "point" | "wall" | "object" | "block" | "seat"; id: string } | null;
 type Camera = { x: number; y: number; scale: number };
-type Drag = { type: "pan"; startX: number; startY: number; camera: Camera } | { type: "point" | "object" | "start" | "end"; id: string; at: { x: number; y: number }; original: RoomPlan };
+type Drag = { type: "pan"; startX: number; startY: number; camera: Camera } | { type: "point" | "object" | "start" | "end" | "block"; id: string; at: { x: number; y: number }; original: RoomPlan };
 
 export default function RoomEditor2D() {
   const [history, setHistory] = useState(() => createHistory(emptyPlan()));
@@ -36,6 +38,7 @@ export default function RoomEditor2D() {
   const [shiftDown, setShiftDown] = useState(false);
   const [spaceDown, setSpaceDown] = useState(false);
   const [notice, setNotice] = useState("");
+  const [rowEditCount, setRowEditCount] = useState(1);
   const [seatingRules, setSeatingRules] = useState<SeatingRules>({ ...DEFAULT_SEATING_RULES });
   const [orientation, setOrientation] = useState<SeatingOrientation>("horizontal");
   const [gridOffset, setGridOffset] = useState<SeatingGridOffset>({ along: 0, cross: 0 });
@@ -56,10 +59,11 @@ export default function RoomEditor2D() {
   const activeVariant = variants?.variants.find((item) => item.id === activeVariantId) ?? (variants?.fallback?.id === activeVariantId ? variants.fallback : null);
   const shownPlan = previewPlan ?? activeVariant?.plan ?? plan;
   const shownRoom = shownPlan.contour;
-  const seating = activeVariant?.seatingPlan ?? (!previewPlan && calculated?.plan === plan && calculated.rules === seatingRules && calculated.orientation === orientation ? calculated.result : null);
+  const seating = activeVariant?.seatingPlan ?? shownPlan.seating ?? (!previewPlan && calculated?.plan === plan && calculated.rules === seatingRules && calculated.orientation === orientation ? calculated.result : null);
   const profile = RULE_PROFILES.find((item) => item.id === profileId) ?? RULE_PROFILES[0];
-  const analysis = useMemo(() => activeVariant?.analysis ?? (seating ? analyzeEgress(plan, seating, profile) : null), [activeVariant, plan, seating, profile]);
-  const report = useMemo(() => activeVariant?.report ?? (seating && analysis ? evaluateRules(plan, seating, analysis, profile) : null), [activeVariant, plan, seating, analysis, profile]);
+  const currentAnalysis = useMemo(() => !activeVariant && plan.seating ? analyzeCurrentPlan(plan, plan.seating, profile) : null, [activeVariant, plan, profile]);
+  const analysis = activeVariant?.analysis ?? currentAnalysis?.egress ?? (seating ? analyzeEgress(plan, seating, profile) : null);
+  const report = activeVariant?.report ?? currentAnalysis?.report ?? (seating && analysis ? evaluateRules(plan, seating, analysis, profile) : null);
   const suggestions = useMemo(() => !activeVariant && seating && analysis && report && (seating.rotation === undefined || seating.rotation === 0 || seating.rotation === 90) ? suggestAisles(plan, seating, profile, analysis, report) : [], [activeVariant, plan, seating, profile, analysis, report]);
   const activeCheck = report?.checks.find((check) => check.id === activeCheckId);
   const activeSuggestion = suggestions.find((suggestion) => suggestion.id === activeSuggestionId);
@@ -70,8 +74,24 @@ export default function RoomEditor2D() {
   const roomRef = useRef(plan);
   roomRef.current = plan;
   const add = (next: RoomPlan) => setHistory((current) => commit(current, next));
-  const updateObject = (id: string, change: (object: RoomObject) => RoomObject) => setHistory((current) => commit(current, { ...current.present, objects: current.present.objects.map((object) => object.id === id ? change(object) : object) }));
+  const applySeating = (next: SeatingPlan) => {
+    if (!plan.seating || next === plan.seating) return;
+    add({ ...plan, seating: next });
+    setNotice("");
+  };
+  const applySeatingEdit = (result: { seating: SeatingPlan; message?: string }) => { if (result.message) setNotice(result.message); else applySeating(result.seating); };
+  const updateObject = (id: string, change: (object: RoomObject) => RoomObject) => {
+    const next = { ...plan, objects: plan.objects.map((object) => object.id === id ? (() => { const changed = change(object); return changed.type === "aisle" ? { ...changed, edited: true } : changed; })() : object) };
+    if (next.objects.some((object) => object.id === id && object.type === "aisle") && validateObjects(next).some((issue) => issue.objectId === id && issue.severity === "error")) { setNotice("Gang liegt außerhalb des Raums oder hat ungültige Maße."); return; }
+    add(next);
+    setNotice("");
+  };
   const removeObject = useCallback((id: string) => { setHistory((current) => commit(current, { ...current.present, objects: current.present.objects.filter((object) => object.id !== id) })); setSelection(null); }, []);
+  const deleteSelection = useCallback(() => {
+    if (selection?.type === "object") removeObject(selection.id);
+    if (selection?.type === "block" && plan.seating) { add({ ...plan, seating: removeBlock(plan.seating, selection.id) }); setSelection(null); }
+    if (selection?.type === "seat" && plan.seating) { add({ ...plan, seating: removeSeat(plan.seating, selection.id) }); setSelection(null); }
+  }, [selection, plan, removeObject]);
 
   useEffect(() => {
     const element = svgRef.current;
@@ -122,13 +142,13 @@ export default function RoomEditor2D() {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") { event.preventDefault(); historyAction(event.shiftKey ? "redo" : "undo"); }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "y") { event.preventDefault(); historyAction("redo"); }
       if (event.key === "Escape") { setHover(null); setSelection(null); setAisleStart(null); }
-      if ((event.key === "Delete" || event.key === "Backspace") && selection?.type === "object" && !(event.target instanceof HTMLInputElement) && !(event.target instanceof HTMLSelectElement)) { event.preventDefault(); removeObject(selection.id); }
+      if ((event.key === "Delete" || event.key === "Backspace") && selection && !(event.target instanceof HTMLInputElement) && !(event.target instanceof HTMLSelectElement)) { event.preventDefault(); deleteSelection(); }
     };
     const keyUp = (event: KeyboardEvent) => { if (event.code === "Space") setSpaceDown(false); if (event.key === "Shift") setShiftDown(false); };
     const blur = () => { setSpaceDown(false); setShiftDown(false); };
     window.addEventListener("keydown", keyDown); window.addEventListener("keyup", keyUp); window.addEventListener("blur", blur);
     return () => { window.removeEventListener("keydown", keyDown); window.removeEventListener("keyup", keyUp); window.removeEventListener("blur", blur); };
-  }, [historyAction, removeObject, selection]);
+  }, [historyAction, deleteSelection, selection]);
 
   const screen = (point: Pick<Point2D, "x" | "y">) => ({ x: size.width / 2 + (point.x - camera.x) * camera.scale, y: size.height / 2 + (point.y - camera.y) * camera.scale });
   const world = (x: number, y: number) => ({ x: camera.x + (x - size.width / 2) / camera.scale, y: camera.y + (y - size.height / 2) / camera.scale });
@@ -144,6 +164,9 @@ export default function RoomEditor2D() {
   const errors = useMemo(() => validateRoom(shownRoom), [shownRoom]);
   const issues = useMemo(() => validateObjects(shownPlan), [shownPlan]);
   const selectedObject = selection?.type === "object" ? shownPlan.objects.find((object) => object.id === selection.id) : undefined;
+  const selectedBlock = selection?.type === "block" ? seating?.blocks.find((block) => block.id === selection.id) : undefined;
+  const selectedSeat = selection?.type === "seat" ? seating?.seats.find((seat) => seat.id === selection.id) : undefined;
+  const selectedSeatBlock = selectedSeat && seating?.blocks.find((block) => block.seats.some((seat) => seat.id === selectedSeat.id));
   const shapePoints = (points: { x: number; y: number }[]) => points.map((point) => { const p = screen(point); return `${p.x},${p.y}`; }).join(" ");
   const aisleEnd = (raw: { x: number; y: number }, shift: boolean) => {
     const p = snapPoint(raw);
@@ -153,6 +176,10 @@ export default function RoomEditor2D() {
     return snapPoint({ x: aisleStart.x + Math.cos(angle) * length, y: aisleStart.y + Math.sin(angle) * length });
   };
   const dragged = (drag: Exclude<Drag, { type: "pan" }>, at: { x: number; y: number }): RoomPlan => {
+    if (drag.type === "block" && drag.original.seating) {
+      const result = moveBlock(drag.original, drag.original.seating, drag.id, at.x - drag.at.x, at.y - drag.at.y);
+      return result.seating === drag.original.seating ? drag.original : { ...drag.original, seating: result.seating };
+    }
     if (drag.type === "point") return { ...drag.original, contour: movePoint(drag.original.contour, drag.id, snapPoint(at)) };
     const object = drag.original.objects.find((item) => item.id === drag.id);
     if (!object) return drag.original;
@@ -161,7 +188,7 @@ export default function RoomEditor2D() {
       const offset = wallOffset(drag.original.contour, object.wallId, at);
       const ends = wallEndpoints(drag.original.contour, object.wallId);
       return { ...object, offset: offset === null || !ends ? object.offset : Number(Math.max(0, Math.min(offset - object.width / 2, wallLength(ends.a, ends.b) - object.width)).toFixed(2)) };
-    })() : object.type === "front" || isBlockingObject(object) ? { ...object, x: Number((object.x + dx).toFixed(2)), y: Number((object.y + dy).toFixed(2)) } : drag.type === "start" ? { ...object, start: snapPoint(at) } : drag.type === "end" ? { ...object, end: snapPoint(at) } : { ...object, start: snapPoint({ x: object.start.x + dx, y: object.start.y + dy }), end: snapPoint({ x: object.end.x + dx, y: object.end.y + dy }) };
+    })() : object.type === "front" || isBlockingObject(object) ? { ...object, x: Number((object.x + dx).toFixed(2)), y: Number((object.y + dy).toFixed(2)) } : drag.type === "start" ? { ...object, start: snapPoint(at), edited: true } : drag.type === "end" ? { ...object, end: snapPoint(at), edited: true } : { ...object, start: snapPoint({ x: object.start.x + dx, y: object.start.y + dy }), end: snapPoint({ x: object.end.x + dx, y: object.end.y + dy }), edited: true };
     return { ...drag.original, objects: drag.original.objects.map((item) => item.id === object.id ? changed : item) };
   };
   const coords = new Map(shownRoom.points.map((point) => [point.id, screen(point)]));
@@ -192,9 +219,16 @@ export default function RoomEditor2D() {
     const pointId = target.getAttribute("data-point-id");
     const wallId = target.getAttribute("data-wall-id");
     const objectId = target.getAttribute("data-object-id");
+    const blockId = target.getAttribute("data-block-id");
+    const seatId = target.getAttribute("data-seat-id");
     const handle = target.getAttribute("data-handle") as "start" | "end" | null;
     if (tool === "select") {
-      if (objectId) {
+      if (seatId && event.altKey) { setSelection({ type: "seat", id: seatId }); }
+      else if (blockId && plan.seating) {
+        setSelection({ type: "block", id: blockId });
+        dragRef.current = { type: "block", id: blockId, at: world(at.x, at.y), original: roomRef.current };
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } else if (objectId) {
         setSelection({ type: "object", id: objectId });
         dragRef.current = { type: handle ?? "object", id: objectId, at: world(at.x, at.y), original: roomRef.current };
         event.currentTarget.setPointerCapture(event.pointerId);
@@ -253,7 +287,14 @@ export default function RoomEditor2D() {
     if (drag && drag.type !== "pan") {
       const at = local(event);
       const next = dragged(drag, world(at.x, at.y));
-      if (JSON.stringify(next) !== JSON.stringify(drag.original)) add(next);
+      if (JSON.stringify(next) !== JSON.stringify(drag.original)) {
+        if (drag.original.objects.some((object) => object.id === drag.id && object.type === "aisle") && validateObjects(next).some((issue) => issue.objectId === drag.id && issue.severity === "error")) setNotice("Gang liegt außerhalb des Raums oder hat ungültige Maße.");
+        else { add(next); setNotice(""); }
+      }
+      else if (drag.type === "block" && drag.original.seating) {
+        const result = moveBlock(drag.original, drag.original.seating, drag.id, world(at.x, at.y).x - drag.at.x, world(at.x, at.y).y - drag.at.y);
+        if (result.message && Math.hypot(at.x - screen(drag.at).x, at.y - screen(drag.at).y) > 3) setNotice(result.message);
+      }
       setPreviewPlan(null);
     }
     dragRef.current = null;
@@ -303,14 +344,14 @@ export default function RoomEditor2D() {
   };
   const adoptVariant = (variant: PlanVariant) => {
     if (!variant.feasible) return;
-    const adoptedPlan = { ...variant.plan, objects: [...variant.plan.objects] };
+    const adoptedPlan = { ...variant.plan, objects: [...variant.plan.objects], seating: { ...variant.seatingPlan, blocks: variant.seatingPlan.blocks.map((block) => ({ ...block, source: "generated" as const })) } };
     parameterHistory.current.set(plan, { rules: seatingRules, orientation, offset: gridOffset, seating: calculated?.plan === plan ? calculated.result : null });
-    parameterHistory.current.set(adoptedPlan, { rules: variant.seatingPlan.rules, orientation: variant.seatingPlan.orientation, offset: variant.gridOffset, seating: variant.seatingPlan });
+    parameterHistory.current.set(adoptedPlan, { rules: variant.seatingPlan.rules, orientation: variant.seatingPlan.orientation, offset: variant.gridOffset, seating: adoptedPlan.seating });
     add(adoptedPlan);
     setSeatingRules(variant.seatingPlan.rules);
     setOrientation(variant.seatingPlan.orientation);
     setGridOffset(variant.gridOffset);
-    setCalculated({ plan: adoptedPlan, rules: variant.seatingPlan.rules, orientation: variant.seatingPlan.orientation, offset: variant.gridOffset, result: variant.seatingPlan });
+    setCalculated({ plan: adoptedPlan, rules: variant.seatingPlan.rules, orientation: variant.seatingPlan.orientation, offset: variant.gridOffset, result: adoptedPlan.seating });
     setVariantCalculation(null);
     setActiveVariantId(null);
     setActiveCheckId(null);
@@ -334,7 +375,7 @@ export default function RoomEditor2D() {
         <rect width={size.width} height={size.height} fill="#f6f4ed" />
         <Grid camera={camera} size={size} />
         {shownRoom.closed && shownRoom.points.length >= 3 ? <polygon points={shownRoom.points.map((point) => { const p = coords.get(point.id)!; return `${p.x},${p.y}`; }).join(" ")} fill={errors.length ? "#c77c6c" : "#9ab393"} fillOpacity="0.24" /> : null}
-        <g pointerEvents="none" aria-label="Berechnete Sitzplätze">{seatingPaths.map((block, index) => <g key={block.id}><path d={block.rectangles} fill={highlightedBlocks.has(block.id) ? "#bf6b30" : index % 2 ? "#477b70" : "#405b49"} stroke="#fff" strokeWidth="1" /><path d={block.backs} fill="none" stroke="#d6ece0" strokeWidth="2" /></g>)}{seating?.seats.filter((seat) => highlightedSeats.has(seat.id)).map((seat) => { const p = screen(seat); return <circle key={seat.id} cx={p.x} cy={p.y} r={Math.max(5, seatingRules.chairWidth * camera.scale / 2)} fill="#e58c39" fillOpacity="0.8" />; })}</g>
+        <g aria-label="Berechnete Sitzplätze">{seatingPaths.map((block, index) => <g key={block.id}><path data-block-id={plan.seating && !activeVariant ? block.id : undefined} d={block.rectangles} fill={highlightedBlocks.has(block.id) || selection?.type === "block" && selection.id === block.id ? "#bf6b30" : index % 2 ? "#477b70" : "#405b49"} stroke="#fff" strokeWidth="1" className={tool === "select" && plan.seating ? "cursor-move" : ""} /><path d={block.backs} fill="none" stroke="#d6ece0" strokeWidth="2" pointerEvents="none" /></g>)}{seating?.seats.filter((seat) => highlightedSeats.has(seat.id) || currentAnalysis?.collisionSeatIds.includes(seat.id) || selection?.type === "seat" && selection.id === seat.id).map((seat) => { const p = screen(seat); return <circle key={seat.id} cx={p.x} cy={p.y} r={Math.max(5, seatingRules.chairWidth * camera.scale / 2)} fill="#e58c39" fillOpacity="0.8" pointerEvents="none" />; })}{selectedBlock?.seats.map((seat) => { const p = screen(seat); return <circle key={seat.id} data-seat-id={seat.id} data-block-id={selectedBlock.id} cx={p.x} cy={p.y} r={Math.max(5, seatingRules.chairWidth * camera.scale / 2)} fill="transparent" className="cursor-move" />; })}</g>
         {activeSuggestion && <g pointerEvents="none" aria-label="Vorschau des Gangvorschlags"><polygon points={shapePoints(aislePolygon({ id: activeSuggestion.id, type: "aisle", start: activeSuggestion.start, end: activeSuggestion.end, width: activeSuggestion.width }))} fill="#df9a45" fillOpacity="0.42" stroke="#ac5b1d" strokeWidth="3" strokeDasharray="8 5" /></g>}
         {shownPlan.objects.filter((object): object is AisleObject => object.type === "aisle").map((object) => { const proposed = object.source === "generated"; return <g key={object.id}><polygon data-object-id={object.id} points={shapePoints(aislePolygon(object))} fill={proposed ? "#df9a45" : "#5596a0"} fillOpacity="0.38" stroke={proposed ? "#ac5b1d" : highlightedObjects.has(object.id) || selection?.id === object.id ? "#bd7647" : "#357682"} strokeWidth={highlightedObjects.has(object.id) || selection?.id === object.id ? 3 : 1.5} strokeDasharray={proposed ? "8 5" : undefined} className={tool === "select" && !activeVariant ? "cursor-move" : ""} /><line x1={screen(object.start).x} y1={screen(object.start).y} x2={screen(object.end).x} y2={screen(object.end).y} stroke="#357682" strokeDasharray="5 4" pointerEvents="none" /><Dimension a={screen(object.start)} b={screen(object.end)} label={`${formatMeters(wallLength(object.start, object.end))} · ${formatMeters(object.width)}`} />{!activeVariant && selection?.id === object.id && (["start", "end"] as const).map((end) => <circle key={end} data-object-id={object.id} data-handle={end} cx={screen(object[end]).x} cy={screen(object[end]).y} r="7" fill="white" stroke="#bd7647" strokeWidth="3" className="cursor-move" />)}</g>; })}
         {aisleStart && hover && <g pointerEvents="none"><polygon points={shapePoints(aislePolygon({ id: "preview", type: "aisle", start: aisleStart, end: aisleEnd(hover, shiftDown), width: 1.2 }))} fill="#5596a0" fillOpacity="0.3" stroke="#357682" strokeDasharray="6 4" /><Dimension a={screen(aisleStart)} b={screen(aisleEnd(hover, shiftDown))} label={`${formatMeters(wallLength(aisleStart, aisleEnd(hover, shiftDown)))} · 1,20 m`} /></g>}
@@ -357,9 +398,11 @@ export default function RoomEditor2D() {
       {selectedObject?.type === "door" && <><p className="text-sm font-semibold">Tür</p>{field("Breite (m)", selectedObject.width, (value) => updateObject(selectedObject.id, (object) => ({ ...object, width: value })), 0.01)}{field("Position auf Wand (m)", selectedObject.offset, (value) => updateObject(selectedObject.id, (object) => ({ ...object, offset: value })), 0)}<label className="flex items-center justify-between gap-2 text-sm">Rolle<select aria-label="Türrolle" value={selectedObject.role ?? "normal"} onChange={(event) => updateObject(selectedObject.id, (object) => object.type === "door" ? { ...object, role: event.target.value as "normal" | "exit" | "emergency_exit", clearWidth: event.target.value === "normal" ? undefined : object.clearWidth ?? object.width } : object)} className="rounded border border-premium-beige px-2 py-1"><option value="normal">Normale Tür</option><option value="exit">Ausgang</option><option value="emergency_exit">Notausgang</option></select></label>{selectedObject.role && selectedObject.role !== "normal" && field("Lichte Breite (m)", selectedObject.clearWidth ?? selectedObject.width, (value) => updateObject(selectedObject.id, (object) => ({ ...object, clearWidth: value })), 0.01)}</>}
       {selectedObject?.type === "obstacle" && <><label className="flex items-center justify-between gap-2 text-sm">Hindernistyp<select aria-label="Hindernistyp" value={selectedObject.obstacleType} onChange={(event) => updateObject(selectedObject.id, (object) => ({ ...object, obstacleType: event.target.value as ObstacleObject["obstacleType"] }))} className="max-w-32 rounded border border-premium-beige"><option value="column">Säule</option><option value="stage">Bühne</option><option value="technical">Technik / Mischpult</option><option value="furniture">Festes Möbel</option><option value="restricted">Sperrfläche</option></select></label>{field("X (m)", selectedObject.x, (v) => updateObject(selectedObject.id, (o) => ({ ...o, x: v })))}{field("Y (m)", selectedObject.y, (v) => updateObject(selectedObject.id, (o) => ({ ...o, y: v })))}{field("Breite (m)", selectedObject.width, (v) => updateObject(selectedObject.id, (o) => ({ ...o, width: v })), 0.01)}{field("Tiefe (m)", selectedObject.depth, (v) => updateObject(selectedObject.id, (o) => ({ ...o, depth: v })), 0.01)}{field("Rotation (°)", selectedObject.rotation, (v) => updateObject(selectedObject.id, (o) => ({ ...o, rotation: v })))}</>}
       {(selectedObject?.type === "stage" || selectedObject?.type === "reservedArea" || selectedObject?.type === "front") && <><p className="text-sm font-semibold">{selectedObject.type === "front" ? "Front" : selectedObject.type === "stage" ? "Bühne" : "Reservierte Fläche"}</p>{selectedObject.type === "reservedArea" && <label className="flex items-center justify-between gap-2 text-sm">Name<input aria-label="Name der reservierten Fläche" maxLength={40} value={selectedObject.name ?? ""} onChange={(event) => updateObject(selectedObject.id, (object) => object.type === "reservedArea" ? { ...object, name: event.target.value } : object)} className="w-32 rounded border border-premium-beige px-2 py-1" /></label>}{field("X (m)", selectedObject.x, (v) => updateObject(selectedObject.id, (o) => ({ ...o, x: v })))}{field("Y (m)", selectedObject.y, (v) => updateObject(selectedObject.id, (o) => ({ ...o, y: v })))}{field("Breite (m)", selectedObject.width, (v) => updateObject(selectedObject.id, (o) => ({ ...o, width: v })), 0.01)}{selectedObject.type !== "front" && field("Tiefe (m)", selectedObject.depth, (v) => updateObject(selectedObject.id, (o) => o.type === "stage" || o.type === "reservedArea" ? { ...o, depth: v } : o), 0.01)}{field("Rotation (°)", selectedObject.rotation, (v) => updateObject(selectedObject.id, (o) => ({ ...o, rotation: v })))}{selectedObject.type === "stage" && <button type="button" onClick={() => { const existing = plan.objects.find((object) => object.type === "front"); const front = { id: existing?.id ?? `object-${nextId.current++}`, type: "front" as const, x: selectedObject.x, y: selectedObject.y, width: selectedObject.width, rotation: selectedObject.rotation }; add({ ...plan, objects: [...plan.objects.filter((object) => object.type !== "front"), front] }); setSelection({ type: "object", id: front.id }); }} className="rounded-lg border border-premium-beige px-3 py-2 text-sm">Als Front verwenden</button>}</>}
-      {selectedObject?.type === "aisle" && <><p className="text-sm font-semibold">Gang / Freihaltezone</p>{field("Breite (m)", selectedObject.width, (v) => updateObject(selectedObject.id, (o) => ({ ...o, width: v })), 0.01)}<p className="text-sm">Länge: {formatMeters(wallLength(selectedObject.start, selectedObject.end))}</p>{(["start", "end"] as const).flatMap((end) => (["x", "y"] as const).map((axis) => field(`${end === "start" ? "Start" : "Ende"} ${axis.toUpperCase()} (m)`, selectedObject[end][axis], (v) => updateObject(selectedObject.id, (o) => o.type === "aisle" ? { ...o, [end]: { ...o[end], [axis]: v } } : o))))}</>}
+      {selectedObject?.type === "aisle" && <><p className="text-sm font-semibold">Gang / Freihaltezone</p><CommitNumberField label="Breite (m)" value={selectedObject.width} min={0.01} onCommit={(v) => updateObject(selectedObject.id, (o) => ({ ...o, width: v }))} /><p className="text-sm">Länge: {formatMeters(wallLength(selectedObject.start, selectedObject.end))}</p><p className="text-xs">Quelle: {selectedObject.source === "generated" ? "automatisch" : "manuell"}{selectedObject.edited ? " · bearbeitet" : ""}</p>{report?.checks.filter((check) => check.affectedIds.includes(selectedObject.id) && check.status !== "pass").map((check) => <p key={check.id} className="text-xs text-amber-800">{check.message}</p>)}{(["start", "end"] as const).flatMap((end) => (["x", "y"] as const).map((axis) => field(`${end === "start" ? "Start" : "Ende"} ${axis.toUpperCase()} (m)`, selectedObject[end][axis], (v) => updateObject(selectedObject.id, (o) => o.type === "aisle" ? { ...o, [end]: { ...o[end], [axis]: v } } : o))))}</>}
       {selectedObject && <button type="button" onClick={() => removeObject(selectedObject.id)} className="rounded-lg border border-red-300 px-3 py-2 text-sm text-red-800">Objekt löschen</button>}
-      {!selectedObject && <p className="text-sm text-premium-muted">Wählen Sie ein Objekt im Grundriss.</p>}
+      {selectedBlock && seating && <div className="space-y-2 text-sm"><p className="font-semibold">Sitzblock {selectedBlock.id}</p><p>{selectedBlock.seats.length} Plätze · {selectedBlock.rowCount} Reihen</p><p>Quelle: {selectedBlock.source === "generated" ? "automatisch" : "manuell"}{selectedBlock.edited ? " · bearbeitet" : ""}</p><p className="text-xs text-premium-muted">Alt + Klick auf einen Sitz wählt ihn einzeln aus.</p><CommitNumberField label="Blockwinkel (°)" value={selectedBlock.rotation ?? selectedBlock.seats[0]?.rotation ?? 0} onCommit={(value) => applySeatingEdit(rotateBlock(plan, seating, selectedBlock.id, value))} />{report?.checks.filter((check) => check.affectedIds.includes(selectedBlock.id) && check.status !== "pass").map((check) => <p key={check.id} className="text-xs text-amber-800">{check.message}</p>)}<label className="flex items-center justify-between gap-2">Sitze je Schritt<input aria-label="Sitze je Schritt" type="number" min="1" step="1" value={rowEditCount} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isInteger(value) && value > 0) setRowEditCount(value); }} className="w-20 rounded border border-premium-beige px-2 py-1 text-right" /></label><div className="max-h-48 space-y-2 overflow-auto">{rowsOf(selectedBlock).map((row, index) => <div key={row.id} className="rounded border border-premium-beige p-2"><p>Reihe {index + 1}: {row.seats.length} Plätze</p>{(["left", "right"] as const).map((end) => <div key={end} className="flex gap-1"><button type="button" aria-label={`Reihe ${index + 1} ${end === "left" ? "links" : "rechts"} kürzen`} onClick={() => applySeatingEdit(editRow(plan, seating, selectedBlock.id, row.id, end, -rowEditCount))} className="rounded border px-2">−</button><button type="button" aria-label={`Reihe ${index + 1} ${end === "left" ? "links" : "rechts"} verlängern`} onClick={() => applySeatingEdit(editRow(plan, seating, selectedBlock.id, row.id, end, rowEditCount))} className="rounded border px-2">+</button><span>{end === "left" ? "links" : "rechts"}</span></div>)}</div>)}</div><button type="button" onClick={deleteSelection} className="rounded-lg border border-red-300 px-3 py-2 text-red-800">Block löschen</button></div>}
+      {selectedSeat && <div className="space-y-2 text-sm"><p className="font-semibold">Sitz {selectedSeat.id}</p><p>Reihe {selectedSeat.row} · Position {selectedSeat.index}</p><p>Block {selectedSeatBlock?.id}</p><button type="button" onClick={() => selectedSeatBlock && setSelection({ type: "block", id: selectedSeatBlock.id })} className="rounded border px-2 py-1">Block auswählen</button><button type="button" onClick={deleteSelection} className="rounded border border-red-300 px-2 py-1 text-red-800">Sitz entfernen</button></div>}
+      {!selectedObject && !selectedBlock && !selectedSeat && <p className="text-sm text-premium-muted">Wählen Sie ein Objekt im Grundriss.</p>}
       <div aria-label="Bestuhlung" className="space-y-3 border-t border-premium-beige pt-4"><h3 className="font-semibold">Bestuhlung</h3>
         {seatingField("Stuhlbreite (m)", "chairWidth", 0.1, "0.05")}
         {seatingField("Stuhltiefe (m)", "chairDepth", 0.1, "0.05")}
@@ -370,6 +413,7 @@ export default function RoomEditor2D() {
         {seatingRules.rowPitch < seatingRules.chairDepth && <p className="text-xs text-amber-800">Der Reihenabstand muss mindestens der Stuhltiefe entsprechen.</p>}
         {seating && <div aria-live="polite" className="space-y-1 rounded-lg bg-[#f1f5ef] p-3 text-sm"><p className="font-semibold">{seating.totalSeats} Sitzplätze · {seating.blocks.length} Sitzblöcke</p><p>{seating.totalRows} Reihen · längste Reihe: {seating.longestRow} Plätze</p><p>Stuhl: {formatMeters(seating.rules.chairWidth)} × {formatMeters(seating.rules.chairDepth)}</p><p>Reihenabstand: {formatMeters(seating.rules.rowPitch)}</p>{seating.hints.map((hint) => <p key={hint} className="text-amber-900">Hinweis: {hint}</p>)}</div>}
       </div>
+      {currentAnalysis && <div aria-label="Aktueller Plan" aria-live="polite" className="space-y-1 rounded-lg border border-premium-beige p-3 text-sm"><p className="font-semibold">Aktueller Plan</p><p>{currentAnalysis.summary.seatCount} Plätze · {currentAnalysis.summary.blockCount} Sitzblöcke · {currentAnalysis.summary.aisleCount} Gänge</p><p>{currentAnalysis.summary.usedExitCount} Ausgänge genutzt · {currentAnalysis.summary.unreachableSeatCount ? `${currentAnalysis.summary.unreachableSeatCount} Plätze ohne Weg` : "Alle Sitze erreichbar"}</p><p>Längster Weg: {currentAnalysis.summary.maxEgressDistance === undefined ? "nicht bestimmbar" : formatMeters(currentAnalysis.summary.maxEgressDistance)}</p><p>{currentAnalysis.summary.errors.length} Fehler · {currentAnalysis.summary.warnings.length} Warnungen</p>{currentAnalysis.summary.errors.filter((item) => item.id === "manual-seat-collisions").map((item) => <p key={item.id} className="text-red-800">{item.message}</p>)}</div>}
       <div aria-label="Regelprüfung" className="space-y-3 border-t border-premium-beige pt-4"><h3 className="font-semibold">Regelprüfung</h3>
         <label className="block space-y-1 text-sm"><span>Regelprofil</span><select aria-label="Regelprofil" value={profileId} onChange={(event) => { setProfileId(event.target.value); setActiveCheckId(null); setActiveSuggestionId(null); }} className="w-full rounded border border-premium-beige px-2 py-1">{RULE_PROFILES.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
         <label className="flex items-start gap-2 text-xs"><input type="checkbox" checked={applicabilityConfirmed} onChange={(event) => setApplicabilityConfirmed(event.target.checked)} className="mt-0.5" /><span>Anwendung dieses Regelprofils wurde fachlich geprüft</span></label>
@@ -420,6 +464,12 @@ export default function RoomEditor2D() {
     <div className="border-t border-premium-beige px-4 py-2 text-xs text-premium-muted">Mausrad: zoomen · Mittlere Maustaste oder Leertaste + ziehen: verschieben · Shift: gerade Wand · Rasterfang: 0,10 m</div>
     {(errors.length > 0 || issues.length > 0 || notice) ? <div role="alert" className="border-t border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">{errors.map((message) => <p key={message}>Fehler: {message}</p>)}{issues.map((issue, index) => <p key={`${issue.objectId}-${index}`}>{issue.severity === "error" ? "Fehler" : "Warnung"}: {issue.message}</p>)}{notice && <p>{notice}</p>}</div> : null}
   </section>;
+}
+
+function CommitNumberField({ label, value, min, onCommit }: { label: string; value: number; min?: number; onCommit: (value: number) => void }) {
+  const [draft, setDraft] = useState(String(value));
+  useEffect(() => setDraft(String(value)), [value]);
+  return <label className="flex items-center justify-between gap-2 text-sm"><span>{label}</span><input aria-label={label} type="number" step="0.1" min={min} value={draft} onChange={(event) => setDraft(event.currentTarget.value)} onBlur={() => { const number = Number(draft); if (draft !== "" && Number.isFinite(number) && (min === undefined || number >= min) && number !== value) onCommit(number); else setDraft(String(value)); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} className="w-24 rounded border border-premium-beige px-2 py-1 text-right" /></label>;
 }
 
 function Dimension({ a, b, label }: { a: { x: number; y: number }; b: { x: number; y: number }; label: string }) {

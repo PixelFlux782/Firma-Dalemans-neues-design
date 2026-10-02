@@ -1,4 +1,5 @@
 import { pointById, wallLength, type Point2D, type RoomGeometry, type RoomWall } from "./geometry";
+import type { SeatingPlan } from "./seating";
 
 export type Position = { x: number; y: number };
 export type DoorObject = { id: string; type: "door"; wallId: string; offset: number; width: number; role?: "normal" | "exit" | "emergency_exit"; clearWidth?: number; openingDirection?: "inside" | "outside"; hingeSide?: "left" | "right" };
@@ -6,11 +7,11 @@ export type ObstacleObject = { id: string; type: "obstacle"; obstacleType: "colu
 export type RoomFront = { id: string; type: "front"; x: number; y: number; width: number; rotation: number };
 export type Stage = { id: string; type: "stage"; x: number; y: number; width: number; depth: number; rotation: number };
 export type ReservedArea = { id: string; type: "reservedArea"; x: number; y: number; width: number; depth: number; rotation: number; name?: string };
-export type AisleObject = { id: string; type: "aisle"; start: Position; end: Position; width: number; source?: "manual" | "generated" };
+export type AisleObject = { id: string; type: "aisle"; start: Position; end: Position; width: number; source?: "manual" | "generated"; edited?: boolean };
 export type RoomObject = DoorObject | ObstacleObject | AisleObject | RoomFront | Stage | ReservedArea;
 export type BlockingObject = ObstacleObject | Stage | ReservedArea;
 export const isBlockingObject = (object: RoomObject): object is BlockingObject => object.type === "obstacle" || object.type === "stage" || object.type === "reservedArea";
-export type RoomPlan = { contour: RoomGeometry; objects: RoomObject[] };
+export type RoomPlan = { contour: RoomGeometry; objects: RoomObject[]; seating?: SeatingPlan };
 export type Issue = { objectId: string; severity: "error" | "warning"; message: string };
 export const emptyPlan = (): RoomPlan => ({ contour: { points: [], walls: [], closed: false }, objects: [] });
 
@@ -100,7 +101,8 @@ export function validateObjects(plan: RoomPlan): Issue[] {
     } else {
       if (![object.start.x, object.start.y, object.end.x, object.end.y, object.width].every(Number.isFinite) || object.width <= 0 || wallLength(object.start, object.end) < EPS) error("Gang: Breite und Länge müssen größer als 0 sein.");
       else if (!polygonInsideRoom(aislePolygon(object), plan.contour)) error("Gang liegt teilweise außerhalb des Raums.");
-      if (plan.objects.some((other) => isBlockingObject(other) && polygonsOverlap(aislePolygon(object), obstaclePolygon(other)))) issues.push({ objectId: object.id, severity: "warning", message: "Gang überlagert eine Sperrfläche." });
+      const overlap = plan.objects.find((other) => isBlockingObject(other) && polygonsOverlap(aislePolygon(object), obstaclePolygon(other)));
+      if (overlap) issues.push({ objectId: object.id, severity: "warning", message: overlap.type === "obstacle" && overlap.obstacleType === "restricted" || overlap.type === "reservedArea" ? "Gang überlagert eine Sperrfläche." : "Gang überlagert ein Hindernis." });
     }
   }
   return issues;

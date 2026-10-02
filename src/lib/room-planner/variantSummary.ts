@@ -51,5 +51,5 @@ export function createVariantSummary(plan: RoomPlan, seating: SeatingPlan, analy
 
 /** Generated aisles belong to variants; all other plan inputs invalidate the result when changed. */
 export function planFingerprint(plan: RoomPlan): string {
-  return JSON.stringify({ contour: plan.contour, objects: plan.objects.filter((object) => object.type !== "aisle" || object.source !== "generated").sort((a, b) => a.id.localeCompare(b.id)) });
+  return JSON.stringify({ contour: plan.contour, objects: plan.objects.filter((object) => object.type !== "aisle" || object.source !== "generated" || object.edited).sort((a, b) => a.id.localeCompare(b.id)), seating: plan.seating?.blocks.map((block) => ({ id: block.id, edited: block.edited, seats: block.seats })) });
 }

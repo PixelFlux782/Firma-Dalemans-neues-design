@@ -106,8 +106,8 @@ function explain(variant: PlanVariant, balanced?: PlanVariant): string[] {
   return reasons;
 }
 export function generatePlanVariants(inputPlan: RoomPlan, baseRules: SeatingRules = DEFAULT_SEATING_RULES, rule: RuleProfile, preference: OrientationPreference = "automatic", config: VariantConfig = DEFAULT_VARIANT_CONFIG): VariantResult {
-  const plan = inputPlan.objects.some((object) => object.type === "aisle" && object.source === "generated")
-    ? { ...inputPlan, objects: inputPlan.objects.filter((object) => object.type !== "aisle" || object.source !== "generated") } : inputPlan;
+  const plan = inputPlan.objects.some((object) => object.type === "aisle" && object.source === "generated" && !object.edited)
+    ? { ...inputPlan, objects: inputPlan.objects.filter((object) => object.type !== "aisle" || object.source !== "generated" || object.edited) } : inputPlan;
   const front = plan.objects.find((object): object is RoomFront => object.type === "front");
   const limit = Math.min(48, Math.max(1, Math.floor(config.maximumCandidatePlans)));
   const offsets = config.gridOffsets.filter((value) => Number.isFinite(value) && value >= 0 && value < 1).slice(0, 4);

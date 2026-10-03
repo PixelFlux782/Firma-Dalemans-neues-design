@@ -88,6 +88,26 @@ export default function HomePage() {
         </div>
       </section>
 
+      <HomeSection className="pt-5 md:pt-7">
+        <aside
+          aria-label="Entwicklungsstatus der Website"
+          className="grid gap-4 border-y border-premium-beige/80 bg-white/35 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-6 md:py-5"
+        >
+          <div className="min-w-0">
+            <h2 className="font-display text-base font-medium text-premium-ink sm:text-lg">
+              DLMNS entwickelt sich weiter.
+            </h2>
+            <p className="mt-1 max-w-4xl text-sm leading-6 text-premium-muted">
+              Diese Website befindet sich in aktiver Weiterentwicklung. In den kommenden Monaten ergänzen und verbessern wir Inhalte, Funktionen und digitale Werkzeuge Schritt für Schritt.
+            </p>
+          </div>
+          <div className="inline-flex min-h-11 w-fit items-center gap-2.5 border-l border-premium-beige pl-3 font-mono text-[0.62rem] font-medium uppercase tracking-[0.16em] text-premium-muted sm:pl-5">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-premium-forest" aria-hidden="true" />
+            <span>Live Preview</span>
+          </div>
+        </aside>
+      </HomeSection>
+
       <HomeSection>
         <SectionHeader eyebrow="Sortiment" title="Stühle, Tische und Lösungen für flexible Räume" lead="Vier Produktbereiche für Räume, die sich im Alltag schnell und zuverlässig verändern müssen." href="/produkte" linkLabel="Alle Produkte" align="editorial" />
         <div className="section-grid-top grid gap-x-8 gap-y-14 md:grid-cols-2 lg:gap-x-12 lg:gap-y-20">

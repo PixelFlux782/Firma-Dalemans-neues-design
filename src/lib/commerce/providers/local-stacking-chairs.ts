@@ -128,15 +128,15 @@ const chairRecords: LocalChairRecord[] = [
       [102.5, 100.86, 98.4], [106.125, 104.485, 102.025],
     ],
     erpArticleNumbers: ["A1021ACO", "A1021ACO", "A1021BCO2", "A1021BCO2", "A1021BCO3", "A1021BCO3", "A1021BCO4", "A1021BCO4", "A1021CCO2", "A1021CCO2", "A1021CCO3", "A1021CCO3", "A1021CCO4", "A1021CCO4"],
-    featuredImage: newChairImage("Stapelstuhl_1021_a.png", "Stapelstuhl Modell 1021, ungepolstert"),
+    featuredImage: image("/neue bilder/Stapelstühle/Stapelstuhl_Stahlrohr_1021c_02.png", "Stapelstuhl Modell 1021, ungepolstert"),
     images: [
-      newChairImage("Stapelstuhl_1021_a.png", "Stapelstuhl Modell 1021, ungepolstert"),
+      image("/neue bilder/Stapelstühle/Stapelstuhl_Stahlrohr_1021c_02.png", "Stapelstuhl Modell 1021, ungepolstert"),
       newChairImage("Stapelstuhl_Stahlrohr_1021c_02.png", "Stapelstuhl Modell 1021c mit Polsterung"),
       newChairImage("Stapelstuhl_1021_c_lila-stuhl.png", "Stapelstuhl Modell 1021 mit Sitz- und Rückenpolster"),
       newChairImage("Stapelstuhl_1021-holzgestell-2-detail.png", "Detail des Holzgestells von Modell 1021"),
     ],
     variantImages: {
-      none: newChairImage("Stapelstuhl_1021_a.png", "Stapelstuhl Modell 1021, ungepolstert"),
+      none: image("/neue bilder/Stapelstühle/Stapelstuhl_Stahlrohr_1021c_02.png", "Stapelstuhl Modell 1021, ungepolstert"),
       seat: newChairImage("Stapelstuhl_Stahlrohr_1021c_02.png", "Stapelstuhl Modell 1021c mit Polsterung"),
       "seat-back": newChairImage("Stapelstuhl_1021_c_lila-stuhl.png", "Stapelstuhl Modell 1021 mit Sitz- und Rückenpolster"),
     },

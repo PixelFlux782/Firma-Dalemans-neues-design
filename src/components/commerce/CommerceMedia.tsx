@@ -1,8 +1,13 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
 import ProductVisual from "@/components/ProductVisual";
 import type { CommerceImage } from "@/lib/commerce/types";
 
 interface CommerceMediaProps {
   image: CommerceImage | null;
+  images?: CommerceImage[];
   fallbackLabel: string;
   priority?: boolean;
   aspectRatio?: string;
@@ -13,6 +18,7 @@ interface CommerceMediaProps {
 
 export default function CommerceMedia({
   image,
+  images = image ? [image] : [],
   fallbackLabel,
   priority = false,
   aspectRatio = "4 / 3",
@@ -20,21 +26,42 @@ export default function CommerceMedia({
   className = "",
   imageInset = "7%",
 }: CommerceMediaProps) {
-  if (image) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeImage = images[activeIndex] ?? image;
+
+  if (activeImage) {
     return (
-      <ProductVisual
-        src={image.url}
-        alt={image.altText ?? fallbackLabel}
-        priority={priority}
-        sizes={sizes}
-        aspectRatio={aspectRatio}
-        imageInset={imageInset}
-        fadeStrength="soft"
-        backgroundTone="warm"
-        surface="warm"
-        decorativeAtmosphere
-        className={className}
-      />
+      <div>
+        <ProductVisual
+          src={activeImage.url}
+          alt={activeImage.altText ?? fallbackLabel}
+          priority={priority}
+          sizes={sizes}
+          aspectRatio={aspectRatio}
+          imageInset={imageInset}
+          fadeStrength="soft"
+          backgroundTone="warm"
+          surface="warm"
+          decorativeAtmosphere
+          className={className}
+        />
+        {images.length > 1 ? (
+          <div className="mt-3 flex gap-3" aria-label="Weitere Produktbilder">
+            {images.map((galleryImage, index) => (
+              <button
+                key={galleryImage.url}
+                type="button"
+                onClick={() => setActiveIndex(index)}
+                aria-label={`Bild ${index + 1}: ${galleryImage.altText ?? fallbackLabel}`}
+                aria-pressed={index === activeIndex}
+                className={`relative h-20 w-20 overflow-hidden rounded-xl border ${index === activeIndex ? "border-premium-ink" : "border-premium-beige"}`}
+              >
+                <Image src={galleryImage.url} alt="" fill sizes="80px" className="object-cover" />
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
     );
   }
 

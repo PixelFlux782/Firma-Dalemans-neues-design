@@ -391,7 +391,12 @@ export const localProducts: CommerceProduct[] = [
       "<p>Die Buchablage ergänzt geeignete Stahlrohrstühle um eine praktische Ablage unter der Sitzfläche.</p>",
     availableForSale: false,
     featuredImage: bookRackImage,
-    images: [bookRackImage],
+    images: [
+      bookRackImage,
+      image("/neue bilder/Zubehör/Buchabl03_edit.png", "Buchablage zum Nachrüsten – Detailansicht"),
+      image("/neue bilder/Zubehör/Buchabl06_edit.png", "Buchablage zum Nachrüsten – montierte Ansicht"),
+      image("/neue bilder/Zubehör/Buchabl07_edit.png", "Buchablage zum Nachrüsten – weitere Ansicht"),
+    ],
     variants: [
       requestVariant("book-rack-standard", "Passend nach Modellprüfung", "DEV-BA-STD", [
         { name: "Ausführung", value: "Nach Modellprüfung" },

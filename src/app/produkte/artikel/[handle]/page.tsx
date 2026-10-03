@@ -99,6 +99,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
         <div className="mt-8 grid items-start gap-10 lg:grid-cols-[1.08fr_.92fr] lg:gap-14">
           <CommerceMedia
             image={product.featuredImage}
+            images={product.images}
             fallbackLabel={product.title}
             priority
             sizes="(min-width: 1024px) 54vw, 100vw"

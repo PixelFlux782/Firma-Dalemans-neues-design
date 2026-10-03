@@ -17,7 +17,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/produkte",
     "/produkte/stapelstuehle",
     "/produkte/gleiter-finder",
-    "/produkte/rednerpulte",
     "/produkte/reihenverbinder",
     "/raeume-planung",
     "/raeume-planung/raumplanung",
@@ -37,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: path === "/" ? 1 : 0.8,
   })) satisfies MetadataRoute.Sitemap;
 
-  const categoryEntries = productCategories.filter((category) => category.id !== "stapelstuehle" && category.id !== "gemeindestuehle-bankettmoebel").map((category) => ({
+  const categoryEntries = productCategories.filter((category) => category.id === "transportwagen-zubehoer").map((category) => ({
     url: `${siteUrl}/produkte/kategorien/${category.id}`,
     lastModified: now,
     changeFrequency: "monthly" as const,

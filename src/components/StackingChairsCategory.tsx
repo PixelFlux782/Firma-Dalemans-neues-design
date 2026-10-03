@@ -84,9 +84,9 @@ export default function StackingChairsCategory({ heroImage, products, variant = 
   const categoryPath = isAccessories
     ? "/produkte/kategorien/transportwagen-zubehoer"
     : isLecterns
-      ? "/produkte/rednerpulte"
+      ? "/produkte/sortiment/rednerpulte"
       : isTables
-        ? "/produkte/kategorien/klapptische"
+        ? "/produkte/sortiment/klapptische"
         : "/produkte/stapelstuehle";
 
   return (

@@ -16,11 +16,14 @@ const pageLinks = [
 
 const productLinks = [
   ["/produkte/stapelstuehle", "Stapelstühle"],
-  ["/produkte/kategorien/klapptische", "Klapptische"],
+  ["/produkte/sortiment/klapptische", "Klapptische"],
+  ["/produkte/sortiment/bistrotische", "Bistrotische"],
+  ["/produkte/sortiment/rednerpulte", "Rednerpulte"],
+  ["/produkte/kategorien/transportwagen-zubehoer", "Zubehör & Ersatzteile"],
+  ["/produkte/sortiment/gleiter-bodenschutz", "Gleiter & Bodenschutz"],
   ["/produkte/artikel/buchablage-nachruesten", "Buchablagen"],
   ["/produkte/artikel/stuhltransportwagen", "Transportwagen"],
-  ["/produkte/reihenverbinder", "Reihenverbinder & Zubehör"],
-  ["/produkte/stuhlgleiter", "Ersatzteile & Gleiter"],
+  ["/produkte/sortiment/reihenverbinder-nachruestung", "Reihenverbinder & Nachrüstung"],
   ["/sonderposten", "Sonderposten"],
 ] as const;
 

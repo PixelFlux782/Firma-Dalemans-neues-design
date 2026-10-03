@@ -11,12 +11,14 @@ const roomHelp = (name: string): ProductDetailData["help"] => ({
 });
 
 export function legacyDetailData(product: Product): ProductDetailData {
-  const categoryHref = `/produkte/kategorien/${product.categoryId}`;
+  const accessoryCollection = product.slug === "stuhlgleiter" ? "gleiter-bodenschutz" : ["tischtransportwagen", "stuhltransportwagen"].includes(product.slug) ? "transport-lagerung" : ["reihenverbinder", "buchablage"].includes(product.slug) ? "reihenverbinder-nachruestung" : null;
+  const categoryHref = accessoryCollection ? `/produkte/sortiment/${accessoryCollection}` : `/produkte/kategorien/${product.categoryId}`;
   const isTable = product.categoryId === "klapptische";
   const isGlider = product.slug === "stuhlgleiter" || product.slug === "ersatzteile-kleinteile";
   const isAccessory = product.categoryId === "transportwagen-zubehoer";
   return {
-    path: `/produkte/${product.slug}`, category: product.categoryName, categoryHref,
+    path: `/produkte/${product.slug}`, category: accessoryCollection ? ({ "gleiter-bodenschutz": "Gleiter & Bodenschutz", "transport-lagerung": "Transport & Lagerung", "reihenverbinder-nachruestung": "Reihenverbinder & Nachrüstung" }[accessoryCollection]) : product.categoryName, categoryHref,
+    parentCategory: isAccessory && accessoryCollection ? { label: "Zubehör", href: "/produkte/kategorien/transportwagen-zubehoer" } : undefined,
     name: product.title, shortDescription: product.shortDescription, description: product.description,
     highlights: product.highlights, useCases: product.suitableFor, variants: product.variants,
     help: isTable ? roomHelp(product.title) : isGlider ? {
@@ -42,10 +44,12 @@ export function commerceDetailData(product: CommerceProduct, category: string, c
     tischtransportwagen: "tischtransportwagen",
     stuhltransportwagen: "stuhltransportwagen",
     "buchablage-nachruesten": "buchablage",
+    bistrotisch: "bistrotisch",
   };
   const editorial = editorialSlug[product.handle] ? getProductBySlug(editorialSlug[product.handle]) : undefined;
   const chair = Boolean(product.stackingChair);
   const table = product.collectionHandles.includes("klapptische");
+  const accessory = product.collectionHandles.some((handle) => ["gleiter-bodenschutz", "reihenverbinder-nachruestung", "transport-lagerung"].includes(handle));
   const glider = product.variants.some(variant => variant.finderAttributes);
   const developmentFinder = product.variants.some(variant => variant.finderAttributes?.dataStatus === "development");
   const help: ProductDetailData["help"] = chair || table ? roomHelp(product.title) : glider ? {
@@ -67,9 +71,9 @@ export function commerceDetailData(product: CommerceProduct, category: string, c
     "Sitz- und Rückenpolster – Stoffgruppe 2, 3 oder 4 separat wählen.",
   ] : [] : [...optionGroups].filter(([, values]) => values.size > 1).map(([name, values]) => `${name}: ${[...values].join(", ")}`);
   return {
-    path, category, categoryHref, name: chair ? `Modell ${product.stackingChair?.modelCode}` : product.title,
+    path, category, categoryHref, parentCategory: accessory ? { label: "Zubehör", href: "/produkte/kategorien/transportwagen-zubehoer" } : undefined, name: chair ? `Modell ${product.stackingChair?.modelCode}` : product.title,
     shortDescription: product.shortDescription,
-    description: editorial ? `${product.description} ${editorial.description}` : product.description,
+    description: editorial && product.handle !== "bistrotisch" ? `${product.description} ${editorial.description}` : product.description,
     highlights: chair ? ["stapelbar", "Polsterarten wählbar", ...(product.variants.some(variant => variant.selectedOptions.some(option => option.name === "Reihenverbindung" && option.value === "Mit Reihenverbindung")) ? ["Reihenverbindung erhältlich"] : [])] : editorial ? editorial.highlights : developmentFinder ? [] : [...product.compatibility, ...product.suitableFor].slice(0, 3),
     compatibility: developmentFinder ? [] : product.compatibility,
     useCases: developmentFinder ? [] : [...new Set([...product.suitableFor, ...(editorial?.suitableFor ?? [])])], variants, specifications: developmentFinder ? [] : product.specifications,

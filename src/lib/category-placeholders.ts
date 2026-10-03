@@ -13,6 +13,10 @@ export const categoryPlaceholders: Record<
     ariaLabel: "Klapptische — flexible Raumflächen",
     mood: "stone-arch",
   },
+  bistrotische: {
+    ariaLabel: "Bistrotische — Begegnungsbereiche",
+    mood: "stone-arch",
+  },
   "gemeindestuehle-bankettmoebel": {
     ariaLabel: "Gemeindestühle — festliche Raumatmosphäre",
     mood: "bronze-glow",

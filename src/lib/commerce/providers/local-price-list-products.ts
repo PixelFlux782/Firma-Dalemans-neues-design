@@ -1,4 +1,5 @@
 import type { CommerceImage, CommerceMoney, CommerceProduct, CommerceProductVariant } from "@/lib/commerce/types";
+import { getProductBySlug } from "@/lib/products";
 
 const updatedAt = "2026-09-19T00:00:00.000Z";
 const eur = (amount: number): CommerceMoney => ({ amount: amount.toFixed(2), currencyCode: "EUR" });
@@ -129,3 +130,38 @@ export const localPriceListProducts: CommerceProduct[] = [
     quotedVariant("rednerpult", "D705AH", "Typ AH · Furnierplatte", 1048.1707),
   ] }),
 ];
+
+const bistrotisch = getProductBySlug("bistrotisch");
+if (!bistrotisch) throw new Error("Bistrotisch fehlt im redaktionellen Katalog");
+
+export const localBistrotischProduct: CommerceProduct = {
+  ...product({
+    handle: bistrotisch.slug,
+    title: bistrotisch.title,
+    description: bistrotisch.description,
+    collection: "bistrotische",
+    featuredImage: { url: bistrotisch.image, altText: bistrotisch.imageAlt ?? bistrotisch.title, width: null, height: null },
+    variants: [{
+      id: "local-variant-bistrotisch-anfrage",
+      title: "Ausführung auf Anfrage",
+      erpArticleNumber: null,
+      sku: null,
+      selectedOptions: [],
+      price: null,
+      compareAtPrice: null,
+      priceStatus: "on_request",
+      priceDataStatus: "verified",
+      availableForSale: false,
+      availability: "on_request",
+      availabilityNote: "Ausführung, Preis und Lieferzeit auf Anfrage.",
+      image: null,
+      finderAttributes: null,
+    }],
+  }),
+  shortDescription: bistrotisch.shortDescription,
+  specifications: bistrotisch.details?.map((value) => ({ name: "Ausführung", value })) ?? [],
+  suitableFor: bistrotisch.suitableFor,
+  applicationNotes: bistrotisch.variants ?? [],
+  consultationNote: bistrotisch.note ?? bistrotisch.shortDescription,
+  seo: { title: bistrotisch.title, description: bistrotisch.shortDescription },
+};

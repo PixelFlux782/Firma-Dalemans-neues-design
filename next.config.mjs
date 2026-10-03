@@ -3,6 +3,9 @@ const nextConfig = {
   reactStrictMode: true,
   async redirects() {
     return [
+      { source: "/produkte/kategorien/klapptische", destination: "/produkte/sortiment/klapptische", statusCode: 301 },
+      { source: "/produkte/rednerpulte", destination: "/produkte/sortiment/rednerpulte", statusCode: 301 },
+      { source: "/produkte/bistrotisch", destination: "/produkte/artikel/bistrotisch", statusCode: 301 },
       ...[
         ["klapptisch-310c", "klapptisch-310c"],
         ["trapezklapptisch-310c", "trapez-klapptisch-310c"],

@@ -1,6 +1,7 @@
 ﻿export type ProductCategoryId =
   | "stapelstuehle"
   | "klapptische"
+  | "bistrotische"
   | "gemeindestuehle-bankettmoebel"
   | "transportwagen-zubehoer";
 
@@ -465,8 +466,8 @@ const productCatalog: Product[] = [
   {
     title: "Bistrotisch",
     slug: "bistrotisch",
-    categoryId: "klapptische",
-    categoryName: "Klapptische",
+    categoryId: "bistrotische",
+    categoryName: "Bistrotische",
     image: asset("/images/curated/Tische/Klapptisch_Stapeltisch_steh3erB_02.webp"),
     imageAlt: "Drei runde Bistrotische mit Säulengestell",
     shortDescription:

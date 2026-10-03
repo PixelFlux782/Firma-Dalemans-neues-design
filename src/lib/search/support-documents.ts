@@ -10,6 +10,14 @@ export interface SupportSearchEntry {
 
 export const supportSearchEntries: SupportSearchEntry[] = [
   {
+    id: "accessories-hub",
+    title: "Transportwagen, Zubehör und Ersatzteile",
+    url: "/produkte/kategorien/transportwagen-zubehoer",
+    description: "Hauptkategorie für Gleiter, Reihenverbinder, Buchablagen, Transportwagen und Ersatzteile.",
+    keywords: ["Zubehör", "Ersatzteile", "Transportwagen", "Buchablagen", "Nachrüstung"],
+    aliases: ["Zubehör-Hauptkategorie", "Ersatzteile finden"],
+  },
+  {
     id: "glider-finder",
     title: "Gleiter-Finder",
     url: "/produkte/gleiter-finder",

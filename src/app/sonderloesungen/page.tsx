@@ -88,7 +88,7 @@ export default function SonderloesungenPage() {
             <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Dalemans verbindet alte Sonderlösungs-Kompetenz mit heutiger Planung: von der Skizze über CAD bis zu Zubehör, Tischlösung oder Transportlogik.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/kontakt" className="btn-primary px-6 py-3">Sonderlösung besprechen</Link>
-              <Link href="/produkte/kategorien/klapptische" className="btn-secondary px-6 py-3">Klapptische ansehen</Link>
+              <Link href="/produkte/sortiment/klapptische" className="btn-secondary px-6 py-3">Klapptische ansehen</Link>
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ const commerceHandles: Record<string, string> = {
   tischtransportwagen: "tischtransportwagen",
   stuhltransportwagen: "stuhltransportwagen",
   buchablage: "buchablage-nachruesten",
+  bistrotisch: "bistrotisch",
 };
 
 export function productPath(slug: string) {

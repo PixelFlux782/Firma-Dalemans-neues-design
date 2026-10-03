@@ -10,7 +10,7 @@ import {
   type DevelopmentFinderProductFixture,
 } from "@/lib/finder/development-fixtures";
 import { localStackingChairProducts } from "@/lib/commerce/providers/local-stacking-chairs";
-import { localPriceListProducts } from "@/lib/commerce/providers/local-price-list-products";
+import { localBistrotischProduct, localPriceListProducts } from "@/lib/commerce/providers/local-price-list-products";
 
 // Local development fixtures only. Finder products carry explicitly marked
 // test prices so cart totals can be exercised; none are final sales prices.
@@ -164,6 +164,7 @@ const developmentFinderProducts = developmentFinderFixtures.map(
 export const localProducts: CommerceProduct[] = [
   ...localStackingChairProducts,
   ...localPriceListProducts,
+  localBistrotischProduct,
   ...developmentFinderProducts,
   {
     id: "local-product-filzgleiter-mit-stift",
@@ -516,6 +517,15 @@ export const localProducts: CommerceProduct[] = [
 ];
 
 export const localCollectionRecords: Array<Omit<CommerceCollection, "products">> = [
+  {
+    id: "local-collection-bistrotische",
+    handle: "bistrotische",
+    title: "Bistrotische",
+    shortDescription: "Kompakte Tischlösungen für Cafébereiche, Begegnungszonen und Stehempfänge.",
+    description: "Bistrotische für Foyers, Gemeindecafés und Aufenthaltsbereiche. Ausführungen und Maße klären wir in der Beratung.",
+    image: localBistrotischProduct.featuredImage,
+    seo: { title: "Bistrotische", description: "Bistrotische für Foyers, Gemeindecafés und Stehempfänge persönlich auswählen." },
+  },
   {
     id: "local-collection-stapelstuehle",
     handle: "stapelstuehle",

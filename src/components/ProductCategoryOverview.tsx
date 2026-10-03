@@ -31,6 +31,9 @@ const guidance: Record<ProductCategoryId, { suitable: string[]; decision: string
       { question: "Sind Klapptische im Sondermaß möglich?", answer: "Je nach Projekt sind Sondermaß und Sonderform möglich. Raummaß, Nutzung und Lagerweg helfen bei der Einordnung." },
     ],
   },
+  bistrotische: {
+    suitable: [], decision: [], faq: [],
+  },
   "gemeindestuehle-bankettmoebel": {
     suitable: ["Gemeindesäle, Bankette und Feierstunden", "Räume mit Anspruch an Komfort und Gesamtbild", "Ergänzungsbestuhlung für Foyer oder Sonderbelegung"],
     decision: ["Optik und Komfort", "Stapel- oder Klappbarkeit", "Reihenabstände, Wege und Reservebestand"],

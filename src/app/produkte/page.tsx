@@ -24,8 +24,8 @@ const featuredSlugs = ["klapptisch-310c", "stuhltransportwagen", "buchablage"];
 
 const productGroups = [
   { title: "Stapelstühle", text: "Fünf Modelle mit verständlicher Auswahl von Polsterung, Stoffgruppe und Reihenverbindung.", href: "/produkte/stapelstuehle", cta: "Stapelstühle ansehen", image: "/neue bilder/Stapelstühle/collage_stapelstuehle.png", alt: "Vollständig sichtbarer Stapel gepolsterter Stapelstühle", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
-  { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und flexibel genutzte Räume.", href: "/produkte/kategorien/klapptische", cta: "Klapptische ansehen", image: "/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", alt: "Vollständig sichtbarer Klapptisch mit verchromtem Gestell", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 51%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
-  { title: "Rednerpulte", text: "Klare und funktionale Lösungen für Gottesdienste, Vorträge und Veranstaltungen.", href: "/produkte/rednerpulte", cta: "Rednerpulte ansehen", image: "/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.png", alt: "Vollständig sichtbares Rednerpult aus Acrylglas, Typ A", backgroundTone: "#F8F7F1", imageInset: "1% 3%", imageScale: 1, objectPosition: "50% 50%", aspectRatio: "4 / 3", fadeStrength: 0.78 },
+  { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und flexibel genutzte Räume.", href: "/produkte/sortiment/klapptische", cta: "Klapptische ansehen", image: "/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", alt: "Vollständig sichtbarer Klapptisch mit verchromtem Gestell", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 51%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
+  { title: "Rednerpulte", text: "Klare und funktionale Lösungen für Gottesdienste, Vorträge und Veranstaltungen.", href: "/produkte/sortiment/rednerpulte", cta: "Rednerpulte ansehen", image: "/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.png", alt: "Vollständig sichtbares Rednerpult aus Acrylglas, Typ A", backgroundTone: "#F8F7F1", imageInset: "1% 3%", imageScale: 1, objectPosition: "50% 50%", aspectRatio: "4 / 3", fadeStrength: 0.78 },
   { title: "Zubehör & Transport", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und Transportlösungen für den praktischen Alltag.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör & Transport ansehen", image: "/neue bilder/Zubehör/zubehör-hero.png", alt: "Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.9 },
 ] as const;
 
@@ -58,7 +58,7 @@ export default async function ProductsPage() {
     </section>
 
     <section id="sortiment" className="scroll-mt-28" aria-labelledby="sortiment-title">
-      <p className="section-eyebrow">Sortimentsübersicht</p><h2 id="sortiment-title" className="mt-3 font-display text-3xl font-medium text-premium-ink md:text-4xl">Vier Produktbereiche für flexible Räume</h2>
+      <p className="section-eyebrow">Sortimentsübersicht</p><h2 id="sortiment-title" className="mt-3 font-display text-3xl font-medium text-premium-ink md:text-4xl">Produktbereiche für flexible Räume</h2>
       <div className="mt-9 grid gap-x-8 gap-y-14 md:grid-cols-2 lg:gap-x-12 lg:gap-y-20">
         {productGroups.map((group) => <ProductCategoryFeature key={group.title} title={group.title} description={group.text} href={group.href} image={group.image} alt={group.alt} linkLabel={group.cta} imageScale={group.imageScale} objectPosition={group.objectPosition} imageInset={group.imageInset} aspectRatio={group.aspectRatio} fadeStrength={group.fadeStrength} backgroundTone={group.backgroundTone} />)}
       </div>
@@ -67,7 +67,7 @@ export default async function ProductsPage() {
     <HomeSection id="alle-produktbereiche">
       <SectionHeader eyebrow="Gesamtes Sortiment" title="Weitere Produktbereiche" lead="Artikel und Ausführungen auswählen und ein persönliches Angebot anfragen." align="editorial" />
       <div className="section-grid-top grid gap-x-9 gap-y-14 sm:grid-cols-2 xl:grid-cols-3 xl:gap-x-12 xl:gap-y-20">
-        {collections.filter((collection) => ["klappstuehle", "gleiter-bodenschutz", "reihenverbinder-nachruestung", "muster-beratung"].includes(collection.handle)).map((collection) => (
+        {collections.filter((collection) => ["bistrotische", "klappstuehle", "gleiter-bodenschutz", "reihenverbinder-nachruestung", "muster-beratung"].includes(collection.handle)).map((collection) => (
           <Link key={collection.handle} href={`/produkte/sortiment/${collection.handle}`} className="products-editorial-module group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-forest focus-visible:ring-offset-4">
             {collection.image ? (
               <ProductVisual src={collection.image.url} alt={collection.image.altText ?? collection.title} aspectRatio={collection.handle === "gleiter-bodenschutz" ? "5 / 4" : "4 / 3"} imageInset="8%" objectPosition="50% 50%" fadeStrength="soft" backgroundTone="canvas" surface="transparent" className="products-editorial-visual" sizes="(min-width: 1280px) 360px, (min-width: 640px) 45vw, calc(100vw - 40px)" />

@@ -8,6 +8,7 @@ export interface ProductDetailData {
   path: string;
   category: string;
   categoryHref: string;
+  parentCategory?: { label: string; href: string };
   name: string;
   shortDescription: string;
   description: string;
@@ -34,7 +35,7 @@ export default function ProductDetailPage({ data, media, purchase, children }: {
   const headingId = `product-${data.path.replace(/[^a-z0-9]/gi, "-")}`;
   return <div className="flex min-w-0 flex-col gap-16 md:gap-20 lg:gap-24">
     <section>
-      <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: data.category, href: data.categoryHref }, { label: data.name }]} currentPath={data.path} />
+      <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, ...(data.parentCategory ? [data.parentCategory] : []), { label: data.category, href: data.categoryHref }, { label: data.name }]} currentPath={data.path} />
       <div className="mt-8 grid items-start gap-10 lg:grid-cols-[1.06fr_.94fr] lg:gap-14">
         <div className="min-w-0 lg:sticky lg:top-28">{media}</div>
         <div className="min-w-0 lg:pt-3">

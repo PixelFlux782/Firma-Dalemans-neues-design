@@ -64,6 +64,7 @@ const shopItems: readonly ShopItem[] = [
         title: "Tische",
         links: [
           { label: "Klapptische", href: "/produkte/sortiment/klapptische" },
+          { label: "Bistrotische", href: "/produkte/sortiment/bistrotische" },
           { label: "Seminarklapptische", href: product("seminarklapptisch-210c") },
           { label: "Trapeztische", href: product("trapez-klapptisch-310c") },
         ],
@@ -76,7 +77,7 @@ const shopItems: readonly ShopItem[] = [
         ],
       },
     ],
-    cta: { label: "Alle Tische ansehen", href: "/produkte/sortiment/klapptische" },
+    cta: { label: "Klapptische ansehen", href: "/produkte/sortiment/klapptische" },
   },
   {
     id: "gliders",
@@ -104,7 +105,7 @@ const shopItems: readonly ShopItem[] = [
         links: [
           { label: "Buchablagen", href: product("buchablage-nachruesten") },
           { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") },
-          { label: "Ersatzteile & Zubehör", href: "/produkte/sortiment/reihenverbinder-nachruestung" },
+          { label: "Ersatzteile & Zubehör", href: "/produkte/kategorien/transportwagen-zubehoer" },
         ],
       },
     ],
@@ -128,9 +129,9 @@ const shopItems: readonly ShopItem[] = [
 
 const mobileGroups: readonly ShopGroup[] = [
   { title: "Stühle", links: [{ label: "Stapelstühle", href: "/produkte/stapelstuehle" }, { label: "Klappstühle", href: "/produkte/sortiment/klappstuehle" }] },
-  { title: "Tische", links: [{ label: "Klapptische", href: "/produkte/sortiment/klapptische" }, { label: "Seminarklapptische", href: product("seminarklapptisch-210c") }, { label: "Trapeztische", href: product("trapez-klapptisch-310c") }] },
+  { title: "Tische", links: [{ label: "Klapptische", href: "/produkte/sortiment/klapptische" }, { label: "Bistrotische", href: "/produkte/sortiment/bistrotische" }, { label: "Seminarklapptische", href: product("seminarklapptisch-210c") }, { label: "Trapeztische", href: product("trapez-klapptisch-310c") }] },
   { title: "Gleiter", links: [{ label: "Gleiter & Bodenschutz", href: "/produkte/sortiment/gleiter-bodenschutz" }, { label: "Gleiter-Finder", href: "/produkte/gleiter-finder" }] },
-  { title: "Nachrüstung", links: [{ label: "Buchablagen", href: product("buchablage-nachruesten") }, { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") }, { label: "Ersatzteile", href: "/produkte/sortiment/reihenverbinder-nachruestung" }] },
+  { title: "Zubehör", links: [{ label: "Alle Zubehörbereiche", href: "/produkte/kategorien/transportwagen-zubehoer" }, { label: "Buchablagen", href: product("buchablage-nachruesten") }, { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") }, { label: "Ersatzteile", href: "/produkte/ersatzteile-kleinteile" }] },
   { title: "Transport", links: [{ label: "Stuhltransportwagen", href: product("stuhltransportwagen") }, { label: "Tischtransportwagen", href: product("tischtransportwagen") }, { label: "Transport & Lagerung", href: "/produkte/sortiment/transport-lagerung" }] },
   { title: "Rednerpulte", links: [{ label: "Rednerpulte ansehen", href: "/produkte/sortiment/rednerpulte" }] },
   { title: "Muster & Beratung", links: [{ label: "Muster & Beratung", href: "/produkte/sortiment/muster-beratung" }] },
@@ -140,7 +141,7 @@ const focusableSelector = "a[href], button:not([disabled]), [tabindex]:not([tabi
 
 function activeSection(pathname: string): ShopSection | null {
   if (/\/(stapelstuehle|klappstuehle)$/.test(pathname) || /\/artikel\/(1021|buende|coburg|nuernberg|erfurt|klappstuehle)$/.test(pathname)) return "chairs";
-  if (pathname === "/produkte/sortiment/klapptische" || /\/artikel\/(klapptisch-310c|seminarklapptisch-210c|trapez-klapptisch-310c)$/.test(pathname)) return "tables";
+  if (["/produkte/sortiment/klapptische", "/produkte/sortiment/bistrotische", "/produkte/artikel/bistrotisch"].includes(pathname) || /\/artikel\/(klapptisch-310c|seminarklapptisch-210c|trapez-klapptisch-310c)$/.test(pathname)) return "tables";
   if (pathname.includes("gleiter") || pathname.endsWith("kunststoff-gestellgleiter")) return "gliders";
   if (pathname.includes("reihenverbinder") || pathname.includes("buchablage")) return "retrofit";
   if (pathname.includes("transport") || pathname.endsWith("stuhltransportwagen")) return "transport";

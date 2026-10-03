@@ -218,11 +218,9 @@ export default function ProductVariantSelector({
             href={`/kontakt?${contactParameters.toString()}`}
             className="btn-primary mt-7 w-full text-center"
           >
-            Ausführung persönlich klären
+            Angebot anfragen
           </Link>
-          <p className="mt-3 text-center text-xs leading-5 text-premium-muted">
-            Diese Ausführung ist nicht klassisch bestellbar und wird deshalb nicht als Warenkorbposition geführt.
-          </p>
+          <p className="mt-3 text-center text-xs leading-5 text-premium-muted">Wir klären Ausführung, Preis und Verfügbarkeit persönlich.</p>
         </>
       )}
     </div>

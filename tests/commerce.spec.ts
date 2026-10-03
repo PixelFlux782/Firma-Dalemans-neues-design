@@ -98,7 +98,7 @@ test("Produktdetailseite wird vollständig aus dem Commerce-Modell gerendert", a
   await page.goto("/produkte/artikel/kunststoff-gestellgleiter");
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Kunststoff-Gestellgleiter");
-  await expect(page.getByText("Technische Informationen")).toBeVisible();
+  await expect(page.getByText("Technische Daten")).toBeVisible();
   await expect(page.getByText("Kompatibilität", { exact: true }).first()).toBeVisible();
   await expect(page.locator('[data-price-status="on_request"]')).toContainText("Preis auf Anfrage");
   await expect(page.locator('[data-availability="on_request"]')).toContainText("Verfügbarkeit auf Anfrage");
@@ -121,7 +121,7 @@ test("Variantenwahl hält nur existierende Kombinationen aktiv", async ({ page }
   await page.getByRole("button", { name: "Vierkant" }).click();
   await expect(page.getByTestId("selected-variant")).toContainText("Vierkant · 20 × 20 mm");
   await expect(page.getByRole("button", { name: "20 × 20 mm" })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("link", { name: "Ausführung persönlich klären" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Angebot anfragen" })).toHaveAttribute(
     "href",
     /variante=Vierkant(?:\+|%20)%C2%B7(?:\+|%20)20(?:\+|%20)%C3%97(?:\+|%20)20(?:\+|%20)mm/,
   );

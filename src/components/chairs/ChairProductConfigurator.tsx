@@ -40,3 +40,8 @@ export default function ChairProductConfigurator({
 export function useChairVariantImage() {
   return useContext(ChairVariantImageContext);
 }
+
+export function ChairProductProvider({ children }: { children: ReactNode }) {
+  const [image, setImage] = useState<CommerceImage | null>(null);
+  return <ChairVariantImageContext.Provider value={{ image, setImage }}>{children}</ChairVariantImageContext.Provider>;
+}

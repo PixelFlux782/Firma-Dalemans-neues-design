@@ -8,7 +8,6 @@ export default function ProductTechnicalData({ items }: { items: CommerceSpecifi
       <div>
         <p className="section-eyebrow">Technische Daten</p>
         <h2 id="technical-data-heading" className="section-title-functional mt-4">Nur, was gesichert vorliegt.</h2>
-        <p className="mt-4 text-sm leading-7 text-premium-muted">Maße, Gewicht und Stapelzahl werden ergänzt, sobald verifizierte Produktunterlagen vorliegen.</p>
       </div>
       <dl className="divide-y divide-premium-beige/80 border-t border-premium-beige/80">
         {items.map((item) => (

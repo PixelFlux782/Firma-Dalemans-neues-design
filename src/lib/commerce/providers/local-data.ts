@@ -18,7 +18,7 @@ import { localPriceListProducts } from "@/lib/commerce/providers/local-price-lis
 const updatedAt = "2026-08-21T12:00:00.000Z";
 
 function image(url: string, altText: string): CommerceImage {
-  return { url, altText, width: null, height: null };
+  return { url: encodeURI(url), altText, width: null, height: null };
 }
 
 function requestVariant(
@@ -393,9 +393,9 @@ export const localProducts: CommerceProduct[] = [
     featuredImage: bookRackImage,
     images: [
       bookRackImage,
-      image("/neue bilder/Zubehör/Buchabl03_edit.png", "Buchablage zum Nachrüsten – Detailansicht"),
-      image("/neue bilder/Zubehör/Buchabl06_edit.png", "Buchablage zum Nachrüsten – montierte Ansicht"),
-      image("/neue bilder/Zubehör/Buchabl07_edit.png", "Buchablage zum Nachrüsten – weitere Ansicht"),
+      image("/neue bilder/Zubehör/Buchabl03.JPG", "Buchablage zum Nachrüsten – Detailansicht"),
+      image("/neue bilder/Zubehör/Buchabl06.JPG", "Buchablage zum Nachrüsten – montierte Ansicht"),
+      image("/neue bilder/Zubehör/Buchabl07.JPG", "Buchablage zum Nachrüsten – weitere Ansicht"),
     ],
     variants: [
       requestVariant("book-rack-standard", "Passend nach Modellprüfung", "DEV-BA-STD", [

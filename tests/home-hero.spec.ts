@@ -11,7 +11,6 @@ test("hero layout, links and slider across viewports", async ({ page }) => {
     await expect(hero.getByRole("link", { name: /3D-Raumplaner ausprobieren/ })).toHaveAttribute("href", "/raumplaner");
     await expect(hero.getByRole("link", { name: /Direktkontakt/ })).toHaveAttribute("href", "tel:+499342915353");
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
-    if (viewport.width !== 1440) await expect(hero.getByLabel("Entwicklungsstatus der Website")).toHaveCount(0);
     await page.screenshot({ path: `test-results/home-hero-${viewport.width}.png` });
 
     if (viewport.width === 1440) {
@@ -34,7 +33,13 @@ test("development notice fades, dismisses, and is limited to one browser session
   await page.goto("/");
   const notice = page.getByLabel("Entwicklungsstatus der Website");
   await expect(notice.locator(":scope > div[aria-hidden='false']")).toHaveClass(/opacity-100/);
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem("dlmns-development-notice-seen"))).toBeNull();
+  await page.mouse.move(400, 400);
+  await page.mouse.move(800, 600);
+  await page.waitForTimeout(4100);
+  await expect(notice).toBeVisible();
   await expect(notice).toHaveCount(0, { timeout: 6500 });
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem("dlmns-development-notice-seen"))).toBe("true");
   await page.reload();
   await expect(notice).toHaveCount(0);
   await context.close();
@@ -52,4 +57,21 @@ test("development notice fades, dismisses, and is limited to one browser session
   await freshPage.mouse.wheel(0, 100);
   await expect(freshNotice).toHaveCount(0);
   await freshContext.close();
+});
+
+test("development notice closes on deliberate interaction only", async ({ browser }) => {
+  for (const interaction of ["scroll", "click", "touch", "keyboard"] as const) {
+    const context = await browser.newContext({ hasTouch: interaction === "touch" });
+    const page = await context.newPage();
+    await page.goto("/");
+    const notice = page.getByLabel("Entwicklungsstatus der Website");
+    await expect(notice.locator(":scope > div[aria-hidden='false']")).toBeVisible();
+    if (interaction === "scroll") await page.mouse.wheel(0, 100);
+    if (interaction === "click") await page.mouse.click(10, 10);
+    if (interaction === "touch") await page.touchscreen.tap(10, 10);
+    if (interaction === "keyboard") await page.keyboard.press("Tab");
+    await expect(notice).toHaveCount(0);
+    await expect.poll(() => page.evaluate(() => sessionStorage.getItem("dlmns-development-notice-seen"))).toBe("true");
+    await context.close();
+  }
 });

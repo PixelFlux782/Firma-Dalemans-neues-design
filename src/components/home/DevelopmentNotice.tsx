@@ -1,58 +1,47 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 const SESSION_KEY = "dlmns-development-notice-seen";
 
 export default function DevelopmentNotice() {
   const [visible, setVisible] = useState(false);
   const [active, setActive] = useState(true);
-  const initialized = useRef(false);
-
   useEffect(() => {
-    if (!initialized.current) {
-      try {
-        if (sessionStorage.getItem(SESSION_KEY)) {
-          setActive(false);
-          return;
-        }
-        sessionStorage.setItem(SESSION_KEY, "true");
-      } catch {
-        // The notice can still appear when browser storage is unavailable.
+    try {
+      if (sessionStorage.getItem(SESSION_KEY)) {
+        setActive(false);
+        return;
       }
-      initialized.current = true;
+    } catch {
+      // The notice can still appear when browser storage is unavailable.
     }
 
     let dismissed = false;
     let collapseTimer: number | undefined;
-    const show = requestAnimationFrame(() => {
-      if (!dismissed) setVisible(true);
-    });
+    setVisible(true);
     const dismiss = () => {
       if (dismissed) return;
       dismissed = true;
       setVisible(false);
-      collapseTimer = window.setTimeout(() => setActive(false), window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 550);
+      collapseTimer = window.setTimeout(() => {
+        setActive(false);
+        try {
+          sessionStorage.setItem(SESSION_KEY, "true");
+        } catch {
+          // Storage may be unavailable; the notice still closes.
+        }
+      }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 550);
     };
     const timer = window.setTimeout(dismiss, 4500);
-    let mouseStart: { x: number; y: number } | null = null;
-    const onMouseMove = (event: MouseEvent) => {
-      if (!mouseStart) {
-        mouseStart = { x: event.clientX, y: event.clientY };
-        return;
-      }
-      if (Math.hypot(event.clientX - mouseStart.x, event.clientY - mouseStart.y) > 40) dismiss();
-    };
 
     window.addEventListener("scroll", dismiss, { passive: true });
     window.addEventListener("wheel", dismiss, { passive: true });
     window.addEventListener("pointerdown", dismiss, { passive: true });
     window.addEventListener("touchstart", dismiss, { passive: true });
     window.addEventListener("keydown", dismiss);
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
 
     return () => {
-      cancelAnimationFrame(show);
       clearTimeout(timer);
       clearTimeout(collapseTimer);
       window.removeEventListener("scroll", dismiss);
@@ -60,7 +49,6 @@ export default function DevelopmentNotice() {
       window.removeEventListener("pointerdown", dismiss);
       window.removeEventListener("touchstart", dismiss);
       window.removeEventListener("keydown", dismiss);
-      window.removeEventListener("mousemove", onMouseMove);
     };
   }, []);
 

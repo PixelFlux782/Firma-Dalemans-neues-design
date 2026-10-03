@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
-import ProductCard from "@/components/ProductCard";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import ProductCategoryFeature from "@/components/home/ProductCategoryFeature";
@@ -10,7 +9,7 @@ import SectionHeader from "@/components/home/SectionHeader";
 import { productOverviewHero } from "@/lib/category-media";
 import { products } from "@/lib/products";
 import { getCollections } from "@/lib/commerce/service";
-import CommerceMedia from "@/components/commerce/CommerceMedia";
+import ProductVisual from "@/components/ProductVisual";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
@@ -23,7 +22,7 @@ export const metadata: Metadata = buildMetadata({
 const featuredSlugs = ["klapptisch-310c", "stuhltransportwagen", "buchablage"];
 
 const productGroups = [
-  { title: "Stapelstühle", text: "Fünf Modelle mit verständlicher Auswahl von Polsterung, Stoffgruppe und Reihenverbindung.", href: "/produkte/stapelstuehle", cta: "Stapelstühle ansehen", image: "/images/curated/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.webp", alt: "Vollständig sichtbarer Stapel gepolsterter Stapelstühle", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
+  { title: "Stapelstühle", text: "Fünf Modelle mit verständlicher Auswahl von Polsterung, Stoffgruppe und Reihenverbindung.", href: "/produkte/stapelstuehle", cta: "Stapelstühle ansehen", image: "/neue bilder/Stapelstühle/collage_stapelstuehle.png", alt: "Vollständig sichtbarer Stapel gepolsterter Stapelstühle", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
   { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und flexibel genutzte Räume.", href: "/produkte/kategorien/klapptische", cta: "Klapptische ansehen", image: "/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", alt: "Vollständig sichtbarer Klapptisch mit verchromtem Gestell", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 51%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
   { title: "Rednerpulte", text: "Klare und funktionale Lösungen für Gottesdienste, Vorträge und Veranstaltungen.", href: "/produkte/rednerpulte", cta: "Rednerpulte ansehen", image: "/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.png", alt: "Vollständig sichtbares Rednerpult aus Acrylglas, Typ A", backgroundTone: "#F8F7F1", imageInset: "1% 3%", imageScale: 1, objectPosition: "50% 50%", aspectRatio: "4 / 3", fadeStrength: 0.78 },
   { title: "Zubehör & Transport", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und Transportlösungen für den praktischen Alltag.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör & Transport ansehen", image: "/neue bilder/Zubehör/zubehör-hero.png", alt: "Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.9 },
@@ -66,17 +65,28 @@ export default async function ProductsPage() {
 
     <HomeSection id="alle-produktbereiche">
       <SectionHeader eyebrow="Gesamtes Sortiment" title="Weitere Produktbereiche" lead="Artikel und Ausführungen auswählen und ein persönliches Angebot anfragen." align="editorial" />
-      <div className="section-grid-top grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {collections.filter((collection) => !["stapelstuehle", "klapptische", "rednerpulte", "transport-lagerung"].includes(collection.handle)).map((collection) => (
-          <Link key={collection.handle} href={`/produkte/sortiment/${collection.handle}`} className="premium-card premium-card-hover overflow-hidden">
-            <CommerceMedia image={collection.image} fallbackLabel={collection.title} aspectRatio="5 / 3" />
-            <div className="p-6"><h3 className="font-display text-2xl text-premium-ink">{collection.title}</h3><p className="mt-3 text-sm leading-6 text-premium-muted">{collection.shortDescription}</p><span className="mt-5 inline-block text-sm font-semibold text-premium-forest">Bereich ansehen →</span></div>
+      <div className="section-grid-top grid gap-x-9 gap-y-14 sm:grid-cols-2 xl:grid-cols-3 xl:gap-x-12 xl:gap-y-20">
+        {collections.filter((collection) => ["klappstuehle", "gleiter-bodenschutz", "reihenverbinder-nachruestung", "muster-beratung"].includes(collection.handle)).map((collection) => (
+          <Link key={collection.handle} href={`/produkte/sortiment/${collection.handle}`} className="products-editorial-module group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-forest focus-visible:ring-offset-4">
+            {collection.image ? (
+              <ProductVisual src={collection.image.url} alt={collection.image.altText ?? collection.title} aspectRatio={collection.handle === "gleiter-bodenschutz" ? "5 / 4" : "4 / 3"} imageInset="8%" objectPosition="50% 50%" fadeStrength="soft" backgroundTone="canvas" surface="transparent" className="products-editorial-visual" sizes="(min-width: 1280px) 360px, (min-width: 640px) 45vw, calc(100vw - 40px)" />
+            ) : (
+              <div className="products-editorial-placeholder" role="img" aria-label={`${collection.title} – Bild folgt`}><span>Bild folgt</span></div>
+            )}
+            <div className="pt-4 sm:pt-5">
+              <h3 className="font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink sm:text-[1.7rem]">{collection.title}<span aria-hidden="true" className="ml-2 inline-block text-premium-bronze transition-transform duration-300 group-hover:translate-x-1">→</span></h3>
+              <p className="mt-2 max-w-md text-sm leading-6 text-premium-muted">{collection.shortDescription}</p>
+              <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-premium-bronze">Bereich ansehen <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">→</span></span>
+            </div>
           </Link>
         ))}
       </div>
     </HomeSection>
 
-    <HomeSection><SectionHeader eyebrow="Häufig nachgefragt" title="Direkt zu ausgewählten Produkten" lead="Ein schneller Einstieg in bewährte Lösungen aus den wichtigsten Sortimentsbereichen." align="editorial" /><div className="section-grid-top grid gap-6 md:grid-cols-2 xl:grid-cols-3">{featuredProducts.map((product) => <ProductCard key={product.slug} product={product} />)}</div></HomeSection>
+    <HomeSection><SectionHeader eyebrow="Häufig nachgefragt" title="Direkt zu ausgewählten Produkten" lead="Ein schneller Einstieg in bewährte Lösungen aus den wichtigsten Sortimentsbereichen." align="editorial" /><div className="section-grid-top grid gap-x-9 gap-y-14 md:grid-cols-2 xl:grid-cols-3 xl:gap-x-12">{featuredProducts.map((product) => <article key={product.slug} className="products-editorial-module group">
+      <ProductVisual src={product.image} alt={product.imageAlt ?? product.title} aspectRatio={product.slug === "klapptisch-310c" ? "5 / 4" : "4 / 3"} imageInset="7%" backgroundTone="canvas" fadeStrength="soft" className="products-editorial-visual" sizes="(min-width: 1280px) 360px, (min-width: 768px) 45vw, calc(100vw - 40px)" />
+      <div className="flex min-h-[13rem] flex-col px-1 pt-4 sm:pt-5"><p className="section-eyebrow text-[0.62rem]">{product.categoryName}</p><h3 className="mt-2 font-display text-xl font-medium tracking-[-0.02em] text-premium-ink md:text-2xl">{product.title}</h3><p className="mt-2 flex-1 text-sm leading-6 text-premium-muted">{product.shortDescription}</p><div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2"><Link href={`/produkte/${product.slug}`} className="text-sm font-medium text-premium-bronze underline-offset-4 hover:underline">Details ansehen →</Link><Link href={`/kontakt?produkt=${encodeURIComponent(product.title)}`} className="text-sm font-medium text-premium-forest underline-offset-4 hover:underline">Anfragen →</Link></div></div>
+    </article>)}</div></HomeSection>
 
     <HomeSection variant="elevated"><div className="grid gap-8 lg:grid-cols-[1fr_.9fr] lg:items-center"><div><p className="section-eyebrow">Kurze Auswahlhilfe</p><h2 className="section-title mt-4">Vom Raum zur passenden Ausstattung</h2><p className="section-lead mt-5">Nutzung, Personenzahl, Umbauhäufigkeit, Lagerweg und gewünschte Raumwirkung grenzen die Auswahl schnell ein.</p></div><div className="grid gap-3 sm:grid-cols-2"><Link href="/raeume-planung/raumplanung" className="btn-primary text-center">Raumplanung ansehen</Link><Link href="/kontakt?anliegen=Produktauswahl" className="btn-secondary text-center">Ausführung klären</Link></div></div></HomeSection>
     <HomeSection><div className="grid gap-8 border-y border-premium-beige py-10 md:grid-cols-3"><div><p className="section-eyebrow">01 · Auswahl</p><p className="mt-3 text-sm leading-7 text-premium-muted">Produkte nach Nutzung, Komfort und Handhabung vergleichen.</p></div><div><p className="section-eyebrow">02 · Raumplanung</p><p className="mt-3 text-sm leading-7 text-premium-muted">Stückzahlen, Reihen, Wege und Lagerung sinnvoll zusammendenken.</p></div><div><p className="section-eyebrow">03 · Betreuung</p><p className="mt-3 text-sm leading-7 text-premium-muted">Zubehör, Nachbestellung und Ersatzteile langfristig persönlich klären.</p></div></div></HomeSection>

@@ -441,6 +441,38 @@
     transform: translateY(-0.2rem) scale(calc(var(--visual-scale) * 1.01));
   }
 
+  /* Editorial product modules used only on the product overview page. */
+  .products-editorial-module .products-editorial-visual {
+    background: transparent;
+  }
+
+  .products-editorial-module:hover .product-visual__product {
+    transform: scale(calc(var(--visual-scale) * 1.01));
+  }
+
+  .products-editorial-placeholder {
+    display: grid;
+    aspect-ratio: 4 / 3;
+    place-items: center;
+    color: rgb(105 98 84 / 0.75);
+    background: linear-gradient(135deg, rgb(239 235 224 / 0.3), rgb(248 247 241 / 0.14) 55%, rgb(232 230 216 / 0.24));
+  }
+
+  .products-editorial-placeholder span {
+    border-bottom: 1px solid rgb(154 135 99 / 0.28);
+    padding: 0.25rem 0.1rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .products-editorial-module .product-visual__product,
+    .products-editorial-module .transition-transform {
+      transition: none;
+    }
+  }
+
 }
 
 @layer utilities {

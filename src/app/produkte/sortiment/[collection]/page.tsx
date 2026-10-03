@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CommerceMedia from "@/components/commerce/CommerceMedia";
 import CommerceProductCard from "@/components/commerce/CommerceProductCard";
+import FoldingTablesHub, { foldingTableFaq } from "@/components/products/FoldingTablesHub";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { StructuredData } from "@/components/StructuredData";
 import { getCollectionByHandle, getCollections } from "@/lib/commerce/service";
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
     title: collection.seo.title ?? collection.title,
     description: collection.seo.description ?? collection.description,
     path: `/produkte/sortiment/${collection.handle}`,
-    image: collection.image?.url ?? null,
+    image: handle === "klapptische" ? "/neue bilder/Tische/Klapptisch-collage-detail.png" : collection.image?.url ?? null,
     keywords: [collection.title, "Dalemans Zubehör", "Nachrüstung"],
   });
 }
@@ -38,17 +39,18 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
   const isLecterns = handle === "rednerpulte";
   const tableCategory = isTables ? getProductCategoryById("klapptische") : null;
   const path = `/produkte/sortiment/${handle}`;
-  const faq = isTables ? [
-    { question: "Welche Klapptische sind für Gemeinden sinnvoll?", answer: "Stabile Tische mit widerstandsfähiger Oberfläche und einem Format, das sich gut bewegen, lagern und kombinieren lässt." },
-    { question: "Sind Klapptische im Sondermaß möglich?", answer: "Je nach Projekt sind Sondermaß und Sonderform möglich. Raummaß, Nutzung und Lagerweg helfen bei der Einordnung." },
-  ] : [];
   const itemList = { "@context": "https://schema.org", "@type": "ItemList", "@id": absoluteUrl(`${path}#produkte`), name: collection.title, itemListElement: collection.products.map((product, index) => ({ "@type": "ListItem", position: index + 1, name: product.title, url: absoluteUrl(`/produkte/artikel/${product.handle}`) })) };
   const accessory = ["gleiter-bodenschutz", "reihenverbinder-nachruestung", "transport-lagerung"].includes(handle);
+
+  if (isTables && tableCategory) return <>
+    <StructuredData data={itemList} />
+    <StructuredData data={{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: foldingTableFaq.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) }} />
+    <FoldingTablesHub collection={collection} category={tableCategory} />
+  </>;
 
   return (
     <div className="page-stack">
       <StructuredData data={itemList} />
-      {faq.length ? <StructuredData data={{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) }} /> : null}
       <section className="grid overflow-hidden rounded-[2.5rem] border border-premium-beige/70 bg-white/55 shadow-premium lg:grid-cols-[.92fr_1.08fr]">
         <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-14">
           <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, ...(accessory ? [{ label: "Zubehör", href: "/produkte/kategorien/transportwagen-zubehoer" }] : []), { label: collection.title }]} currentPath={path} />
@@ -61,17 +63,6 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
         </div>
         <CommerceMedia image={collection.image} fallbackLabel={collection.title} priority sizes="(min-width: 1024px) 52vw, 100vw" aspectRatio="5 / 4" imageInset={collection.handle === "transport-lagerung" ? "3%" : "6%"} className="min-h-[320px] lg:min-h-[580px]" />
       </section>
-
-      {isTables && tableCategory ? <section aria-labelledby="table-guidance" className="rounded-[2rem] bg-premium-warm/70 p-7 sm:p-10">
-        <p className="section-eyebrow">Auswahlhilfe</p>
-        <h2 id="table-guidance" className="section-title-functional mt-3">Welcher Klapptisch passt zu Ihrem Raum?</h2>
-        <p className="mt-4 max-w-3xl leading-7 text-premium-muted">{tableCategory.description}</p>
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div><h3 className="font-medium text-premium-ink">Darauf kommt es an</h3><ul className="mt-3 space-y-2 text-sm leading-7 text-premium-muted"><li>Maße passend zu Nutzung und Handling</li><li>Oberfläche, Kante und Gestell</li><li>Transportwagen, Lagerfläche und Laufwege</li></ul></div>
-          <div><h3 className="font-medium text-premium-ink">Geeignet für</h3><ul className="mt-3 space-y-2 text-sm leading-7 text-premium-muted"><li>Gemeindecafés, Seminarräume und Vereinssäle</li><li>Buffet, Gruppenarbeit und Feiern</li><li>Projekte mit Sondermaß oder vorhandenem Bestand</li></ul></div>
-        </div>
-        <p className="mt-6 text-sm leading-7 text-premium-muted">Rechtecktisch 310c, Trapez-Klapptisch 310c und Seminar-Klapptisch 210c decken unterschiedliche Aufstellungen ab. Für kompakte Begegnungsflächen finden Sie den <Link className="font-medium text-premium-forest underline" href="/produkte/sortiment/bistrotische">Bistrotisch in der eigenen Kategorie</Link>.</p>
-      </section> : null}
 
       {isLecterns ? <section className="rounded-[2rem] bg-premium-warm/70 p-7 sm:p-10" aria-labelledby="lectern-guidance">
         <p className="section-eyebrow">Auswahlhilfe</p><h2 id="lectern-guidance" className="section-title-functional mt-3">Das passende Rednerpult auswählen</h2>
@@ -103,8 +94,6 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
           </div>
         )}
       </section>
-
-      {faq.length ? <section id="faq" aria-labelledby="table-faq"><p className="section-eyebrow">Häufige Fragen</p><h2 id="table-faq" className="section-title-functional mt-3">Klapptische kurz geklärt</h2><div className="mt-6 grid gap-5 md:grid-cols-2">{faq.map((item) => <article key={item.question} className="premium-card p-7"><h3 className="font-display text-xl text-premium-ink">{item.question}</h3><p className="mt-3 text-sm leading-7 text-premium-muted">{item.answer}</p></article>)}</div></section> : null}
 
       <section className="rounded-[2rem] bg-premium-ink px-6 py-9 text-white sm:px-9 lg:flex lg:items-center lg:justify-between lg:gap-10 lg:px-12">
         <div>

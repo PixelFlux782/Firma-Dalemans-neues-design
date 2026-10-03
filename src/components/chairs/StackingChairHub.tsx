@@ -1,7 +1,7 @@
 import Link from "next/link";
 import ProductVisual from "@/components/ProductVisual";
 import ChairComparison from "@/components/chairs/ChairComparison";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import CategoryHero from "@/components/products/CategoryHero";
 import { formatCommerceMoney } from "@/lib/commerce/money";
 import type { CommerceProduct } from "@/lib/commerce/types";
 
@@ -69,44 +69,7 @@ function ChairVisual({ product }: { product: CommerceProduct }) {
 export default function StackingChairHub({ products }: { products: CommerceProduct[] }) {
   return (
     <div className="flex min-w-0 flex-col gap-16 md:gap-20 lg:gap-24">
-      <section className="grid overflow-hidden rounded-[2rem] border border-premium-beige/70 bg-white/45 lg:grid-cols-[.96fr_1.04fr]">
-        <div className="flex flex-col justify-center px-6 py-10 sm:px-10 lg:px-14 lg:py-16">
-          <Breadcrumbs
-            items={[
-              { label: "Start", href: "/" },
-              { label: "Produkte", href: "/produkte" },
-              { label: "Stapelstühle" },
-            ]}
-            currentPath="/produkte/stapelstuehle"
-          />
-          <p className="section-eyebrow mt-8">Fünf Modelle · 70 Ausführungen</p>
-          <h1 className="mt-4 max-w-[13ch] font-display text-4xl font-medium leading-[1.04] tracking-[-0.035em] text-premium-ink sm:text-5xl lg:text-[3.75rem]">
-            Stapelstühle für flexible Räume.
-          </h1>
-          <p className="mt-6 max-w-xl text-base leading-8 text-premium-muted">
-            Für Gemeinden, Kirchen, Kommunen und vielseitig genutzte Räume – mit drei Polsterarten, optionaler Reihenverbindung und persönlicher Beratung.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="#modelle" className="btn-primary px-6">Modelle ansehen</Link>
-            <Link href="/kontakt?kategorie=Stapelst%C3%BChle" className="btn-secondary px-6">Beratung erhalten</Link>
-          </div>
-          <p className="mt-8 border-t border-premium-beige/70 pt-5 text-sm leading-7 text-premium-muted">
-            Seit 1994 persönlich beraten · Musterstühle möglich · Raum- und Bestuhlungsplanung
-          </p>
-        </div>
-        <ProductVisual
-          src="/images/curated/Stapelstühle/1021c.webp"
-          alt="Stapelstuhl für flexible Gemeinde- und Veranstaltungsräume"
-          priority
-          sizes="(min-width: 1024px) 52vw, 100vw"
-          aspectRatio="4 / 5"
-          imageInset="4%"
-          backgroundTone="#123322"
-          surface="#123322"
-          decorativeAtmosphere
-          className="min-h-[430px] lg:min-h-[650px]"
-        />
-      </section>
+      <CategoryHero path="/produkte/stapelstuehle" category="Stapelstühle" eyebrow="Fünf Modelle · 70 Ausführungen" title="Stapelstühle für flexible Räume." description="Für Gemeinden, Kirchen, Kommunen und vielseitig genutzte Räume – mit drei Polsterarten, optionaler Reihenverbindung und persönlicher Beratung." image="/images/curated/Stapelstühle/1021c.webp" imageAlt="Stapelstuhl für flexible Gemeinde- und Veranstaltungsräume" modelsHref="#modelle" consultationHref="/kontakt?kategorie=Stapelst%C3%BChle" note="Seit 1994 persönlich beraten · Musterstühle möglich · Raum- und Bestuhlungsplanung" />
 
       <section id="modelle" aria-labelledby="chair-models-heading" className="scroll-mt-28">
         <div className="grid gap-6 border-b border-premium-beige/70 pb-8 lg:grid-cols-[.8fr_1.2fr] lg:items-end">

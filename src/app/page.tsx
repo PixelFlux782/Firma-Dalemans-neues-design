@@ -6,6 +6,7 @@ import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
 import HeroCarousel from "@/components/home/HeroCarousel";
+import DevelopmentNotice from "@/components/home/DevelopmentNotice";
 import ProductCategoryFeature from "@/components/home/ProductCategoryFeature";
 import ProductVisual from "@/components/ProductVisual";
 import { absoluteUrl, buildMetadata } from "@/lib/seo";
@@ -57,29 +58,30 @@ export default function HomePage() {
       <StructuredData data={{ "@context": "https://schema.org", "@graph": [organizationStructuredData, { "@type": "WebSite", name: "Dalemans Stapelstühle & Klapptische", url: absoluteUrl("/") }] }} />
 
       <section className="hero-architectural relative -mx-5 bg-premium-highlight sm:-mx-6 md:mx-0">
-        <div className="grid lg:min-h-[min(72vh,760px)] lg:grid-cols-[.88fr_1.12fr]">
-          <div className="hero-copy relative z-10 flex flex-col justify-center px-5 py-12 sm:px-8 md:px-12 md:py-16 lg:px-14 xl:px-16">
+        <div className="grid lg:min-h-[min(72vh,720px)] lg:grid-cols-[.88fr_1.12fr]">
+          <div className="hero-copy relative z-10 flex flex-col justify-center px-5 py-9 sm:px-8 md:px-10 md:py-10 lg:px-12 lg:py-8 xl:px-14">
             <p className="section-eyebrow">Dalemans Stapelstühle & Klapptische</p>
-            <div className="mt-5 flex items-center gap-3 text-[0.65rem] font-medium uppercase tracking-[0.18em] text-premium-muted">
+            <DevelopmentNotice />
+            <div className="mt-4 flex items-center gap-3 text-[0.65rem] font-medium uppercase tracking-[0.18em] text-premium-muted">
               <span>Seit 1994</span><span className="h-px w-8 bg-premium-stone" aria-hidden /><span>Persönlich geplant</span>
             </div>
-            <h1 className="mt-6 max-w-[13ch] font-display text-[2.35rem] font-medium leading-[1.04] tracking-[-0.035em] text-premium-ink sm:text-[3.15rem] lg:text-[3.5rem]">
+            <h1 className="mt-5 max-w-[13ch] font-display text-[2.35rem] font-medium leading-[1.04] tracking-[-0.035em] text-premium-ink sm:text-[3.15rem] lg:max-w-none lg:text-[3rem] xl:text-[3.2rem]">
               Flexible Ausstattung für Räume, in denen Gemeinde lebt.
             </h1>
-            <p className="mt-6 max-w-xl text-[0.95rem] leading-7 text-premium-muted md:text-base md:leading-8">
+            <p className="mt-5 max-w-xl text-[0.95rem] leading-7 text-premium-muted md:text-base md:leading-8">
               Kein anonymer Möbelshop: persönliche Beratung zu Stapelstühlen, Klapptischen und Raumplanung für Gemeinden, Kirchen und flexible Mehrzweckräume.
             </p>
-            <p className="mt-6 border-l border-premium-stone pl-4 font-mono text-[0.66rem] uppercase tracking-[0.14em] text-premium-bronze">
+            <p className="mt-5 border-l border-premium-stone pl-4 font-mono text-[0.66rem] uppercase tracking-[0.14em] text-premium-bronze">
               Raumplanung · Bestuhlung · Sonderlösungen
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link href="/kontakt?anliegen=Beratung" className="btn-primary group justify-center rounded-xl px-6">
                 Beratung anfragen <span aria-hidden className="ml-2 transition-transform group-hover:translate-x-0.5">→</span>
               </Link>
               <Link href="/produkte/stapelstuehle" className="btn-secondary justify-center rounded-xl px-6">Produkte ansehen</Link>
-              <Link href="/raumplaner" className="btn-secondary justify-center rounded-xl px-6">3D-Raumplaner ausprobieren</Link>
             </div>
-            <a href="tel:+499342915353" className="mt-6 inline-flex w-fit items-center gap-3 text-sm font-semibold text-premium-ink transition hover:text-premium-bronze">
+            <Link href="/raumplaner" className="mt-4 inline-flex w-fit items-center gap-2 text-xs font-medium text-premium-bronze transition hover:text-premium-forest">Raum digital planen <span aria-hidden="true">→</span> 3D-Raumplaner ausprobieren</Link>
+            <a href="tel:+499342915353" className="mt-5 inline-flex w-fit items-center gap-3 text-sm font-semibold text-premium-ink transition hover:text-premium-bronze">
               <span className="text-[0.62rem] font-medium uppercase tracking-[0.16em] text-premium-muted">Direktkontakt</span>
               +49 9342 9153-53
             </a>
@@ -87,26 +89,6 @@ export default function HomePage() {
           <HeroCarousel />
         </div>
       </section>
-
-      <HomeSection className="pt-5 md:pt-7">
-        <aside
-          aria-label="Entwicklungsstatus der Website"
-          className="grid gap-4 border-y border-premium-beige/80 bg-white/35 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-6 md:py-5"
-        >
-          <div className="min-w-0">
-            <h2 className="font-display text-base font-medium text-premium-ink sm:text-lg">
-              DLMNS entwickelt sich weiter.
-            </h2>
-            <p className="mt-1 max-w-4xl text-sm leading-6 text-premium-muted">
-              Diese Website befindet sich in aktiver Weiterentwicklung. In den kommenden Monaten ergänzen und verbessern wir Inhalte, Funktionen und digitale Werkzeuge Schritt für Schritt.
-            </p>
-          </div>
-          <div className="inline-flex min-h-11 w-fit items-center gap-2.5 border-l border-premium-beige pl-3 font-mono text-[0.62rem] font-medium uppercase tracking-[0.16em] text-premium-muted sm:pl-5">
-            <span className="h-2 w-2 shrink-0 rounded-full bg-premium-forest" aria-hidden="true" />
-            <span>Live Preview</span>
-          </div>
-        </aside>
-      </HomeSection>
 
       <HomeSection>
         <SectionHeader eyebrow="Sortiment" title="Stühle, Tische und Lösungen für flexible Räume" lead="Vier Produktbereiche für Räume, die sich im Alltag schnell und zuverlässig verändern müssen." href="/produkte" linkLabel="Alle Produkte" align="editorial" />

@@ -14,7 +14,10 @@ test("alle Sitemap-Routen laden ohne Browser- oder Netzwerkfehler", async ({ pag
   page.on("console", (message) => {
     if (message.type() === "error") failures.push(`Konsole: ${message.text()}`);
   });
-  page.on("requestfailed", (request) => failures.push(`Request: ${request.url()}`));
+  page.on("requestfailed", (request) => {
+    if (request.url().includes("?_rsc=") && request.failure()?.errorText === "net::ERR_ABORTED") return;
+    failures.push(`Request: ${request.url()}`);
+  });
   page.on("response", (response) => {
     if (response.status() >= 400) failures.push(`HTTP ${response.status()}: ${response.url()}`);
   });

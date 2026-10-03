@@ -1,4 +1,4 @@
-import type { Product } from "@/lib/products";
+import { getProductBySlug, type Product } from "@/lib/products";
 import type { CommerceProduct } from "@/lib/commerce/types";
 import type { ProductDetailData } from "@/components/product-detail/ProductDetailPage";
 
@@ -35,6 +35,15 @@ export function legacyDetailData(product: Product): ProductDetailData {
 }
 
 export function commerceDetailData(product: CommerceProduct, category: string, categoryHref: string, path: string): ProductDetailData {
+  const editorialSlug: Record<string, string> = {
+    "klapptisch-310c": "klapptisch-310c",
+    "trapez-klapptisch-310c": "trapezklapptisch-310c",
+    "seminarklapptisch-210c": "seminar-klapptisch",
+    tischtransportwagen: "tischtransportwagen",
+    stuhltransportwagen: "stuhltransportwagen",
+    "buchablage-nachruesten": "buchablage",
+  };
+  const editorial = editorialSlug[product.handle] ? getProductBySlug(editorialSlug[product.handle]) : undefined;
   const chair = Boolean(product.stackingChair);
   const table = product.collectionHandles.includes("klapptische");
   const glider = product.variants.some(variant => variant.finderAttributes);
@@ -59,10 +68,12 @@ export function commerceDetailData(product: CommerceProduct, category: string, c
   ] : [] : [...optionGroups].filter(([, values]) => values.size > 1).map(([name, values]) => `${name}: ${[...values].join(", ")}`);
   return {
     path, category, categoryHref, name: chair ? `Modell ${product.stackingChair?.modelCode}` : product.title,
-    shortDescription: product.shortDescription, description: product.description,
-    highlights: chair ? ["stapelbar", "Polsterarten wählbar", "Reihenverbindung erhältlich"] : developmentFinder ? [] : [...product.compatibility, ...product.suitableFor].slice(0, 3),
+    shortDescription: product.shortDescription,
+    description: editorial ? `${product.description} ${editorial.description}` : product.description,
+    highlights: chair ? ["stapelbar", "Polsterarten wählbar", ...(product.variants.some(variant => variant.selectedOptions.some(option => option.name === "Reihenverbindung" && option.value === "Mit Reihenverbindung")) ? ["Reihenverbindung erhältlich"] : [])] : editorial ? editorial.highlights : developmentFinder ? [] : [...product.compatibility, ...product.suitableFor].slice(0, 3),
     compatibility: developmentFinder ? [] : product.compatibility,
-    useCases: developmentFinder ? [] : product.suitableFor, variants, specifications: developmentFinder ? [] : product.specifications,
+    useCases: developmentFinder ? [] : [...new Set([...product.suitableFor, ...(editorial?.suitableFor ?? [])])], variants, specifications: developmentFinder ? [] : product.specifications,
+    editorialNotes: editorial ? [...(product.handle === "seminarklapptisch-210c" ? (editorial.details ?? []).slice(2) : editorial.details ?? []), ...(editorial.note ? [editorial.note] : [])] : undefined,
     help, downloads: product.downloads, faq: product.faq,
     consultation: { eyebrow: chair ? "Musterstuhl & Beratung" : "Persönliche Beratung",
       title: chair ? "Ausführung vor größerer Bestellung persönlich prüfen." : "Ausführung und Einsatz persönlich klären.",

@@ -375,8 +375,8 @@ export const localProducts: CommerceProduct[] = [
     consultationNote: "Senden Sie uns ein Foto der Stühle und die relevanten Gestellmaße.",
     faq: [],
     seo: {
-      title: "Reihenverbinder für Stahlrohrstühle",
-      description: "Reihenverbinder für vorhandene Bestuhlungen – mit Prüfung von Gestell, Maß und Stuhlabstand.",
+      title: "Kunststoff-Reihenverbinder zum Nachrüsten",
+      description: "Nachrüstbare Kunststoff-Reihenverbinder für geeignete Stahlrohrstühle – Gestell, Rohrmaß und Stuhlabstand vorab prüfen.",
     },
     updatedAt,
   },

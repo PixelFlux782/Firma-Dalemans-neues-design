@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Product } from "@/lib/products";
+import { productPath } from "@/lib/product-routes";
 import ProductVisual from "@/components/ProductVisual";
 
 interface ProductCardProps {
@@ -49,7 +50,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <div className="mt-5 flex flex-wrap items-center gap-2">
           <Link
-            href={`/produkte/${product.slug}`}
+            href={productPath(product.slug)}
             className="btn-primary px-5 py-2.5 text-sm group-hover:shadow-premium-glow"
           >
             Details ansehen

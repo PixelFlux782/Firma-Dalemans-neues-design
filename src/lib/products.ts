@@ -599,13 +599,13 @@ const productCatalog: Product[] = [
     imageAlt: "Reihenverbinder zwischen zwei Stuhlgestellen",
     overviewGroup: "chair-accessories",
     shortDescription:
-      "Verbindungslösung für geordnete Reihenbestuhlung, deren Eignung am vorhandenen Stuhl geprüft wird.",
+      "Integrierte Reihenverbindungen und nachrüstbare Kunststoff-Reihenverbinder im Vergleich.",
     description:
-      "Der Reihenverbinder kann für Stahlrohrstühle ohne serienmäßige Reihenverbindung geprüft werden. Entscheidend sind Gestellform und Abmessungen des vorhandenen Bestands.",
+      "Für neue Stapelstühle kann eine feste Reihenverbindung als Ausstattungsvariante verfügbar sein. Für geeignete vorhandene Stahlrohrstühle kommen Kunststoff-Reihenverbinder zum Nachrüsten infrage. Die passende Lösung hängt vom Stuhlmodell, Gestell und gewünschten Abstand ab.",
     highlights: [
-      "Eignung für vorhandene Stühle wird individuell geprüft",
-      "bewährte Lösung für geordnete Reihenbestuhlung",
-      "stabil genug für den regelmäßigen Einsatz",
+      "Stuhlvariante und Nachrüstprodukt unterscheiden",
+      "Eignung für vorhandene Stühle individuell prüfen",
+      "Reihenabstand bei der Auswahl berücksichtigen",
     ],
     suitableFor: [
       "Kirchen",

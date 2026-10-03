@@ -5,11 +5,12 @@ import ProductDetailPage from "@/components/product-detail/ProductDetailPage";
 import InquiryPurchase from "@/components/product-detail/InquiryPurchase";
 import { StructuredData } from "@/components/StructuredData";
 import { getProductBySlug, products } from "@/lib/products";
+import { isCommerceLegacyProduct } from "@/lib/product-routes";
 import { legacyDetailData } from "@/lib/product-detail-data";
 import { absoluteUrl, buildMetadata, siteName } from "@/lib/seo";
 
 interface Props { params: Promise<{ slug: string }> }
-export function generateStaticParams() { return products.map(product => ({ slug: product.slug })); }
+export function generateStaticParams() { return products.filter(product => product.slug !== "reihenverbinder" && !isCommerceLegacyProduct(product.slug)).map(product => ({ slug: product.slug })); }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = getProductBySlug((await params).slug);
   if (!product) return {};

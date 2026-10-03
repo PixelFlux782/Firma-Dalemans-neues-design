@@ -6,6 +6,7 @@ import { useState } from "react";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ProductVisual from "@/components/ProductVisual";
 import type { Product } from "@/lib/products";
+import { productPath } from "@/lib/product-routes";
 
 type CategoryProduct = Pick<Product, "title" | "slug" | "image" | "imageAlt" | "shortDescription" | "highlights" | "overviewGroup">;
 
@@ -54,7 +55,7 @@ function ProductActions({ product, requestSample, variant }: { product: Category
 
   return (
     <div className="mt-5 grid gap-3 sm:flex sm:flex-wrap sm:items-center sm:gap-x-5">
-      <Link href={`/produkte/${product.slug}`} className="btn-primary justify-center px-5 py-2.5 text-sm">
+      <Link href={productPath(product.slug)} className="btn-primary justify-center px-5 py-2.5 text-sm">
         Modell ansehen
       </Link>
       <Link

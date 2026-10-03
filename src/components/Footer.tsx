@@ -17,8 +17,8 @@ const pageLinks = [
 const productLinks = [
   ["/produkte/stapelstuehle", "Stapelstühle"],
   ["/produkte/kategorien/klapptische", "Klapptische"],
-  ["/produkte/buchablage", "Buchablagen"],
-  ["/produkte/stuhltransportwagen", "Transportwagen"],
+  ["/produkte/artikel/buchablage-nachruesten", "Buchablagen"],
+  ["/produkte/artikel/stuhltransportwagen", "Transportwagen"],
   ["/produkte/reihenverbinder", "Reihenverbinder & Zubehör"],
   ["/produkte/stuhlgleiter", "Ersatzteile & Gleiter"],
   ["/sonderposten", "Sonderposten"],

@@ -9,6 +9,7 @@ import SectionHeader from "@/components/home/SectionHeader";
 import StackingChairsCategory from "@/components/StackingChairsCategory";
 import { getProductCategoryById } from "@/lib/product-categories";
 import { getProductsByCategory, type ProductCategoryId } from "@/lib/products";
+import { productPath } from "@/lib/product-routes";
 import { absoluteUrl, siteName } from "@/lib/seo";
 
 interface Props { categoryId: ProductCategoryId }
@@ -62,7 +63,7 @@ export default function ProductCategoryOverview({ categoryId }: Props) {
   const title = isAccessories ? "Transportwagen, Zubehör & Ersatzteile" : category.name;
   const lead = isAccessories ? "Praktische Lösungen für Transport, Lagerung, Reihenbestuhlung und den langfristigen Erhalt Ihrer Ausstattung." : category.intro;
   const data = { "@context": "https://schema.org", "@graph": [
-    { "@type": "ItemList", "@id": absoluteUrl(`/produkte/kategorien/${category.id}#products`), name: `${category.name} von ${siteName}`, description: category.description, url: absoluteUrl(`/produkte/kategorien/${category.id}`), itemListElement: products.map((product, index) => ({ "@type": "ListItem", position: index + 1, name: product.title, url: absoluteUrl(`/produkte/${product.slug}`) })) },
+    { "@type": "ItemList", "@id": absoluteUrl(`/produkte/kategorien/${category.id}#products`), name: `${category.name} von ${siteName}`, description: category.description, url: absoluteUrl(`/produkte/kategorien/${category.id}`), itemListElement: products.map((product, index) => ({ "@type": "ListItem", position: index + 1, name: product.title, url: absoluteUrl(productPath(product.slug)) })) },
     { "@type": "FAQPage", "@id": absoluteUrl(`/produkte/kategorien/${category.id}#faq`), mainEntity: info.faq.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) },
   ] };
 

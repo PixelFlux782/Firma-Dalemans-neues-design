@@ -3,6 +3,18 @@ const nextConfig = {
   reactStrictMode: true,
   async redirects() {
     return [
+      ...[
+        ["klapptisch-310c", "klapptisch-310c"],
+        ["trapezklapptisch-310c", "trapez-klapptisch-310c"],
+        ["seminar-klapptisch", "seminarklapptisch-210c"],
+        ["tischtransportwagen", "tischtransportwagen"],
+        ["stuhltransportwagen", "stuhltransportwagen"],
+        ["buchablage", "buchablage-nachruesten"],
+      ].map(([legacy, handle]) => ({
+        source: `/produkte/${legacy}`,
+        destination: `/produkte/artikel/${handle}`,
+        statusCode: 301,
+      })),
       {
         source: "/produkte/kategorien/stapelstuehle",
         destination: "/produkte/stapelstuehle",

@@ -16,6 +16,7 @@ export interface ProductDetailData {
   compatibility?: string[];
   useCases?: string[];
   variants?: string[];
+  editorialNotes?: string[];
   specifications?: CommerceSpecification[];
   help?: { eyebrow: string; title: string; text: string; href: string; label: string; secondaryHref?: string; secondaryLabel?: string };
   consultation?: { eyebrow: string; title: string; text: string; href: string; label: string };
@@ -51,6 +52,7 @@ export default function ProductDetailPage({ data, media, purchase, children }: {
       <div><p className="text-lg leading-8 text-premium-charcoal">{data.description}</p>{data.useCases?.length ? <p className="mt-5 text-sm leading-7 text-premium-muted">Einsatzbereiche: {data.useCases.join(", ")}.</p> : null}</div>
     </section> : null}
     {data.variants?.length ? <section aria-labelledby={`${headingId}-variants`}><p className="section-eyebrow">Varianten &amp; Ausführungen</p><h2 id={`${headingId}-variants`} className="section-title mt-4">Passend zum Bedarf auswählen.</h2><div className="mt-9 grid gap-6 md:grid-cols-3">{data.variants.map((variant, index) => <article key={variant} className="border-t border-premium-beige/80 pt-5"><span className="font-display text-2xl text-premium-sand" aria-hidden>{String(index + 1).padStart(2, "0")}</span><p className="mt-3 text-sm leading-7 text-premium-muted">{variant}</p></article>)}</div></section> : null}
+    {data.editorialNotes?.length ? <section aria-labelledby={`${headingId}-notes`}><p className="section-eyebrow">Planung &amp; Anwendung</p><h2 id={`${headingId}-notes`} className="section-title mt-4">Worauf es im Einsatz ankommt.</h2><ul className="mt-7 grid gap-4 text-sm leading-7 text-premium-muted md:grid-cols-2">{data.editorialNotes.map(note => <li key={note} className="border-t border-premium-beige/80 pt-4">{note}</li>)}</ul></section> : null}
     {children}
     <ProductTechnicalData items={data.specifications ?? []} />
     {data.downloads?.length ? <section><p className="section-eyebrow">Downloads</p><h2 className="section-title-functional mt-4">Unterlagen zum Produkt.</h2><div className="mt-7 divide-y divide-premium-beige/80 border-y border-premium-beige/80">{data.downloads.map(item => <a key={item.url} href={item.url} className="flex min-h-14 items-center justify-between gap-5 py-4 text-sm font-semibold text-premium-forest hover:underline">{item.title}<span aria-hidden>↓</span></a>)}</div></section> : null}

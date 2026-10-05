@@ -105,6 +105,18 @@ function explain(variant: PlanVariant, balanced?: PlanVariant): string[] {
   if (m.failures) reasons.push(`${m.failures} offene Regelabweichungen`);
   return reasons;
 }
+/** Turn a preview into the editable, serializable plan in one history step. */
+export function materializeVariant(variant: PlanVariant): RoomPlan & { seating: SeatingPlan } {
+  const ids = new Set<string>();
+  const objects = variant.plan.objects.map((object) => {
+    let id = object.id;
+    if (ids.has(id)) { let suffix = 2; while (ids.has(`${id}-${suffix}`)) suffix++; id = `${id}-${suffix}`; }
+    ids.add(id);
+    return { ...object, id };
+  });
+  return { ...variant.plan, objects, seating: { ...variant.seatingPlan, blocks: variant.seatingPlan.blocks.map((block) => ({ ...block, source: "generated" as const })) } };
+}
+
 export function generatePlanVariants(inputPlan: RoomPlan, baseRules: SeatingRules = DEFAULT_SEATING_RULES, rule: RuleProfile, preference: OrientationPreference = "automatic", config: VariantConfig = DEFAULT_VARIANT_CONFIG): VariantResult {
   const plan = inputPlan.objects.some((object) => object.type === "aisle" && object.source === "generated" && !object.edited)
     ? { ...inputPlan, objects: inputPlan.objects.filter((object) => object.type !== "aisle" || object.source !== "generated" || object.edited) } : inputPlan;

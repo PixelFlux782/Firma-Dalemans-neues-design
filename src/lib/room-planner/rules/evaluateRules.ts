@@ -53,7 +53,7 @@ export function evaluateRules(plan: RoomPlan, seating: SeatingPlan, egress: Egre
     const required = Math.max(minAisle ?? 0, load?.requiredWidth ?? 0);
     add(`${aisle.id}-width`, "aisle-width", !required ? "not_applicable" : aisle.width + 1e-7 >= required ? "pass" : "fail", !required ? `Gang ${aisle.id}: Breitenregel nicht anwendbar.` : `Gang ${aisle.id}: ${load?.persons ?? 0} zugeordnete Personen; Breite ${aisle.width.toFixed(2)} m, rechnerisch erforderlich ${required.toFixed(2)} m.`, [aisle.id], aisle.width, required || undefined);
   }
-  if (!aisles.length) add("aisles-missing", "aisle-width", "warning", "Keine Gänge eingezeichnet; Gangzugang und Rettungswege sind nicht nachweisbar.");
+  if (!aisles.length) add("aisles-missing", "aisle-width", egress.seatsWithoutRoute > 0 ? "fail" : "warning", egress.seatsWithoutRoute > 0 ? "Erforderlicher Gang oder Rettungsweg fehlt; Sitzplätze ohne nachweisbare Route." : "Keine Gänge eingezeichnet; Gangzugang und Rettungswege sind nicht nachweisbar.");
   for (const load of egress.exitLoads) add(`${load.doorId}-capacity`, "exit-capacity", load.requiredWidth === undefined ? "not_applicable" : load.clearWidth + 1e-7 >= load.requiredWidth ? "pass" : "fail", load.requiredWidth === undefined ? `Ausgang ${load.doorId}: Kapazitätsregel nicht anwendbar.` : `Ausgang ${load.doorId}: ${load.persons} zugeordnete Personen; lichte Breite ${load.clearWidth.toFixed(2)} m, rechnerisch erforderlich ${load.requiredWidth.toFixed(2)} m.`, [load.doorId], load.clearWidth, load.requiredWidth);
   if (!egress.exitLoads.length) add("exits-missing", "reachable-exit", "fail", "Kein für Rettungswege nutzbarer Ausgang markiert.");
   const counts = { pass: 0, warning: 0, fail: 0, not_applicable: 0 };

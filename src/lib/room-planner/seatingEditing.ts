@@ -51,6 +51,15 @@ export function moveBlock(plan: RoomPlan, seating: SeatingPlan, blockId: string,
   return { seating: replaceBlock(seating, blockId, (item) => ({ ...item, seats, origin: item.origin ? { x: item.origin.x + dx, y: item.origin.y + dy } : undefined, edited: true })) };
 }
 
+export function moveSeat(plan: RoomPlan, seating: SeatingPlan, seatId: string, dx: number, dy: number): SeatingEdit {
+  const block = seating.blocks.find((item) => item.seats.some((seat) => seat.id === seatId));
+  const seat = block?.seats.find((item) => item.id === seatId);
+  if (!block || !seat || !Number.isFinite(dx) || !Number.isFinite(dy)) return unchanged(seating, "Sitz nicht gefunden.");
+  const moved = { ...seat, x: Number((seat.x + dx).toFixed(4)), y: Number((seat.y + dy).toFixed(4)) };
+  if (seatProblems(plan, seating, [moved], new Set([seatId])).length) return unchanged(seating, "Sitz kollidiert mit Raumgrenze, Objekt, Gang oder anderen Sitzen.");
+  return { seating: replaceBlock(seating, block.id, (item) => ({ ...item, edited: true, seats: item.seats.map((candidate) => candidate.id === seatId ? moved : candidate) })) };
+}
+
 export function rotateBlock(plan: RoomPlan, seating: SeatingPlan, blockId: string, angle: number): SeatingEdit {
   const block = seating.blocks.find((item) => item.id === blockId);
   if (!block || !Number.isFinite(angle)) return unchanged(seating, "Ungültiger Drehwinkel.");

@@ -11,6 +11,13 @@ export default function ChairGallery({ images, modelCode }: { images: CommerceIm
   const variantImageContext = useChairVariantImage();
   const activeImage = variantImageContext?.image ?? images[activeIndex] ?? null;
 
+  const showGalleryImage = (index: number) => {
+    setActiveIndex(index);
+    // A manually selected gallery image should take precedence until the
+    // configurator selects another product variant.
+    variantImageContext?.setImage(null);
+  };
+
   if (!activeImage) {
     return (
       <div className="flex min-h-[420px] items-end rounded-[2rem] bg-gradient-to-br from-premium-warm via-premium-canvas to-premium-sage/55 p-8 sm:min-h-[560px]">
@@ -43,7 +50,7 @@ export default function ChairGallery({ images, modelCode }: { images: CommerceIm
               type="button"
               aria-pressed={index === activeIndex}
               aria-label={`Ansicht ${index + 1}: ${image.altText ?? modelCode}`}
-              onClick={() => setActiveIndex(index)}
+              onClick={() => showGalleryImage(index)}
               className={`relative min-h-16 overflow-hidden rounded-xl border bg-premium-warm/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-2 sm:min-h-20 ${index === activeIndex ? "border-premium-forest ring-1 ring-premium-forest" : "border-premium-beige/80 hover:border-premium-leaf"}`}
             >
               <Image

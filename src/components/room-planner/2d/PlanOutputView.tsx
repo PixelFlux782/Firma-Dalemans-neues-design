@@ -6,6 +6,7 @@ import { seatPolygon } from "@/lib/room-planner/seating";
 import { calculatePlanDemand, calculateRecommendedDemand } from "@/lib/room-planner/chairSelection";
 import type { analyzeCurrentPlan } from "@/lib/room-planner/currentPlanAnalysis";
 import MeasurementLayer from "./MeasurementLayer";
+import { planCapacity, tableModel, tablePolygon, zonePolygon } from "@/lib/room-planner/tables";
 
 type ReturnTypeAnalysis = ReturnType<typeof analyzeCurrentPlan>;
 type Props = { plan: RoomPlan; name: string; issuedAt: Date; profileName: string; analysis: ReturnTypeAnalysis | null; reservePercent: number; inquiryHref: string; shopHref?: string; onClose: () => void };
@@ -15,7 +16,7 @@ export default function PlanOutputView({ plan, name, issuedAt, profileName, anal
   const seating = plan.seating;
   const demand = calculatePlanDemand(plan);
   const recommended = calculateRecommendedDemand(plan, reservePercent);
-  const points = [...plan.contour.points, ...plan.objects.flatMap((object) => object.type === "aisle" ? aislePolygon(object) : isBlockingObject(object) ? obstaclePolygon(object) : object.type === "front" ? Object.values(frontSegment(object)) : object.type === "door" ? Object.values(doorSegment(plan.contour, object) ?? {}) : []), ...(seating?.seats ?? [])];
+  const points = [...plan.contour.points, ...plan.objects.flatMap((object) => object.type === "aisle" ? aislePolygon(object) : isBlockingObject(object) ? obstaclePolygon(object) : object.type === "front" ? Object.values(frontSegment(object)) : object.type === "door" ? Object.values(doorSegment(plan.contour, object) ?? {}) : []), ...(seating?.seats ?? []), ...(plan.tables ?? []).flatMap(tablePolygon), ...(plan.zones ?? []).flatMap(zonePolygon)];
   const minX = points.length ? Math.min(...points.map((p) => p.x)) : 0, maxX = points.length ? Math.max(...points.map((p) => p.x)) : 1;
   const minY = points.length ? Math.min(...points.map((p) => p.y)) : 0, maxY = points.length ? Math.max(...points.map((p) => p.y)) : 1;
   const width = maxX - minX, height = maxY - minY, margin = Math.max(1.7, Math.max(width, height) * .08 + .5);
@@ -26,15 +27,19 @@ export default function PlanOutputView({ plan, name, issuedAt, profileName, anal
   const unreachable = typeof analysis?.egress?.seatsWithoutRoute === "number" ? analysis.egress.seatsWithoutRoute : undefined;
   const checks = Array.isArray(analysis?.report?.checks) ? analysis.report.checks : [];
   const important = checks.filter((check) => check.status === "fail" || check.status === "warning");
-  const legend = [["Sitz", "#405b49"], ["Gang", "#5596a0"], ["Tür", "#347b7a"], ["Ausgang", "#13714a"], ["Hindernis", "#bb7558"], ["Bühne", "#aa7854"], ["Sperrfläche", "#957bb4"], ["Front", "#235e89"], ...(routes?.some((r) => r.valid && r.path?.length > 1) ? [["Rettungsweg", "#d97706"]] : [])];
+  const capacity = planCapacity(plan);
+  const legend = [["Sitz", "#405b49"], ["Tisch", "#d9c49a"], ["Tischzone", "#d6a15b"], ["Gang", "#5596a0"], ["Tür", "#347b7a"], ["Ausgang", "#13714a"], ["Hindernis", "#bb7558"], ["Bühne", "#aa7854"], ["Sperrfläche", "#957bb4"], ["Front", "#235e89"], ...(routes?.some((r) => r.valid && r.path?.length > 1) ? [["Rettungsweg", "#d97706"]] : [])];
   return <section className="plan-output" aria-label="Plan-Ausgabe">
     <div className="plan-output-actions"><button type="button" onClick={onClose}>Zurück zum Editor</button><button type="button" onClick={() => window.print()}>Drucken / als PDF speichern</button><a href={inquiryHref}>Angebot für diese Bestuhlung anfordern</a>{shopHref && <a href={shopHref}>Stuhl konfigurieren</a>}</div>
-    <header><p>Raumplan · Planungsansicht</p><h1>{name}</h1><p>Ausgabe: {issuedAt.toLocaleString("de-DE")}</p></header>
+    <header><p>Raumplan · Planungsansicht</p><h1>{name}</h1><p>Ausgabe: {issuedAt.toLocaleString("de-DE")} · {capacity.total} Plätze ({capacity.rowSeats} Reihe / {capacity.tableSeats} Tisch)</p></header>
     <div className="plan-output-sheet"><div className="plan-output-drawing">
       <svg role="img" aria-label="Grundriss mit Sitzen, Gängen, Objekten und Ausgängen" viewBox={`${minX - margin} ${minY - margin} ${width + 2 * margin} ${height + 2 * margin}`} preserveAspectRatio="xMidYMid meet">
         {plan.contour.closed && <polygon points={polygon(plan.contour.points)} fill="#edf2e9" stroke="#314c3a" strokeWidth=".05" />}
+        {(plan.zones ?? []).map(zone => <polygon key={zone.id} points={polygon(zonePolygon(zone))} fill={zone.type === "tables" ? "#d6a15b" : zone.type === "seating" ? "#5f9281" : "#9b91b4"} fillOpacity=".15" stroke="#77684f" strokeWidth=".025" strokeDasharray=".12 .08" />)}
         {plan.objects.filter((o) => o.type === "aisle").map((o) => o.type === "aisle" && <polygon key={o.id} points={polygon(aislePolygon(o))} fill="#a9d2d8" stroke="#357682" strokeWidth=".025" />)}
         {plan.objects.filter(isBlockingObject).map((o) => <g key={o.id}><polygon points={polygon(obstaclePolygon(o))} fill={o.type === "stage" || o.type === "obstacle" && o.obstacleType === "stage" ? "#aa7854" : o.type === "reservedArea" || o.type === "obstacle" && o.obstacleType === "restricted" ? "#957bb4" : "#bb7558"} stroke="#694d43" strokeWidth=".025" /><text x={o.x} y={o.y} textAnchor="middle" dominantBaseline="middle" fontSize=".24" fill="white">{o.type === "stage" || o.type === "obstacle" && o.obstacleType === "stage" ? "Bühne" : o.type === "reservedArea" || o.type === "obstacle" && o.obstacleType === "restricted" ? "Sperrfläche" : "Hindernis"}</text></g>)}
+        {(plan.tables ?? []).map(table => <g key={table.id}><polygon points={polygon(tablePolygon(table))} fill="#d9c49a" stroke="#725b36" strokeWidth=".03" /><text x={table.x} y={table.y} textAnchor="middle" dominantBaseline="middle" fontSize=".18" fill="#5f4b2e">{tableModel(table.modelId).name.replace("DLMNS ", "")}</text></g>)}
+        {(plan.chairs ?? []).map(chair => <polygon key={chair.id} points={polygon([{ x: chair.x - chair.width/2, y: chair.y-chair.depth/2 }, { x: chair.x+chair.width/2, y: chair.y-chair.depth/2 }, { x: chair.x+chair.width/2, y: chair.y+chair.depth/2 }, { x: chair.x-chair.width/2, y: chair.y+chair.depth/2 }])} fill="#557a69" stroke="white" strokeWidth=".012" transform={`rotate(${chair.rotation} ${chair.x} ${chair.y})`} />)}
         {seating?.seats.map((seat) => <polygon key={seat.id} data-seat-id={seat.id} points={polygon(seatPolygon(seat.x, seat.y, seating.rules, seating.orientation, seat.rotation))} fill="#405b49" stroke="white" strokeWidth=".012" />)}
         {seating?.blocks.map((block, i) => block.seats.length > 0 && <text key={block.id} x={block.seats.reduce((n, s) => n + s.x, 0) / block.seats.length} y={block.seats.reduce((n, s) => n + s.y, 0) / block.seats.length} textAnchor="middle" fontSize=".25" fontWeight="bold" fill="#172d20" stroke="white" strokeWidth=".06" paintOrder="stroke">{block.id || `Block ${i + 1}`}</text>)}
         {routes?.filter((r) => r.valid && r.path?.length > 1).map((r) => <polyline key={r.originId} points={polygon(r.path)} fill="none" stroke="#d97706" strokeWidth=".035" strokeOpacity=".35" />)}

@@ -110,6 +110,29 @@ test("Produktdetailseite wird vollständig aus dem Commerce-Modell gerendert", a
   );
 });
 
+test("Alternativbilder tauschen auf Artikelseiten das große Produktbild", async ({ page }) => {
+  await page.goto("/produkte/artikel/buchablage-nachruesten");
+
+  const mainImage = page.locator(".product-visual__product img").first();
+  await expect(mainImage).toHaveAttribute("alt", /Buchablage unter der Sitzfläche/);
+
+  await page.getByRole("button", { name: /Bild 3:/ }).click();
+
+  await expect(mainImage).toHaveAttribute("alt", /montierte Ansicht/);
+});
+
+test("Alternativbilder übersteuern auf Stapelstuhlseiten das Konfiguratorbild", async ({ page }) => {
+  await page.goto("/produkte/stapelstuehle/buende");
+
+  const gallery = page.getByTestId("chair-gallery");
+  const mainImage = gallery.locator(".product-visual__product img");
+  await expect(mainImage).toHaveAttribute("alt", /ungepolstert/);
+
+  await gallery.getByRole("button", { name: /Ansicht 3:/ }).click();
+
+  await expect(mainImage).toHaveAttribute("alt", /Mehrere gestapelte Stühle/);
+});
+
 test("Variantenwahl hält nur existierende Kombinationen aktiv", async ({ page }) => {
   await page.goto("/shop/produkt/kunststoff-gestellgleiter");
 

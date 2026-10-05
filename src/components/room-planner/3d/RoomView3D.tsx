@@ -8,6 +8,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
 import { doorSegment, frontSegment, type DoorObject, type RoomPlan } from "@/lib/room-planner/objects";
 import { chairDisplayAngle, planBounds } from "@/lib/room-planner/visualization3d";
+import { TABLE_MODELS, zonePolygon, type TableModel } from "@/lib/room-planner/tables";
 
 const DEFAULT_WALL_HEIGHT = 2.9;
 const CHAIR_MODEL = "/models/dalemans-chair-low.glb";
@@ -106,6 +107,54 @@ function FallbackSeats({ plan }: { plan: RoomPlan }) {
   return <><instancedMesh ref={seatRef} args={[chairGeometry, seatMaterial, seats.length]} /><instancedMesh ref={backRef} args={[chairGeometry, seatMaterial, seats.length]} /><instancedMesh ref={legsRef} args={[chairGeometry, frameMaterial, seats.length * 4]} /></>;
 }
 
+function ModelFurnitureChairs({ plan }: { plan: RoomPlan }) {
+  const { scene } = useGLTF(CHAIR_MODEL);
+  const source = useMemo(() => {
+    scene.updateMatrixWorld(true);
+    let mesh: THREE.Mesh | null = null;
+    scene.traverse(object => { if (!mesh && (object as THREE.Mesh).isMesh) mesh = object as THREE.Mesh; });
+    if (!mesh) throw new Error("Chair GLB contains no mesh");
+    const found: THREE.Mesh = mesh; found.geometry.computeBoundingBox(); const box = found.geometry.boundingBox!;
+    return { geometry: found.geometry, material: found.material, width: box.max.x - box.min.x, depth: box.max.z - box.min.z, floorOffset: -box.min.y };
+  }, [scene]);
+  const chairs = useMemo(() => plan.chairs ?? [], [plan.chairs]), ref = useRef<THREE.InstancedMesh>(null);
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+    const matrix = new THREE.Matrix4(), position = new THREE.Vector3(), rotation = new THREE.Quaternion(), axis = new THREE.Vector3(0, 1, 0), scale = new THREE.Vector3();
+    chairs.forEach((chair, index) => { scale.set(chair.width / source.width, Math.min(chair.width / source.width, chair.depth / source.depth), chair.depth / source.depth); rotation.setFromAxisAngle(axis, chairDisplayAngle(chair.rotation)); position.set(chair.x, source.floorOffset * scale.y, chair.y); ref.current!.setMatrixAt(index, matrix.compose(position, rotation, scale)); });
+    ref.current.instanceMatrix.needsUpdate = true; ref.current.computeBoundingSphere();
+  }, [chairs, source]);
+  return chairs.length ? <instancedMesh ref={ref} args={[source.geometry, source.material, chairs.length]} /> : null;
+}
+
+function ModelTables({ plan, model }: { plan: RoomPlan; model: TableModel }) {
+  const { scene } = useGLTF(model.modelPath);
+  const source = useMemo(() => {
+    let mesh: THREE.Mesh | null = null;
+    scene.traverse(object => { if (!mesh && (object as THREE.Mesh).isMesh) mesh = object as THREE.Mesh; });
+    if (!mesh) throw new Error("Table GLB contains no mesh");
+    const found: THREE.Mesh = mesh;
+    const geometry = found.geometry.clone().applyMatrix4(found.matrixWorld);
+    geometry.computeBoundingBox();
+    return { geometry, material: found.material };
+  }, [scene]);
+  const tables = (plan.tables ?? []).filter(table => table.modelId === model.id), ref = useRef<THREE.InstancedMesh>(null);
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+    const translate = new THREE.Matrix4(), rotate = new THREE.Matrix4(), scale = new THREE.Matrix4(), normalize = new THREE.Matrix4(), matrix = new THREE.Matrix4();
+    tables.forEach((table, index) => {
+      translate.makeTranslation(table.x, -model.modelBounds.floorY * (model.height / model.modelBounds.height), table.y);
+      rotate.makeRotationY(Math.PI - table.rotation * Math.PI / 180);
+      scale.makeScale(table.width / model.modelBounds.width, model.height / model.modelBounds.height, table.depth / model.modelBounds.depth);
+      normalize.makeTranslation(-model.modelBounds.centerX, 0, -model.modelBounds.centerZ);
+      matrix.copy(translate).multiply(rotate).multiply(scale).multiply(normalize);
+      ref.current!.setMatrixAt(index, matrix);
+    });
+    ref.current.instanceMatrix.needsUpdate = true; ref.current.computeBoundingSphere();
+  }, [tables, model]);
+  return tables.length ? <instancedMesh ref={ref} args={[source.geometry, source.material, tables.length]} castShadow receiveShadow /> : null;
+}
+
 function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
   const points = plan.contour.points;
   const floor = useMemo(() => {
@@ -154,7 +203,10 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
       const height = reserved ? 0.035 : stage ? 0.35 : 1.2;
       return <mesh key={object.id} renderOrder={reserved ? 1 : 0} position={[object.x, height / 2, object.y]} rotation={[0, -object.rotation * Math.PI / 180, 0]}><boxGeometry args={[object.width, height, object.depth]} /><meshStandardMaterial color={reserved ? "#947bb2" : stage ? "#a47752" : "#81776d"} transparent={reserved} opacity={reserved ? 0.4 : 1} depthWrite={!reserved} /></mesh>;
     })}
+    {(plan.zones ?? []).map(zone => { const points = zonePolygon(zone); const shape = new THREE.Shape(); points.forEach((point, index) => index ? shape.lineTo(point.x, -point.y) : shape.moveTo(point.x, -point.y)); shape.closePath(); return <mesh key={zone.id} geometry={new THREE.ShapeGeometry(shape)} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]} renderOrder={1}><meshStandardMaterial color={zone.type === "tables" ? "#c99555" : zone.type === "seating" ? "#4f8072" : "#8d83a8"} transparent opacity={0.16} depthWrite={false} side={THREE.DoubleSide} /></mesh>; })}
+    {TABLE_MODELS.filter(model => plan.tables?.some(table => table.modelId === model.id)).map(model => <Suspense key={model.id} fallback={null}><ModelTables plan={plan} model={model} /></Suspense>)}
     {!!plan.seating?.seats.length && <ChairErrorBoundary fallback={<FallbackSeats plan={plan} />}><Suspense fallback={<FallbackSeats plan={plan} />}><ModelSeats plan={plan} /></Suspense></ChairErrorBoundary>}
+    {!!plan.chairs?.length && <ChairErrorBoundary fallback={null}><Suspense fallback={null}><ModelFurnitureChairs plan={plan} /></Suspense></ChairErrorBoundary>}
     <CameraControls plan={plan} reset={reset} />
   </>;
 }

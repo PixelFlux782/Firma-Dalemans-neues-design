@@ -1,5 +1,6 @@
 import { pointById, wallLength, type Point2D, type RoomGeometry, type RoomWall } from "./geometry";
 import type { SeatingPlan } from "./seating";
+import type { FurnitureChair, PlanningZone, TableGroup, TableInstance } from "./tables";
 
 export type Position = { x: number; y: number };
 export type DoorObject = { id: string; type: "door"; wallId: string; offset: number; width: number; role?: "normal" | "exit" | "emergency_exit"; clearWidth?: number; openingDirection?: "inside" | "outside"; hingeSide?: "left" | "right" };
@@ -19,9 +20,18 @@ export type AisleObject = { id: string; type: "aisle"; start: Position; end: Pos
 export type RoomObject = DoorObject | ObstacleObject | AisleObject | RoomFront | Stage | ReservedArea;
 export type BlockingObject = ObstacleObject | Stage | ReservedArea;
 export const isBlockingObject = (object: RoomObject): object is BlockingObject => object.type === "obstacle" || object.type === "stage" || object.type === "reservedArea";
-export type RoomPlan = { chairSelection?: import("./chairSelection").ChairSelection; contour: RoomGeometry; objects: RoomObject[]; seating?: SeatingPlan };
+export type RoomPlan = {
+  chairSelection?: import("./chairSelection").ChairSelection;
+  contour: RoomGeometry;
+  objects: RoomObject[];
+  seating?: SeatingPlan;
+  tables?: TableInstance[];
+  chairs?: FurnitureChair[];
+  zones?: PlanningZone[];
+  tableGroups?: TableGroup[];
+};
 export type Issue = { objectId: string; severity: "error" | "warning"; message: string };
-export const emptyPlan = (): RoomPlan => ({ contour: { points: [], walls: [], closed: false }, objects: [] });
+export const emptyPlan = (): RoomPlan => ({ contour: { points: [], walls: [], closed: false }, objects: [], tables: [], chairs: [], zones: [], tableGroups: [] });
 
 const EPS = 1e-8;
 export function wallEndpoints(room: RoomGeometry, wallId: string): { a: Point2D; b: Point2D; wall: RoomWall } | null {

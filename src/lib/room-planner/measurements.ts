@@ -1,6 +1,7 @@
 import { formatMeters, wallLength } from "./geometry";
 import { aislePolygon, doorSegment, isBlockingObject, obstaclePolygon, pointInPolygon, polygonsOverlap, wallEndpoints, type Position, type RoomPlan } from "./objects";
 import { seatPolygon, type SeatingPlan } from "./seating";
+import { tablePolygon, zonePolygon } from "./tables";
 
 export type Measurement = { id: string; kind: "wall" | "door" | "aisle" | "object" | "block" | "detail"; a: Position; b: Position; label: string; side: number; offset: number; priority: number; selected?: boolean };
 const midpoint = (a: Position, b: Position): Position => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
@@ -87,6 +88,23 @@ export function planMeasurements(plan: RoomPlan, seating: SeatingPlan | null | u
       result.push(segment(`${object.id}-width`, "object", corners[0], corners[1], formatMeters(object.width), -1, .22, 2, selected));
       result.push(segment(`${object.id}-depth`, "object", corners[1], corners[2], formatMeters(object.depth), -1, .22, 2, selected));
       if (selected) { const gap = nearestWallGap(plan, object.id, corners); if (gap) result.push(gap); }
+    }
+  }
+  for (const table of plan.tables ?? []) {
+    const corners = tablePolygon(table), selected = selectedId === table.id;
+    shapes.push({ id: table.id, points: corners });
+    if (selected) {
+      result.push(segment(`${table.id}-width`, "object", corners[0], corners[1], formatMeters(table.width), -1, .22, 2, true));
+      result.push(segment(`${table.id}-depth`, "object", corners[1], corners[2], formatMeters(table.depth), -1, .22, 2, true));
+      const gap = nearestWallGap(plan, table.id, corners); if (gap) result.push(gap);
+    }
+  }
+  for (const zone of plan.zones ?? []) {
+    const corners = zonePolygon(zone), selected = selectedId === zone.id;
+    shapes.push({ id: zone.id, points: corners });
+    if (selected) {
+      result.push(segment(`${zone.id}-width`, "object", corners[0], corners[1], formatMeters(zone.geometry.width), -1, .3, 2, true));
+      result.push(segment(`${zone.id}-depth`, "object", corners[1], corners[2], formatMeters(zone.geometry.depth), -1, .3, 2, true));
     }
   }
   if (seating) for (const block of seating.blocks) {

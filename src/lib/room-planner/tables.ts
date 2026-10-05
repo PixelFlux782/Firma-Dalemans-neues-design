@@ -86,17 +86,90 @@ export const TABLE_PRESETS: readonly { id: TablePresetId; name: string }[] = [
   { id: "long-tables", name: "Lange Tafeln" }, { id: "free-groups", name: "Freie Gruppen" },
 ] as const;
 
-export type TableLayoutOptions = { preset: TablePresetId; modelId: string; count: number; spacing: number; rotation: number; withChairs: boolean; chairsPerTable?: number; columns?: number; center?: Position; plan?: RoomPlan };
+export type TableLayoutOptions = { preset: TablePresetId; modelId: string; count: number; spacing: number; rotation: number; withChairs: boolean; chairsPerTable?: number; columns?: number; center?: Position; zone?: PlanningZone; plan?: RoomPlan };
 export type GeneratedTableLayout = { tables: TableInstance[]; chairs: FurnitureChair[]; groups: TableGroup[] };
+export type LayoutTransform = { center: Position; rotation: number; spread: number };
+
+/** Transforms a complete proposal without changing the physical size of tables/chairs.
+ * `spread` changes only the distances inside the arrangement, which is what users
+ * expect from visually making a formation tighter or wider. */
+export function transformTableLayout(layout: GeneratedTableLayout, transform: LayoutTransform): GeneratedTableLayout {
+  const members = [...layout.tables, ...layout.chairs];
+  if (!members.length) return layout;
+  const origin = members.reduce((sum, item) => ({ x: sum.x + item.x / members.length, y: sum.y + item.y / members.length }), { x: 0, y: 0 });
+  const angle = transform.rotation * Math.PI / 180, c = Math.cos(angle), s = Math.sin(angle);
+  const change = <T extends { x: number; y: number; rotation: number }>(item: T): T => {
+    const x = (item.x - origin.x) * transform.spread, y = (item.y - origin.y) * transform.spread;
+    return { ...item, x: Number((transform.center.x + x * c - y * s).toFixed(3)), y: Number((transform.center.y + x * s + y * c).toFixed(3)), rotation: (item.rotation + transform.rotation + 360) % 360 };
+  };
+  return { ...layout, tables: layout.tables.map(change), chairs: layout.chairs.map(change) };
+}
+
+export function tableLayoutConflicts(plan: RoomPlan, layout: GeneratedTableLayout): Set<string> {
+  const conflicts = new Set<string>();
+  const tableByGroup = new Map(layout.tables.map(table => [table.groupId, table.id]));
+  for (const table of layout.tables) {
+    const polygon = tablePolygon(table);
+    if (!polygonInsideRoom(polygon, plan.contour)
+      || plan.objects.some(object => isBlockingObject(object) && polygonsOverlap(polygon, obstaclePolygon(object)) || object.type === "aisle" && polygonsOverlap(polygon, aislePolygon(object)))
+      || (plan.tables ?? []).some(other => polygonsOverlap(polygon, tablePolygon(other)))) conflicts.add(table.id);
+  }
+  for (let i = 0; i < layout.tables.length; i++) for (let j = i + 1; j < layout.tables.length; j++) {
+    if (polygonsOverlap(tablePolygon(layout.tables[i]), tablePolygon(layout.tables[j]))) { conflicts.add(layout.tables[i].id); conflicts.add(layout.tables[j].id); }
+  }
+  for (const chair of layout.chairs) {
+    const polygon = rotatedRectangle(chair), owner = tableByGroup.get(chair.groupId) ?? layout.tables[0]?.id;
+    if (!owner) continue;
+    if (!polygonInsideRoom(polygon, plan.contour)
+      || plan.objects.some(object => isBlockingObject(object) && polygonsOverlap(polygon, obstaclePolygon(object)) || object.type === "aisle" && polygonsOverlap(polygon, aislePolygon(object)))
+      || (plan.tables ?? []).some(table => polygonsOverlap(polygon, tablePolygon(table)))
+      || layout.tables.some(table => table.groupId !== chair.groupId && polygonsOverlap(polygon, tablePolygon(table)))) conflicts.add(owner);
+  }
+  for (let i = 0; i < layout.chairs.length; i++) for (let j = i + 1; j < layout.chairs.length; j++) {
+    if (polygonsOverlap(rotatedRectangle(layout.chairs[i]), rotatedRectangle(layout.chairs[j]))) {
+      const first = tableByGroup.get(layout.chairs[i].groupId), second = tableByGroup.get(layout.chairs[j].groupId);
+      if (first) conflicts.add(first); if (second) conflicts.add(second);
+    }
+  }
+  return conflicts;
+}
+
+/** Finds the room orientation, column count and spacing that preserves the complete
+ * requested formation. It never silently drops individual tables. */
+export function fitTableLayout(options: TableLayoutOptions, idPrefix = `layout-${Date.now()}`): { layout: GeneratedTableLayout; transform: LayoutTransform; conflicts: Set<string> } {
+  const plan = options.plan;
+  const center = options.center ?? (plan?.contour.points.length ? {
+    x: plan.contour.points.reduce((sum, point) => sum + point.x, 0) / plan.contour.points.length,
+    y: plan.contour.points.reduce((sum, point) => sum + point.y, 0) / plan.contour.points.length,
+  } : { x: 0, y: 0 });
+  let best: { layout: GeneratedTableLayout; transform: LayoutTransform; conflicts: Set<string> } | null = null;
+  const roomWidth = plan?.contour.points.length ? Math.max(...plan.contour.points.map(point => point.x)) - Math.min(...plan.contour.points.map(point => point.x)) : 1;
+  const roomDepth = plan?.contour.points.length ? Math.max(...plan.contour.points.map(point => point.y)) - Math.min(...plan.contour.points.map(point => point.y)) : 1;
+  const model = tableModel(options.modelId);
+  const ideal = Math.max(1, Math.min(options.count, Math.round(Math.sqrt(options.count * roomWidth / Math.max(.1, roomDepth) * model.depth / model.width))));
+  const allColumns = Array.from({ length: options.count }, (_, index) => index + 1);
+  const columnCandidates = options.columns ? [options.columns] : [...new Set([ideal, ideal + 1, ideal - 1, ...allColumns])].filter(value => value >= 1 && value <= options.count);
+  const rotations = [...new Set([options.rotation, options.rotation + 90])];
+  for (const columns of columnCandidates) for (const rotation of rotations) for (const spread of [1, 1.1, 1.2, .9, .8, .7, .6]) {
+    const layout = generateTableLayout({ ...options, plan: undefined, center: { x: 0, y: 0 }, columns }, idPrefix);
+    const transform = { center, rotation: rotation - options.rotation, spread };
+    const transformed = transformTableLayout(layout, transform);
+    const conflicts = plan ? tableLayoutConflicts(plan, transformed) : new Set<string>();
+    const candidate = { layout, transform, conflicts };
+    if (!best || conflicts.size < best.conflicts.size || conflicts.size === best.conflicts.size && spread > best.transform.spread) best = candidate;
+    if (!conflicts.size) return candidate;
+  }
+  return best!;
+}
 
 function chairRing(table: TableInstance, count: number, groupId: string, idPrefix: string): FurnitureChair[] {
   const result: FurnitureChair[] = [];
   const longSide = Math.max(1, Math.floor((count - 2) / 2));
   const local: { x: number; y: number; rotation: number }[] = [];
-  for (let i = 0; i < longSide && local.length < count; i++) local.push({ x: -table.width / 2 + table.width * (i + 1) / (longSide + 1), y: -table.depth / 2 - 0.32, rotation: 0 });
-  for (let i = 0; i < longSide && local.length < count; i++) local.push({ x: table.width / 2 - table.width * (i + 1) / (longSide + 1), y: table.depth / 2 + 0.32, rotation: 180 });
-  if (local.length < count) local.push({ x: -table.width / 2 - 0.32, y: 0, rotation: 270 });
-  if (local.length < count) local.push({ x: table.width / 2 + 0.32, y: 0, rotation: 90 });
+  for (let i = 0; i < longSide && local.length < count; i++) local.push({ x: -table.width / 2 + table.width * (i + 1) / (longSide + 1), y: -table.depth / 2 - 0.36, rotation: 0 });
+  for (let i = 0; i < longSide && local.length < count; i++) local.push({ x: table.width / 2 - table.width * (i + 1) / (longSide + 1), y: table.depth / 2 + 0.36, rotation: 180 });
+  if (local.length < count) local.push({ x: -table.width / 2 - 0.36, y: 0, rotation: 270 });
+  if (local.length < count) local.push({ x: table.width / 2 + 0.36, y: 0, rotation: 90 });
   const a = table.rotation * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
   local.slice(0, count).forEach((chair, index) => result.push({ id: `${idPrefix}-chair-${index + 1}`, x: table.x + chair.x * c - chair.y * s, y: table.y + chair.x * s + chair.y * c, rotation: (chair.rotation + table.rotation) % 360, width: 0.5, depth: 0.55, groupId, source: table.source }));
   return result;
@@ -104,7 +177,7 @@ function chairRing(table: TableInstance, count: number, groupId: string, idPrefi
 
 export function generateTableLayout(options: TableLayoutOptions, idPrefix = `layout-${Date.now()}`): GeneratedTableLayout {
   const model = tableModel(options.modelId), count = Math.max(1, Math.floor(options.count)), spacing = Math.max(0, options.spacing);
-  const center = options.center ?? { x: 0, y: 0 };
+  const center = options.center ?? (options.zone ? { x: options.zone.geometry.x, y: options.zone.geometry.y } : { x: 0, y: 0 });
   const columns = Math.max(1, Math.floor(options.columns ?? Math.ceil(Math.sqrt(count))));
   const rows = Math.ceil(count / columns);
   const stepX = model.width + spacing, stepY = model.depth + spacing;

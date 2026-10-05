@@ -1,4 +1,5 @@
 import { aislePolygon, doorSegment, isBlockingObject, obstaclePolygon, polygonInsideRoom, polygonsOverlap, type AisleObject, type DoorObject, type Position, type RoomPlan } from "./objects";
+import { tablePolygon } from "./tables";
 import type { SeatingPlan } from "./seating";
 
 const EPS = 0.02;
@@ -60,7 +61,7 @@ export function generateAisleGroups(plan: RoomPlan, seating: SeatingPlan, width:
     candidates.push([longitudinal(`exit-${door.id}`, along(midpoint))]);
   }
   const existing = plan.objects.filter((o): o is AisleObject => o.type === "aisle");
-  const blockers = plan.objects.filter(isBlockingObject).map(obstaclePolygon);
+  const blockers = [...plan.objects.filter(isBlockingObject).map(obstaclePolygon), ...(plan.tables ?? []).map(tablePolygon)];
   const clear = (aisle: AisleObject) => {
     const polygon = aislePolygon(aisle);
     return polygonInsideRoom(polygon, plan.contour) && !blockers.some((blocker) => polygonsOverlap(polygon, blocker));

@@ -1,4 +1,5 @@
 import { aislePolygon, isBlockingObject, obstaclePolygon, pointInPolygon, type Position, type RoomPlan } from "./objects";
+import { tablePolygon } from "./tables";
 
 export type SeatingRegion = { id: string; minAlong: number; maxAlong: number; minCross: number; maxCross: number; contains: (point: Position) => boolean };
 export const SEATING_REGION_LIMITS = Object.freeze({ minimumSeats: 2, minimumAlong: 0.5, minimumCross: 0.55, maximumCells: 4096 });
@@ -14,7 +15,7 @@ export function seatingRegions(plan: RoomPlan, toLocal: (point: Position) => Pos
   };
   const roomWidth = Math.max(...room.map((point) => point.x)) - Math.min(...room.map((point) => point.x));
   const roomHeight = Math.max(...room.map((point) => point.y)) - Math.min(...room.map((point) => point.y));
-  const exclusions = plan.objects.flatMap((object) => {
+  const exclusions = [...plan.objects.flatMap((object) => {
     if (isBlockingObject(object)) return [obstaclePolygon(object).map(toLocal)];
     if (object.type !== "aisle") return [];
     const polygon = aislePolygon(object).map(toLocal);
@@ -27,7 +28,7 @@ export function seatingRegions(plan: RoomPlan, toLocal: (point: Position) => Pos
     const a = { x: start.x - ux * extension, y: start.y - uy * extension };
     const b = { x: end.x + ux * extension, y: end.y + uy * extension };
     return [[{ x: a.x + nx, y: a.y + ny }, { x: b.x + nx, y: b.y + ny }, { x: b.x - nx, y: b.y - ny }, { x: a.x - nx, y: a.y - ny }]];
-  });
+  }), ...(plan.tables ?? []).map((table) => tablePolygon(table).map(toLocal))];
   const orthogonalContour = room.every((point, index) => {
     const next = room[(index + 1) % room.length];
     return Math.abs(point.x - next.x) < 1e-7 || Math.abs(point.y - next.y) < 1e-7;

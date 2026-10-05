@@ -1,6 +1,7 @@
 import { validateRoom } from "./geometry";
 import { seatingRegions, SEATING_REGION_LIMITS } from "./seatingRegions";
 import { aislePolygon, doorSegment, isBlockingObject, obstaclePolygon, pointInPolygon, polygonInsideRoom, polygonsOverlap, validateObjects, type Position, type RoomPlan } from "./objects";
+import { rotatedRectangle, tablePolygon } from "./tables";
 
 export type SeatingOrientation = "horizontal" | "vertical";
 export type SeatingGridOffset = { along: number; cross: number };
@@ -75,10 +76,11 @@ export function seatPolygon(x: number, y: number, rules: SeatingRules, orientati
   const angle = rotation ?? (orientation === "horizontal" ? 0 : 90);
   return [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sy]) => rotatePoint({ x: sx * rules.chairWidth / 2, y: sy * rules.chairDepth / 2 }, { x, y }, angle));
 }
-type Exclusions = { obstacles: Position[][]; aisles: Position[][]; doors: { start: Position; end: Position }[] };
+type Exclusions = { obstacles: Position[][]; furnitureChairs: Position[][]; aisles: Position[][]; doors: { start: Position; end: Position }[] };
 function exclusions(plan: RoomPlan): Exclusions {
   return {
-    obstacles: plan.objects.filter(isBlockingObject).map(obstaclePolygon),
+    obstacles: [...plan.objects.filter(isBlockingObject).map(obstaclePolygon), ...(plan.tables ?? []).map(tablePolygon)],
+    furnitureChairs: (plan.chairs ?? []).map(rotatedRectangle),
     aisles: plan.objects.filter((o) => o.type === "aisle").map(aislePolygon),
     doors: plan.objects.filter((o) => o.type === "door").map((o) => doorSegment(plan.contour, o)).filter((o): o is { start: Position; end: Position } => o !== null),
   };
@@ -91,6 +93,7 @@ function fits(plan: RoomPlan, excluded: Exclusions, rules: SeatingRules, orienta
   if (!polygonInsideRoom(seat, plan.contour)) return false;
   if (boundaryDistance(seat, plan.contour.points) + EPS < rules.minimumWallClearance) return false;
   if (excluded.obstacles.some((polygon) => polygonDistance(seat, polygon) + EPS < rules.minimumObstacleClearance || polygonsOverlap(seat, polygon))) return false;
+  if (excluded.furnitureChairs.some((polygon) => polygonsOverlap(seat, polygon))) return false;
   if (excluded.aisles.some((polygon) => polygonsOverlap(seat, polygon))) return false;
   if (excluded.doors.some(({ start, end }) => segmentPolygonDistance(start, end, seat) + EPS < rules.minimumDoorClearance)) return false;
   return true;

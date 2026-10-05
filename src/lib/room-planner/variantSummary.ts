@@ -1,4 +1,5 @@
 import { isBlockingObject, obstaclePolygon, polygonsOverlap, type RoomPlan } from "./objects";
+import { tablePolygon } from "./tables";
 import type { SeatingPlan } from "./seating";
 import type { EgressAnalysis } from "./egress/analyzeEgress";
 import type { RuleCheckResult, RuleReport } from "./rules/evaluateRules";
@@ -24,7 +25,7 @@ export function createVariantSummary(plan: RoomPlan, seating: SeatingPlan, analy
   const aisles = plan.objects.filter((object) => object.type === "aisle");
   const routes = analysis.routes.filter((route) => route.valid);
   const unreachableBlocks = new Set(analysis.routes.filter((route) => !route.valid).map((route) => route.blockId));
-  const blockers = plan.objects.filter(isBlockingObject).map(obstaclePolygon);
+  const blockers = [...plan.objects.filter(isBlockingObject).map(obstaclePolygon), ...(plan.tables ?? []).map(tablePolygon)];
   const blockersOverlap = blockers.some((polygon, index) => blockers.slice(index + 1).some((other) => polygonsOverlap(polygon, other)));
   const contourArea = plan.contour.closed ? area(plan.contour.points) : 0;
   const usableArea = !blockersOverlap && contourArea > 0 ? round(contourArea - blockers.reduce((sum, polygon) => sum + area(polygon), 0)) : undefined;

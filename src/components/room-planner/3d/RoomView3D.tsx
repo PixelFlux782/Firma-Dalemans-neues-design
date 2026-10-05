@@ -8,7 +8,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
 import { doorSegment, frontSegment, type DoorObject, type RoomPlan } from "@/lib/room-planner/objects";
 import { chairDisplayAngle, planBounds } from "@/lib/room-planner/visualization3d";
-import { TABLE_MODELS, zonePolygon, type TableModel } from "@/lib/room-planner/tables";
+import { TABLE_MODELS, type TableModel } from "@/lib/room-planner/tables";
 
 const DEFAULT_WALL_HEIGHT = 2.9;
 const CHAIR_MODEL = "/models/dalemans-chair-low.glb";
@@ -203,7 +203,6 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
       const height = reserved ? 0.035 : stage ? 0.35 : 1.2;
       return <mesh key={object.id} renderOrder={reserved ? 1 : 0} position={[object.x, height / 2, object.y]} rotation={[0, -object.rotation * Math.PI / 180, 0]}><boxGeometry args={[object.width, height, object.depth]} /><meshStandardMaterial color={reserved ? "#947bb2" : stage ? "#a47752" : "#81776d"} transparent={reserved} opacity={reserved ? 0.4 : 1} depthWrite={!reserved} /></mesh>;
     })}
-    {(plan.zones ?? []).map(zone => { const points = zonePolygon(zone); const shape = new THREE.Shape(); points.forEach((point, index) => index ? shape.lineTo(point.x, -point.y) : shape.moveTo(point.x, -point.y)); shape.closePath(); return <mesh key={zone.id} geometry={new THREE.ShapeGeometry(shape)} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]} renderOrder={1}><meshStandardMaterial color={zone.type === "tables" ? "#c99555" : zone.type === "seating" ? "#4f8072" : "#8d83a8"} transparent opacity={0.16} depthWrite={false} side={THREE.DoubleSide} /></mesh>; })}
     {TABLE_MODELS.filter(model => plan.tables?.some(table => table.modelId === model.id)).map(model => <Suspense key={model.id} fallback={null}><ModelTables plan={plan} model={model} /></Suspense>)}
     {!!plan.seating?.seats.length && <ChairErrorBoundary fallback={<FallbackSeats plan={plan} />}><Suspense fallback={<FallbackSeats plan={plan} />}><ModelSeats plan={plan} /></Suspense></ChairErrorBoundary>}
     {!!plan.chairs?.length && <ChairErrorBoundary fallback={null}><Suspense fallback={null}><ModelFurnitureChairs plan={plan} /></Suspense></ChairErrorBoundary>}

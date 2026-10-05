@@ -1,4 +1,4 @@
-import { aislePolygon, isBlockingObject, obstaclePolygon, pointInPolygon, polygonInsideRoom, polygonsOverlap, type Issue, type Position, type RoomPlan } from "./objects";
+import { aislePolygon, isBlockingObject, obstaclePolygon, polygonInsideRoom, polygonsOverlap, type Issue, type Position, type RoomPlan } from "./objects";
 
 export type TableShape = "rectangular" | "round" | "square" | "trapezoid";
 export type TableSource = "manual" | "auto" | "preset";
@@ -6,6 +6,7 @@ export type TableSource = "manual" | "auto" | "preset";
 export type TableModel = {
   id: string;
   name: string;
+  articleNumbers: readonly string[];
   modelPath: string;
   width: number;
   depth: number;
@@ -16,10 +17,29 @@ export type TableModel = {
   modelBounds: { width: number; depth: number; height: number; centerX: number; centerY: number; centerZ: number; floorY: number };
 };
 
+const MODEL_BOUNDS = {
+  "210c": { width: 1.899253, depth: 0.847804, height: 0.863075, centerX: 0.950543, centerY: 0.428466, centerZ: -0.430974, floorY: -0.003072 },
+  "310c": { width: 1.899243, depth: 0.879099, height: 0.935664, centerX: 0.875079, centerY: 0.432884, centerZ: -0.431824, floorY: -0.034948 },
+  trapezoid: { width: 1.898275, depth: 0.858471, height: 0.941359, centerX: 0.968091, centerY: 0.42456, centerZ: -0.431777, floorY: -0.04612 },
+} as const;
+
 export const TABLE_MODELS: readonly TableModel[] = [
-  { id: "table-210", name: "DLMNS Tisch 210", modelPath: "/models/dalemans-tisch-210-low.glb", width: 1.9, depth: 0.85, height: 0.86, shape: "rectangular", defaultSeats: 6, modelBounds: { width: 1.899253, depth: 0.847804, height: 0.863075, centerX: 0.950543, centerY: 0.428466, centerZ: -0.430974, floorY: -0.003072 } },
-  { id: "table-310", name: "DLMNS Tisch 310", modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.9, depth: 0.88, height: 0.94, shape: "rectangular", defaultSeats: 6, modelBounds: { width: 1.899243, depth: 0.879099, height: 0.935664, centerX: 0.875079, centerY: 0.432884, centerZ: -0.431824, floorY: -0.034948 } },
-  { id: "table-trapez", name: "DLMNS Trapeztisch", modelPath: "/models/dalemans-tisch-trapez-low.glb", width: 1.9, depth: 0.86, height: 0.94, shape: "trapezoid", defaultSeats: 5, modelBounds: { width: 1.898275, depth: 0.858471, height: 0.941359, centerX: 0.968091, centerY: 0.42456, centerZ: -0.431777, floorY: -0.04612 } },
+  { id: "table-310c-120x70", name: "Klapptisch 310c · 120 × 70 cm", articleNumbers: ["T310C127", "T310C127N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.2, depth: .7, height: .94, shape: "rectangular", defaultSeats: 4, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-120x80", name: "Klapptisch 310c · 120 × 80 cm", articleNumbers: ["T310C128", "T310C128N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.2, depth: .8, height: .94, shape: "rectangular", defaultSeats: 4, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-140x70", name: "Klapptisch 310c · 140 × 70 cm", articleNumbers: ["T310C147", "T310C147N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.4, depth: .7, height: .94, shape: "rectangular", defaultSeats: 4, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-140x80", name: "Klapptisch 310c · 140 × 80 cm", articleNumbers: ["T310C148", "T310C148N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.4, depth: .8, height: .94, shape: "rectangular", defaultSeats: 4, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-150x70", name: "Klapptisch 310c · 150 × 70 cm", articleNumbers: ["T310C157", "T310C157N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.5, depth: .7, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-150x75", name: "Klapptisch 310c · 150 × 75 cm", articleNumbers: ["T310C1575", "T310C1575N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.5, depth: .75, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-160x70", name: "Klapptisch 310c · 160 × 70 cm", articleNumbers: ["T310C167", "T310C167N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.6, depth: .7, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-160x80", name: "Klapptisch 310c · 160 × 80 cm", articleNumbers: ["T310C168", "T310C168N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.6, depth: .8, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-170x70", name: "Klapptisch 310c · 170 × 70 cm", articleNumbers: ["T310C177", "T310C177N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.7, depth: .7, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-170x80", name: "Klapptisch 310c · 170 × 80 cm", articleNumbers: ["T310C178", "T310C178N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.7, depth: .8, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-180x70", name: "Klapptisch 310c · 180 × 70 cm", articleNumbers: ["T310C187", "T310C187N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.8, depth: .7, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-180x80", name: "Klapptisch 310c · 180 × 80 cm", articleNumbers: ["T310C188", "T310C188N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.8, depth: .8, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-210c-120x60", name: "Seminarklapptisch 210c · 120 × 60 cm", articleNumbers: ["T210C126"], modelPath: "/models/dalemans-tisch-210-low.glb", width: 1.2, depth: .6, height: .86, shape: "rectangular", defaultSeats: 4, modelBounds: MODEL_BOUNDS["210c"] },
+  { id: "table-210c-140x70", name: "Seminarklapptisch 210c · 140 × 70 cm", articleNumbers: ["T210C147"], modelPath: "/models/dalemans-tisch-210-low.glb", width: 1.4, depth: .7, height: .86, shape: "rectangular", defaultSeats: 4, modelBounds: MODEL_BOUNDS["210c"] },
+  { id: "table-310c-trapez-140x70", name: "Trapez-Klapptisch 310c · 140 × 70 cm", articleNumbers: ["T310CT147", "T310CT147N"], modelPath: "/models/dalemans-tisch-trapez-low.glb", width: 1.4, depth: .7, height: .94, shape: "trapezoid", defaultSeats: 4, modelBounds: MODEL_BOUNDS.trapezoid },
+  { id: "table-310c-trapez-160x80", name: "Trapez-Klapptisch 310c · 160 × 80 cm", articleNumbers: ["T310CT168", "T310CT168N"], modelPath: "/models/dalemans-tisch-trapez-low.glb", width: 1.6, depth: .8, height: .94, shape: "trapezoid", defaultSeats: 5, modelBounds: MODEL_BOUNDS.trapezoid },
 ] as const;
 
 export const DEFAULT_TABLE_MODEL_ID = TABLE_MODELS[0].id;
@@ -66,7 +86,7 @@ export const TABLE_PRESETS: readonly { id: TablePresetId; name: string }[] = [
   { id: "long-tables", name: "Lange Tafeln" }, { id: "free-groups", name: "Freie Gruppen" },
 ] as const;
 
-export type TableLayoutOptions = { preset: TablePresetId; modelId: string; count: number; spacing: number; rotation: number; withChairs: boolean; chairsPerTable?: number; columns?: number; zone?: PlanningZone };
+export type TableLayoutOptions = { preset: TablePresetId; modelId: string; count: number; spacing: number; rotation: number; withChairs: boolean; chairsPerTable?: number; columns?: number; center?: Position; plan?: RoomPlan };
 export type GeneratedTableLayout = { tables: TableInstance[]; chairs: FurnitureChair[]; groups: TableGroup[] };
 
 function chairRing(table: TableInstance, count: number, groupId: string, idPrefix: string): FurnitureChair[] {
@@ -84,8 +104,7 @@ function chairRing(table: TableInstance, count: number, groupId: string, idPrefi
 
 export function generateTableLayout(options: TableLayoutOptions, idPrefix = `layout-${Date.now()}`): GeneratedTableLayout {
   const model = tableModel(options.modelId), count = Math.max(1, Math.floor(options.count)), spacing = Math.max(0, options.spacing);
-  const zone = options.zone;
-  const center = zone ? { x: zone.geometry.x, y: zone.geometry.y } : { x: 0, y: 0 };
+  const center = options.center ?? { x: 0, y: 0 };
   const columns = Math.max(1, Math.floor(options.columns ?? Math.ceil(Math.sqrt(count))));
   const rows = Math.ceil(count / columns);
   const stepX = model.width + spacing, stepY = model.depth + spacing;
@@ -103,7 +122,12 @@ export function generateTableLayout(options: TableLayoutOptions, idPrefix = `lay
     layout.push({ x: center.x + (column - (columns - 1) / 2) * stepX, y: center.y + (row - (rows - 1) / 2) * stepY, rotation });
   }
   let tables = layout.map((position, index): TableInstance => ({ id: `${idPrefix}-table-${index + 1}`, modelId: model.id, x: Number(position.x.toFixed(3)), y: Number(position.y.toFixed(3)), rotation: position.rotation ?? options.rotation, width: model.width, depth: model.depth, groupId: `${idPrefix}-group-${index + 1}`, source: "preset" }));
-  if (zone) tables = tables.filter(table => tablePolygon(table).every(point => pointInPolygon(point, zonePolygon(zone))));
+  if (options.plan) tables = tables.filter((table) => {
+    const polygon = tablePolygon(table);
+    return polygonInsideRoom(polygon, options.plan!.contour)
+      && !options.plan!.objects.some((object) => isBlockingObject(object) && polygonsOverlap(polygon, obstaclePolygon(object)) || object.type === "aisle" && polygonsOverlap(polygon, aislePolygon(object)))
+      && !(options.plan!.tables ?? []).some((other) => polygonsOverlap(polygon, tablePolygon(other)));
+  });
   const chairs = options.withChairs ? tables.flatMap((table, index) => chairRing(table, options.chairsPerTable ?? model.defaultSeats, table.groupId!, `${idPrefix}-${index + 1}`)) : [];
   const groups = tables.map(table => ({ id: table.groupId!, tableIds: [table.id], chairIds: chairs.filter(chair => chair.groupId === table.groupId).map(chair => chair.id) }));
   return { tables, chairs, groups };
@@ -122,3 +146,10 @@ export function moveTableGroup(plan: RoomPlan, groupId: string, dx: number, dy: 
 }
 
 export const planCapacity = (plan: RoomPlan) => ({ rowSeats: plan.seating?.seats.length ?? 0, tableSeats: (plan.chairs ?? []).length, total: (plan.seating?.seats.length ?? 0) + (plan.chairs ?? []).length });
+
+export type TableDemandLine = { model: TableModel; quantity: number };
+export function calculateTableDemand(plan: RoomPlan): TableDemandLine[] {
+  const quantities = new Map<string, number>();
+  for (const table of plan.tables ?? []) quantities.set(table.modelId, (quantities.get(table.modelId) ?? 0) + 1);
+  return TABLE_MODELS.flatMap((model) => quantities.has(model.id) ? [{ model, quantity: quantities.get(model.id)! }] : []);
+}

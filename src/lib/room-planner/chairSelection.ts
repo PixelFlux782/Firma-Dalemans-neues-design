@@ -19,9 +19,13 @@ export function resolveChair(selection: ChairSelection = DEFAULT_CHAIR_SELECTION
 export function calculatePlanDemand(plan: RoomPlan) {
   const selection = plan.chairSelection ?? DEFAULT_CHAIR_SELECTION;
   const { product, variant } = resolveChair(selection);
+  const rowQuantity = plan.seating?.blocks.reduce((sum, block) => sum + block.seats.length, 0) ?? 0;
+  const tableQuantity = plan.chairs?.length ?? 0;
   return {
     selection, product, variant,
-    quantity: plan.seating?.blocks.reduce((sum, block) => sum + block.seats.length, 0) ?? 0,
+    rowQuantity,
+    tableQuantity,
+    quantity: rowQuantity + tableQuantity,
     blocks: plan.seating?.blocks.filter((block) => block.seats.length > 0).length ?? 0,
   };
 }

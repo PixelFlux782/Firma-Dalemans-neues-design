@@ -69,7 +69,12 @@ function normalizePlan(raw: unknown): RoomPlan {
   const zoneValid = (value: unknown) => record(value) && named(value.id) && ["seating", "tables", "free"].includes(String(value.type)) && record(value.geometry) && value.geometry.kind === "rectangle" && finite(value.geometry.x) && finite(value.geometry.y) && finite(value.geometry.width) && value.geometry.width > 0 && finite(value.geometry.depth) && value.geometry.depth > 0 && finite(value.rotation);
   const groupValid = (value: unknown) => record(value) && named(value.id) && Array.isArray(value.tableIds) && value.tableIds.every(named) && Array.isArray(value.chairIds) && value.chairIds.every(named);
   if (raw.tables !== undefined && (!Array.isArray(raw.tables) || raw.tables.length > 5000 || !raw.tables.every(tableValid)) || raw.chairs !== undefined && (!Array.isArray(raw.chairs) || raw.chairs.length > 20000 || !raw.chairs.every(chairValid)) || raw.zones !== undefined && (!Array.isArray(raw.zones) || raw.zones.length > 1000 || !raw.zones.every(zoneValid)) || raw.tableGroups !== undefined && (!Array.isArray(raw.tableGroups) || raw.tableGroups.length > 5000 || !raw.tableGroups.every(groupValid))) throw new Error("Die gespeicherte Tischplanung ist ungültig.");
-  const plan = { ...(raw as unknown as RoomPlan), tables: (raw.tables ?? []) as RoomPlan["tables"], chairs: (raw.chairs ?? []) as RoomPlan["chairs"], zones: (raw.zones ?? []) as RoomPlan["zones"], tableGroups: (raw.tableGroups ?? []) as RoomPlan["tableGroups"] };
+  const legacyModels: Record<string, string> = { "table-210": "table-210c-140x70", "table-310": "table-310c-180x80", "table-trapez": "table-310c-trapez-160x80" };
+  const normalizedTables = ((raw.tables ?? []) as NonNullable<RoomPlan["tables"]>).map((table) => {
+    const model = TABLE_MODELS.find((item) => item.id === (legacyModels[table.modelId] ?? table.modelId));
+    return model ? { ...table, modelId: model.id, width: model.width, depth: model.depth } : table;
+  });
+  const plan: RoomPlan = { ...(raw as unknown as RoomPlan), tables: normalizedTables, chairs: (raw.chairs ?? []) as RoomPlan["chairs"], zones: [], tableGroups: (raw.tableGroups ?? []) as RoomPlan["tableGroups"] };
   const tableIds = (plan.tables ?? []).map(table => table.id), furnitureChairIds = (plan.chairs ?? []).map(chair => chair.id), zoneIds = (plan.zones ?? []).map(zone => zone.id);
   const allFurnitureIds = [...tableIds, ...furnitureChairIds, ...zoneIds];
   const furnitureGroupIds = (plan.tableGroups ?? []).map(group => group.id);

@@ -264,28 +264,29 @@ export default function FirmaPage() {
         />
 
         <article className="section-grid-top overflow-hidden rounded-6xl bg-premium-espresso text-premium-canvas shadow-premium-xl">
-          <div className="grid lg:grid-cols-[minmax(300px,0.82fr)_1.18fr] lg:items-stretch">
-            <div className="grid min-h-[420px] overflow-hidden sm:min-h-[520px] lg:min-h-[560px] lg:grid-rows-2">
-              <figure className="relative min-h-[280px] sm:min-h-[320px] lg:min-h-0">
+          <div className="grid lg:grid-cols-[minmax(420px,0.95fr)_1.05fr] lg:items-center">
+            <div className="grid gap-3 p-3 sm:grid-cols-2 sm:items-center sm:gap-4 sm:p-4 lg:p-5">
+              <figure className="overflow-hidden rounded-[1.5rem] bg-premium-warm/10">
                 <Image
                   src={encodeURI("/neue bilder/Hubert_Dalemans_gruender.png")}
                   alt="Hubert Dalemans, Gründer von Dalemans"
-                  fill
-                  sizes="(min-width: 1024px) 42vw, 100vw"
-                  className="object-cover object-[center_38%]"
+                  width={1448}
+                  height={1086}
+                  sizes="(min-width: 1024px) 23vw, (min-width: 640px) 48vw, 100vw"
+                  className="h-auto w-full object-contain"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-premium-espresso/65 via-transparent to-transparent" aria-hidden />
-                <figcaption className="absolute bottom-4 left-5 text-sm font-medium text-white/90 sm:left-7">Hubert Dalemans, Gründer</figcaption>
+                <figcaption className="px-4 py-3 text-sm font-medium text-white/80">Hubert Dalemans, Gründer</figcaption>
               </figure>
-              <figure className="relative min-h-[280px] sm:min-h-[320px] lg:min-h-0">
-              <Image
-                src={encodeURI("/neue bilder/stefan-dalemans-portrait.png")}
-                alt="Stefan Dalemans, heutiger Geschäftsführer von Dalemans"
-                fill
-                sizes="(min-width: 1024px) 42vw, 100vw"
-                className="object-cover object-top"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-premium-espresso/45 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-premium-espresso/25" aria-hidden />
+              <figure className="overflow-hidden rounded-[1.5rem] bg-premium-warm/10">
+                <Image
+                  src={encodeURI("/neue bilder/stefan-dalemans-portrait.png")}
+                  alt="Stefan Dalemans, heutiger Geschäftsführer von Dalemans"
+                  width={1122}
+                  height={1402}
+                  sizes="(min-width: 1024px) 23vw, (min-width: 640px) 48vw, 100vw"
+                  className="h-auto w-full object-contain"
+                />
+                <figcaption className="px-4 py-3 text-sm font-medium text-white/80">Stefan Dalemans, Geschäftsführer</figcaption>
               </figure>
             </div>
 

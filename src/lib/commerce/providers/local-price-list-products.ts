@@ -60,23 +60,27 @@ function unavailableVariant(prefix: string, erpArticleNumber: string, title: str
   };
 }
 
-function quotedVariant(prefix: string, erpArticleNumber: string, title: string, amount: number): CommerceProductVariant {
+function fixedInquiryVariant(prefix: string, erpArticleNumber: string, title: string, amount: number): CommerceProductVariant {
   return {
     ...requestVariant(prefix, erpArticleNumber, title),
     price: eur(amount),
-    priceStatus: "from",
+    priceStatus: "fixed",
+    priceDataStatus: "verified",
   };
 }
 
 function product(input: {
   handle: string; title: string; description: string; collection: string;
   variants: CommerceProductVariant[]; featuredImage: CommerceImage | null;
+  images?: CommerceImage[]; specifications?: CommerceProduct["specifications"];
+  suitableFor?: string[]; consultationNote?: string;
 }): CommerceProduct {
   const prices = input.variants.flatMap((variant) => variant.price ? [Number(variant.price.amount)] : []);
   const fixed = prices.length > 0;
   const allUnavailable = input.variants.length > 0 && input.variants.every((variant) =>
     variant.priceStatus === "unavailable" || variant.availability === "out_of_stock",
   );
+  const availableForSale = input.variants.some((variant) => variant.availableForSale);
   return {
     id: `local-product-${input.handle}`,
     handle: input.handle,
@@ -84,23 +88,25 @@ function product(input: {
     shortDescription: input.description,
     description: input.description,
     descriptionHtml: `<p>${input.description}</p>`,
-    availableForSale: input.variants.some((variant) => variant.availableForSale),
+    availableForSale,
     featuredImage: input.featuredImage,
-    images: input.featuredImage ? [input.featuredImage] : [],
+    images: input.images ?? (input.featuredImage ? [input.featuredImage] : []),
     variants: input.variants,
     priceRange: { min: fixed ? eur(Math.min(...prices)) : null, max: fixed ? eur(Math.max(...prices)) : null },
-    priceStatus: fixed ? "from" : allUnavailable ? "unavailable" : "on_request",
-    availability: fixed ? "in_stock" : allUnavailable ? "out_of_stock" : "on_request",
-    availabilityNote: fixed
+    priceStatus: fixed
+      ? input.variants.length === 1 && input.variants[0]?.priceStatus === "fixed" ? "fixed" : "from"
+      : allUnavailable ? "unavailable" : "on_request",
+    availability: availableForSale ? "in_stock" : allUnavailable ? "out_of_stock" : "on_request",
+    availabilityNote: availableForSale
       ? "Mengenpreis wird im Warenkorb automatisch berücksichtigt."
       : allUnavailable
         ? "In der aktuellen Preisliste ist kein numerischer Verkaufspreis hinterlegt."
         : "Preis und Lieferzeit auf Anfrage.",
     collectionHandles: [input.collection],
-    specifications: [], compatibility: [], suitableFor: ["Gemeinden", "Veranstaltungsräume"],
+    specifications: input.specifications ?? [], compatibility: [], suitableFor: input.suitableFor ?? ["Gemeinden", "Veranstaltungsräume"],
     quantity: { unit: "piece", unitLabel: "Stück", minimum: 1, step: 1, note: null },
     measureGuide: [], applicationNotes: [], notes: [], accessories: [], faq: [],
-    consultationNote: "Bei Sondermaßen oder Ausstattungsfragen beraten wir persönlich.",
+    consultationNote: input.consultationNote ?? "Bei Sondermaßen oder Ausstattungsfragen beraten wir persönlich.",
     seo: { title: input.title, description: input.description }, updatedAt,
   };
 }
@@ -108,6 +114,19 @@ function product(input: {
 const table310Image = image("/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", "Klapptisch Modell 310c");
 const seminarImage = image("/images/curated/Tische/T210cdetail.webp", "Seminarklapptisch Modell 210c");
 const trapezoidImage = image("/images/curated/Tische/Trapezklapptisch_Klapptische_trapez_klappbar.webp", "Trapez-Klapptisch Modell 310c");
+
+const lecternAImages = [
+  image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA_1.png", "Rednerpult aus Plexiglas und Acrylglas, Typ A"),
+  image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.png", "Rednerpult Typ A aus Plexiglas und Acrylglas, weitere Ansicht"),
+];
+const lecternEImages = [
+  image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypE_1.png", "Rednerpult aus Plexiglas und Acrylglas, Typ E"),
+  image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypE.png", "Rednerpult Typ E aus Plexiglas und Acrylglas, weitere Ansicht"),
+];
+const lecternAhImages = [
+  image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypAH_1.png", "Rednerpult Typ AH aus massiver Furnierplatte"),
+  image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypAH_2.png", "Rednerpult Typ AH aus massiver Furnierplatte, weitere Ansicht"),
+];
 
 const table310Rows: PricedRow[] = [
   ["T310C127", "120 × 70 cm · ABS", 355.93, 345.2521, 338.1335], ["T310C128", "120 × 80 cm · ABS", 364.63, 353.6911, 346.3985],
@@ -140,11 +159,33 @@ export const localPriceListProducts: CommerceProduct[] = [
     unavailableVariant("klappstuhl", "LSBAS1", "BAS 1 · VPE 4 Stück"), unavailableVariant("klappstuhl", "LS193", "L 193 · VPE 4 Stück"),
     unavailableVariant("klappstuhl", "LS189", "L 189 · VPE 4 Stück"), unavailableVariant("klappstuhl", "LS190", "L 190 · VPE 4 Stück"),
   ] }),
-  product({ handle: "rednerpulte", title: "Rednerpulte", description: "Rednerpulte aus Acrylglas oder massiver Furnierplatte.", collection: "rednerpulte", featuredImage: image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.png", "Rednerpult aus Acrylglas Typ A"), variants: [
-    quotedVariant("rednerpult", "D705A", "Typ A · Acrylglas", 1249.1515),
-    quotedVariant("rednerpult", "D705E", "Typ E · Acrylglas", 1743.2293),
-    quotedVariant("rednerpult", "D705AH", "Typ AH · Furnierplatte", 1048.1707),
-  ] }),
+  product({
+    handle: "rednerpult-typ-a", title: "Rednerpult aus Plexiglas/Acrylglas, Typ A",
+    description: "Transparentes Rednerpult aus Plexiglas beziehungsweise Acrylglas in der Ausführung Typ A.",
+    collection: "rednerpulte", featuredImage: lecternAImages[0], images: lecternAImages,
+    variants: [fixedInquiryVariant("rednerpult-a", "D705A", "Typ A", 1249.1515)],
+    specifications: [{ name: "Material", value: "Plexiglas/Acrylglas" }],
+    consultationNote: "Maße, Ausstattung, Lieferzeit und Einsatz klären wir persönlich.",
+  }),
+  product({
+    handle: "rednerpult-typ-e", title: "Rednerpult aus Plexiglas/Acrylglas, Typ E",
+    description: "Transparentes Rednerpult aus Plexiglas beziehungsweise Acrylglas in der Ausführung Typ E.",
+    collection: "rednerpulte", featuredImage: lecternEImages[0], images: lecternEImages,
+    variants: [fixedInquiryVariant("rednerpult-e", "D705E", "Typ E", 1743.2293)],
+    specifications: [{ name: "Material", value: "Plexiglas/Acrylglas" }],
+    consultationNote: "Maße, Ausstattung, Lieferzeit und Einsatz klären wir persönlich.",
+  }),
+  product({
+    handle: "rednerpult-typ-ah", title: "Rednerpult Typ AH aus massiver Furnierplatte, 16 mm",
+    description: "Rednerpult Typ AH aus einer massiven Furnierplatte mit 16 mm Materialstärke.",
+    collection: "rednerpulte", featuredImage: lecternAhImages[0], images: lecternAhImages,
+    variants: [fixedInquiryVariant("rednerpult-ah", "D705AH", "Typ AH", 1048.1707)],
+    specifications: [
+      { name: "Material", value: "massive Furnierplatte" },
+      { name: "Materialstärke", value: "16 mm" },
+    ],
+    consultationNote: "Maße, Ausstattung, Lieferzeit und Einsatz klären wir persönlich.",
+  }),
 ];
 
 const bistrotisch = getProductBySlug("bistrotisch");

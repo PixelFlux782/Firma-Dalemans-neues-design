@@ -123,6 +123,39 @@ test("Produkte sind in Desktop- und Mobile-Navigation erreichbar", async ({ page
   await expect(mobileShopLink).toHaveAttribute("aria-current", "page");
 });
 
+test("Rednerpulte sind einzeln mit Preis, Artikelnummer und Bildzuweisung erreichbar", async ({ page }) => {
+  const products = [
+    { handle: "rednerpult-typ-a", sku: "D705A", price: "1.249,15 €", image: "Rednerpult_Acrylglas_Plexiglas_TypA_1.png" },
+    { handle: "rednerpult-typ-e", sku: "D705E", price: "1.743,23 €", image: "Rednerpult_Acrylglas_Plexiglas_TypE_1.png" },
+    { handle: "rednerpult-typ-ah", sku: "D705AH", price: "1.048,17 €", image: "Rednerpult_Acrylglas_Plexiglas_TypAH_1.png" },
+  ];
+
+  await page.goto("/produkte/sortiment/rednerpulte");
+  await expect(page.locator("#produkte article")).toHaveCount(3);
+  for (const product of products) {
+    await expect(page.locator(`#produkte a[href="/produkte/artikel/${product.handle}"]`).first()).toBeVisible();
+  }
+
+  for (const product of products) {
+    const href = `/produkte/artikel/${product.handle}`;
+    await page.goto(href);
+    await expect(page.locator("h1")).toBeVisible();
+    await expect(page.getByTestId("selected-sku")).toContainText(product.sku);
+    await expect(page.locator('[data-price-status="fixed"]')).toContainText(product.price);
+    await expect(page.locator(`img[src*="${product.image}"]`).first()).toBeVisible();
+    await expect(page.getByLabel("Breadcrumb").getByRole("link", { name: "Rednerpulte" })).toHaveAttribute("href", "/produkte/sortiment/rednerpulte");
+    const inquiry = page.getByRole("link", { name: "Angebot anfragen" }).first();
+    await expect(inquiry).toHaveAttribute("href", new RegExp(`artikelnummer=${product.sku}`));
+  }
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const route of ["/produkte/sortiment/rednerpulte", ...products.map((product) => `/produkte/artikel/${product.handle}`)]) {
+    await page.goto(route, { waitUntil: "domcontentloaded" });
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow, route).toBeLessThanOrEqual(1);
+  }
+});
+
 test("Kontaktformular zeigt eigene deutsche Feldfehler und aktualisiert sie", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/kontakt?anliegen=Beratung");

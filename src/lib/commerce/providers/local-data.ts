@@ -607,7 +607,7 @@ export const localCollectionRecords: Array<Omit<CommerceCollection, "products">>
     title: "Rednerpulte",
     shortDescription: "Rednerpulte aus Acrylglas oder massiver Furnierplatte.",
     description: "Drei Rednerpult-Ausführungen aus der aktuellen Preisliste.",
-    image: localPriceListProducts.find((product) => product.handle === "rednerpulte")?.featuredImage ?? null,
+    image: localPriceListProducts.find((product) => product.handle === "rednerpult-typ-a")?.featuredImage ?? null,
     seo: { title: "Rednerpulte", description: "Rednerpulte aus Acrylglas und Furnierplatte." },
   },
   {

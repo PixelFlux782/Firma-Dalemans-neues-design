@@ -61,7 +61,6 @@ export default function HomePage() {
         <div className="grid lg:min-h-[min(72vh,720px)] lg:grid-cols-[.88fr_1.12fr]">
           <div className="hero-copy relative z-10 flex flex-col justify-center px-5 py-9 sm:px-8 md:px-10 md:py-10 lg:px-12 lg:py-8 xl:px-14">
             <p className="section-eyebrow">Dalemans Stapelstühle & Klapptische</p>
-            <DevelopmentNotice />
             <div className="mt-4 flex items-center gap-3 text-[0.65rem] font-medium uppercase tracking-[0.18em] text-premium-muted">
               <span>Seit 1994</span><span className="h-px w-8 bg-premium-stone" aria-hidden /><span>Persönlich geplant</span>
             </div>
@@ -81,6 +80,7 @@ export default function HomePage() {
               <Link href="/produkte/stapelstuehle" className="btn-secondary justify-center rounded-xl px-6">Produkte ansehen</Link>
             </div>
             <Link href="/raumplaner" className="mt-4 inline-flex w-fit items-center gap-2 text-xs font-medium text-premium-bronze transition hover:text-premium-forest">Raum digital planen <span aria-hidden="true">→</span> 3D-Raumplaner ausprobieren</Link>
+            <DevelopmentNotice />
             <a href="tel:+499342915353" className="mt-5 inline-flex w-fit items-center gap-3 text-sm font-semibold text-premium-ink transition hover:text-premium-bronze">
               <span className="text-[0.62rem] font-medium uppercase tracking-[0.16em] text-premium-muted">Direktkontakt</span>
               +49 9342 9153-53

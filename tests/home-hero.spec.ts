@@ -27,51 +27,46 @@ test("hero layout, links and slider across viewports", async ({ page }) => {
   }
 });
 
-test("development notice fades, dismisses, and is limited to one browser session", async ({ browser }) => {
-  const context = await browser.newContext();
-  const page = await context.newPage();
+test("development notice is server-rendered and remains permanently visible", async ({ page, request }) => {
+  const initialHtml = await (await request.get("/")).text();
+  expect(initialHtml).toContain("Website in Entwicklung · Inhalte werden laufend ergänzt");
+
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
-  const notice = page.getByLabel("Entwicklungsstatus der Website");
-  await expect(notice.locator(":scope > div[aria-hidden='false']")).toHaveClass(/opacity-100/);
-  await expect.poll(() => page.evaluate(() => sessionStorage.getItem("dlmns-development-notice-seen"))).toBeNull();
-  await page.mouse.move(400, 400);
-  await page.mouse.move(800, 600);
-  await page.waitForTimeout(4100);
+  const hero = page.locator(".hero-architectural");
+  const notice = hero.getByLabel("Entwicklungsstatus der Website");
+  const roomPlanner = hero.getByRole("link", { name: /3D-Raumplaner ausprobieren/ });
+  const directContact = hero.getByRole("link", { name: /Direktkontakt/ });
+
   await expect(notice).toBeVisible();
-  await expect(notice).toHaveCount(0, { timeout: 6500 });
-  await expect.poll(() => page.evaluate(() => sessionStorage.getItem("dlmns-development-notice-seen"))).toBe("true");
+  await expect(notice).toHaveText("Website in Entwicklung · Inhalte werden laufend ergänzt");
+  await expect(notice.locator('[aria-hidden="true"]')).toHaveCount(1);
+  const initialNoticeBox = await notice.boundingBox();
+  expect(initialNoticeBox).not.toBeNull();
+  const initialDocumentY = initialNoticeBox!.y + await page.evaluate(() => window.scrollY);
+  expect((await roomPlanner.boundingBox())!.y).toBeLessThan((await notice.boundingBox())!.y);
+  expect((await notice.boundingBox())!.y).toBeLessThan((await directContact.boundingBox())!.y);
+
+  await page.waitForTimeout(5_200);
+  await page.mouse.wheel(0, 100);
+  await page.mouse.click(10, 10);
+  await page.keyboard.press("Tab");
+  await expect(notice).toBeVisible();
+  const settledNoticeBox = await notice.boundingBox();
+  expect(settledNoticeBox).not.toBeNull();
+  expect(settledNoticeBox!.x).toBe(initialNoticeBox!.x);
+  expect(settledNoticeBox!.width).toBe(initialNoticeBox!.width);
+  expect(settledNoticeBox!.height).toBe(initialNoticeBox!.height);
+  expect(settledNoticeBox!.y + await page.evaluate(() => window.scrollY)).toBe(initialDocumentY);
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem("dlmns-development-notice-seen"))).toBeNull();
+
   await page.reload();
-  await expect(notice).toHaveCount(0);
-  await context.close();
-
-  const freshContext = await browser.newContext({ reducedMotion: "reduce" });
-  const freshPage = await freshContext.newPage();
-  await freshPage.setViewportSize({ width: 390, height: 844 });
-  await freshPage.goto("/");
-  const freshNotice = freshPage.getByLabel("Entwicklungsstatus der Website");
-  await expect(freshNotice.locator(":scope > div[aria-hidden='false']")).toBeAttached();
-  const noticeBox = await freshNotice.boundingBox();
-  expect(noticeBox).not.toBeNull();
-  expect(noticeBox!.y + noticeBox!.height).toBeLessThan(774);
-  await expect(freshNotice.locator(":scope > div[aria-hidden='false']")).toHaveCSS("transition-property", "none");
-  await freshPage.mouse.wheel(0, 100);
-  await expect(freshNotice).toHaveCount(0);
-  await freshContext.close();
-});
-
-test("development notice closes on deliberate interaction only", async ({ browser }) => {
-  for (const interaction of ["scroll", "click", "touch", "keyboard"] as const) {
-    const context = await browser.newContext({ hasTouch: interaction === "touch" });
-    const page = await context.newPage();
-    await page.goto("/");
-    const notice = page.getByLabel("Entwicklungsstatus der Website");
-    await expect(notice.locator(":scope > div[aria-hidden='false']")).toBeVisible();
-    if (interaction === "scroll") await page.mouse.wheel(0, 100);
-    if (interaction === "click") await page.mouse.click(10, 10);
-    if (interaction === "touch") await page.touchscreen.tap(10, 10);
-    if (interaction === "keyboard") await page.keyboard.press("Tab");
-    await expect(notice).toHaveCount(0);
-    await expect.poll(() => page.evaluate(() => sessionStorage.getItem("dlmns-development-notice-seen"))).toBe("true");
-    await context.close();
-  }
+  await expect(notice).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(notice).toBeVisible();
+  const mobileNoticeBox = await notice.boundingBox();
+  const mobileContactBox = await directContact.boundingBox();
+  expect(mobileNoticeBox!.y + mobileNoticeBox!.height).toBeLessThan(844);
+  expect(mobileContactBox!.y + mobileContactBox!.height).toBeLessThan(844);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });

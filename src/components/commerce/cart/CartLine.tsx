@@ -114,7 +114,7 @@ export default function CartLine({ line }: { line: CommerceCartLineModel }) {
           <div className="text-right text-sm">
             {unitPrice ? <p className="text-xs text-premium-muted">{unitPrice} je {line.unitLabel.toLowerCase()}</p> : null}
             <p className="mt-1 font-semibold tabular-nums text-premium-ink">
-              {lineTotal ?? "Preis auf Anfrage"}
+              {lineTotal ?? (line.priceStatus === "unavailable" ? "Nicht verfügbar" : "Preis auf Anfrage")}
             </p>
           </div>
         </div>

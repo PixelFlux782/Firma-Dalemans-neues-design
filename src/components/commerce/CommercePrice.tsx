@@ -22,7 +22,7 @@ export default function CommercePrice({
   if (status === "on_request") {
     label = "Preis auf Anfrage";
   } else if (status === "unavailable" || !formattedPrice) {
-    label = "Preis folgt";
+    label = "Nicht verfügbar";
   } else if (status === "from") {
     label = `ab ${formattedPrice}`;
   } else {

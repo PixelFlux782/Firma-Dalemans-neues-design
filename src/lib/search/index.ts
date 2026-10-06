@@ -28,7 +28,7 @@ function fields(
 
 function priceLabel(status: CommerceProduct["priceStatus"], money: CommerceMoney | null): string {
   if (status === "on_request") return "Preis auf Anfrage";
-  if (status === "unavailable" || !money) return "Preis folgt";
+  if (status === "unavailable" || !money) return "Nicht verfügbar";
   const formatted = new Intl.NumberFormat("de-DE", {
     style: "currency",
     currency: money.currencyCode,

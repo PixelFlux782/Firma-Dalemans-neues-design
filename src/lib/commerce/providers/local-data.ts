@@ -229,8 +229,8 @@ export const localProducts: CommerceProduct[] = [
     ],
     priceRange: { min: null, max: null },
     priceStatus: "unavailable",
-    availability: "unknown",
-    availabilityNote: "Preis und Verfügbarkeit folgen nach finaler Sortimentsprüfung.",
+    availability: "out_of_stock",
+    availabilityNote: "Diese Ausführungen sind derzeit nicht verfügbar.",
     collectionHandles: ["gleiter-bodenschutz"],
     specifications: [
       { name: "Befestigung", value: "Stiftmontage" },

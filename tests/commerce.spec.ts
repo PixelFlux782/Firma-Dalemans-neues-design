@@ -110,6 +110,38 @@ test("Produktdetailseite wird vollständig aus dem Commerce-Modell gerendert", a
   );
 });
 
+test("Varianten ohne numerischen Preis werden als nicht verfügbar behandelt", async ({ page }) => {
+  for (const path of [
+    "/produkte/artikel/klappstuehle",
+    "/produkte/artikel/filzgleiter-mit-stift",
+  ]) {
+    await page.goto(path);
+    await expect(page.locator('[data-price-status="unavailable"]')).toContainText("Nicht verfügbar");
+    await expect(page.locator('[data-availability="out_of_stock"]')).toContainText("nicht verfügbar");
+    await expect(page.getByTestId("variant-selector")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Angebot anfragen" })).toHaveCount(0);
+    await expect(page.getByTestId("unavailable-product")).toBeVisible();
+  }
+});
+
+test("Tischvarianten werden verständlich und ohne technische Hinweise dargestellt", async ({ page }) => {
+  for (const path of [
+    "/produkte/artikel/klapptisch-310c",
+    "/produkte/artikel/seminarklapptisch-210c",
+    "/produkte/artikel/trapez-klapptisch-310c",
+  ]) {
+    await page.goto(path);
+    await expect(page.getByText("Tisch konfigurieren", { exact: true })).toBeVisible();
+    await expect(page.getByRole("group", { name: "Größe" })).toBeVisible();
+    await expect(page.getByTestId("selected-variant")).toContainText("Ihre Auswahl:");
+    await expect(page.getByText("Preisstaffel aus der aktuellen Preisliste; Lieferzeit auf Anfrage.")).toHaveCount(0);
+    await expect(page.getByText("Mengeneinheit", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Der Einzelpreis richtet sich nach der Bestellmenge.")).toHaveCount(0);
+    await expect(page.getByText("Schrittweite 1 Stück")).toHaveCount(0);
+    await expect(page.getByText("Anzahl", { exact: true })).toBeVisible();
+  }
+});
+
 test("Alternativbilder tauschen auf Artikelseiten das große Produktbild", async ({ page }) => {
   await page.goto("/produkte/artikel/buchablage-nachruesten");
 

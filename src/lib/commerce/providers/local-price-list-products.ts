@@ -21,7 +21,7 @@ function pricedVariant(prefix: string, row: PricedRow): CommerceProductVariant {
     priceDataStatus: "verified",
     availableForSale: true,
     availability: "in_stock",
-    availabilityNote: "Preisstaffel aus der aktuellen Preisliste; Lieferzeit auf Anfrage.",
+    availabilityNote: null,
     image: null,
     finderAttributes: null,
     priceTiers: [
@@ -51,6 +51,15 @@ function requestVariant(prefix: string, erpArticleNumber: string, title: string)
   };
 }
 
+function unavailableVariant(prefix: string, erpArticleNumber: string, title: string): CommerceProductVariant {
+  return {
+    ...requestVariant(prefix, erpArticleNumber, title),
+    priceStatus: "unavailable",
+    availability: "out_of_stock",
+    availabilityNote: "In der aktuellen Preisliste ist kein numerischer Verkaufspreis hinterlegt.",
+  };
+}
+
 function quotedVariant(prefix: string, erpArticleNumber: string, title: string, amount: number): CommerceProductVariant {
   return {
     ...requestVariant(prefix, erpArticleNumber, title),
@@ -65,6 +74,9 @@ function product(input: {
 }): CommerceProduct {
   const prices = input.variants.flatMap((variant) => variant.price ? [Number(variant.price.amount)] : []);
   const fixed = prices.length > 0;
+  const allUnavailable = input.variants.length > 0 && input.variants.every((variant) =>
+    variant.priceStatus === "unavailable" || variant.availability === "out_of_stock",
+  );
   return {
     id: `local-product-${input.handle}`,
     handle: input.handle,
@@ -77,12 +89,16 @@ function product(input: {
     images: input.featuredImage ? [input.featuredImage] : [],
     variants: input.variants,
     priceRange: { min: fixed ? eur(Math.min(...prices)) : null, max: fixed ? eur(Math.max(...prices)) : null },
-    priceStatus: fixed ? "from" : "on_request",
-    availability: fixed ? "in_stock" : "on_request",
-    availabilityNote: fixed ? "Mengenpreis wird im Warenkorb automatisch berücksichtigt." : "Preis und Lieferzeit auf Anfrage.",
+    priceStatus: fixed ? "from" : allUnavailable ? "unavailable" : "on_request",
+    availability: fixed ? "in_stock" : allUnavailable ? "out_of_stock" : "on_request",
+    availabilityNote: fixed
+      ? "Mengenpreis wird im Warenkorb automatisch berücksichtigt."
+      : allUnavailable
+        ? "In der aktuellen Preisliste ist kein numerischer Verkaufspreis hinterlegt."
+        : "Preis und Lieferzeit auf Anfrage.",
     collectionHandles: [input.collection],
     specifications: [], compatibility: [], suitableFor: ["Gemeinden", "Veranstaltungsräume"],
-    quantity: { unit: "piece", unitLabel: "Stück", minimum: 1, step: 1, note: fixed ? "Der Einzelpreis richtet sich nach der Bestellmenge." : null },
+    quantity: { unit: "piece", unitLabel: "Stück", minimum: 1, step: 1, note: null },
     measureGuide: [], applicationNotes: [], notes: [], accessories: [], faq: [],
     consultationNote: "Bei Sondermaßen oder Ausstattungsfragen beraten wir persönlich.",
     seo: { title: input.title, description: input.description }, updatedAt,
@@ -120,9 +136,9 @@ export const localPriceListProducts: CommerceProduct[] = [
     pricedVariant("310ct", ["T310CT147N", "140 × 70 cm · Buche natur", 493.12, 478.3264, 468.464]),
     pricedVariant("310ct", ["T310CT168N", "160 × 80 cm · Buche natur", 498.7, 483.739, 473.765]),
   ] }),
-  product({ handle: "klappstuehle", title: "Klappstühle", description: "Vier Klappstuhlmodelle in Verpackungseinheiten zu vier Stück; Preise auf Anfrage.", collection: "klappstuehle", featuredImage: null, variants: [
-    requestVariant("klappstuhl", "LSBAS1", "BAS 1 · VPE 4 Stück"), requestVariant("klappstuhl", "LS193", "L 193 · VPE 4 Stück"),
-    requestVariant("klappstuhl", "LS189", "L 189 · VPE 4 Stück"), requestVariant("klappstuhl", "LS190", "L 190 · VPE 4 Stück"),
+  product({ handle: "klappstuehle", title: "Klappstühle", description: "Vier Klappstuhlmodelle in Verpackungseinheiten zu vier Stück; aktuell ohne hinterlegten Verkaufspreis.", collection: "klappstuehle", featuredImage: null, variants: [
+    unavailableVariant("klappstuhl", "LSBAS1", "BAS 1 · VPE 4 Stück"), unavailableVariant("klappstuhl", "LS193", "L 193 · VPE 4 Stück"),
+    unavailableVariant("klappstuhl", "LS189", "L 189 · VPE 4 Stück"), unavailableVariant("klappstuhl", "LS190", "L 190 · VPE 4 Stück"),
   ] }),
   product({ handle: "rednerpulte", title: "Rednerpulte", description: "Rednerpulte aus Acrylglas oder massiver Furnierplatte.", collection: "rednerpulte", featuredImage: image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.png", "Rednerpult aus Acrylglas Typ A"), variants: [
     quotedVariant("rednerpult", "D705A", "Typ A · Acrylglas", 1249.1515),

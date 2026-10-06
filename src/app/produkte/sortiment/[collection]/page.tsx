@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import CommerceMedia from "@/components/commerce/CommerceMedia";
 import CommerceProductCard from "@/components/commerce/CommerceProductCard";
+import CategoryHero from "@/components/products/CategoryHero";
 import FoldingTablesHub, { foldingTableFaq } from "@/components/products/FoldingTablesHub";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { StructuredData } from "@/components/StructuredData";
 import { getCollectionByHandle, getCollections } from "@/lib/commerce/service";
 import { getProductCategoryById } from "@/lib/product-categories";
@@ -41,6 +40,11 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
   const path = `/produkte/sortiment/${handle}`;
   const itemList = { "@context": "https://schema.org", "@type": "ItemList", "@id": absoluteUrl(`${path}#produkte`), name: collection.title, itemListElement: collection.products.map((product, index) => ({ "@type": "ListItem", position: index + 1, name: product.title, url: absoluteUrl(`/produkte/artikel/${product.handle}`) })) };
   const accessory = ["gleiter-bodenschutz", "reihenverbinder-nachruestung", "transport-lagerung"].includes(handle);
+  const heroTitle = handle === "bistrotische"
+    ? "Bistrotische für Begegnung und Empfang."
+    : handle === "rednerpulte"
+      ? "Rednerpulte für einen klaren Auftritt."
+      : collection.title;
 
   if (isTables && tableCategory) return <>
     <StructuredData data={itemList} />
@@ -51,18 +55,22 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
   return (
     <div className="page-stack">
       <StructuredData data={itemList} />
-      <section className="grid overflow-hidden rounded-[2.5rem] border border-premium-beige/70 bg-white/55 shadow-premium lg:grid-cols-[.92fr_1.08fr]">
-        <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-14">
-          <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, ...(accessory ? [{ label: "Zubehör", href: "/produkte/kategorien/transportwagen-zubehoer" }] : []), { label: collection.title }]} currentPath={path} />
-          <p className="section-eyebrow mt-10">Produktbereich</p>
-          <h1 className="mt-4 max-w-[14ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">{collection.title}</h1>
-          <p className="section-lead mt-6 max-w-xl">{tableCategory?.intro ?? collection.description}</p>
-          <Link href="#produkte" className="mt-8 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 hover:text-premium-bronze hover:underline">
-            {collection.products.length ? "Produkte ansehen" : "Aktuellen Stand ansehen"} <span className="ml-2" aria-hidden>↓</span>
-          </Link>
-        </div>
-        <CommerceMedia image={collection.image} fallbackLabel={collection.title} priority sizes="(min-width: 1024px) 52vw, 100vw" aspectRatio="5 / 4" imageInset={collection.handle === "transport-lagerung" ? "3%" : "6%"} className="min-h-[320px] lg:min-h-[580px]" />
-      </section>
+      <CategoryHero data={{
+        slug: path,
+        breadcrumbItems: [{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, ...(accessory ? [{ label: "Zubehör", href: "/produkte/kategorien/transportwagen-zubehoer" }] : []), { label: collection.title }],
+        eyebrow: `Produktkategorie · ${collection.products.length} ${collection.products.length === 1 ? "Produkt" : "Produkte"}`,
+        title: heroTitle,
+        description: collection.description,
+        primaryCta: { label: collection.products.length ? "Produkte ansehen" : "Aktuellen Stand ansehen", href: "#produkte" },
+        secondaryCta: { label: "Beratung erhalten", href: `/kontakt?kategorie=${encodeURIComponent(collection.title)}` },
+        metaLine: "Persönliche Auswahlhilfe · Passende Ausführung · Langfristige Betreuung",
+        image: {
+          src: collection.image?.url ?? null,
+          alt: collection.image?.altText ?? `${collection.title} für flexible Räume`,
+          inset: collection.handle === "transport-lagerung" ? "3%" : "6%",
+          backgroundTone: "#f1ece1",
+        },
+      }} />
 
       {isLecterns ? <section className="rounded-[2rem] bg-premium-warm/70 p-7 sm:p-10" aria-labelledby="lectern-guidance">
         <p className="section-eyebrow">Auswahlhilfe</p><h2 id="lectern-guidance" className="section-title-functional mt-3">Das passende Rednerpult auswählen</h2>

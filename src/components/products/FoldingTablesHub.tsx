@@ -13,7 +13,17 @@ export const foldingTableFaq = [
 export default function FoldingTablesHub({ collection, category }: { collection: CommerceCollection; category: ProductCategory }) {
   return (
     <div className="flex min-w-0 flex-col gap-16 md:gap-20 lg:gap-24">
-      <CategoryHero path="/produkte/sortiment/klapptische" category="Klapptische" eyebrow={`${collection.products.length} Modelle · verschiedene Maße und Kanten`} title="Klapptische für flexible Räume." description={`${category.intro} ${collection.description}`} image="/neue bilder/Tische/Klapptisch-collage-detail.png" imageAlt="Klapptisch Collage mit Details zu Tischplatte und Gestell" imageTone="#F5F0E8" imageInset="2%" modelsHref="#produkte" consultationHref="/kontakt?kategorie=Klapptische" note="Seit 1994 persönlich beraten · Sondermaße auf Anfrage · Raum- und Tischplanung" />
+      <CategoryHero data={{
+        slug: "/produkte/sortiment/klapptische",
+        breadcrumbItems: [{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: "Klapptische" }],
+        eyebrow: `${collection.products.length} Modelle · verschiedene Maße und Kanten`,
+        title: "Klapptische für flexible Räume.",
+        description: `${category.intro} ${collection.description}`,
+        primaryCta: { label: "Modelle ansehen", href: "#produkte" },
+        secondaryCta: { label: "Beratung erhalten", href: "/kontakt?kategorie=Klapptische" },
+        metaLine: "Seit 1994 persönlich beraten · Sondermaße auf Anfrage · Raum- und Tischplanung",
+        image: { src: "/neue bilder/Tische/Klapptisch-collage-detail.png", alt: "Klapptisch-Collage mit Details zu Tischplatte und Gestell", inset: "2%", backgroundTone: "#f1ece1" },
+      }} />
 
       <section id="produkte" aria-labelledby="table-models-heading" className="scroll-mt-28">
         <div className="grid gap-6 border-b border-premium-beige/70 pb-8 lg:grid-cols-[.8fr_1.2fr] lg:items-end">

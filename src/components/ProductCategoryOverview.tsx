@@ -1,7 +1,6 @@
 import Link from "next/link";
-import ProductVisual from "@/components/ProductVisual";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ProductCatalog from "@/components/ProductCatalog";
+import CategoryHero from "@/components/products/CategoryHero";
 import { StructuredData } from "@/components/StructuredData";
 import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
@@ -79,21 +78,17 @@ export default function ProductCategoryOverview({ categoryId }: Props) {
 
   return <div className="flex min-w-0 flex-col gap-14 md:gap-20">
     <StructuredData data={data} />
-    <section>
-      <div className="grid lg:grid-cols-[1.08fr_.92fr]">
-        <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-10">
-          <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: category.name }]} />
-          <p className="section-eyebrow mt-7">Produktkategorie · {products.length} Produkte</p>
-          <h1 className="mt-3 max-w-[18ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">{title}</h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-premium-muted">{lead}</p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href={`/kontakt?${isAccessories ? "anliegen=Ersatzteilanfrage" : `kategorie=${encodeURIComponent(category.name)}`}`} className="btn-primary px-6 py-3">{isAccessories ? "Ersatzteil anfragen" : "Beratung zur Auswahl"}</Link>
-            <a href="tel:+499342915353" className="btn-secondary px-6 py-3">Beratung</a>
-          </div>
-        </div>
-        <ProductVisual src={category.image} alt={`${category.name} im Einsatz`} priority sizes="(min-width: 1024px) 42vw, 100vw" aspectRatio="4 / 3" imageInset={isAccessories ? "6%" : "5%"} backgroundTone="canvas" className="min-h-72 lg:min-h-[390px]" />
-      </div>
-    </section>
+    <CategoryHero data={{
+      slug: `/produkte/kategorien/${category.id}`,
+      breadcrumbItems: [{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: category.name }],
+      eyebrow: `Produktkategorie · ${products.length} Produkte`,
+      title,
+      description: lead,
+      primaryCta: { label: "Produkte ansehen", href: "#products" },
+      secondaryCta: { label: isAccessories ? "Ersatzteil anfragen" : "Beratung zur Auswahl", href: `/kontakt?${isAccessories ? "anliegen=Ersatzteilanfrage" : `kategorie=${encodeURIComponent(category.name)}`}` },
+      metaLine: "Persönliche Auswahlhilfe · Passende Ausführung · Langfristige Betreuung",
+      image: { src: category.image, alt: `${category.name} im Einsatz`, inset: isAccessories ? "6%" : "5%", backgroundTone: "#f1ece1" },
+    }} />
 
     <section id="products" aria-labelledby="products-title" className="scroll-mt-28">
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">

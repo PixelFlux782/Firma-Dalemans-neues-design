@@ -69,7 +69,17 @@ function ChairVisual({ product }: { product: CommerceProduct }) {
 export default function StackingChairHub({ products }: { products: CommerceProduct[] }) {
   return (
     <div className="flex min-w-0 flex-col gap-16 md:gap-20 lg:gap-24">
-      <CategoryHero path="/produkte/stapelstuehle" category="Stapelstühle" eyebrow="Fünf Modelle · 70 Ausführungen" title="Stapelstühle für flexible Räume." description="Für Gemeinden, Kirchen, Kommunen und vielseitig genutzte Räume – mit drei Polsterarten, optionaler Reihenverbindung und persönlicher Beratung." image="/images/curated/Stapelstühle/1021c.webp" imageAlt="Stapelstuhl für flexible Gemeinde- und Veranstaltungsräume" modelsHref="#modelle" consultationHref="/kontakt?kategorie=Stapelst%C3%BChle" note="Seit 1994 persönlich beraten · Musterstühle möglich · Raum- und Bestuhlungsplanung" />
+      <CategoryHero data={{
+        slug: "/produkte/stapelstuehle",
+        breadcrumbItems: [{ label: "Start", href: "/" }, { label: "Produkte", href: "/produkte" }, { label: "Stapelstühle" }],
+        eyebrow: "Fünf Modelle · 70 Ausführungen",
+        title: "Stapelstühle für flexible Räume.",
+        description: "Für Gemeinden, Kirchen, Kommunen und vielseitig genutzte Räume – mit drei Polsterarten, optionaler Reihenverbindung und persönlicher Beratung.",
+        primaryCta: { label: "Modelle ansehen", href: "#modelle" },
+        secondaryCta: { label: "Beratung erhalten", href: "/kontakt?kategorie=Stapelst%C3%BChle" },
+        metaLine: "Seit 1994 persönlich beraten · Musterstühle möglich · Raum- und Bestuhlungsplanung",
+        image: { src: "/images/curated/Stapelstühle/1021c.webp", alt: "Stapelstuhl für flexible Gemeinde- und Veranstaltungsräume", inset: "4%", backgroundTone: "#f1ece1" },
+      }} />
 
       <section id="modelle" aria-labelledby="chair-models-heading" className="scroll-mt-28">
         <div className="grid gap-6 border-b border-premium-beige/70 pb-8 lg:grid-cols-[.8fr_1.2fr] lg:items-end">

@@ -71,6 +71,12 @@ test.describe("Premium-Navigation", () => {
     }
   });
 
+  test("Firmenseite zeigt das Gründerporträt in der Unternehmensgeschichte", async ({ page }) => {
+    await page.goto("/firma");
+    await expect(page.getByAltText("Hubert Dalemans, Gründer von Dalemans")).toBeVisible();
+    await expect(page.getByText("Hubert Dalemans, Gründer", { exact: true })).toBeVisible();
+  });
+
   test("Mobile Navigation ist strukturiert und zeigt reale Kontaktwege", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/");

@@ -77,7 +77,10 @@ const firmaStructuredData = {
   "@graph": [
     {
       ...organizationStructuredData,
-      image: absoluteUrl("/neue bilder/stefan-dalemans-portrait.png"),
+      image: [
+        absoluteUrl("/neue bilder/Hubert_Dalemans_gruender.png"),
+        absoluteUrl("/neue bilder/stefan-dalemans-portrait.png"),
+      ],
     },
     {
       "@type": "WebSite",
@@ -262,7 +265,19 @@ export default function FirmaPage() {
 
         <article className="section-grid-top overflow-hidden rounded-6xl bg-premium-espresso text-premium-canvas shadow-premium-xl">
           <div className="grid lg:grid-cols-[minmax(300px,0.82fr)_1.18fr] lg:items-stretch">
-            <div className="relative min-h-[420px] overflow-hidden sm:min-h-[520px] lg:min-h-[560px]">
+            <div className="grid min-h-[420px] overflow-hidden sm:min-h-[520px] lg:min-h-[560px] lg:grid-rows-2">
+              <figure className="relative min-h-[280px] sm:min-h-[320px] lg:min-h-0">
+                <Image
+                  src={encodeURI("/neue bilder/Hubert_Dalemans_gruender.png")}
+                  alt="Hubert Dalemans, Gründer von Dalemans"
+                  fill
+                  sizes="(min-width: 1024px) 42vw, 100vw"
+                  className="object-cover object-[center_38%]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-premium-espresso/65 via-transparent to-transparent" aria-hidden />
+                <figcaption className="absolute bottom-4 left-5 text-sm font-medium text-white/90 sm:left-7">Hubert Dalemans, Gründer</figcaption>
+              </figure>
+              <figure className="relative min-h-[280px] sm:min-h-[320px] lg:min-h-0">
               <Image
                 src={encodeURI("/neue bilder/stefan-dalemans-portrait.png")}
                 alt="Stefan Dalemans, heutiger Geschäftsführer von Dalemans"
@@ -271,6 +286,7 @@ export default function FirmaPage() {
                 className="object-cover object-top"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-premium-espresso/45 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-premium-espresso/25" aria-hidden />
+              </figure>
             </div>
 
             <div className="relative flex flex-col justify-center px-7 py-10 sm:px-10 sm:py-12 lg:px-14 lg:py-16">

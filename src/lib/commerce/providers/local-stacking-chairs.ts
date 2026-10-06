@@ -133,7 +133,6 @@ const chairRecords: LocalChairRecord[] = [
       newChairImage("Stapelstuhl_1021_ungepolstert.png", "Stapelstuhl Modell 1021, ungepolstert"),
       newChairImage("Stapelstuhl_1021_sitzpolster.png", "Stapelstuhl Modell 1021 mit Sitzpolster"),
       newChairImage("Stapelstuhl_1021_c_lila-stuhl.png", "Stapelstuhl Modell 1021 mit Sitz- und Rückenpolster"),
-      newChairImage("Stapelstuhl_1021-holzgestell-2-detail.png", "Detail des Holzgestells von Modell 1021"),
     ],
     variantImages: {
       A1021ACO: newChairImage("Stapelstuhl_1021_ungepolstert.png", "Stapelstuhl Modell 1021, ungepolstert"),

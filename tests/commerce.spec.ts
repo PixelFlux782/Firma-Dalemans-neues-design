@@ -121,16 +121,55 @@ test("Alternativbilder tauschen auf Artikelseiten das große Produktbild", async
   await expect(mainImage).toHaveAttribute("alt", /montierte Ansicht/);
 });
 
-test("Alternativbilder übersteuern auf Stapelstuhlseiten das Konfiguratorbild", async ({ page }) => {
+test("Schreibtablar zeigt die drei neuen Alternativbilder", async ({ page }) => {
+  await page.goto("/produkte/schreibtablare");
+
+  const mainImage = page.locator(".product-visual__product img").first();
+  await expect(page.getByRole("button", { name: /Bild 2: Stapelstuhl mit montiertem Schreibtablar von vorne/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Bild 3: Schreibtablar mit Gestell und Befestigung von unten/ })).toBeVisible();
+  await page.getByRole("button", { name: /Bild 4: Holz-Schreibtablar mit eingelassener Stiftablage/ }).click();
+  await expect(mainImage).toHaveAttribute("alt", "Holz-Schreibtablar mit eingelassener Stiftablage");
+});
+
+test("Buchablage zeigt Preis und SKU aus der aktuellen Preisliste", async ({ page }) => {
+  await page.goto("/produkte/artikel/buchablage-nachruesten");
+
+  await expect(page.getByText("27,50 €").first()).toBeVisible();
+  await expect(page.getByText("BU1021C", { exact: true }).first()).toBeVisible();
+});
+
+test("Filzgleiter-Artikel verwendet neues Haupt- und Maßbild", async ({ page }) => {
+  await page.goto("/produkte/artikel/filzgleiter-mit-stift");
+
+  const mainImage = page.locator(".product-visual__product img").first();
+  await expect(mainImage).toHaveAttribute("alt", /Weißer gerippter Möbelgleiter mit schräger Auflagefläche/);
+  await page.getByRole("button", { name: /Bild 2: Weißer gerippter Möbelgleiter mit Maßangaben/ }).click();
+  await expect(mainImage).toHaveAttribute("alt", /Weißer gerippter Möbelgleiter mit Maßangaben/);
+});
+
+test("Galeriebild wird beim nächsten Stapelstuhl-Variantenwechsel wieder durch das Variantenbild ersetzt", async ({ page }) => {
   await page.goto("/produkte/stapelstuehle/buende");
 
   const gallery = page.getByTestId("chair-gallery");
   const mainImage = gallery.locator(".product-visual__product img");
   await expect(mainImage).toHaveAttribute("alt", /ungepolstert/);
 
-  await gallery.getByRole("button", { name: /Ansicht 3:/ }).click();
+  await page.getByRole("radio", { name: /Sitzpolster/ }).check({ force: true });
+  await expect(mainImage).toHaveAttribute("alt", /Sitzpolster, Stoffgruppe 2/);
 
+  await gallery.getByRole("button", { name: /Mehrere gestapelte Stühle/ }).click();
   await expect(mainImage).toHaveAttribute("alt", /Mehrere gestapelte Stühle/);
+
+  await page.getByRole("radio", { name: "Gruppe 3" }).check({ force: true });
+  await expect(mainImage).toHaveAttribute("alt", /Sitzpolster, Stoffgruppe 3/);
+
+  await gallery.getByRole("button", { name: /Mehrere gestapelte Stühle/ }).click();
+  await page.getByRole("checkbox", { name: /Reihenverbindung/ }).check({ force: true });
+  await expect(mainImage).toHaveAttribute("alt", /Sitzpolster, Stoffgruppe 3/);
+
+  await page.getByText("Sitz + Rücken", { exact: true }).click();
+  await expect(page.getByTestId("selected-chair-variant")).toContainText("Sitz- und Rückenpolster · Gruppe 3 · Mit Reihenverbindung");
+  await expect(mainImage).toHaveAttribute("alt", /Sitz- und Rückenpolster, Stoffgruppe 3/);
 });
 
 test("Variantenwahl hält nur existierende Kombinationen aktiv", async ({ page }) => {
@@ -164,6 +203,16 @@ test("leere Collection führt mit einem echten Empty State zur Beratung", async 
 test("unbekannte Commerce-Handles liefern 404", async ({ request }) => {
   expect((await request.get("/shop/unbekannte-collection")).status()).toBe(404);
   expect((await request.get("/shop/produkt/unbekanntes-produkt")).status()).toBe(404);
+});
+
+test("entfernte Ersatzteilseite und ihre Verweise sind nicht mehr vorhanden", async ({ request, page }) => {
+  expect((await request.get("/produkte/ersatzteile-kleinteile")).status()).toBe(404);
+
+  const sitemap = await request.get("/sitemap.xml");
+  expect(await sitemap.text()).not.toContain("/produkte/ersatzteile-kleinteile");
+
+  await page.goto("/produkte/kategorien/transportwagen-zubehoer");
+  await expect(page.locator('a[href="/produkte/ersatzteile-kleinteile"]')).toHaveCount(0);
 });
 
 test("Shop, Collection und Produkt bleiben auf Mobilgeräten ohne horizontalen Überlauf", async ({ page }) => {

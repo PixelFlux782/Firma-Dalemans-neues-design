@@ -186,6 +186,10 @@ function canAddLine(line: CartInputLine) {
   );
 }
 
+function sameAddons(left: string[] | undefined, right: string[] | undefined) {
+  return JSON.stringify(left ?? []) === JSON.stringify(right ?? []);
+}
+
 function persisted(cart: CommerceCart): PersistedCartV1 {
   return {
     version: LOCAL_CART_VERSION,
@@ -225,7 +229,9 @@ export function createLocalCartProvider({
       const lines = [...current.lines];
       for (const input of inputs) {
         if (!canAddLine(input)) continue;
-        const existingIndex = lines.findIndex((line) => line.variantId === input.variantId);
+        const existingIndex = lines.findIndex((line) =>
+          line.variantId === input.variantId && sameAddons(line.selectedAddons, input.selectedAddons),
+        );
         if (existingIndex >= 0) {
           const existing = lines[existingIndex];
           lines[existingIndex] = lineFromInput(

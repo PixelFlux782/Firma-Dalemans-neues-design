@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import CommerceAvailability from "@/components/commerce/CommerceAvailability";
 import CommercePrice from "@/components/commerce/CommercePrice";
+import { formatCommerceMoney } from "@/lib/commerce/money";
 import { useCart } from "@/components/commerce/cart/CartProvider";
 import {
   canAddVariantToCart,
@@ -81,6 +82,7 @@ export default function ProductVariantSelector({
     anliegen: "Shop-Produktberatung",
     produkt: product.title,
     ...(selectedVariant ? { variante: selectedVariant.title } : {}),
+    ...(selectedVariant?.erpArticleNumber ? { artikelnummer: selectedVariant.erpArticleNumber } : {}),
   });
 
   return (
@@ -99,19 +101,30 @@ export default function ProductVariantSelector({
               <div className="mt-3 flex flex-wrap gap-2">
                 {group.values.map((value) => {
                   const active = selection[group.name] === value;
+                  const optionVariant = product.variants.find((variant) =>
+                    variant.selectedOptions.some((option) => option.name === group.name && option.value === value),
+                  );
+                  const optionPrice = product.handle === "tischtransportwagen" && optionVariant
+                    ? priceForQuantity(optionVariant, quantity)
+                    : null;
                   return (
                     <button
                       key={value}
                       type="button"
                       aria-pressed={active}
                       onClick={() => selectOption(group.name, value)}
-                      className={`min-h-11 rounded-full border px-4 py-2.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-2 ${
+                      className={`min-h-11 rounded-2xl border px-4 py-2.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-2 ${
                         active
                           ? "border-premium-forest bg-premium-forest text-white"
                           : "border-premium-beige bg-premium-canvas/70 text-premium-charcoal hover:border-premium-leaf hover:bg-white"
                       }`}
                     >
-                      {value}
+                      <span className="block">{value}</span>
+                      {optionPrice ? (
+                        <span className={`mt-1 block text-xs ${active ? "text-white/75" : "text-premium-muted"}`}>
+                          {formatCommerceMoney(optionPrice)}
+                        </span>
+                      ) : null}
                     </button>
                   );
                 })}
@@ -126,6 +139,11 @@ export default function ProductVariantSelector({
           <p className="text-sm leading-6 text-premium-muted" aria-live="polite" data-testid="selected-variant">
             Gewählt: <span className="font-medium text-premium-charcoal">{selectedVariant.title}</span>
           </p>
+          {selectedVariant.erpArticleNumber ? (
+            <p className="mt-1 text-xs leading-5 text-premium-muted" data-testid="selected-sku">
+              Artikelnummer: <span className="font-medium text-premium-charcoal">{selectedVariant.erpArticleNumber}</span>
+            </p>
+          ) : null}
           {process.env.NODE_ENV === "development" && selectedVariant.finderAttributes?.dataStatus === "development" ? (
             <p className="mt-2 inline-flex rounded-full bg-premium-sand/25 px-3 py-1 text-xs font-semibold text-premium-ink">
               Development-Daten

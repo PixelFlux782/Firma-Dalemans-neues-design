@@ -14,6 +14,7 @@ export interface Product {
   categoryName: string;
   image: string;
   imageAlt?: string;
+  additionalImages?: { image: string; imageAlt: string }[];
   overviewGroup?: "transport" | "chair-accessories" | "table-accessories" | "spares";
   shortDescription: string;
   description: string;
@@ -564,8 +565,8 @@ const productCatalog: Product[] = [
     slug: "stuhlgleiter",
     categoryId: "transportwagen-zubehoer",
     categoryName: "Transportwagen & Zubehör",
-    image: asset("/images/curated/Zubehör/zubehör-filzgleiter.webp"),
-    imageAlt: "Filzgleiter für ein Stuhlgestell",
+    image: asset("/neue bilder/Zubehör/stopfen-sortiment.png"),
+    imageAlt: "Sortiment verschiedener Möbelgleiter und Gestellstopfen",
     overviewGroup: "chair-accessories",
     shortDescription:
       "Gleiter und Gestellstopfen für den langfristigen Erhalt vorhandener Stühle.",
@@ -661,6 +662,20 @@ const productCatalog: Product[] = [
     categoryName: "Transportwagen & Zubehör",
     image: asset("/images/curated/Zubehör/schreibtablart-mit-stuhl-seite.webp"),
     imageAlt: "Schreibtablar seitlich an einem Stapelstuhl",
+    additionalImages: [
+      {
+        image: asset("/neue bilder/Zubehör/schreibtablart-mit-stuhl-vorne.png"),
+        imageAlt: "Stapelstuhl mit montiertem Schreibtablar von vorne",
+      },
+      {
+        image: asset("/neue bilder/Zubehör/schreibtablart-von-unten.png"),
+        imageAlt: "Schreibtablar mit Gestell und Befestigung von unten",
+      },
+      {
+        image: asset("/neue bilder/Zubehör/schreibtablart.png"),
+        imageAlt: "Holz-Schreibtablar mit eingelassener Stiftablage",
+      },
+    ],
     overviewGroup: "chair-accessories",
     shortDescription: "Schreibflächen am Stuhl für Vortrag, Seminar und konzentriertes Arbeiten.",
     description: "Schreibtablare ergänzen geeignete Stühle um eine kompakte Schreibfläche. Ob Befestigung und Ausführung zu einem vorhandenen Modell passen, prüfen wir anhand von Fotos, Maßen und Produktangaben.",
@@ -681,20 +696,6 @@ const productCatalog: Product[] = [
     highlights: ["Gestellbereich im Zusammenhang sichtbar", "Zuordnung anhand von Form, Fotos und Maßen"],
     suitableFor: ["Klapptische", "Bestandspflege", "Instandsetzung"],
     details: ["Gestellform und Einbauort dokumentieren", "Maße und vorhandene Produktangaben mitsenden"],
-  },
-  {
-    title: "Ersatzteile und Kleinteile",
-    slug: "ersatzteile-kleinteile",
-    categoryId: "transportwagen-zubehoer",
-    categoryName: "Transportwagen & Zubehör",
-    image: asset("/images/curated/Zubehör/zubehör-stopfen.webp"),
-    imageAlt: "Kunststoffstopfen für ein Metallrohrgestell",
-    overviewGroup: "spares",
-    shortDescription: "Verschleißteile und kleine Ergänzungen anhand des vorhandenen Produkts zuordnen lassen.",
-    description: "Viele Verschleißteile können ersetzt werden. Senden Sie uns dafür Fotos des vollständigen Produkts und des benötigten Teils sowie Maße, Modellangaben, ungefähres Kaufjahr und Stückzahl.",
-    highlights: ["persönliche Zuordnung statt pauschaler Kompatibilität", "Fotos und Maße erleichtern die Auswahl"],
-    suitableFor: ["Nachbestellung", "Werterhalt", "Bestandspflege"],
-    details: ["Foto des vollständigen Stuhls oder Tisches", "Foto und Maße des defekten oder fehlenden Teils", "Modellbezeichnung, Kaufjahr und Stückzahl soweit bekannt"],
   },
 ];
 

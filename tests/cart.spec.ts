@@ -69,6 +69,16 @@ test.describe("provider-neutrale lokale Cart-Logik", () => {
     expect(result.lines.map((line) => line.variantId)).toEqual(["variant-1", "variant-2"]);
   });
 
+  test("führt unterschiedliche Erweiterungskonfigurationen derselben Variante getrennt", () => {
+    const { cart } = provider();
+    const result = cart.addLines([
+      fixedLine({ selectedAddons: ["A1021FG"] }),
+      fixedLine({ selectedAddons: ["BU1021C"] }),
+    ]);
+    expect(result.lines).toHaveLength(2);
+    expect(result.lines.map((line) => line.selectedAddons)).toEqual([["A1021FG"], ["BU1021C"]]);
+  });
+
   test("behält ERP-Artikelnummer und wechselt den Staffelpreis bei Mengenänderung", () => {
     const table = localProducts.find((product) => product.handle === "klapptisch-310c")!;
     const variant = table.variants.find((entry) => entry.erpArticleNumber === "T310C127")!;
@@ -77,6 +87,28 @@ test.describe("provider-neutrale lokale Cart-Logik", () => {
     expect(added.lines[0]).toMatchObject({ erpArticleNumber: "T310C127", unitPrice: { amount: "355.93" } });
     const updated = cart.updateLines([{ lineId: added.lines[0].id, quantity: 16 }]);
     expect(updated.lines[0]).toMatchObject({ erpArticleNumber: "T310C127", unitPrice: { amount: "345.25" } });
+  });
+
+  test("berechnet Buchablage und Stuhl beim Mengenwechsel gemeinsam neu", () => {
+    const chair = localProducts.find((product) => product.handle === "1021")!;
+    const variant = chair.variants.find((entry) => entry.id.endsWith("none-no-row"))!;
+    const { cart } = provider();
+    const added = cart.addLines([cartLineFromProduct({
+      product: chair,
+      variant,
+      quantity: 100,
+      selectedAddonSkus: ["BU1021C"],
+    })]);
+    expect(added.lines[0]).toMatchObject({
+      selectedAddons: ["BU1021C"],
+      unitPrice: { amount: "94.63" },
+      lineTotal: { amount: "9463.00" },
+    });
+    const updated = cart.updateLines([{ lineId: added.lines[0].id, quantity: 101 }]);
+    expect(updated.lines[0]).toMatchObject({
+      unitPrice: { amount: "92.92" },
+      lineTotal: { amount: "9384.92" },
+    });
   });
 
   test("ordnet die verschobene Buche-310c-Zeile mit Staffelpreisen korrekt zu", () => {
@@ -224,7 +256,7 @@ test.describe("DLMNS Cart Drawer", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Modell Bünde");
     await page.locator('input[name="upholstery"][value="seat-back"]').check({ force: true });
     await page.locator('input[name="fabricGroup"][value="3"]').check({ force: true });
-    await page.locator('input[name="rowConnector"][value="true"]').check({ force: true });
+    await page.locator('input[name="chairAddon"][value="APRV"]').check({ force: true });
     await expect(page.getByTestId("selected-chair-variant")).toContainText("Sitz- und Rückenpolster · Gruppe 3 · Mit Reihenverbindung");
     await expect(page.getByTestId("chair-price")).toContainText("109,88");
 
@@ -242,6 +274,7 @@ test.describe("DLMNS Cart Drawer", () => {
       productTitle: "Stapelstuhl Modell Bünde",
       variantTitle: "Sitz- und Rückenpolster · Gruppe 3 · Mit Reihenverbindung",
       unitPrice: { amount: "109.88", currencyCode: "EUR" },
+      selectedAddons: ["APRV"],
       image: { url: expect.stringContaining("Stapelstuhl_buende_c.png") },
     });
     expect(runtimeErrors).toEqual([]);

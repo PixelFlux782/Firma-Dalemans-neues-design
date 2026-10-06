@@ -11,7 +11,6 @@ const areas = [
   { title: "Reihenverbinder & Nachrüstung", text: "Bestehende Bestuhlung verbinden und sinnvoll ergänzen.", href: "/produkte/sortiment/reihenverbinder-nachruestung", links: [{ label: "Reihenverbinder", href: "/produkte/artikel/reihenverbinder-kunststoff" }] },
   { title: "Transport & Lagerung", text: "Stühle und Tische geordnet bewegen und lagern.", href: "/produkte/sortiment/transport-lagerung", links: [{ label: "Stuhltransportwagen", href: "/produkte/artikel/stuhltransportwagen" }, { label: "Tischtransportwagen", href: "/produkte/artikel/tischtransportwagen" }] },
   { title: "Buchablagen", text: "Praktische Ablage für geeignete Stahlrohrstühle nachrüsten.", href: "/produkte/artikel/buchablage-nachruesten", links: [{ label: "Nachrüstung ansehen", href: "/produkte/sortiment/reihenverbinder-nachruestung" }] },
-  { title: "Ersatzteile", text: "Verschleißteile anhand von Modell, Fotos und Maßen zuordnen lassen.", href: "/produkte/ersatzteile-kleinteile", links: [{ label: "Beratung anfragen", href: "/kontakt?anliegen=Ersatzteilanfrage" }] },
   { title: "Weitere Zubehörteile", text: "Schreibtablare, Tischfüße und Gestellteile für bestehende Ausstattung prüfen.", href: "/produkte/schreibtablare", links: [{ label: "Tischfüße & Gestellteile", href: "/produkte/tischfuesse-gestellteile" }] },
 ] as const;
 

@@ -46,9 +46,44 @@ function requestVariant(
   };
 }
 
+function priceListVariant(
+  id: string,
+  title: string,
+  erpArticleNumber: string,
+  amount: number,
+  selectedOptions: CommerceProductVariant["selectedOptions"],
+): CommerceProductVariant {
+  return {
+    id: `local-variant-${id}`,
+    title,
+    sku: erpArticleNumber,
+    erpArticleNumber,
+    selectedOptions,
+    price: { amount: amount.toFixed(2), currencyCode: "EUR" },
+    compareAtPrice: null,
+    priceStatus: "fixed",
+    priceDataStatus: "verified",
+    availableForSale: false,
+    availability: "on_request",
+    availabilityNote: "Verfügbarkeit und Lieferzeit klären wir für die gewählte Ausführung.",
+    image: null,
+    finderAttributes: null,
+  };
+}
+
 const feltGliderImage = image(
-  "/images/curated/Zubehör/zubehör-filzgleiter.webp",
-  "Filzgleiter mit hellem Kunststoffkörper und Befestigungsstift",
+  "/neue bilder/Zubehör/stopfen-sortiment.png",
+  "Sortiment verschiedener Möbelgleiter und Gestellstopfen",
+);
+
+const feltGliderProductImage = image(
+  "/neue bilder/Zubehör/zubehoer_stopfen_weiß_a.png",
+  "Weißer gerippter Möbelgleiter mit schräger Auflagefläche",
+);
+
+const feltGliderProductDetailImage = image(
+  "/neue bilder/Zubehör/zubehör-stopfen-weiß.png",
+  "Weißer gerippter Möbelgleiter mit Maßangaben",
 );
 
 const frameGliderImage = image(
@@ -176,8 +211,8 @@ export const localProducts: CommerceProduct[] = [
     descriptionHtml:
       "<p>Der Filzgleiter wird über einen Stift am Stuhlbein befestigt und kann empfindliche, glatte Böden im täglichen Betrieb schützen.</p>",
     availableForSale: false,
-    featuredImage: feltGliderImage,
-    images: [feltGliderImage],
+    featuredImage: feltGliderProductImage,
+    images: [feltGliderProductImage, feltGliderProductDetailImage],
     variants: [
       requestVariant("felt-3-grey", "3 mm · Filz grau", "DEV-FG-3-GR", [
         { name: "Stiftmaß", value: "3 mm" },
@@ -399,12 +434,15 @@ export const localProducts: CommerceProduct[] = [
       image("/neue bilder/Zubehör/Buchabl07.JPG", "Buchablage zum Nachrüsten – weitere Ansicht"),
     ],
     variants: [
-      requestVariant("book-rack-standard", "Passend nach Modellprüfung", "DEV-BA-STD", [
+      priceListVariant("book-rack-standard", "Passend nach Modellprüfung", "BU1021C", 27.50, [
         { name: "Ausführung", value: "Nach Modellprüfung" },
       ]),
     ],
-    priceRange: { min: null, max: null },
-    priceStatus: "on_request",
+    priceRange: {
+      min: { amount: "27.50", currencyCode: "EUR" },
+      max: { amount: "27.50", currencyCode: "EUR" },
+    },
+    priceStatus: "fixed",
     availability: "on_request",
     availabilityNote: "Die Eignung wird anhand des vorhandenen Stuhlmodells geprüft.",
     collectionHandles: ["reihenverbinder-nachruestung"],
@@ -444,11 +482,19 @@ export const localProducts: CommerceProduct[] = [
     availableForSale: false,
     featuredImage: tableTrolleyImage,
     images: [tableTrolleyImage],
-    variants: [requestVariant("table-trolley-check", "Ausführung nach Tischbestand", "DEV-TTW-CHECK", [
-      { name: "Ausführung", value: "Nach Bestandsprüfung" },
-    ])],
-    priceRange: { min: null, max: null },
-    priceStatus: "on_request",
+    variants: [
+      priceListVariant("table-trolley-one-steering-axle", "Eine Lenkachse", "D710-007", 435, [
+        { name: "Lenkachse", value: "Eine Lenkachse" },
+      ]),
+      priceListVariant("table-trolley-two-steering-axles", "Zwei Lenkachsen", "D710-008", 455.30, [
+        { name: "Lenkachse", value: "Zwei Lenkachsen" },
+      ]),
+    ],
+    priceRange: {
+      min: { amount: "435.00", currencyCode: "EUR" },
+      max: { amount: "455.30", currencyCode: "EUR" },
+    },
+    priceStatus: "fixed",
     availability: "on_request",
     availabilityNote: "Ausführung und Lieferzeit werden projektbezogen geklärt.",
     collectionHandles: ["transport-lagerung"],
@@ -484,13 +530,12 @@ export const localProducts: CommerceProduct[] = [
     availableForSale: false,
     featuredImage: trolleyImage,
     images: [trolleyImage],
-    variants: [
-      requestVariant("trolley-check", "Passend zum Stuhlbestand", "DEV-STW-CHECK", [
-        { name: "Ausführung", value: "Nach Bestandsprüfung" },
-      ]),
-    ],
-    priceRange: { min: null, max: null },
-    priceStatus: "on_request",
+    variants: [priceListVariant("chair-trolley", "Stuhltransportwagen", "D720", 180.32, [])],
+    priceRange: {
+      min: { amount: "180.32", currencyCode: "EUR" },
+      max: { amount: "180.32", currencyCode: "EUR" },
+    },
+    priceStatus: "fixed",
     availability: "on_request",
     availabilityNote: "Ausführung und Lieferzeit werden projektbezogen geklärt.",
     collectionHandles: ["transport-lagerung"],

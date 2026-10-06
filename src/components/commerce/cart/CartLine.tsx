@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/components/commerce/cart/CartProvider";
 import { formatCommerceMoney } from "@/lib/commerce/money";
+import { chairAddonBySku } from "@/lib/commerce/chair-addons";
 import type { CommerceCartLine as CommerceCartLineModel } from "@/lib/commerce/types";
 
 export default function CartLine({ line }: { line: CommerceCartLineModel }) {
@@ -43,6 +44,11 @@ export default function CartLine({ line }: { line: CommerceCartLineModel }) {
               {line.productTitle}
             </Link>
             <p className="mt-1 text-xs leading-5 text-premium-muted">{line.variantTitle}</p>
+            {line.selectedAddons?.length ? (
+              <p className="mt-1 text-xs leading-5 text-premium-muted">
+                Erweiterungen: {line.selectedAddons.map((sku) => chairAddonBySku(sku)?.name ?? sku).join(", ")}
+              </p>
+            ) : null}
           </div>
           <button
             type="button"

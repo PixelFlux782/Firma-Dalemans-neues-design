@@ -5,6 +5,12 @@ import {
   type ChairConfiguration,
   type ChairFabricGroup,
 } from "../src/lib/commerce/stacking-chairs";
+import {
+  CHAIR_ADDONS,
+  chairAddonBySku,
+  chairAddonPriceForQuantity,
+  isChairAddonCompatible,
+} from "../src/lib/commerce/chair-addons";
 
 const configurations: ChairConfiguration[] = [
   { upholstery: "none", rowConnector: false },
@@ -53,6 +59,79 @@ test.describe("provider-neutrales Stapelstuhlmodell", () => {
       }
     }
   });
+
+  test("übernimmt sieben Erweiterungen und die Buchablagen-Staffeln aus Export_Flo", () => {
+    expect(CHAIR_ADDONS.map((addon) => addon.sku)).toEqual([
+      "APRV", "APGSTR22", "A1021FG", "A1021TG", "A1021BEI", "AP1021GRL", "BU1021C",
+    ]);
+    expect(chairAddonPriceForQuantity(chairAddonBySku("A1021FG")!, 251)?.amount).toBe("6.90");
+    const bookTray = chairAddonBySku("BU1021C")!;
+    expect([100, 101, 250, 251].map((quantity) =>
+      chairAddonPriceForQuantity(bookTray, quantity)?.amount,
+    )).toEqual(["27.50", "26.87", "26.87", "26.45"]);
+  });
+
+  test("kann Erweiterungen zentral auf Modelle und Varianten beschränken", () => {
+    const restricted = {
+      ...CHAIR_ADDONS[0],
+      compatibleModels: ["1021"],
+      compatibleVariants: ["variant-a"],
+    };
+    expect(isChairAddonCompatible(restricted, "1021", "variant-a")).toBe(true);
+    expect(isChairAddonCompatible(restricted, "Coburg", "variant-a")).toBe(false);
+    expect(isChairAddonCompatible(restricted, "1021", "variant-b")).toBe(false);
+  });
+
+  test("ordnet Variantenbilder über die ERP-Artikelnummern aus Export_Flo zu", () => {
+    const expectedImages: Record<string, string | null> = {
+      A1021ACO: "Stapelstuhl_1021_ungepolstert.png",
+      A1021BCO2: "Stapelstuhl_1021_sitzpolster.png",
+      A1021BCO3: "Stapelstuhl_1021_sitzpolster.png",
+      A1021BCO4: "Stapelstuhl_1021_sitzpolster.png",
+      A1021CCO2: "Stapelstuhl_1021_c_lila-stuhl.png",
+      A1021CCO3: "Stapelstuhl_1021_c_lila-stuhl.png",
+      A1021CCO4: "Stapelstuhl_1021_c_lila-stuhl.png",
+      ABUNDACO: "Stapelstuhl_Buende_a.png",
+      ABUNDBCO2: "Stapelstuhl_buende_sitzpolster.png",
+      ABUNDBCO3: "Stapelstuhl_buende_sitzpolster.png",
+      ABUNDBCO4: "Stapelstuhl_buende_sitzpolster.png",
+      ABUNDCCO2: "Stapelstuhl_buende_c.png",
+      ABUNDCCO3: "Stapelstuhl_buende_c.png",
+      ABUNDCCO4: "Stapelstuhl_buende_c.png",
+      ACOBUACO: "Stapelstuhl_Coburg_ungepolstert.png",
+      ACOBUBCO2: "Stapelstuhl_Coburg_a.png",
+      ACOBUBCO3: "Stapelstuhl_Coburg_a_mehrere-löcher.png",
+      ACOBUBCO4: "Stapelstuhl_Coburg_a_ovales-griffloch.png",
+      ACOBUCCO2: "Stapelstuhl_Coburg_sitz_rueckenpolster.png",
+      ACOBUCCO3: "Stapelstuhl_Coburg_sitz_rueckenpolster.png",
+      ACOBUCCO4: "Stapelstuhl_Coburg_sitz_rueckenpolster.png",
+      ANURNACO: "Stapelstuhl_Nuernberg_a.png",
+      ANURNBCO2: "Stapelstuhl_Nuernberg_a_GL.png",
+      ANURNBCO3: "Stapelstuhl_Nuernberg_a_GL.png",
+      ANURNBCO4: "Stapelstuhl_Nuernberg_a_GL.png",
+      ANURNCCO2: "Stapelstuhl_Nuernberg_c.png",
+      ANURNCCO3: "Stapelstuhl_Nuernberg_c_2.png",
+      ANURNCCO4: "Stapelstuhl_Nuernberg_c_02.png",
+      AERFUACO: "Stapelstuhl_Erfurt_a.png",
+      AERFUBCO2: "Stapelstuhl_Erfurt_b.png",
+      AERFUBCO3: "Stapelstuhl_Erfurt_b.png",
+      AERFUBCO4: "Stapelstuhl_Erfurt_b.png",
+    };
+
+    const variantsByArticle = new Map(
+      localStackingChairProducts
+        .flatMap((product) => product.variants)
+        .map((variant) => [variant.erpArticleNumber, variant]),
+    );
+
+    for (const [articleNumber, filename] of Object.entries(expectedImages)) {
+      const variant = variantsByArticle.get(articleNumber);
+      expect(variant, articleNumber).toBeTruthy();
+      expect(variant?.image?.url ?? null, articleNumber).toBe(
+        filename ? encodeURI(`/neue bilder/Stapelstühle/neu_beschriftet/${filename}`) : null,
+      );
+    }
+  });
 });
 
 test.describe("Stapelstuhl-Hub", () => {
@@ -91,7 +170,7 @@ test.describe("Modell 1021 Konfigurator", () => {
     const groupThree = page.getByRole("radio", { name: "Gruppe 3" });
     await groupThree.focus();
     await groupThree.press("Space");
-    const withRowConnector = page.getByRole("radio", { name: /Mit Reihenverbindung/ });
+    const withRowConnector = page.getByRole("checkbox", { name: /Reihenverbindung/ });
     await withRowConnector.focus();
     await withRowConnector.press("Space");
     await expect(page.getByTestId("selected-chair-variant")).toContainText("Sitzpolster · Gruppe 3 · Mit Reihenverbindung");
@@ -100,6 +179,37 @@ test.describe("Modell 1021 Konfigurator", () => {
       const params = new URL(page.url()).searchParams;
       return [params.get("polster"), params.get("gruppe"), params.get("reihe")];
     }).toEqual(["sitz", "3", "ja"]);
+  });
+
+  test("summiert Erweiterungen, reduziert sie wieder und berechnet Menge sowie Buchablagen-Staffeln", async ({ page }) => {
+    await page.goto("/produkte/stapelstuehle/1021");
+    const price = page.getByTestId("chair-price");
+    const total = page.getByTestId("chair-total-price");
+    const quantity = page.getByLabel("Menge", { exact: true });
+    const felt = page.getByRole("checkbox", { name: /Filzgelenkgleiter/ });
+    const carpet = page.getByRole("checkbox", { name: /Teppichboden-Gelenkgleiter/ });
+    const bookTray = page.getByRole("checkbox", { name: /Buchablage aus Stahlblech/ });
+
+    await expect(price).toContainText("67,13");
+    await felt.check({ force: true });
+    await expect(price).toContainText("74,03");
+    await carpet.check({ force: true });
+    await expect(price).toContainText("80,62");
+    await felt.uncheck({ force: true });
+    await expect(price).toContainText("73,72");
+    await carpet.uncheck({ force: true });
+    await bookTray.check({ force: true });
+
+    for (const [amount, expectedUnitPrice, expectedTotal] of [
+      [100, "94,63", "9.463,00"],
+      [101, "92,92", "9.384,92"],
+      [250, "92,92", "23.230,00"],
+      [251, "90,89", "22.813,39"],
+    ] as const) {
+      await quantity.fill(String(amount));
+      await expect(price).toContainText(expectedUnitPrice);
+      await expect(total).toContainText(expectedTotal);
+    }
   });
 
   test("validiert die Menge und übernimmt die Konfiguration in die Angebotsanfrage", async ({ page }) => {

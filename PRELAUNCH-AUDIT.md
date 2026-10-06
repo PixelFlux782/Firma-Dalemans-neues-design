@@ -51,7 +51,6 @@ Der lokal geprüfte Code ist nach den Korrekturen technisch stabil und die autom
 | `/produkte/schreibtablare` | 200 | geprüft |
 | `/produkte/stuhlgleiter` | 200 | geprüft |
 | `/produkte/tischfuesse-gestellteile` | 200 | geprüft |
-| `/produkte/ersatzteile-kleinteile` | 200 | geprüft |
 | `/raeume-planung` | 200 | geprüft |
 | `/raeume-planung/raumplanung` | 200 | geprüft |
 | `/raumloesungen/gemeindesaal` | 200 | geprüft |

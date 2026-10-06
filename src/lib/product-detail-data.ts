@@ -14,7 +14,7 @@ export function legacyDetailData(product: Product): ProductDetailData {
   const accessoryCollection = product.slug === "stuhlgleiter" ? "gleiter-bodenschutz" : ["tischtransportwagen", "stuhltransportwagen"].includes(product.slug) ? "transport-lagerung" : ["reihenverbinder", "buchablage"].includes(product.slug) ? "reihenverbinder-nachruestung" : null;
   const categoryHref = accessoryCollection ? `/produkte/sortiment/${accessoryCollection}` : `/produkte/kategorien/${product.categoryId}`;
   const isTable = product.categoryId === "klapptische";
-  const isGlider = product.slug === "stuhlgleiter" || product.slug === "ersatzteile-kleinteile";
+  const isGlider = product.slug === "stuhlgleiter";
   const isAccessory = product.categoryId === "transportwagen-zubehoer";
   return {
     path: `/produkte/${product.slug}`, category: accessoryCollection ? ({ "gleiter-bodenschutz": "Gleiter & Bodenschutz", "transport-lagerung": "Transport & Lagerung", "reihenverbinder-nachruestung": "Reihenverbinder & Nachrüstung" }[accessoryCollection]) : product.categoryName, categoryHref,

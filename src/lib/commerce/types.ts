@@ -247,6 +247,8 @@ export interface CartInputLine {
   availability: CommerceAvailabilityStatus;
   source: CommerceCartLineSource;
   finderContext?: CommerceFinderCartContext;
+  /** Separate Konfigurationsoptionen; Varianten-IDs bleiben unverändert. */
+  selectedAddons?: string[];
 }
 
 export interface CartUpdateLine {

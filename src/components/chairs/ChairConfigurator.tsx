@@ -7,6 +7,12 @@ import { useCart } from "@/components/commerce/cart/CartProvider";
 import { formatCommerceMoney } from "@/lib/commerce/money";
 import { cartLineFromProduct, priceForQuantity } from "@/lib/commerce/cart/lines";
 import {
+  chairAddonBySku,
+  chairAddonPriceForQuantity,
+  compatibleChairAddons,
+  isChairAddonCompatible,
+} from "@/lib/commerce/chair-addons";
+import {
   CHAIR_OPTION_VALUES,
   resolveChairVariant,
   type ChairConfiguration,
@@ -33,6 +39,7 @@ function contactHref(
   configuration: ChairConfiguration,
   quantity: number,
   intent: "Angebot" | "Musterstuhl" | "Beratung",
+  selectedAddonSkus: string[],
 ) {
   const upholstery = CHAIR_OPTION_VALUES.upholstery[configuration.upholstery];
   const rowConnector = configuration.rowConnector ? "ja" : "nein";
@@ -41,6 +48,9 @@ function contactHref(
     `Polsterung: ${upholstery}`,
     ...(configuration.fabricGroup ? [`Stoffgruppe: ${configuration.fabricGroup}`] : []),
     `Reihenverbindung: ${rowConnector}`,
+    ...(selectedAddonSkus.length > 0
+      ? [`Erweiterungen: ${selectedAddonSkus.map((sku) => chairAddonBySku(sku)?.name ?? sku).join(", ")}`]
+      : []),
     `Menge: ${quantity}`,
   ].join("\n");
   const parameters = new URLSearchParams({
@@ -68,6 +78,9 @@ export default function ChairConfigurator({
   onVariantImageChange?: (image: CommerceImage | null) => void;
 }) {
   const [configuration, setConfiguration] = useState(initialConfiguration);
+  const [selectedAddonSkus, setSelectedAddonSkus] = useState<string[]>(
+    initialConfiguration.rowConnector ? ["APRV"] : [],
+  );
   const [quantity, setQuantity] = useState(() => normalizedQuantity(initialQuantity));
   const { addLines, pending } = useCart();
   const firstVariantEffect = useRef(true);
@@ -82,15 +95,48 @@ export default function ChairConfigurator({
     () => resolveChairVariant(product, { ...configuration, rowConnector: false }),
     [configuration, product],
   );
-  const connectorVariant = useMemo(
-    () => resolveChairVariant(product, { ...configuration, rowConnector: true }),
-    [configuration, product],
-  );
   const basePrice = baseVariant ? priceForQuantity(baseVariant, quantity) : null;
-  const connectorPrice = connectorVariant ? priceForQuantity(connectorVariant, quantity) : null;
-  const connectorDelta = basePrice && connectorPrice
-    ? Number(connectorPrice.amount) - Number(basePrice.amount)
-    : null;
+  const availableAddons = useMemo(
+    () => compatibleChairAddons(product.stackingChair?.modelCode, selectedVariant?.id),
+    [product.stackingChair?.modelCode, selectedVariant?.id],
+  );
+  const selectedAddons = selectedAddonSkus
+    .map(chairAddonBySku)
+    .filter((addon) => addon !== null);
+  const addonPrices = selectedAddons.map((addon) => ({
+    addon,
+    price: chairAddonPriceForQuantity(addon, quantity),
+  }));
+  const configuredPrice = basePrice ? {
+    amount: (
+      Number(basePrice.amount)
+      + addonPrices.reduce((sum, entry) => sum + Number(entry.price?.amount ?? 0), 0)
+    ).toFixed(2),
+    currencyCode: basePrice.currencyCode,
+  } : null;
+  const totalPrice = configuredPrice ? {
+    amount: (Number(configuredPrice.amount) * quantity).toFixed(2),
+    currencyCode: configuredPrice.currencyCode,
+  } : null;
+
+  useEffect(() => {
+    setSelectedAddonSkus((current) => current.filter((sku) => {
+      const addon = chairAddonBySku(sku);
+      return addon && isChairAddonCompatible(
+        addon,
+        product.stackingChair?.modelCode,
+        selectedVariant?.id,
+      );
+    }));
+    const rowConnectorAddon = chairAddonBySku("APRV");
+    if (configuration.rowConnector && rowConnectorAddon && !isChairAddonCompatible(
+      rowConnectorAddon,
+      product.stackingChair?.modelCode,
+      selectedVariant?.id,
+    )) {
+      setConfiguration((current) => ({ ...current, rowConnector: false }));
+    }
+  }, [configuration.rowConnector, product.stackingChair?.modelCode, selectedVariant?.id]);
 
   useEffect(() => {
     recordChairAction({ action: "chair_model_view", model: product.stackingChair?.modelCode });
@@ -135,8 +181,17 @@ export default function ChairConfigurator({
     });
   }
 
-  const selectedPrice = selectedVariant ? priceForQuantity(selectedVariant, quantity) : null;
-  const price = selectedPrice ? formatCommerceMoney(selectedPrice) : null;
+  function toggleAddon(sku: string) {
+    const selected = selectedAddonSkus.includes(sku);
+    setSelectedAddonSkus((current) => selected
+      ? current.filter((entry) => entry !== sku)
+      : [...current, sku]);
+    if (sku === "APRV") {
+      setConfiguration((current) => ({ ...current, rowConnector: !selected }));
+    }
+  }
+
+  const price = configuredPrice ? formatCommerceMoney(configuredPrice) : null;
   const configurationSummary = selectedVariant?.title ?? "Keine gültige Ausführung";
 
   return (
@@ -199,31 +254,58 @@ export default function ChairConfigurator({
           </fieldset>
         ) : null}
 
-        <fieldset>
-          <legend className="text-sm font-semibold text-premium-ink">{configuration.upholstery === "none" ? "2" : "3"}. Reihenverbindung</legend>
-          <p className="mt-1 text-xs leading-5 text-premium-muted">Für geordnete Reihenbestuhlung; die konkrete Raumplanung wird separat geprüft.</p>
+        <fieldset data-testid="chair-addons">
+          <legend className="text-sm font-semibold text-premium-ink">Ausstattung &amp; Erweiterungen</legend>
+          <p className="mt-1 text-xs leading-5 text-premium-muted">Mehrere Erweiterungen können miteinander kombiniert werden.</p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            {[false, true].map((rowConnector) => (
-              <label key={String(rowConnector)} className="relative cursor-pointer">
-                <input
-                  type="radio"
-                  name="rowConnector"
-                  value={String(rowConnector)}
-                  checked={configuration.rowConnector === rowConnector}
-                  onChange={() => setConfiguration((current) => ({ ...current, rowConnector }))}
-                  className="peer sr-only"
-                />
-                <span className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-premium-beige bg-white/65 px-4 py-3 text-sm font-semibold transition peer-checked:border-premium-forest peer-checked:bg-premium-forest peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-premium-sand peer-focus-visible:ring-offset-2">
-                  {rowConnector ? "Mit Reihenverbindung" : "Ohne Reihenverbindung"}
-                  {rowConnector && connectorDelta !== null && connectorDelta > 0 ? (
-                    <span className="text-xs opacity-75">+ {formatCommerceMoney({ amount: connectorDelta.toFixed(2), currencyCode: "EUR" })}</span>
-                  ) : null}
-                </span>
-              </label>
-            ))}
+            {availableAddons.map((addon) => {
+              const addonPrice = chairAddonPriceForQuantity(addon, quantity);
+              return (
+                <label key={addon.sku} className="relative cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="chairAddon"
+                    value={addon.sku}
+                    checked={selectedAddonSkus.includes(addon.sku)}
+                    onChange={() => toggleAddon(addon.sku)}
+                    className="peer sr-only"
+                  />
+                  <span className="flex min-h-24 flex-col justify-center rounded-xl border border-premium-beige bg-white/65 px-4 py-3 transition peer-checked:border-premium-forest peer-checked:bg-premium-forest peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-premium-sand peer-focus-visible:ring-offset-2">
+                    <span className="text-sm font-semibold">{addon.name}</span>
+                    <span className="mt-1 text-xs opacity-70">{addon.description}</span>
+                    <span className="mt-2 text-xs font-semibold">
+                      + {addonPrice ? formatCommerceMoney(addonPrice) : "Preis auf Anfrage"} / Stuhl
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
           </div>
         </fieldset>
       </div>
+
+      {basePrice && configuredPrice ? (
+        <div className="mt-7 rounded-2xl border border-premium-beige/80 bg-white/55 p-5" data-testid="chair-price-breakdown">
+          <div className="flex items-center justify-between gap-4 text-sm">
+            <span className="text-premium-muted">Basispreis</span>
+            <span className="font-semibold tabular-nums text-premium-ink">{formatCommerceMoney(basePrice)} / Stuhl</span>
+          </div>
+          {addonPrices.map(({ addon, price: addonPrice }) => (
+            <div key={addon.sku} className="mt-2 flex items-center justify-between gap-4 text-sm">
+              <span className="text-premium-muted">+ {addon.name}</span>
+              <span className="font-semibold tabular-nums text-premium-ink">{addonPrice ? formatCommerceMoney(addonPrice) : "Preis auf Anfrage"}</span>
+            </div>
+          ))}
+          <div className="mt-4 flex items-center justify-between gap-4 border-t border-premium-beige/80 pt-4">
+            <span className="font-semibold text-premium-ink">Konfiguriert</span>
+            <span className="font-semibold tabular-nums text-premium-forest">{formatCommerceMoney(configuredPrice)} / Stuhl</span>
+          </div>
+          <div className="mt-2 flex items-center justify-between gap-4 text-sm" data-testid="chair-total-price">
+            <span className="text-premium-muted">Gesamt für {quantity} Stück</span>
+            <span className="font-semibold tabular-nums text-premium-ink">{totalPrice ? formatCommerceMoney(totalPrice) : "–"}</span>
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-7 grid gap-5 border-y border-premium-beige/75 py-5 sm:grid-cols-[1fr_auto] sm:items-center">
         <div>
@@ -258,28 +340,28 @@ export default function ChairConfigurator({
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <button
               type="button"
-              onClick={() => addLines([cartLineFromProduct({ product, variant: selectedVariant, quantity })])}
+              onClick={() => addLines([cartLineFromProduct({ product, variant: selectedVariant, quantity, selectedAddonSkus })])}
               disabled={pending || !selectedVariant?.price || !selectedVariant.priceTiers?.length}
               className="btn-primary text-center disabled:cursor-not-allowed disabled:opacity-50"
             >
               In den Warenkorb
             </button>
             <Link
-              href={contactHref(product, configuration, quantity, "Angebot")}
+              href={contactHref(product, configuration, quantity, "Angebot", selectedAddonSkus)}
               onClick={() => recordChairAction({ action: "chair_quote_request", model: product.stackingChair?.modelCode, variantId: selectedVariant.id, quantity })}
               className="btn-primary text-center"
             >
               Angebot anfragen
             </Link>
             <Link
-              href={contactHref(product, configuration, quantity, "Musterstuhl")}
+              href={contactHref(product, configuration, quantity, "Musterstuhl", selectedAddonSkus)}
               onClick={() => recordChairAction({ action: "chair_sample_request", model: product.stackingChair?.modelCode, variantId: selectedVariant.id, quantity })}
               className="btn-secondary text-center"
             >
               Musterstuhl anfragen
             </Link>
           </div>
-          <Link href={contactHref(product, configuration, quantity, "Beratung")} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">
+          <Link href={contactHref(product, configuration, quantity, "Beratung", selectedAddonSkus)} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">
             Fragen zum Modell? Persönlich beraten lassen →
           </Link>
         </>

@@ -5,6 +5,7 @@ import type {
   CommerceProduct,
   CommerceProductVariant,
 } from "@/lib/commerce/types";
+import { configuredChairPriceTiers } from "@/lib/commerce/chair-addons";
 
 export function canAddVariantToCart(variant: CommerceProductVariant | null) {
   return Boolean(
@@ -44,14 +45,23 @@ export function cartLineFromProduct({
   quantity,
   source = "product",
   finderContext,
+  selectedAddonSkus = [],
 }: {
   product: CommerceProduct;
   variant: CommerceProductVariant;
   quantity: number;
   source?: CommerceCartLineSource;
   finderContext?: CommerceFinderCartContext;
+  selectedAddonSkus?: string[];
 }): CartInputLine {
   const rules = cartQuantityRules(product, variant);
+  const priceTiers = product.stackingChair
+    ? configuredChairPriceTiers(variant, selectedAddonSkus)
+    : variant.priceTiers;
+  const unitPrice = priceTiers?.find((tier) =>
+    (tier.minimumQuantity === null || quantity >= tier.minimumQuantity)
+      && (tier.maximumQuantity === null || quantity <= tier.maximumQuantity),
+  )?.price ?? priceForQuantity(variant, quantity);
   return {
     productId: product.id,
     productHandle: product.handle,
@@ -61,8 +71,8 @@ export function cartLineFromProduct({
     image: variant.image ?? product.featuredImage,
     quantity,
     erpArticleNumber: variant.erpArticleNumber ?? null,
-    unitPrice: priceForQuantity(variant, quantity),
-    priceTiers: variant.priceTiers,
+    unitPrice,
+    priceTiers,
     priceStatus: variant.priceStatus,
     priceDataStatus: variant.priceDataStatus,
     ...rules,
@@ -70,5 +80,6 @@ export function cartLineFromProduct({
     availability: variant.availability,
     source,
     finderContext,
+    ...(selectedAddonSkus.length > 0 ? { selectedAddons: selectedAddonSkus.slice().sort() } : {}),
   };
 }

@@ -7,7 +7,7 @@ import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
 import HeroCarousel from "@/components/home/HeroCarousel";
 import DevelopmentNotice from "@/components/home/DevelopmentNotice";
-import ProductCategoryFeature from "@/components/home/ProductCategoryFeature";
+import HomeProductRange from "@/components/home/HomeProductRange";
 import ProductVisual from "@/components/ProductVisual";
 import { absoluteUrl, buildMetadata } from "@/lib/seo";
 import { organizationStructuredData } from "@/lib/company";
@@ -26,13 +26,6 @@ const entries = [
   { title: "Raum planen", text: "Nutzung, Bestuhlung, Wege und Lagerung sollen zusammenpassen.", href: "/raeume-planung", label: "Räume & Planung ansehen" },
   { title: "Herausforderung lösen", text: "Säulen, wenig Lagerfläche oder schnelle Umbauten brauchen eine praktische Antwort.", href: "/raeume-planung#herausforderungen", label: "Typische Lösungen finden" },
   { title: "Persönlich beraten lassen", text: "Sie möchten erst klären, welche Lösung wirklich zum Raum passt.", href: "/beratung-service", label: "Beratung & Service ansehen" },
-] as const;
-
-const groups = [
-  { title: "Stapelstühle", text: "Fünf Modelle mit verständlicher Auswahl von Polsterung, Stoffgruppe und Reihenverbindung.", href: "/produkte/stapelstuehle", cta: "Stapelstühle ansehen", image: "/images/curated/Stapelstühle/Stapelstuhl_Stapelstuhle_Stapelstuehle_Buende_01.webp", alt: "Vollständig sichtbarer Stapel gepolsterter Stapelstühle", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
-  { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und flexibel genutzte Räume.", href: "/produkte/sortiment/klapptische", cta: "Klapptische ansehen", image: "/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", alt: "Vollständig sichtbarer Klapptisch mit verchromtem Gestell", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 51%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
-  { title: "Rednerpulte", text: "Klare und funktionale Lösungen für Gottesdienste, Vorträge und Veranstaltungen.", href: "/produkte/sortiment/rednerpulte", cta: "Rednerpulte ansehen", image: "/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.png", alt: "Vollständig sichtbares Rednerpult aus Acrylglas, Typ A", backgroundTone: "#F8F7F1", imageInset: "1% 3%", imageScale: 1, objectPosition: "50% 50%", aspectRatio: "4 / 3", fadeStrength: 0.78 },
-  { title: "Zubehör & Transport", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und Transportlösungen für den praktischen Alltag.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör & Transport ansehen", image: "/neue bilder/Zubehör/zubehör-hero.png", alt: "Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.9 },
 ] as const;
 
 const challenges = [
@@ -90,12 +83,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <HomeSection>
-        <SectionHeader eyebrow="Sortiment" title="Stühle, Tische und Lösungen für flexible Räume" lead="Vier Produktbereiche für Räume, die sich im Alltag schnell und zuverlässig verändern müssen." href="/produkte" linkLabel="Alle Produkte" align="editorial" />
-        <div className="section-grid-top grid gap-x-8 gap-y-14 md:grid-cols-2 lg:gap-x-12 lg:gap-y-20">
-          {groups.map((group) => <ProductCategoryFeature key={group.title} title={group.title} description={group.text} href={group.href} image={group.image} alt={group.alt} linkLabel={group.cta} imageScale={group.imageScale} objectPosition={group.objectPosition} imageInset={group.imageInset} aspectRatio={group.aspectRatio} fadeStrength={group.fadeStrength} backgroundTone={group.backgroundTone} />)}
-        </div>
-      </HomeSection>
+      <HomeProductRange />
 
       <HomeSection>
         <div className="company-intro-grid grid gap-10 border-y border-premium-beige py-10 md:py-14 lg:grid-cols-[.9fr_1.1fr] lg:gap-16">

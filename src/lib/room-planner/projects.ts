@@ -74,7 +74,7 @@ function normalizePlan(raw: unknown): RoomPlan {
     const model = TABLE_MODELS.find((item) => item.id === (legacyModels[table.modelId] ?? table.modelId));
     return model ? { ...table, modelId: model.id, width: model.width, depth: model.depth } : table;
   });
-  const plan: RoomPlan = { ...(raw as unknown as RoomPlan), tables: normalizedTables, chairs: (raw.chairs ?? []) as RoomPlan["chairs"], zones: [], tableGroups: (raw.tableGroups ?? []) as RoomPlan["tableGroups"] };
+  const plan: RoomPlan = { ...(raw as unknown as RoomPlan), tables: normalizedTables, chairs: (raw.chairs ?? []) as RoomPlan["chairs"], zones: (raw.zones ?? []) as RoomPlan["zones"], tableGroups: (raw.tableGroups ?? []) as RoomPlan["tableGroups"] };
   const tableIds = (plan.tables ?? []).map(table => table.id), furnitureChairIds = (plan.chairs ?? []).map(chair => chair.id), zoneIds = (plan.zones ?? []).map(zone => zone.id);
   const allFurnitureIds = [...tableIds, ...furnitureChairIds, ...zoneIds];
   const furnitureGroupIds = (plan.tableGroups ?? []).map(group => group.id);

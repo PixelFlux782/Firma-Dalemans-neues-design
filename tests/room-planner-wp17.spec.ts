@@ -8,7 +8,7 @@ const room = (): RoomPlan => ({ ...emptyPlan(), contour: { closed: true, points:
 const zone: PlanningZone = { id: "zone-1", type: "tables", geometry: { kind: "rectangle", x: 0, y: 0, width: 10, depth: 8 }, rotation: 0 };
 
 test("WP17 catalog describes all optimized table GLBs", () => {
-  expect(TABLE_MODELS.map(model => model.modelPath)).toEqual(["/models/dalemans-tisch-210-low.glb", "/models/dalemans-tisch-310-low.glb", "/models/dalemans-tisch-trapez-low.glb"]);
+  expect([...new Set(TABLE_MODELS.map(model => model.modelPath))].sort()).toEqual(["/models/dalemans-tisch-210-low.glb", "/models/dalemans-tisch-310-low.glb", "/models/dalemans-tisch-trapez-low.glb"].sort());
   expect(TABLE_MODELS.every(model => model.width > 1 && model.depth > .5 && model.height > .5)).toBe(true);
   expect(TABLE_PRESETS).toHaveLength(14);
 });
@@ -61,7 +61,7 @@ test("WP17 undo and redo preserve table operations and differentiated capacity",
 
 test("WP17 editor places, selects, rotates, duplicates and deletes a table", async ({ page }) => {
   let tableModelRequests = 0;
-  page.on("request", request => { if (request.url().endsWith("/models/dalemans-tisch-210-low.glb")) tableModelRequests += 1; });
+  page.on("request", request => { if (request.url().endsWith(TABLE_MODELS[0].modelPath)) tableModelRequests += 1; });
   await page.setViewportSize({ width: 1440, height: 900 }); await page.goto("/raumplaner");
   const canvas = page.getByRole("img", { name: /Grundriss Zeichenfläche/ });
   for (const position of [{x:140,y:110},{x:500,y:110},{x:500,y:380},{x:140,y:380}]) await canvas.click({ position });

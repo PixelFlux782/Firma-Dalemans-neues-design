@@ -1,7 +1,7 @@
 import Link from "next/link";
 import CategoryHero from "@/components/products/CategoryHero";
 import ProductVisual from "@/components/ProductVisual";
-import { formatCommerceMoney } from "@/lib/commerce/money";
+import { formatCommerceMoney, lowestProductUnitPrice } from "@/lib/commerce/money";
 import type { CommerceCollection } from "@/lib/commerce/types";
 import type { ProductCategory } from "@/lib/product-categories";
 
@@ -31,13 +31,13 @@ export default function FoldingTablesHub({ collection, category }: { collection:
           <p className="max-w-2xl text-sm leading-7 text-premium-muted lg:justify-self-end">Rechtecktisch 310c, Seminar-Klapptisch 210c und Trapez-Klapptisch 310c decken unterschiedliche Aufstellungen ab. Maße und Kanten wählen Sie am Modell.</p>
         </div>
         <div className="grid gap-x-8 gap-y-14 pt-10 md:grid-cols-2">
-          {collection.products.map((product) => <article key={product.id} className="group min-w-0 border-b border-premium-beige/70 pb-12">
-            <div className="overflow-hidden rounded-[1.75rem]"><ProductVisual src={product.featuredImage?.url ?? category.image} alt={product.featuredImage?.altText ?? product.title} sizes="(min-width: 1024px) 36vw, (min-width: 640px) 50vw, 100vw" aspectRatio="5 / 4" imageInset="4%" backgroundTone="canvas" className="min-h-[310px] sm:min-h-[380px] transition duration-500 group-hover:scale-[1.015]" /></div>
-            <div className="pt-6"><div className="flex flex-wrap items-baseline justify-between gap-3"><h3 className="font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink sm:text-3xl">{product.title}</h3>{product.priceRange.min ? <p className="text-base font-semibold tabular-nums text-premium-forest">ab {formatCommerceMoney(product.priceRange.min)}</p> : null}</div>
+          {collection.products.map((product) => { const href = `/produkte/artikel/${product.handle}`; const lowestPrice = lowestProductUnitPrice(product); return <article key={product.id} className="group min-w-0 border-b border-premium-beige/70 pb-12">
+            <Link href={href} aria-label={`${product.title} ansehen`} className="block cursor-pointer overflow-hidden rounded-[1.75rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-4"><ProductVisual src={product.featuredImage?.url ?? category.image} alt={product.featuredImage?.altText ?? product.title} sizes="(min-width: 1024px) 36vw, (min-width: 640px) 50vw, 100vw" aspectRatio="5 / 4" imageInset="4%" backgroundTone="canvas" className="min-h-[310px] sm:min-h-[380px] transition duration-500 group-hover:scale-[1.015]" /></Link>
+            <div className="pt-6"><div className="flex flex-wrap items-baseline justify-between gap-3"><h3 className="font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink sm:text-3xl"><Link href={href} className="cursor-pointer rounded-sm transition hover:text-premium-bronze focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">{product.title}</Link></h3>{lowestPrice ? <p className="text-base font-semibold tabular-nums text-premium-forest">ab {formatCommerceMoney(lowestPrice.price)}</p> : null}</div>
               <p className="mt-4 max-w-xl text-sm leading-7 text-premium-muted">{product.shortDescription}</p>
-              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3"><Link href={`/produkte/artikel/${product.handle}`} className="btn-primary px-6 py-2.5 text-sm">Modell ansehen</Link><span className="text-xs leading-5 text-premium-subtle">Maße und Ausführungen am Modell wählen</span></div>
+              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3"><Link href={href} className="btn-primary px-6 py-2.5 text-sm">Modell ansehen</Link><span className="text-xs leading-5 text-premium-subtle">Maße und Ausführungen am Modell wählen</span></div>
             </div>
-          </article>)}
+          </article>})}
         </div>
       </section>
 

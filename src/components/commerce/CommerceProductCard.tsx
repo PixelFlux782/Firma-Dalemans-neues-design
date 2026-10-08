@@ -1,6 +1,7 @@
 import Link from "next/link";
 import CommerceMedia from "@/components/commerce/CommerceMedia";
 import CommercePrice from "@/components/commerce/CommercePrice";
+import { lowestProductUnitPrice } from "@/lib/commerce/money";
 import type { CommerceProduct } from "@/lib/commerce/types";
 
 export default function CommerceProductCard({
@@ -13,6 +14,7 @@ export default function CommerceProductCard({
   const hasDevelopmentPrice = product.variants.some(
     (variant) => variant.priceDataStatus === "development",
   );
+  const lowestPrice = lowestProductUnitPrice(product);
 
   return (
     <article className="group min-w-0 border-t border-premium-beige/80 pt-5">
@@ -31,9 +33,8 @@ export default function CommerceProductCard({
       </Link>
       <div className="px-1 pb-2 pt-6">
         <CommercePrice
-          status={product.priceStatus}
-          price={product.priceRange.min}
-          maxPrice={product.priceRange.max}
+          status={lowestPrice ? "from" : product.priceStatus}
+          price={lowestPrice?.price ?? null}
           className="mb-3"
         />
         {hasDevelopmentPrice ? (

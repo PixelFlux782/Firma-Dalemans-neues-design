@@ -2,7 +2,7 @@ import Link from "next/link";
 import ProductVisual from "@/components/ProductVisual";
 import ChairComparison from "@/components/chairs/ChairComparison";
 import CategoryHero from "@/components/products/CategoryHero";
-import { formatCommerceMoney } from "@/lib/commerce/money";
+import { formatCommerceMoney, lowestProductUnitPrice } from "@/lib/commerce/money";
 import type { CommerceProduct } from "@/lib/commerce/types";
 
 export const stackingChairCategoryFaq = [
@@ -96,20 +96,18 @@ export default function StackingChairHub({ products }: { products: CommerceProdu
 
         <div className="grid gap-x-8 gap-y-14 pt-10 md:grid-cols-2">
           {products.map((product) => {
-            const fromPrice = product.priceRange.min
-              ? formatCommerceMoney(product.priceRange.min)
-              : null;
+            const lowestPrice = lowestProductUnitPrice(product);
+            const fromPrice = lowestPrice ? formatCommerceMoney(lowestPrice.price) : null;
+            const href = `/produkte/stapelstuehle/${product.handle}`;
 
             return (
               <article key={product.id} className="group min-w-0 border-b border-premium-beige/70 pb-12">
-                <div className="overflow-hidden rounded-[1.75rem]">
+                <Link href={href} aria-label={`${product.title} ansehen`} className="block cursor-pointer overflow-hidden rounded-[1.75rem] transition duration-500 group-hover:scale-[1.015] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-4">
                   <ChairVisual product={product} />
-                </div>
+                </Link>
                 <div className="pt-6">
                   <div className="flex flex-wrap items-baseline justify-between gap-3">
-                    <h3 className="font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink sm:text-3xl">
-                      Modell {product.stackingChair?.modelCode}
-                    </h3>
+                    <h3 className="font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink sm:text-3xl"><Link href={href} className="cursor-pointer rounded-sm transition hover:text-premium-bronze focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">Modell {product.stackingChair?.modelCode}</Link></h3>
                     {fromPrice ? (
                       <p className="text-base font-semibold tabular-nums text-premium-forest">ab {fromPrice}</p>
                     ) : null}
@@ -126,7 +124,7 @@ export default function StackingChairHub({ products }: { products: CommerceProdu
                     </div>
                   </dl>
                   <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
-                    <Link href={`/produkte/stapelstuehle/${product.handle}`} className="btn-primary px-6 py-2.5 text-sm">
+                    <Link href={href} className="btn-primary px-6 py-2.5 text-sm">
                       Modell ansehen
                     </Link>
                     <span className="text-xs leading-5 text-premium-subtle">
@@ -144,7 +142,7 @@ export default function StackingChairHub({ products }: { products: CommerceProdu
         models={products.map((product) => ({
           handle: product.handle,
           modelCode: product.stackingChair?.modelCode ?? product.title,
-          fromPrice: product.priceRange.min,
+          fromPrice: lowestProductUnitPrice(product)?.price ?? null,
         }))}
       />
 

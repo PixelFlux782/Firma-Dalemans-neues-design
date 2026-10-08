@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import CommerceAvailability from "@/components/commerce/CommerceAvailability";
 import CommercePrice from "@/components/commerce/CommercePrice";
-import { formatCommerceMoney } from "@/lib/commerce/money";
+import { formatCommerceMoney, lowestProductUnitPrice } from "@/lib/commerce/money";
 import { useCart } from "@/components/commerce/cart/CartProvider";
 import {
   canAddVariantToCart,
@@ -71,6 +71,7 @@ export default function ProductVariantSelector({
   const selectedVariant =
     selectableVariants.find((variant) => matchesSelection(variant, selection)) ?? selectableVariants[0] ?? null;
   const selectedRules = selectedVariant ? cartQuantityRules(product, selectedVariant) : null;
+  const lowestPrice = useMemo(() => lowestProductUnitPrice(product), [product]);
   const selectedMinimumQuantity = selectedRules?.minimumQuantity;
   const [quantity, setQuantity] = useState(product.quantity.minimum);
 
@@ -108,6 +109,12 @@ export default function ProductVariantSelector({
         price={price}
         compareAtPrice={selectedVariant?.compareAtPrice}
       />
+      {lowestPrice?.priceTierId && lowestPrice.minimumQuantity > 1 ? (
+        <div className="mt-2" data-testid="lowest-tier-price">
+          <p className="text-sm font-semibold tabular-nums text-premium-forest">ab {formatCommerceMoney(lowestPrice.price)} / Stück</p>
+          <p className="mt-1 text-xs leading-5 text-premium-muted">Bei Abnahme von mindestens {lowestPrice.minimumQuantity} Stück</p>
+        </div>
+      ) : null}
 
       {isTableConfigurator && optionGroups.length ? (
         <div className="mt-6 border-t border-premium-beige/70 pt-6">

@@ -75,7 +75,10 @@ test("Produktübersicht lädt Collections als nutzbare Sortimenteinstiege", asyn
     "href",
     "#sortiment",
   );
-  await expect(page.locator('a[href="/produkte/sortiment/gleiter-bodenschutz"]')).toBeVisible();
+  const additionalCollections = page.locator("#alle-produktbereiche");
+  await expect(
+    additionalCollections.getByRole("link", { name: /Gleiter & Bodenschutz/ }),
+  ).toHaveAttribute("href", "/produkte/sortiment/gleiter-bodenschutz");
 });
 
 test("Collection-Seite zeigt Produkte, Breadcrumb und kanonische Metadaten", async ({ page }) => {

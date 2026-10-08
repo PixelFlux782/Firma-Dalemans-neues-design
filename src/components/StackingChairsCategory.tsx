@@ -140,6 +140,7 @@ export default function StackingChairsCategory({ heroImage, products, variant = 
 
         <div className="mt-4 sm:mt-5">
           {visibleProducts.map((product, index) => {
+            const href = productPath(product.slug);
             const imageRight = index % 2 === 1;
             const imageTreatment = productImageTreatments[product.slug] ?? {
               imagePosition: "50% 52%",
@@ -153,10 +154,10 @@ export default function StackingChairsCategory({ heroImage, products, variant = 
                 key={product.slug}
                 className={`grid min-w-0 gap-7 py-12 sm:gap-10 sm:py-16 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)] lg:items-center lg:gap-16 lg:py-20 ${index > 0 ? "border-t border-premium-beige/55" : ""}`}
               >
-                <ProductVisual src={product.image} alt={product.imageAlt ?? product.title} sizes="(min-width: 1280px) 570px, (min-width: 1024px) 48vw, 100vw" aspectRatio="4 / 5" objectPosition={imageTreatment.imagePosition} imageScale={Math.min(imageTreatment.imageScale, 1)} imageInset="5%" backgroundTone="canvas" className={`min-w-0 sm:[--visual-ratio:5/4] lg:min-h-[580px] ${imageRight ? "lg:order-2" : ""}`} />
+                <Link href={href} aria-label={`${product.title} ansehen`} className={`block cursor-pointer rounded-[1.75rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-4 ${imageRight ? "lg:order-2" : ""}`}><ProductVisual src={product.image} alt={product.imageAlt ?? product.title} sizes="(min-width: 1280px) 570px, (min-width: 1024px) 48vw, 100vw" aspectRatio="4 / 5" objectPosition={imageTreatment.imagePosition} imageScale={Math.min(imageTreatment.imageScale, 1)} imageInset="5%" backgroundTone="canvas" className="min-w-0 transition duration-500 hover:scale-[1.015] sm:[--visual-ratio:5/4] lg:min-h-[580px]" /></Link>
                 <div className={`flex min-w-0 flex-col justify-center px-1 sm:px-2 lg:px-0 ${imageRight ? "lg:order-1" : ""}`}>
                   <p className="section-eyebrow">{categoryName}</p>
-                  <h3 className="mt-2 font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink sm:text-3xl">{product.title}</h3>
+                  <h3 className="mt-2 font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink sm:text-3xl"><Link href={href} className="cursor-pointer rounded-sm transition hover:text-premium-bronze focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">{product.title}</Link></h3>
                   <p className="mt-4 max-w-xl leading-7 text-premium-muted">{product.shortDescription}</p>
                   <ul className="mt-6 grid max-w-xl gap-3 border-y border-premium-beige/60 py-5 text-sm leading-6 text-premium-charcoal/90" aria-label={`Merkmale von ${product.title}`}>
                     {product.highlights.slice(0, 3).map((item) => (

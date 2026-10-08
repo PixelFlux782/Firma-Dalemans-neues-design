@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { recordChairAction } from "@/lib/analytics";
 import { useCart } from "@/components/commerce/cart/CartProvider";
-import { formatCommerceMoney } from "@/lib/commerce/money";
+import { formatCommerceMoney, lowestProductUnitPrice } from "@/lib/commerce/money";
 import { cartLineFromProduct, priceForQuantity } from "@/lib/commerce/cart/lines";
 import {
   chairAddonBySku,
@@ -96,6 +96,7 @@ export default function ChairConfigurator({
     [configuration, product],
   );
   const basePrice = baseVariant ? priceForQuantity(baseVariant, quantity) : null;
+  const lowestPrice = useMemo(() => lowestProductUnitPrice(product), [product]);
   const availableAddons = useMemo(
     () => compatibleChairAddons(product.stackingChair?.modelCode, selectedVariant?.id),
     [product.stackingChair?.modelCode, selectedVariant?.id],
@@ -206,6 +207,12 @@ export default function ChairConfigurator({
           <p className="mt-1 text-2xl font-semibold tabular-nums text-premium-forest">{price ?? "Auf Anfrage"}</p>
         </div>
       </div>
+      {lowestPrice?.priceTierId && lowestPrice.minimumQuantity > 1 ? (
+        <div className="mt-3 text-right" data-testid="lowest-tier-price">
+          <p className="text-sm font-semibold tabular-nums text-premium-forest">ab {formatCommerceMoney(lowestPrice.price)} / Stück</p>
+          <p className="mt-1 text-xs leading-5 text-premium-muted">Bei Abnahme von mindestens {lowestPrice.minimumQuantity} Stück</p>
+        </div>
+      ) : null}
 
       <div className="mt-7 space-y-7">
         <fieldset>

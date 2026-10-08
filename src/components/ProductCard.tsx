@@ -8,8 +8,10 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const href = productPath(product.slug);
   return (
     <article className="group flex h-full flex-col">
+      <Link href={href} aria-label={`${product.title} ansehen`} className="block cursor-pointer rounded-[1.75rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-4">
         <ProductVisual
           src={product.image}
           alt={
@@ -19,13 +21,13 @@ export default function ProductCard({ product }: ProductCardProps) {
           sizes="(min-width: 1280px) 30vw, (min-width: 768px) 50vw, 100vw"
           imageInset={product.categoryId === "transportwagen-zubehoer" ? "8%" : "6%"}
           backgroundTone="canvas"
+          className="transition duration-500 group-hover:scale-[1.015]"
         />
+      </Link>
 
       <div className="flex flex-1 flex-col px-1 pb-2 pt-5">
         <p className="section-eyebrow text-[0.65rem]">{product.categoryName}</p>
-        <h3 className="mt-3 font-display text-xl font-medium tracking-[-0.02em] text-premium-ink md:text-2xl">
-          {product.title}
-        </h3>
+        <h3 className="mt-3 font-display text-xl font-medium tracking-[-0.02em] text-premium-ink md:text-2xl"><Link href={href} className="cursor-pointer rounded-sm transition hover:text-premium-bronze focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">{product.title}</Link></h3>
         <p className="mt-3 flex-1 text-sm leading-6 text-premium-muted">
           {product.shortDescription}
         </p>
@@ -50,7 +52,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <div className="mt-5 flex flex-wrap items-center gap-2">
           <Link
-            href={productPath(product.slug)}
+            href={href}
             className="btn-primary px-5 py-2.5 text-sm group-hover:shadow-premium-glow"
           >
             Details ansehen

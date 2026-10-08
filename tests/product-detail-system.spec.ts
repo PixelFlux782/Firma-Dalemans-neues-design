@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { localProducts } from "../src/lib/commerce/providers/local-data";
+import { canAddVariantToCart } from "../src/lib/commerce/cart/lines";
 import { products } from "../src/lib/products";
 import { productPath } from "../src/lib/product-routes";
 
@@ -63,18 +64,45 @@ test("alle vorhandenen Produktdetailrouten laden mit derselben Grundstruktur", a
   page.on("response", response => {
     if (response.url().includes("/_next/image") && response.status() >= 400) failedImages.push(response.url());
   });
-  const paths = [
-    ...products.map(product => productPath(product.slug)),
-    ...commerce.map(product => product.stackingChair
-      ? `/produkte/stapelstuehle/${product.handle}`
-      : `/produkte/artikel/${product.handle}`),
+  const commerceRoutes = commerce.map(product => {
+    const productUnavailable = product.priceStatus === "unavailable"
+      || product.availability === "out_of_stock";
+    const selectedVariant = productUnavailable
+      ? undefined
+      : product.variants.find(variant =>
+          variant.priceStatus !== "unavailable" && variant.availability !== "out_of_stock",
+        );
+    return {
+      path: product.stackingChair
+        ? `/produkte/stapelstuehle/${product.handle}`
+        : `/produkte/artikel/${product.handle}`,
+      purchaseState: !selectedVariant
+        ? "unavailable" as const
+        : canAddVariantToCart(selectedVariant)
+          ? "cart" as const
+          : "inquiry" as const,
+    };
+  });
+  const commercePaths = new Set(commerceRoutes.map(route => route.path));
+  const routes = [
+    ...products
+      .map(product => productPath(product.slug))
+      .filter(path => !commercePaths.has(path))
+      .map(path => ({ path, purchaseState: "legacy" as const })),
+    ...commerceRoutes,
   ];
-  for (const path of paths) {
+  for (const { path, purchaseState } of routes) {
     const response = await page.goto(path);
     expect(response?.status(), path).toBe(200);
     await expect(page.getByRole("heading", { level: 1 }), path).toHaveCount(1);
     await expect(page.getByRole("navigation", { name: /Breadcrumb|Brotkrumen/i }), path).toBeVisible();
-    await expect(page.locator("main .btn-primary").first(), path).toBeVisible();
+    if (purchaseState === "unavailable") {
+      await expect(page.getByTestId("unavailable-product"), path).toBeVisible();
+    } else if (purchaseState === "cart") {
+      await expect(page.getByRole("button", { name: "In den Warenkorb", exact: true }), path).toBeVisible();
+    } else if (purchaseState === "inquiry") {
+      await expect(page.getByRole("link", { name: "Angebot anfragen", exact: true }), path).toBeVisible();
+    }
   }
   expect(failedImages).toEqual([]);
 });

@@ -13,13 +13,13 @@ export const metadata: Metadata = buildMetadata({
 });
 
 const themes = [
-  { title: "Stapelstühle", description: "Auswahl, Polsterung und Ausstattung passend zur Nutzung einordnen.", href: "/wissen/stoffe-und-bezuege", linkLabel: "Zur Stoffberatung", number: "01" },
+  { title: "Stapelstühle", description: "Auswahl, Polsterung und Ausstattung passend zur Nutzung einordnen.", href: "/wissen/stapelstuehle-richtig-auswaehlen", linkLabel: "Stapelstühle auswählen", number: "01" },
   { title: "Klapptische", description: "Maße, Platzbedarf, Aufstellung und Gestelle aus der Praxis erklärt.", href: "/wissen/klapptische-richtig-waehlen", linkLabel: "Klapptische auswählen", number: "02" },
   { title: "Stoffe & Materialien", description: "Stoffgruppen, Martindale, Materialien und Nachweise verständlich prüfen.", href: "/wissen/stoffe-und-bezuege", linkLabel: "Stoffratgeber lesen", number: "03" },
   { title: "Raumplanung", description: "Bestuhlung, Wege und flexible Nutzungen von Anfang an zusammendenken.", href: "/raumplaner", linkLabel: "Zum Raumplaner", number: "04" },
-  { title: "Brandschutz & Sicherheit", description: "Anforderungen und Nachweise gehören zur konkreten Variante und Planung.", number: "05" },
-  { title: "Transport & Lagerung", description: "Umbauwege, Stapelung und Lagerfläche sinnvoll in die Auswahl einbeziehen.", number: "06" },
-  { title: "Pflege & Ersatzteile", description: "Oberflächen erhalten und vorhandene Ausstattung langfristig weiter nutzen.", number: "07" },
+  { title: "Reihenbestuhlung", description: "Reihenverbinder, Nachrüstung und Bestuhlungsplan gemeinsam betrachten.", href: "/wissen/reihenverbinder-fuer-stapelstuehle", linkLabel: "Reihenverbinder einplanen", number: "05" },
+  { title: "Transport & Lagerung", description: "Umbauwege, Stapelung und Lagerfläche sinnvoll in die Auswahl einbeziehen.", href: "/wissen/transport-lagerung-pflege", linkLabel: "Praxiswerte lesen", number: "06" },
+  { title: "Pflege & Ersatzteile", description: "Oberflächen erhalten und vorhandene Ausstattung langfristig weiter nutzen.", href: "/wissen/transport-lagerung-pflege", linkLabel: "Pflegehinweise lesen", number: "07" },
 ] as const;
 
 export default function WissenPage() {
@@ -38,7 +38,7 @@ export default function WissenPage() {
       </header>
 
       <section aria-labelledby="knowledge-topics">
-        <div className="max-w-3xl"><p className="section-eyebrow">Themen entdecken</p><h2 id="knowledge-topics" className="section-title mt-5">Sieben Zugänge für konkrete Fragen.</h2><p className="section-lead mt-5">Ausgearbeitete Inhalte führen direkt weiter. Themen im Aufbau bleiben bewusst als Orientierung sichtbar, ohne leere Detailseiten zu erzeugen.</p></div>
+        <div className="max-w-3xl"><p className="section-eyebrow">Themen entdecken</p><h2 id="knowledge-topics" className="section-title mt-5">Sieben Zugänge für konkrete Fragen.</h2><p className="section-lead mt-5">Jeder Einstieg führt zu einem veröffentlichten Ratgeber oder zu einem bestehenden Planungswerkzeug.</p></div>
         <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {themes.map((theme) => (
             <article key={theme.title} className={`flex min-w-0 flex-col rounded-3xl border p-6 md:p-7 ${"href" in theme ? "border-premium-beige/70 bg-white/70 shadow-[0_8px_28px_rgba(20,18,16,.04)]" : "border-premium-beige/60 bg-premium-warm/45"}`}>

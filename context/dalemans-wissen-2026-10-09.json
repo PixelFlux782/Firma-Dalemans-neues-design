@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "referenceDate": "2026-10-09",
+  "provenance": {
+    "type": "dalemans_company_statement",
+    "received": "2026-10-09",
+    "document": "02_DALEMANS_FACHWISSEN_QUELLE.md",
+    "verified_by_certificate": false
+  },
+  "editorialPolicy": "This is internal editorial input, not a warranty or product specification. Publication must obey 03_REDAKTION_FREIGABEN.md.",
+  "chairs": {
+    "nominalWidthCmWithoutRowConnector": {
+      "value": 51,
+      "status": "company_estimate",
+      "modelScope": "to_verify"
+    },
+    "nominalWidthCmWithRowConnector": {
+      "value": 53,
+      "status": "company_estimate",
+      "modelScope": "to_verify"
+    },
+    "gsTestedLoadKg": {
+      "value": 120,
+      "status": "certificate_pending",
+      "publishAsGSClaim": false
+    },
+    "typicalMaxStackCount": {
+      "value": 15,
+      "approximate": true,
+      "status": "model_and_transport_confirmation_needed"
+    },
+    "upholsteryPreferenceForLongSitting": "seat_and_back_upholstery_often_preferred; subjective_comfort",
+    "heavyUseRecommendations": [
+      "Coburg",
+      "Nürnberg"
+    ],
+    "longevityExperienceYears": {
+      "value": 35,
+      "status": "anecdotal",
+      "notGuarantee": true
+    },
+    "serviceAreas": [
+      "Kirchen",
+      "christliche Gemeinden",
+      "Kommunen",
+      "Versammlungs- und Sporthallen",
+      "Speiseraum und Kantine",
+      "Seminar und Hotel",
+      "Vereine",
+      "Feuerwehr",
+      "Schulen"
+    ]
+  },
+  "rowConnectors": {
+    "recommendedFor": "row_seating",
+    "reasons": [
+      "orderly_appearance",
+      "move_rows_for_cleaning",
+      "potential_location_specific_requirements"
+    ],
+    "aftermarketClip": {
+      "color": "schwarz",
+      "compatibility": "unknown"
+    },
+    "universalLegalRequirement": false
+  },
+  "accessories": {
+    "gliders": "replaceable_wear_parts",
+    "bookRests": {
+      "retrofitPossible": true,
+      "recommendation": "one_per_two_seats_when_suitable",
+      "notMandatory": true
+    }
+  },
+  "tables": {
+    "standardDimensionsCm": [
+      {
+        "length": 120,
+        "width": 70,
+        "ratioTwoToOne": false
+      },
+      {
+        "length": 120,
+        "width": 80,
+        "ratioTwoToOne": false
+      },
+      {
+        "length": 140,
+        "width": 70,
+        "ratioTwoToOne": true
+      },
+      {
+        "length": 140,
+        "width": 80,
+        "ratioTwoToOne": false
+      },
+      {
+        "length": 150,
+        "width": 70,
+        "ratioTwoToOne": false
+      },
+      {
+        "length": 150,
+        "width": 75,
+        "ratioTwoToOne": true
+      },
+      {
+        "length": 160,
+        "width": 70,
+        "ratioTwoToOne": false
+      },
+      {
+        "length": 160,
+        "width": 80,
+        "ratioTwoToOne": true
+      },
+      {
+        "length": 170,
+        "width": 70,
+        "ratioTwoToOne": false
+      },
+      {
+        "length": 170,
+        "width": 80,
+        "ratioTwoToOne": false
+      },
+      {
+        "length": 180,
+        "width": 70,
+        "ratioTwoToOne": false
+      },
+      {
+        "length": 180,
+        "width": 80,
+        "ratioTwoToOne": false
+      }
+    ],
+    "nonStandardDimensions": "available_on_request_not_unconditionally",
+    "model210": {
+      "label": "Seminar",
+      "edging": "without_edge_doubling",
+      "topThicknessMm": 25,
+      "largestAdvertisedFormatCm": {
+        "length": 140,
+        "width": 70
+      },
+      "variantMatrix": "must_check_existing_repo"
+    },
+    "otherTypicalTopThicknessMm": {
+      "value": 19,
+      "status": "typical_not_all_variants"
+    },
+    "heightMm": {
+      "value": 738,
+      "customAvailable": true,
+      "status": "typical_not_all_variants"
+    },
+    "legRecommendations": {
+      "K1": "predominantly_in_rows",
+      "K3": "frequent_end_seating",
+      "K2": "mentioned_on_legacy_site_requires_mapping",
+      "K4": "mentioned_on_legacy_site_requires_mapping"
+    },
+    "weightKgApprox": {
+      "min": 23,
+      "max": 32,
+      "dependsOn": "size_and_materials",
+      "precisePerSku": false
+    },
+    "foldedHeightCmApprox": {
+      "lengthLessThan160": 10,
+      "lengthFrom160": 8,
+      "status": "model_confirmation_needed"
+    },
+    "stackCountApprox": {
+      "inStorage": 15,
+      "onSuitableTransportCart": 10,
+      "safetyApproval": "must_verify_model_cart_load"
+    },
+    "heightSafeStorage": "flat_dry_indoor_avoid_uv_do_not_lean_on_walls",
+    "reportedStaticCenterLoadKg": {
+      "value": 100,
+      "status": "unverified_no_public_load_rating",
+      "publishAsTechnicalLoad": false
+    },
+    "doNotSlideSidewaysUnderHeavyLoad": true,
+    "finish": {
+      "HPL": "available_as_decor_family",
+      "customColorsAndEdges": "on_request",
+      "colorBinding": "screen_not_color_accurate",
+      "samplesAvailable": true
+    },
+    "customShapes": true
+  },
+  "fabrics": {
+    "groupsInSync": [
+      2,
+      3,
+      4
+    ],
+    "syncPublicStatus": "pending",
+    "b1FromGroup3": {
+      "companyRuleOfThumb": true,
+      "certificationPerFabricRequired": true,
+      "notAutomatedBadge": true
+    },
+    "cleaning": "suitable_carpet_dry_foam_subject_to_fabric_care_instructions",
+    "materialWiki": "missing"
+  },
+  "planning": {
+    "purpose": "non_binding_orientation",
+    "legallyBindingRules": false,
+    "roomPlannerIsPermitApproval": false
+  },
+  "practiceExamples": [
+    "school_custom_pc_workstations",
+    "quantities_in_rooms_with_columns_and_steps"
+  ],
+  "reviewRequired": [
+    "GS certificates per model",
+    "fabrics B1 certificates",
+    "chair width per model",
+    "cart specific capacities",
+    "table 210 eligible sizes",
+    "static table test load",
+    "Cloud_Wiki-Texte_zu_Stoffe_und_Kanten"
+  ]
+}

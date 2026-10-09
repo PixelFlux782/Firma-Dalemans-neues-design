@@ -15,6 +15,11 @@ export interface GuideSection {
   heading: string;
   paragraphs: readonly string[];
   list?: readonly string[];
+  facts?: readonly {
+    label: string;
+    value: string;
+    note?: string;
+  }[];
 }
 
 export interface GuideFaqItem {

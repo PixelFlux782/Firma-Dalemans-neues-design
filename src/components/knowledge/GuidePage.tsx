@@ -70,6 +70,17 @@ export default function GuidePage({ article }: { article: GuideArticle }) {
                   {section.list.map((item) => <li key={item} className="flex gap-3"><span className="mt-3 size-1.5 shrink-0 rounded-full bg-premium-leaf" aria-hidden />{item}</li>)}
                 </ul>
               ) : null}
+              {section.facts?.length ? (
+                <dl className="mt-7 grid gap-3 sm:grid-cols-2" aria-label={`${section.heading}: Übersicht`}>
+                  {section.facts.map((fact) => (
+                    <div key={`${fact.label}-${fact.value}`} className="min-w-0 rounded-2xl border border-premium-beige/70 bg-premium-warm/55 p-5">
+                      <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-premium-subtle">{fact.label}</dt>
+                      <dd className="mt-2 font-display text-xl font-medium text-premium-ink">{fact.value}</dd>
+                      {fact.note ? <p className="mt-2 text-sm leading-6 text-premium-muted">{fact.note}</p> : null}
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
             </section>
           ))}
         </div>
@@ -123,7 +134,7 @@ export default function GuidePage({ article }: { article: GuideArticle }) {
       </section>
 
       <CtaBanner
-        eyebrow="Stoff- und Materialberatung"
+        eyebrow={article.slug === "stoffe-und-bezuege" ? "Stoff- und Materialberatung" : "Persönliche Beratung"}
         title={article.slug === "stoffe-und-bezuege" ? "Farbe, Haptik und Nachweise am konkreten Stoff prüfen." : "Die passende Ausführung gemeinsam eingrenzen."}
         lead={article.slug === "stoffe-und-bezuege" ? "Wir senden Ihnen Stoffmuster und prüfen mit Ihnen die Anforderungen Ihres Raums." : "Wir beraten zu Nutzung, Raum, Oberfläche und den aktuell verfügbaren Ausführungen."}
         primaryHref={article.slug === "stoffe-und-bezuege" ? "/kontakt?anliegen=Stoffmuster" : "/kontakt?anliegen=Beratung"}

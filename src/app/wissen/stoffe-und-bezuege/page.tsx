@@ -8,7 +8,7 @@ const article = getPublishedGuide("stoffe-und-bezuege");
 
 export const metadata: Metadata = buildMetadata({
   title: "Bezugsstoffe & Stoffgruppen für Stapelstühle",
-  description: "Stoffgruppen, Martindale, Materialien, Stoffgewicht und Brandschutz bei Polsterbezügen verständlich erklärt.",
+  description: "Stoffgruppen, Martindale, Pflege, Stoffmuster und konkrete Brandschutznachweise bei Polsterbezügen verständlich erklärt.",
   path: "/wissen/stoffe-und-bezuege",
   keywords: ["Bezugsstoffe", "Stoffgruppen", "Martindale", "Stapelstühle", "B1"],
 });

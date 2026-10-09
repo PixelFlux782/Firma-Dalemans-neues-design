@@ -153,6 +153,7 @@ export default function StackingChairHub({ products }: { products: CommerceProdu
           <p className="mt-5 text-sm leading-7 text-premium-muted">
             Drei klare Entscheidungen ersetzen unübersichtliche Variantenlisten. Stoffgruppe und Reihenverbindung wählen Sie anschließend direkt am Modell.
           </p>
+          <Link href="/wissen/stapelstuehle-richtig-auswaehlen" className="mt-5 inline-flex min-h-11 items-center font-semibold text-premium-forest underline underline-offset-4">Auswahlhilfe im Ratgeber</Link>
         </div>
         <div className="divide-y divide-premium-beige/80 border-y border-premium-beige/80">
           {[
@@ -186,7 +187,10 @@ export default function StackingChairHub({ products }: { products: CommerceProdu
           <p className="mt-5 text-sm leading-7 text-white/70 sm:text-base">
             Eine Reihenverbindung kann Stühle bei geordneter Reihenbestuhlung zusammenführen. Welche Ausführung zum Raum und zum Ablauf passt, wird projektbezogen abgestimmt; pauschale brandschutzrechtliche Aussagen treffen wir nicht.
           </p>
-          <Link href="/raeume-planung/raumplanung" className="btn-on-dark mt-7 self-start">Bestuhlungsplanung ansehen</Link>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Link href="/wissen/reihenverbinder-fuer-stapelstuehle" className="btn-on-dark">Ratgeber lesen</Link>
+            <Link href="/raeume-planung/raumplanung" className="btn-outline-dark">Bestuhlungsplanung</Link>
+          </div>
         </div>
       </section>
 

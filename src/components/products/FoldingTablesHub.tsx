@@ -42,7 +42,7 @@ export default function FoldingTablesHub({ collection, category }: { collection:
       </section>
 
       <section aria-labelledby="table-guidance" className="grid gap-10 lg:grid-cols-[.7fr_1.3fr] lg:gap-16">
-        <div><p className="section-eyebrow">Kaufberatung</p><h2 id="table-guidance" className="section-title mt-4">Welcher Klapptisch passt zu Ihrem Raum?</h2><p className="mt-5 text-sm leading-7 text-premium-muted">{category.description}</p></div>
+        <div><p className="section-eyebrow">Kaufberatung</p><h2 id="table-guidance" className="section-title mt-4">Welcher Klapptisch passt zu Ihrem Raum?</h2><p className="mt-5 text-sm leading-7 text-premium-muted">{category.description}</p><Link href="/wissen/klapptische-richtig-waehlen" className="mt-5 inline-flex min-h-11 items-center font-semibold text-premium-forest underline underline-offset-4">Maße, 2:1-Prinzip und Gestelle im Ratgeber</Link></div>
         <div className="divide-y divide-premium-beige/80 border-y border-premium-beige/80">
           {[["Maße und Nutzung", "Wählen Sie Tischform und Format nach Personenanzahl, Aufstellung und Handhabung."], ["Oberfläche und Kante", "Oberfläche, ABS- oder Buchekante und Gestell stimmen wir auf die Beanspruchung ab."], ["Transport und Lagerung", "Lagerfläche, Transportwagen und Laufwege gehören zur Auswahl des passenden Tischs."]].map(([title, description], index) => <article key={title} className="grid gap-3 py-6 sm:grid-cols-[3rem_.7fr_1.3fr] sm:items-start sm:gap-6"><span className="font-display text-2xl text-premium-sand" aria-hidden>0{index + 1}</span><h3 className="font-semibold text-premium-ink">{title}</h3><p className="text-sm leading-7 text-premium-muted">{description}</p></article>)}
         </div>

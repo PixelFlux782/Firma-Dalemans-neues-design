@@ -8,7 +8,7 @@ const article = getPublishedGuide("tischplatten-und-kanten");
 
 export const metadata: Metadata = buildMetadata({
   title: "Tischplatten & Kanten: HPL und Melamin",
-  description: "HPL, Melamin, Tischkanten und Reinigung sachlich vergleichen und passend zur Nutzung auswählen.",
+  description: "HPL, Melamin, Tischkanten, Muster, Reinigung und flache Lagerung sachlich vergleichen und passend zur Nutzung auswählen.",
   path: "/wissen/tischplatten-und-kanten",
   keywords: ["HPL", "Melamin", "Tischplatten", "Tischkanten", "Klapptische reinigen"],
 });

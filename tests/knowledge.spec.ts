@@ -1,13 +1,23 @@
 import { expect, test } from "@playwright/test";
-import { fabricCards, getPublishedGuides, hasVerifiedFabricCard } from "../src/lib/knowledge";
+import {
+  fabricCards,
+  getPublishedGuides,
+  hasVerifiedFabricCard,
+  modelSpecific,
+  standardTableDimensions,
+  verificationNeeded,
+} from "../src/lib/knowledge";
 import { buildSearchIndex } from "../src/lib/search/index";
 
 test.describe("Wissensbereich", () => {
   test("veröffentlicht ausschließlich freigegebene Ratgeber", () => {
     const guides = getPublishedGuides();
-    expect(guides).toHaveLength(3);
+    expect(guides).toHaveLength(6);
     expect(guides.every((guide) => guide.status === "published")).toBe(true);
     expect(guides.map((guide) => guide.slug)).toEqual([
+      "stapelstuehle-richtig-auswaehlen",
+      "reihenverbinder-fuer-stapelstuehle",
+      "transport-lagerung-pflege",
       "stoffe-und-bezuege",
       "klapptische-richtig-waehlen",
       "tischplatten-und-kanten",
@@ -16,7 +26,7 @@ test.describe("Wissensbereich", () => {
 
   test("nimmt die veröffentlichten Ratgeber in die bestehende Suche auf", () => {
     const knowledgeDocuments = buildSearchIndex([], []).filter((document) => document.type === "knowledge");
-    expect(knowledgeDocuments).toHaveLength(3);
+    expect(knowledgeDocuments).toHaveLength(6);
     expect(knowledgeDocuments.map((document) => document.url)).toContain("/wissen/stoffe-und-bezuege");
   });
 
@@ -30,11 +40,12 @@ test.describe("Wissensbereich", () => {
     await expect(page.getByRole("navigation", { name: "Mobile Hauptnavigation" }).getByRole("link", { name: "Wissen", exact: true })).toBeVisible();
   });
 
-  test("rendert alle drei Ratgeber über ihre internen Routen", async ({ page }) => {
+  test("rendert alle Ratgeber über ihre internen Routen mit SEO und Breadcrumbs", async ({ page }) => {
     for (const guide of getPublishedGuides()) {
       await page.goto(`/wissen/${guide.slug}`);
       await expect(page.getByRole("heading", { level: 1, name: guide.title })).toBeVisible();
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", new RegExp(`/wissen/${guide.slug}$`));
+      await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText("Wissen");
       await expect(page.getByRole("heading", { level: 2, name: "Kurz und konkret beantwortet." })).toBeVisible();
     }
   });
@@ -48,18 +59,50 @@ test.describe("Wissensbereich", () => {
     await expect(page.getByRole("link", { name: /Muster zu Stoffgruppe/ })).toHaveCount(3);
   });
 
-  test("zeigt Themen ohne geprüften Beitrag ohne leere Detailroute", async ({ page }) => {
+  test("verlinkt alle Themenkarten auf veröffentlichte Inhalte", async ({ page }) => {
     await page.goto("/wissen");
-    for (const name of ["Brandschutz & Sicherheit", "Transport & Lagerung", "Pflege & Ersatzteile"]) {
-      const card = page.getByRole("article").filter({ has: page.getByRole("heading", { name }) });
-      await expect(card.getByText("In redaktioneller Vorbereitung")).toBeVisible();
-      await expect(card.getByRole("link")).toHaveCount(0);
+    for (const name of ["Stapelstühle", "Reihenbestuhlung", "Transport & Lagerung", "Pflege & Ersatzteile"]) {
+      const card = page.getByRole("article").filter({ has: page.getByRole("heading", { name, exact: true }) });
+      await expect(card.getByRole("link")).toHaveCount(1);
+    }
+  });
+
+  test("hält Maße und Modell-210-Grenze in der zentralen Datenquelle korrekt", () => {
+    expect(standardTableDimensions).toHaveLength(12);
+    const ratio = (length: number, width: number) => standardTableDimensions.find((item) => item.length === length && item.width === width)?.ratioTwoToOne;
+    expect(ratio(140, 70)).toBe(true);
+    expect(ratio(150, 75)).toBe(true);
+    expect(ratio(160, 80)).toBe(true);
+    expect(ratio(160, 70)).toBe(false);
+    expect(modelSpecific.table210.largestAdvertisedFormatCm).toEqual({ length: 140, width: 70 });
+    expect(standardTableDimensions.filter((item) => item.length > 140).length).toBeGreaterThan(0);
+  });
+
+  test("veröffentlicht keine offenen Zertifikats- oder Traglastzusagen", () => {
+    expect(verificationNeeded.gsCertificatesByChairModel).toBe(true);
+    expect(verificationNeeded.b1CertificateByFabricAndUpholsteryAssembly).toBe(true);
+    expect(verificationNeeded.staticTableLoad).toBe(true);
+    const publicCopy = JSON.stringify(getPublishedGuides());
+    expect(publicCopy).not.toContain("100 kg");
+    expect(publicCopy).not.toContain("GS-geprüft");
+    expect(publicCopy).not.toContain("35 Jahre");
+    expect(publicCopy).not.toContain("Panikvorschrift");
+  });
+
+  test("verweist nur auf erreichbare interne Ziele", async ({ request }) => {
+    const hrefs = new Set(getPublishedGuides().flatMap((guide) => guide.relatedLinks.map((link) => link.href)));
+    for (const href of hrefs) {
+      const response = await request.get(href);
+      expect(response.status(), href).toBeLessThan(400);
     }
   });
 
   test("bleibt auf allen Wissensrouten mobil und am Desktop ohne horizontalen Überlauf", async ({ page }) => {
     const routes = [
       "/wissen",
+      "/wissen/stapelstuehle-richtig-auswaehlen",
+      "/wissen/reihenverbinder-fuer-stapelstuehle",
+      "/wissen/transport-lagerung-pflege",
       "/wissen/stoffe-und-bezuege",
       "/wissen/klapptische-richtig-waehlen",
       "/wissen/tischplatten-und-kanten",

@@ -20,6 +20,7 @@ const primaryLinks: readonly NavigationLink[] = [
   { href: "/raumplaner", label: "Raumplaner" },
   { href: "/beratung-service", label: "Beratung & Service" },
   { href: "/sonderloesungen", label: "Sonderlösungen" },
+  { href: "/wissen", label: "Wissen" },
 ] as const;
 
 const moreGroups = [

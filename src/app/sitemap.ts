@@ -4,6 +4,7 @@ import { products } from "@/lib/products";
 import { isCommerceLegacyProduct } from "@/lib/product-routes";
 import { getCollections, getProducts } from "@/lib/commerce/service";
 import { absoluteUrl, siteUrl } from "@/lib/seo";
+import { knowledgeCategories, knowledgeEntries } from "@/lib/knowledge";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
@@ -27,6 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/sonderposten",
     "/firma",
     "/kontakt",
+    "/wissen",
   ];
 
   const staticEntries = staticRoutes.map((path) => ({
@@ -50,6 +52,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  const knowledgeCategoryEntries = knowledgeCategories.map((category) => ({
+    url: absoluteUrl(`/wissen/${category.slug}`),
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  const knowledgeArticleEntries = knowledgeEntries.map((entry) => ({
+    url: absoluteUrl(`/wissen/${entry.category}/${entry.slug}`),
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
   const shopCollectionEntries = shopCollections.filter((collection) => collection.handle !== "stapelstuehle").map((collection) => ({
     url: `${siteUrl}/produkte/sortiment/${collection.handle}`,
     lastModified: now,
@@ -68,6 +84,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticEntries,
     ...categoryEntries,
     ...productEntries,
+    ...knowledgeCategoryEntries,
+    ...knowledgeArticleEntries,
     ...shopCollectionEntries,
     ...shopProductEntries,
     ...shopProducts.filter((product) => product.stackingChair).map((product) => ({

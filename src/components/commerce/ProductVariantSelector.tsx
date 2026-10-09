@@ -13,6 +13,8 @@ import {
   priceForQuantity,
 } from "@/lib/commerce/cart/lines";
 import type { CommerceProduct, CommerceProductVariant } from "@/lib/commerce/types";
+import KnowledgeInfoTrigger from "@/components/knowledge/KnowledgeInfoTrigger";
+import { getKnowledgeOptionIdForProductOption } from "@/lib/knowledge/product-options";
 
 function selectionFromVariant(variant: CommerceProductVariant) {
   return Object.fromEntries(variant.selectedOptions.map((option) => [option.name, option.value]));
@@ -148,24 +150,31 @@ export default function ProductVariantSelector({
                     ? priceForQuantity(optionVariant, quantity)
                     : null;
                   return (
-                    <button
-                      key={value}
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() => selectOption(group.name, value)}
-                      className={`${isTableConfigurator ? "min-h-12" : "min-h-11"} rounded-2xl border px-4 py-2.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-2 ${
-                        active
-                          ? "border-premium-forest bg-premium-forest text-white"
-                          : "border-premium-beige bg-premium-canvas/70 text-premium-charcoal hover:border-premium-leaf hover:bg-white"
-                      }`}
-                    >
-                      <span className="block">{value}</span>
-                      {optionPrice ? (
-                        <span className={`mt-1 block text-xs ${active ? "text-white/75" : "text-premium-muted"}`}>
-                          {formatCommerceMoney(optionPrice)}
-                        </span>
+                    <div key={value} className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => selectOption(group.name, value)}
+                        className={`${isTableConfigurator ? "min-h-12" : "min-h-11"} rounded-2xl border px-4 py-2.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-2 ${
+                          active
+                            ? "border-premium-forest bg-premium-forest text-white"
+                            : "border-premium-beige bg-premium-canvas/70 text-premium-charcoal hover:border-premium-leaf hover:bg-white"
+                        }`}
+                      >
+                        <span className="block">{value}</span>
+                        {optionPrice ? (
+                          <span className={`mt-1 block text-xs ${active ? "text-white/75" : "text-premium-muted"}`}>
+                            {formatCommerceMoney(optionPrice)}
+                          </span>
+                        ) : null}
+                      </button>
+                      {isTableConfigurator && group.name === "Kantenart" ? (
+                        <KnowledgeInfoTrigger
+                          optionId={getKnowledgeOptionIdForProductOption(group.name, value)}
+                          label={`Tischkante ${value}`}
+                        />
                       ) : null}
-                    </button>
+                    </div>
                   );
                 })}
               </div>

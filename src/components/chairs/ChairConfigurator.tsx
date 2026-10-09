@@ -21,6 +21,8 @@ import {
 } from "@/lib/commerce/stacking-chairs";
 import type { CommerceProduct } from "@/lib/commerce/types";
 import type { CommerceImage } from "@/lib/commerce/types";
+import KnowledgeInfoTrigger from "@/components/knowledge/KnowledgeInfoTrigger";
+import { getKnowledgeOptionIdForProductOption } from "@/lib/knowledge/product-options";
 
 const upholsteryOptions: Array<{ value: ChairUpholstery; label: string; note: string }> = [
   { value: "none", label: "Ungepolstert", note: "ohne Stoffgruppe" },
@@ -243,19 +245,26 @@ export default function ChairConfigurator({
             <p className="mt-1 text-xs leading-5 text-premium-muted">Material- und Farbinformationen zu den Gruppen werden noch ergänzt.</p>
             <div className="mt-3 grid grid-cols-3 gap-2">
               {fabricGroups.map((group) => (
-                <label key={group} className="relative cursor-pointer">
-                  <input
-                    type="radio"
-                    name="fabricGroup"
-                    value={group}
-                    checked={configuration.fabricGroup === group}
-                    onChange={() => setConfiguration((current) => ({ ...current, fabricGroup: group }))}
-                    className="peer sr-only"
+                <div key={group} className="relative min-w-0">
+                  <label className="relative block cursor-pointer">
+                    <input
+                      type="radio"
+                      name="fabricGroup"
+                      value={group}
+                      checked={configuration.fabricGroup === group}
+                      onChange={() => setConfiguration((current) => ({ ...current, fabricGroup: group }))}
+                      className="peer sr-only"
+                    />
+                    <span className="flex min-h-12 items-center justify-center rounded-xl border border-premium-beige bg-white/65 px-10 text-sm font-semibold transition peer-checked:border-premium-forest peer-checked:bg-premium-forest peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-premium-sand peer-focus-visible:ring-offset-2">
+                      Gruppe {group}
+                    </span>
+                  </label>
+                  <KnowledgeInfoTrigger
+                    optionId={getKnowledgeOptionIdForProductOption("Stoffgruppe", `Gruppe ${group}`)}
+                    label={`Stoffgruppe ${group}`}
+                    className="absolute right-2 top-2 size-8"
                   />
-                  <span className="flex min-h-12 items-center justify-center rounded-xl border border-premium-beige bg-white/65 px-3 text-sm font-semibold transition peer-checked:border-premium-forest peer-checked:bg-premium-forest peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-premium-sand peer-focus-visible:ring-offset-2">
-                    Gruppe {group}
-                  </span>
-                </label>
+                </div>
               ))}
             </div>
           </fieldset>

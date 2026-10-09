@@ -39,7 +39,7 @@ export const knowledgeCategories = [
   },
 ] as const satisfies readonly KnowledgeCategory[];
 
-const fabricGroupEntries = ["1", "2", "3"].map((group): KnowledgeEntry => ({
+const fabricGroupEntries = ["1", "2", "3", "4"].map((group): KnowledgeEntry => ({
   id: `fabric-group-${group}`,
   slug: `stoffgruppe-${group}`,
   category: "stoffe-polster",

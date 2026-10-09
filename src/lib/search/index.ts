@@ -8,6 +8,7 @@ import type {
 import { normalizeSearchText } from "@/lib/search/normalize";
 import { supportSearchEntries, type SupportSearchEntry } from "@/lib/search/support-documents";
 import type { SearchDocument, SearchField, SearchFieldName } from "@/lib/search/types";
+import { getPublishedGuides, type GuideArticle } from "@/lib/knowledge";
 
 type SearchCollection = Pick<
   CommerceCollection,
@@ -174,6 +175,36 @@ function supportDocument(entry: SupportSearchEntry): SearchDocument {
   };
 }
 
+function knowledgeDocument(article: GuideArticle): SearchDocument {
+  const sectionText = article.body.flatMap((section) => [
+    section.heading,
+    ...section.paragraphs,
+    ...(section.list ?? []),
+  ]);
+  return {
+    type: "knowledge",
+    id: `knowledge-${article.slug}`,
+    title: article.title,
+    url: `/wissen/${article.slug}`,
+    description: article.description,
+    image: null,
+    priceStatus: null,
+    priceLabel: null,
+    aliases: [],
+    variantLabels: [],
+    dataStatus: null,
+    featuredWhenEmpty: false,
+    fields: [
+      field("title", article.title),
+      field("handle", article.slug),
+      field("keywords", article.category),
+      field("description", article.description),
+      ...fields("description", sectionText),
+      ...fields("description", article.faq.flatMap((item) => [item.question, item.answer])),
+    ].filter((value): value is SearchField => Boolean(value)),
+  };
+}
+
 export function buildSearchIndex(
   products: readonly CommerceProduct[],
   collections: readonly SearchCollection[],
@@ -183,5 +214,6 @@ export function buildSearchIndex(
     ...products.map(productDocument),
     ...collections.map(collectionDocument),
     ...supportEntries.map(supportDocument),
+    ...getPublishedGuides().map(knowledgeDocument),
   ];
 }

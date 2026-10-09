@@ -2,6 +2,8 @@ import { knowledgeCategories, knowledgeEntries } from "@/lib/knowledge/data";
 import type { KnowledgeCategorySlug } from "@/lib/knowledge/types";
 
 export * from "@/lib/knowledge/types";
+export * from "@/lib/knowledge/guides";
+export * from "@/lib/knowledge/fabric-cards";
 export { knowledgeCategories, knowledgeEntries };
 
 export function getKnowledgeCategory(slug: string) {

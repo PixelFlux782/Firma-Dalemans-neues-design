@@ -15,7 +15,7 @@ export default function KnowledgePreview({
   className = "",
   headingLevel = 2,
 }: KnowledgePreviewProps) {
-  const href = `/wissen/${entry.category}/${entry.slug}`;
+  const href = entry.href ?? `/wissen/${entry.category}/${entry.slug}`;
   const Heading = `h${headingLevel}` as const;
 
   return (

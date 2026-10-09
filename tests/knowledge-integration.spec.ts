@@ -30,7 +30,7 @@ test.describe("Wissenszuordnung in Konfiguratoren", () => {
       await expect(dialog.getByRole("heading", { name: `Stoffgruppe ${group}` })).toBeVisible();
       await expect(dialog.getByRole("link", { name: /Mehr erfahren/ })).toHaveAttribute(
         "href",
-        `/wissen/stoffe-polster/stoffgruppe-${group}`,
+        `/wissen/stoffkarten#stoffgruppe-${group}`,
       );
       await dialog.getByRole("button", { name: "Schließen" }).click();
       await expect(dialog).toHaveCount(0);

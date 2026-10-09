@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "sourcePage": "https://zachert-gmbh.de/stoffe-und-leder.html",
+  "documents": [
+    {
+      "id": "historical-multi-group-candidate",
+      "groups": [2, 3, 4],
+      "sourcePage": "https://zachert-gmbh.de/stoffe-und-leder.html",
+      "sourcePdfUrl": "https://zachert-gmbh.de/media/pdf/5a/48/83/Stoffmuster57e3d69143d40.pdf",
+      "sha256": "af2a84f4e3854b0de15dee97526e2f6243017522b3df1f50f87cb6a2776db353",
+      "sourceCheckedAt": "2026-10-09T17:07:20.000Z",
+      "currentPublicFilename": null,
+      "approvalStatus": "needs_review",
+      "notes": "Live geprüft am 09.10.2026: 12-seitige Zachert-Stoffkollektion, Dokumentstand Januar 2015, Gruppen 2 bis 7. Gruppenzuordnung 2/3/4 ist nur ein Review-Vorschlag; Aktualität und Rehosting-Rechte sind nicht belegt."
+    }
+  ]
+}

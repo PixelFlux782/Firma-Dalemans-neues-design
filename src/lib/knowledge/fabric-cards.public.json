@@ -1,0 +1,17 @@
+[
+  {
+    "group": 2,
+    "title": "Stoffgruppe 2",
+    "status": "pending"
+  },
+  {
+    "group": 3,
+    "title": "Stoffgruppe 3",
+    "status": "pending"
+  },
+  {
+    "group": 4,
+    "title": "Stoffgruppe 4",
+    "status": "pending"
+  }
+]

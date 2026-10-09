@@ -39,7 +39,7 @@ export const knowledgeCategories = [
   },
 ] as const satisfies readonly KnowledgeCategory[];
 
-const fabricGroupEntries = ["1", "2", "3", "4"].map((group): KnowledgeEntry => ({
+const fabricGroupEntries = ["2", "3", "4"].map((group): KnowledgeEntry => ({
   id: `fabric-group-${group}`,
   slug: `stoffgruppe-${group}`,
   category: "stoffe-polster",
@@ -48,6 +48,7 @@ const fabricGroupEntries = ["1", "2", "3", "4"].map((group): KnowledgeEntry => (
   description:
     `Diese Seite bündelt die verlässlichen Informationen zur Stoffgruppe ${group}. Technische Eigenschaften, Materialangaben und Pflegehinweise werden ergänzt, sobald sie bestätigt vorliegen.`,
   status: "in-progress",
+  href: `/wissen/stoffkarten#stoffgruppe-${group}`,
   sections: [
     {
       id: "informationsstand",

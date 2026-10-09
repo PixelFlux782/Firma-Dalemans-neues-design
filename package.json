@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "sync:fabric-cards:check": "node --use-system-ca scripts/sync-fabric-cards.mjs --check",
+    "sync:fabric-cards:apply": "node --use-system-ca scripts/sync-fabric-cards.mjs --apply",
+    "test:fabric-cards": "node --test tests/fabric-card-sync.test.mjs",
     "test:prelaunch": "playwright test"
   },
   "dependencies": {

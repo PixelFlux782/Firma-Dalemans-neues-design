@@ -4,7 +4,7 @@ import { products } from "@/lib/products";
 import { isCommerceLegacyProduct } from "@/lib/product-routes";
 import { getCollections, getProducts } from "@/lib/commerce/service";
 import { absoluteUrl, siteUrl } from "@/lib/seo";
-import { knowledgeCategories, knowledgeEntries } from "@/lib/knowledge";
+import { getPublishedGuides } from "@/lib/knowledge";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
@@ -29,6 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/firma",
     "/kontakt",
     "/wissen",
+    "/wissen/stoffkarten",
   ];
 
   const staticEntries = staticRoutes.map((path) => ({
@@ -52,16 +53,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const knowledgeCategoryEntries = knowledgeCategories.map((category) => ({
-    url: absoluteUrl(`/wissen/${category.slug}`),
-    lastModified: now,
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
-
-  const knowledgeArticleEntries = knowledgeEntries.map((entry) => ({
-    url: absoluteUrl(`/wissen/${entry.category}/${entry.slug}`),
-    lastModified: now,
+  const knowledgeArticleEntries = getPublishedGuides().map((entry) => ({
+    url: absoluteUrl(`/wissen/${entry.slug}`),
+    lastModified: new Date(`${entry.updatedAt}T12:00:00+02:00`),
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
@@ -84,7 +78,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticEntries,
     ...categoryEntries,
     ...productEntries,
-    ...knowledgeCategoryEntries,
     ...knowledgeArticleEntries,
     ...shopCollectionEntries,
     ...shopProductEntries,

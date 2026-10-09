@@ -2,11 +2,21 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import CtaBanner from "@/components/ui/CtaBanner";
 import { StructuredData } from "@/components/StructuredData";
+import CommerceProductCard from "@/components/commerce/CommerceProductCard";
+import { getProducts } from "@/lib/commerce/service";
 import type { GuideArticle } from "@/lib/knowledge";
+import { regulatory } from "@/lib/knowledge/advisory-facts";
+import { getGuideIntegration } from "@/lib/knowledge/advisory-integration";
 import { absoluteUrl, siteName } from "@/lib/seo";
 
-export default function GuidePage({ article }: { article: GuideArticle }) {
+export default async function GuidePage({ article }: { article: GuideArticle }) {
   const path = `/wissen/${article.slug}`;
+  const integration = getGuideIntegration(article.slug);
+  const allProducts = integration ? await getProducts() : [];
+  const productHandles: readonly string[] = integration?.productHandles ?? [];
+  const relevantProducts = productHandles
+    .map((handle) => allProducts.find((product) => product.handle === handle))
+    .filter((product): product is NonNullable<typeof product> => Boolean(product));
   const date = new Intl.DateTimeFormat("de-DE", {
     day: "2-digit",
     month: "2-digit",
@@ -118,6 +128,37 @@ export default function GuidePage({ article }: { article: GuideArticle }) {
           ))}
         </div>
       </section>
+
+      {relevantProducts.length ? (
+        <section aria-labelledby="guide-products">
+          <p className="section-eyebrow">Passende Produkte</p>
+          <h2 id="guide-products" className="section-title mt-4">Aus dem Wissen direkt zur Auswahl.</h2>
+          <p className="mt-5 max-w-3xl text-sm leading-7 text-premium-muted">Die Auswahl zeigt vorhandene Produkte, die zum Thema passen. Welche Ausführung konkret geeignet ist, hängt von Raum, Nutzung und den verfügbaren Varianten ab.</p>
+          <div className="mt-8 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+            {relevantProducts.map((product, index) => <CommerceProductCard key={product.id} product={product} priority={index === 0} />)}
+          </div>
+        </section>
+      ) : null}
+
+      {integration ? (
+        <section className={`grid overflow-hidden rounded-[2rem] ${integration.roomPlanner ? "lg:grid-cols-2" : "lg:grid-cols-[1fr_auto]"}`} aria-label="Planung und persönliche Beratung">
+          {integration.roomPlanner ? (
+            <div className="bg-premium-ink px-7 py-10 text-white sm:px-10 lg:px-12 lg:py-12">
+              <p className="section-eyebrow text-premium-sand">Raumplaner</p>
+              <h2 className="mt-4 font-display text-3xl font-medium text-white">{integration.roomPlanner.title}</h2>
+              <p className="mt-4 text-sm leading-7 text-white/70">{integration.roomPlanner.description}</p>
+              <p className="mt-3 text-xs leading-6 text-white/55">{regulatory.planningScope}</p>
+              <Link href="/raumplaner" className="btn-dark-primary mt-7">Raumplaner öffnen</Link>
+            </div>
+          ) : null}
+          <div className="flex flex-col justify-center bg-premium-warm/80 px-7 py-10 sm:px-10 lg:px-12 lg:py-12">
+            <p className="section-eyebrow">Wenn die Auswahl offen bleibt</p>
+            <h2 className="mt-4 font-display text-3xl font-medium text-premium-ink">Persönlich passend eingrenzen.</h2>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-premium-muted">{integration.consultation.description}</p>
+            <Link href={`/kontakt?anliegen=${encodeURIComponent(integration.consultation.concern)}`} className="btn-primary mt-7 w-fit">Beratung anfragen</Link>
+          </div>
+        </section>
+      ) : null}
 
       <section aria-labelledby="related-guides">
         <p className="section-eyebrow">Passend dazu</p>

@@ -8,6 +8,12 @@ const commerceHandles: Record<string, string> = {
   bistrotisch: "bistrotisch",
 };
 
+export function commerceProductPath(product: { handle: string; stackingChair?: unknown }) {
+  return product.stackingChair
+    ? `/produkte/stapelstuehle/${product.handle}`
+    : `/produkte/artikel/${product.handle}`;
+}
+
 export function productPath(slug: string) {
   const handle = commerceHandles[slug];
   return handle ? `/produkte/artikel/${handle}` : `/produkte/${slug}`;

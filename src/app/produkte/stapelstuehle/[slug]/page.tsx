@@ -5,6 +5,7 @@ import { StructuredData } from "@/components/StructuredData";
 import { getProductByHandle, getProductsByCollection } from "@/lib/commerce/service";
 import { chairConfigurationFromSearchParams, isStackingChairProduct } from "@/lib/commerce/stacking-chairs";
 import { commerceDetailData } from "@/lib/product-detail-data";
+import { getRelatedGuidesForProduct } from "@/lib/knowledge/advisory-integration";
 import { absoluteUrl, buildMetadata } from "@/lib/seo";
 
 interface Props { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }
@@ -32,6 +33,7 @@ export default async function StackingChairModelPage({ params, searchParams }: P
   if (!product?.stackingChair) notFound();
   const path = modelPath(product.handle);
   const data = commerceDetailData(product, "Stapelstuhl", "/produkte/stapelstuehle", path);
+  const relatedGuides = getRelatedGuidesForProduct({ handle: product.handle, collectionHandles: product.collectionHandles });
   if (product.stackingChair.editorialStatus === "reference") {
     data.editorialTitle = "Für Räume, die regelmäßig wechseln.";
     data.faq = [...product.faq, ...referenceFaq];
@@ -47,6 +49,6 @@ export default async function StackingChairModelPage({ params, searchParams }: P
       { "@type": "ListItem", position: 4, name: product.title, item: absoluteUrl(path) }] },
     ...(data.faq?.length ? [{ "@type": "FAQPage", mainEntity: data.faq.map(item => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) }] : []),
   ] };
-  return <><StructuredData data={structuredData} /><ChairDetail product={product} data={data}
+  return <><StructuredData data={structuredData} /><ChairDetail product={product} data={data} relatedGuides={relatedGuides}
     configuration={chairConfigurationFromSearchParams(query)} quantity={Number(Array.isArray(query.menge) ? query.menge[0] : query.menge) || 1} /></>;
 }

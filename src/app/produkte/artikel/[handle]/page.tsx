@@ -6,6 +6,7 @@ import ProductDetailPage from "@/components/product-detail/ProductDetailPage";
 import { StructuredData } from "@/components/StructuredData";
 import { getCollectionByHandle, getProductByHandle, getProducts } from "@/lib/commerce/service";
 import { commerceDetailData } from "@/lib/product-detail-data";
+import { getRelatedGuidesForProduct } from "@/lib/knowledge/advisory-integration";
 import { absoluteUrl, buildMetadata } from "@/lib/seo";
 
 interface Props { params: Promise<{ handle: string }>; searchParams: Promise<{ variant?: string | string[] }> }
@@ -28,12 +29,13 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const collection = product.collectionHandles[0] ? await getCollectionByHandle(product.collectionHandles[0]) : null;
   const path = `/produkte/artikel/${product.handle}`;
   const data = commerceDetailData(product, collection?.title ?? "Produkt", collection ? `/produkte/sortiment/${collection.handle}` : "/produkte", path);
+  const relatedGuides = getRelatedGuidesForProduct({ handle: product.handle, collectionHandles: product.collectionHandles });
   const structuredData = { "@context": "https://schema.org", "@type": "Product", "@id": absoluteUrl(`${path}#product`),
     name: product.title, description: product.description, url: absoluteUrl(path),
     ...(product.images.length ? { image: product.images.map(image => absoluteUrl(image.url)) } : {}),
     ...(collection ? { category: collection.title } : {}),
     additionalProperty: product.specifications.map(item => ({ "@type": "PropertyValue", name: item.name, value: item.value })) };
-  return <><StructuredData data={structuredData} /><ProductDetailPage data={data}
+  return <><StructuredData data={structuredData} /><ProductDetailPage data={data} relatedGuides={relatedGuides}
     media={<CommerceMedia image={product.featuredImage} images={product.images} fallbackLabel={product.title} priority sizes="(min-width: 1024px) 54vw, 100vw" aspectRatio="5 / 4" imageInset={product.handle === "stuhltransportwagen" ? "2%" : "6%"} className="min-h-[330px] rounded-[2.25rem] sm:min-h-[500px] lg:min-h-[620px]" />}
     purchase={<ProductVariantSelector product={product} initialVariantId={Array.isArray(query.variant) ? query.variant[0] : query.variant} />}
   /></>;

@@ -2,7 +2,9 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ProductTechnicalData from "@/components/chairs/ProductTechnicalData";
+import RelatedGuideLinks from "@/components/knowledge/RelatedGuideLinks";
 import type { CommerceFaqItem, CommerceSpecification } from "@/lib/commerce/types";
+import type { RelatedGuideLink } from "@/lib/knowledge/advisory-integration";
 
 export interface ProductDetailData {
   path: string;
@@ -26,11 +28,12 @@ export interface ProductDetailData {
   downloads?: { title: string; url: string }[];
 }
 
-export default function ProductDetailPage({ data, media, purchase, children }: {
+export default function ProductDetailPage({ data, media, purchase, children, relatedGuides = [] }: {
   data: ProductDetailData;
   media: ReactNode;
   purchase: ReactNode;
   children?: ReactNode;
+  relatedGuides?: readonly RelatedGuideLink[];
 }) {
   const headingId = `product-${data.path.replace(/[^a-z0-9]/gi, "-")}`;
   return <div className="flex min-w-0 flex-col gap-16 md:gap-20 lg:gap-24">
@@ -55,6 +58,7 @@ export default function ProductDetailPage({ data, media, purchase, children }: {
     {data.variants?.length ? <section aria-labelledby={`${headingId}-variants`}><p className="section-eyebrow">Varianten &amp; Ausführungen</p><h2 id={`${headingId}-variants`} className="section-title mt-4">Passend zum Bedarf auswählen.</h2><div className="mt-9 grid gap-6 md:grid-cols-3">{data.variants.map((variant, index) => <article key={variant} className="border-t border-premium-beige/80 pt-5"><span className="font-display text-2xl text-premium-sand" aria-hidden>{String(index + 1).padStart(2, "0")}</span><p className="mt-3 text-sm leading-7 text-premium-muted">{variant}</p></article>)}</div></section> : null}
     {data.editorialNotes?.length ? <section aria-labelledby={`${headingId}-notes`}><p className="section-eyebrow">Planung &amp; Anwendung</p><h2 id={`${headingId}-notes`} className="section-title mt-4">Worauf es im Einsatz ankommt.</h2><ul className="mt-7 grid gap-4 text-sm leading-7 text-premium-muted md:grid-cols-2">{data.editorialNotes.map(note => <li key={note} className="border-t border-premium-beige/80 pt-4">{note}</li>)}</ul></section> : null}
     {children}
+    <RelatedGuideLinks guides={relatedGuides} />
     <ProductTechnicalData items={data.specifications ?? []} />
     {data.downloads?.length ? <section><p className="section-eyebrow">Downloads</p><h2 className="section-title-functional mt-4">Unterlagen zum Produkt.</h2><div className="mt-7 divide-y divide-premium-beige/80 border-y border-premium-beige/80">{data.downloads.map(item => <a key={item.url} href={item.url} className="flex min-h-14 items-center justify-between gap-5 py-4 text-sm font-semibold text-premium-forest hover:underline">{item.title}<span aria-hidden>↓</span></a>)}</div></section> : null}
     {data.help ? <section className="relative overflow-hidden rounded-[2rem] bg-premium-warm/80 px-7 py-10 sm:px-10 lg:px-14 lg:py-14"><div className="grid items-end gap-9 lg:grid-cols-[1fr_auto] lg:gap-14"><div><p className="section-eyebrow">{data.help.eyebrow}</p><h2 className="section-title mt-4">{data.help.title}</h2><p className="mt-5 max-w-2xl text-sm leading-7 text-premium-muted sm:text-base">{data.help.text}</p></div><div className="flex flex-wrap gap-3"><Link href={data.help.href} className="btn-primary text-center">{data.help.label}</Link>{data.help.secondaryHref ? <Link href={data.help.secondaryHref} className="btn-secondary text-center">{data.help.secondaryLabel}</Link> : null}</div></div></section> : null}

@@ -3,6 +3,7 @@ import CommerceMedia from "@/components/commerce/CommerceMedia";
 import CommercePrice from "@/components/commerce/CommercePrice";
 import { lowestProductUnitPrice } from "@/lib/commerce/money";
 import type { CommerceProduct } from "@/lib/commerce/types";
+import { commerceProductPath } from "@/lib/product-routes";
 
 export default function CommerceProductCard({
   product,
@@ -15,11 +16,12 @@ export default function CommerceProductCard({
     (variant) => variant.priceDataStatus === "development",
   );
   const lowestPrice = lowestProductUnitPrice(product);
+  const href = commerceProductPath(product);
 
   return (
     <article className="group min-w-0 border-t border-premium-beige/80 pt-5">
       <Link
-        href={`/produkte/artikel/${product.handle}`}
+        href={href}
         className="block overflow-hidden rounded-[1.75rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-4 focus-visible:ring-offset-premium-canvas"
         aria-label={`${product.title} ansehen`}
       >
@@ -44,7 +46,7 @@ export default function CommerceProductCard({
         ) : null}
         <h2 className="font-display text-2xl font-medium leading-tight tracking-[-0.02em] text-premium-ink">
           <Link
-            href={`/produkte/artikel/${product.handle}`}
+            href={href}
             className="rounded-sm underline-offset-4 transition hover:text-premium-bronze hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand"
           >
             {product.title}
@@ -54,7 +56,7 @@ export default function CommerceProductCard({
           {product.shortDescription}
         </p>
         <Link
-          href={`/produkte/artikel/${product.handle}`}
+          href={href}
           className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 transition hover:text-premium-bronze hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand"
         >
           Details &amp; Ausführungen <span className="ml-2" aria-hidden>→</span>

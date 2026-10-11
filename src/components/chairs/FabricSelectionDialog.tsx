@@ -135,7 +135,7 @@ export default function FabricSelectionDialog({
             </details>
 
             <div className="mt-7">
-              <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-semibold text-premium-ink">Farbe und Farbcode</p><p className="mt-1 text-xs leading-5 text-premium-muted">Nur aktuell in Produktdaten bestätigte Codes sind direkt auswählbar.</p></div><a href={active.colorCardUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline underline-offset-4">Vollständige Farbkarte öffnen ↗</a></div>
+              <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-semibold text-premium-ink">Farbe und Farbcode</p><p className="mt-1 text-xs leading-5 text-premium-muted">Nur aktuell in Produktdaten bestätigte Codes sind direkt auswählbar.</p></div></div>
               {active.colors.length > 0 ? (
                 <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3" data-testid="fabric-colors">
                   {active.colors.map((color) => {
@@ -146,6 +146,19 @@ export default function FabricSelectionDialog({
                   })}
                 </div>
               ) : <p className="mt-4 rounded-2xl border border-premium-beige/70 bg-white/60 p-4 text-sm leading-6 text-premium-muted">Die aktuelle Gesamtpalette finden Sie in der Farbkarte. Den gewünschten Code übernehmen wir anschließend in Ihre Anfrage.</p>}
+              {active.colorCardPublicationStatus === "approved" ? (
+                <details className="mt-5 rounded-2xl border border-premium-beige/70 bg-white/65 p-4" data-testid="fabric-color-card">
+                  <summary className="cursor-pointer text-sm font-semibold text-premium-forest underline underline-offset-4">Vollständige Farbkarte ansehen</summary>
+                  <div className="mt-4 overflow-hidden rounded-xl border border-premium-beige bg-white">
+                    <object data={active.colorCardUrl} type="application/pdf" className="h-[65vh] min-h-96 w-full" aria-label={`Farbkarte ${active.name}`}>
+                      <p className="p-4 text-sm text-premium-muted">Die PDF-Vorschau wird von diesem Browser nicht unterstützt.</p>
+                    </object>
+                  </div>
+                  <a href={active.colorCardUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline underline-offset-4">Farbkarte in neuem Tab öffnen ↗</a>
+                </details>
+              ) : (
+                <p className="mt-5 rounded-2xl border border-premium-beige/70 bg-premium-warm/55 p-4 text-sm leading-6 text-premium-muted" data-testid="fabric-color-card-rights-review">Die vollständige Farbkarte wird nach Bestätigung der Veröffentlichungsrechte hier bereitgestellt.</p>
+              )}
             </div>
 
             <details className="mt-7 rounded-3xl border border-premium-beige/70 bg-white/65 p-5" data-testid="fabric-comparison">

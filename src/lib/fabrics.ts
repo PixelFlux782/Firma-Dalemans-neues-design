@@ -17,6 +17,7 @@ export interface FabricCollection {
   fireSafety?: string[];
   colors: FabricColor[];
   colorCardUrl: string;
+  colorCardPublicationStatus: "approved" | "rights-review";
   informationAsOf: string;
 }
 
@@ -40,7 +41,8 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "24017", name: "Weinrot" },
       { code: "26071", name: "Royal" },
     ],
-    colorCardUrl: "https://zachert-gmbh.de/media/pdf/da/03/9b/Bondai_cartella-1.pdf",
+    colorCardUrl: "/materials/fabrics/bondai.pdf",
+    colorCardPublicationStatus: "rights-review",
     informationAsOf: currentAsOf,
   },
   {
@@ -53,7 +55,8 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
     properties: ["Einfarbig oder leicht kontrastiert", "OEKO-TEX®"],
     fireSafety: ["DIN 4102 B1", "EN 1021-1 & 2", "Klassifizierung teils abhängig vom Polsteraufbau"],
     colors: [],
-    colorCardUrl: "https://zachert-gmbh.de/media/pdf/b8/1c/44/Stofflarte_Radio.pdf",
+    colorCardUrl: "/materials/fabrics/radio.pdf",
+    colorCardPublicationStatus: "rights-review",
     informationAsOf: currentAsOf,
   },
   {
@@ -72,7 +75,8 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "3169", name: "Kornblume" }, { code: "3171", name: "Mittelblau" },
       { code: "3338", name: "Agave" }, { code: "3343", name: "Orchidee" },
     ],
-    colorCardUrl: "https://zachert-gmbh.de/media/pdf/5b/d7/bb/VOWAled_Pisa.pdf",
+    colorCardUrl: "/materials/fabrics/pisa.pdf",
+    colorCardPublicationStatus: "rights-review",
     informationAsOf: currentAsOf,
   },
   {
@@ -90,7 +94,8 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "3045", name: "Taboo" }, { code: "3077", name: "Appledore" },
       { code: "3100", name: "Ocean" },
     ],
-    colorCardUrl: "https://zachert-gmbh.de/media/pdf/ec/2d/b9/Xtreme_YS_0223_WEB.pdf",
+    colorCardUrl: "/materials/fabrics/xtreme.pdf",
+    colorCardPublicationStatus: "rights-review",
     informationAsOf: currentAsOf,
   },
   {
@@ -104,7 +109,8 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
     care: "Regelmäßig absaugen; feucht abwischen oder geeignetes Polstershampoo verwenden. Waschbar bis 60 °C gemäß Herstellerangabe.",
     fireSafety: ["DIN 4102 B1", "EN 1021-1 & 2", "Prüfungen gelten für den Stoff bzw. angegebenen Aufbau"],
     colors: [],
-    colorCardUrl: "https://zachert-gmbh.de/media/pdf/d3/05/5b/X2_AK_0423_WEB.pdf",
+    colorCardUrl: "/materials/fabrics/x2.pdf",
+    colorCardPublicationStatus: "rights-review",
     informationAsOf: currentAsOf,
   },
   {
@@ -122,7 +128,8 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "34008", name: "Rot" }, { code: "34009", name: "Weinrot" },
       { code: "36026", name: "Hellblau" }, { code: "36071", name: "Blau" },
     ],
-    colorCardUrl: "https://zachert-gmbh.de/media/pdf/d7/9e/ef/King_Flex_cartella.pdf",
+    colorCardUrl: "/materials/fabrics/king-flex.pdf",
+    colorCardPublicationStatus: "rights-review",
     informationAsOf: currentAsOf,
   },
   {
@@ -140,7 +147,8 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "36580", name: "Blau/Schwarz" }, { code: "36072", name: "Blau" },
       { code: "34027", name: "Rot" }, { code: "35004", name: "Lila" },
     ],
-    colorCardUrl: "https://zachert-gmbh.de/media/pdf/26/3e/14/King_L_cartella.pdf",
+    colorCardUrl: "/materials/fabrics/king-l.pdf",
+    colorCardPublicationStatus: "rights-review",
     informationAsOf: currentAsOf,
   },
   {
@@ -158,7 +166,8 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "CSE10", name: "Everlasting" }, { code: "CSE18", name: "Event / Grün" },
       { code: "CSE17", name: "Phase / Pink" },
     ],
-    colorCardUrl: "https://zachert-gmbh.de/media/pdf/df/7a/7a/Era_0623_WEB.pdf",
+    colorCardUrl: "/materials/fabrics/era.pdf",
+    colorCardPublicationStatus: "rights-review",
     informationAsOf: currentAsOf,
   },
   {
@@ -172,7 +181,8 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
     care: "Regelmäßig absaugen; feucht abwischen oder geeignetes Polstershampoo verwenden.",
     fireSafety: ["EN 1021-1 & 2", "BS 7176 Low Hazard"],
     colors: [],
-    colorCardUrl: "https://zachert-gmbh.de/media/pdf/c9/76/96/Advantage_0123_WEB.pdf",
+    colorCardUrl: "/materials/fabrics/advantage.pdf",
+    colorCardPublicationStatus: "rights-review",
     informationAsOf: currentAsOf,
   },
   {
@@ -185,7 +195,8 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
     properties: ["Elektrostatisch ableitfähig nach DIN EN 1149-1", "Desinfektionsmittelbeständig gemäß Prüfliste", "Phthalatfrei"],
     fireSafety: ["DIN EN 1021-1 & 2"],
     colors: [{ code: "3672", name: "Schwarz" }],
-    colorCardUrl: "https://zachert-gmbh.de/media/pdf/6f/50/70/VOWAled_Pulfero_EL.pdf",
+    colorCardUrl: "/materials/fabrics/pulfero.pdf",
+    colorCardPublicationStatus: "rights-review",
     informationAsOf: currentAsOf,
   },
   {
@@ -198,7 +209,8 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
     properties: ["Atmungsaktiv", "Recyclingfähig", "OEKO-TEX®"],
     fireSafety: ["DIN EN 1021-1 & 2"],
     colors: [],
-    colorCardUrl: "https://zachert-gmbh.de/media/pdf/c3/a3/75/PURE.pdf",
+    colorCardUrl: "/materials/fabrics/pure.pdf",
+    colorCardPublicationStatus: "rights-review",
     informationAsOf: currentAsOf,
   },
   {
@@ -215,7 +227,8 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "48504", name: "Grau melange" }, { code: "46004", name: "Blau" },
       { code: "47522", name: "Grün" },
     ],
-    colorCardUrl: "https://zachert-gmbh.de/media/pdf/a8/0f/92/Mini_cartella.pdf",
+    colorCardUrl: "/materials/fabrics/mini.pdf",
+    colorCardPublicationStatus: "rights-review",
     informationAsOf: currentAsOf,
   },
 ] as const;

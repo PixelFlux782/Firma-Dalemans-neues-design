@@ -24,10 +24,41 @@
     "pure": "https://www.krallroth.com/produkte/bezugsstoffe/pure",
     "mini": "https://www.fidivi.com/de/produkte/mini"
   },
+  "pdfSources": {
+    "bondai": { "source": "https://www.fidivi.com/images/fidivi/catalogo/bondai/pdf/bondai_cartella.pdf", "reviewedDistributorSource": "https://zachert-gmbh.de/media/pdf/da/03/9b/Bondai_cartella-1.pdf", "localPath": "/materials/fabrics/bondai.pdf", "bytes": 2734611, "sha256": "6a5265041d5a9bcecdd81f7b204fb1ef5149416cde787036aad07372a4887730", "publicationRights": "unconfirmed" },
+    "radio": { "source": "https://www.fidivi.com/images/fidivi/catalogo/radio/pdf/radio_cartella.pdf", "reviewedDistributorSource": "https://zachert-gmbh.de/media/pdf/b8/1c/44/Stofflarte_Radio.pdf", "localPath": "/materials/fabrics/radio.pdf", "bytes": 140478, "sha256": "79e4025c8628169e091e664da87390ad33603b5697581a51dbaa99c37d73ea3a", "publicationRights": "unconfirmed" },
+    "pisa": { "source": "https://www.vowalon.eu/fileadmin/vowalon/dateien/Musterkarten/VOWAled_Pisa.pdf", "reviewedDistributorSource": "https://zachert-gmbh.de/media/pdf/5b/d7/bb/VOWAled_Pisa.pdf", "localPath": "/materials/fabrics/pisa.pdf", "bytes": 2879734, "sha256": "9648f798c4967ec774a3f344da96744e97e11ad77a24f7e20cb0cd295eacb80f", "publicationRights": "unconfirmed" },
+    "xtreme": { "source": "https://content.camirafabrics.com/media/d1vjuqyi/xtreme_ys.pdf", "reviewedDistributorSource": "https://zachert-gmbh.de/media/pdf/ec/2d/b9/Xtreme_YS_0223_WEB.pdf", "localPath": "/materials/fabrics/xtreme.pdf", "bytes": 1173460, "sha256": "c41c0d7fccd50cf0cbb09fabf316127cb8eadb9baffea137d654a01f40f805df", "publicationRights": "unconfirmed" },
+    "x2": { "source": "https://content.camirafabrics.com/media/lvgdobqx/x2_ak.pdf", "reviewedDistributorSource": "https://zachert-gmbh.de/media/pdf/d3/05/5b/X2_AK_0423_WEB.pdf", "localPath": "/materials/fabrics/x2.pdf", "bytes": 1216137, "sha256": "9f1dafe8c26cc2737c5393e3ffa8f890b3d2a3a3f310b7dd3efe627d5d631bf0", "publicationRights": "unconfirmed" },
+    "king-flex": { "source": "https://www.fidivi.com/images/fidivi/catalogo/king-flex/pdf/king-flex_cartella.pdf", "reviewedDistributorSource": "https://zachert-gmbh.de/media/pdf/d7/9e/ef/King_Flex_cartella.pdf", "localPath": "/materials/fabrics/king-flex.pdf", "bytes": 164029, "sha256": "7ee2ad6dda10ce062032cfe6ac7f6fb73cdd6a4af4acd09a16a8fe4a28c0b37d", "publicationRights": "unconfirmed" },
+    "king-l": { "source": "https://www.fidivi.com/images/fidivi/catalogo/king-l/pdf/king-l_cartella.pdf", "reviewedDistributorSource": "https://zachert-gmbh.de/media/pdf/26/3e/14/King_L_cartella.pdf", "localPath": "/materials/fabrics/king-l.pdf", "bytes": 203108, "sha256": "fdcdb037e64ce11cc2a58388d58e5cb58092977e1aa8d836e658b052696d1a19", "publicationRights": "unconfirmed" },
+    "era": { "source": "https://content.camirafabrics.com/media/exunphid/era_cse.pdf", "reviewedDistributorSource": "https://zachert-gmbh.de/media/pdf/df/7a/7a/Era_0623_WEB.pdf", "localPath": "/materials/fabrics/era.pdf", "bytes": 2066218, "sha256": "e6aaafacb73b9e6ac488c40ee411ebeed9641e5ab1085c2c751e036de99e8d2a", "publicationRights": "unconfirmed" },
+    "advantage": { "source": "https://content.camirafabrics.com/media/1k3brecg/advantage_ad_web.pdf", "reviewedDistributorSource": "https://zachert-gmbh.de/media/pdf/c9/76/96/Advantage_0123_WEB.pdf", "localPath": "/materials/fabrics/advantage.pdf", "bytes": 858619, "sha256": "232b0ed8181eabafa8e4e7e58c51087074bc6847d361e37a7ef35dc41872922e", "publicationRights": "unconfirmed" },
+    "pulfero": { "source": "https://www.vowalon.eu/fileadmin/vowalon/dateien/Musterkarten/VOWAclassic.pdf", "reviewedDistributorSource": "https://zachert-gmbh.de/media/pdf/6f/50/70/VOWAled_Pulfero_EL.pdf", "localPath": "/materials/fabrics/pulfero.pdf", "bytes": 4962108, "sha256": "066491ad6795f66f3d69975857f219c34db18417798b0b2931ca4d6cd21ae926", "publicationRights": "unconfirmed" },
+    "pure": { "source": "https://www.krallroth.com/assets/pdf-products/KR_PURE-colourcard.pdf", "reviewedDistributorSource": "https://zachert-gmbh.de/media/pdf/c3/a3/75/PURE.pdf", "localPath": "/materials/fabrics/pure.pdf", "bytes": 2505535, "sha256": "9eaa1dc0ceef4fe9b9bd5ac0f75b2ddaf1308536a66d466c8e2e54f3e58d8f67", "publicationRights": "unconfirmed" },
+    "mini": { "source": "https://www.fidivi.com/images/fidivi/catalogo/mini/pdf/mini_cartella.pdf", "reviewedDistributorSource": "https://zachert-gmbh.de/media/pdf/a8/0f/92/Mini_cartella.pdf", "localPath": "/materials/fabrics/mini.pdf", "bytes": 174696, "sha256": "6a6e40b211621e3e39bc1320abe2c6c4bd3d4e0770bd0d5be43ee080f4de08e4", "publicationRights": "unconfirmed" }
+  },
+  "rightsReview": {
+    "reviewedAt": "2026-10-11",
+    "status": "unconfirmed",
+    "findings": {
+      "camiraCopyrightAndWebsite": ["xtreme", "x2", "era", "advantage"],
+      "vowalonBrandingAndContactDetails": ["pisa", "pulfero"],
+      "krallRothBrandingAndContactDetails": ["pure"],
+      "fidiviProductBrandingWithoutExtractableLicense": ["bondai", "radio", "king-flex", "king-l", "mini"]
+    },
+    "notes": [
+      "Camira-PDFs enthalten Herstellerbranding, Websiteangaben und einen ausdrücklichen Hinweis auf exklusive Urheber- und Designrechte von Camira Fabrics Limited.",
+      "Pisa und Pulfero enthalten Vowalon-Logos, Website, E-Mail-Adresse und weitere Kontaktdaten; Pure enthält entsprechende Krall+Roth-Hinweise.",
+      "Die Bild-Farbkarten von Fidivi enthalten Produktbranding; eine ausdrückliche Rehosting-Lizenz ist nicht erkennbar.",
+      "In keiner der zwölf geprüften Dateien wurde eine ausdrückliche Erlaubnis zur öffentlichen Bereitstellung durch Dalemans gefunden.",
+      "Die Originaldateien wurden nicht verändert. Bis zur schriftlichen Freigabe werden sie im Konfigurator nicht verlinkt."
+    ]
+  },
   "notes": [
     "Die CLAAS-Seite bestätigt am 11.10.2026 die beauftragte Gruppenzuordnung 2/3/4.",
     "Eine andere aktuelle Produktseite führt Era als P4; für Dalemans gilt bewusst die modellübergreifende CLAAS-Zuordnung Era=P3.",
     "Auswählbare Farbcodes stammen aus einer am 11.10.2026 erreichbaren aktuellen Produktkonfiguration. Hersteller-Gesamtpaletten werden nur als Farbkarte verlinkt und nicht als bestellbare Dalemans-Variante behauptet.",
-    "Rehosting- und Bildnutzungsrechte für Stoffbilder und PDFs sind nicht dokumentiert. Daher wurden keine fremden Dateien lokal kopiert."
+    "Rehosting- und Bildnutzungsrechte für Stoffbilder und PDFs sind nicht dokumentiert. Die zwölf Original-PDFs wurden deshalb nur zur internen Vorbereitung lokal gespeichert und werden bis zur Freigabe nicht im Konfigurator verlinkt."
   ]
 }

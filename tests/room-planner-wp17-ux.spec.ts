@@ -6,7 +6,7 @@ test("WP17 UX führt bei 1440 × 900 durch Raum, Einrichtung und Ergebnis", asyn
   const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
 
   await expect(editor.getByLabel("Planungsschritte").getByRole("button")).toHaveCount(3);
-  await expect(editor.getByRole("button", { name: "Automatisch planen" })).toBeVisible();
+  await expect(editor.getByRole("button", { name: "Bestuhlen" })).toBeVisible();
   await expect(editor.getByLabel("Planungsergebnis")).toContainText("Sitzplätze");
   await expect(editor.getByLabel("Planungsergebnis")).toContainText("Tische");
   await expect(editor.getByLabel("Planungsergebnis")).toContainText("Prüfstatus");

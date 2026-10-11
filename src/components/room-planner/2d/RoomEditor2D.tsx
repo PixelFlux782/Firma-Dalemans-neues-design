@@ -925,7 +925,7 @@ export default function RoomEditor2D() {
         <label className="block text-sm">Stuhlmodell<select aria-label="Stuhlmodell" value={chairSelection.productId} onChange={(event) => { const product = chairProducts.find((item) => item.id === event.target.value)!; selectChair(product.id, product.variants[0].id); }} className="mt-1 w-full rounded border border-premium-beige p-1">{chairProducts.map((product) => <option key={product.id} value={product.id}>{product.title}</option>)}</select></label>
         <label className="block text-sm">Variante<select aria-label="Stuhlvariante" value={chairSelection.variantId} onChange={(event) => selectChair(chairSelection.productId, event.target.value)} className="mt-1 w-full rounded border border-premium-beige p-1">{(demand.product?.variants ?? []).map((variant) => <option key={variant.id} value={variant.id}>{variant.title}</option>)}</select></label>
 
-        <details className="rounded-lg border border-premium-beige p-2"><summary className="cursor-pointer text-xs font-semibold text-premium-forest">Planungsannahmen</summary><div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1">{seatingField("Stuhlbreite (m)", "chairWidth", 0.1, "0.05")}
+        <details open className="rounded-lg border border-premium-beige p-2"><summary className="cursor-pointer text-xs font-semibold text-premium-forest">Planungsannahmen</summary><div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1">{seatingField("Stuhlbreite (m)", "chairWidth", 0.1, "0.05")}
         {seatingField("Stuhltiefe (m)", "chairDepth", 0.1, "0.05")}
         {seatingField("Reihenabstand (m)", "rowPitch", 0.1, "0.05")}
         {seatingField("Max. Stühle pro Reihe", "maximumChairsPerRow", 1, "1")}</div>

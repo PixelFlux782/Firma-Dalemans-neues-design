@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import type { ReactNode, SyntheticEvent } from "react";
 import {
   fabricById,
   fabricsForGroup,
@@ -36,8 +36,11 @@ export default function FabricSelectionDialog({
   onClose: () => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const colorCardTriggerRef = useRef<HTMLButtonElement>(null);
+  const colorCardCloseRef = useRef<HTMLButtonElement>(null);
   const collections = useMemo(() => fabricsForGroup(group), [group]);
   const [activeId, setActiveId] = useState(() => value?.collectionId ?? collections[0]?.id ?? "");
+  const [colorCardOpen, setColorCardOpen] = useState(false);
   const active = fabricById(activeId) ?? collections[0];
 
   useEffect(() => {
@@ -51,8 +54,13 @@ export default function FabricSelectionDialog({
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog || open || !dialog.open) return;
+    setColorCardOpen(false);
     dialog.close();
   }, [open]);
+
+  useEffect(() => {
+    if (colorCardOpen) colorCardCloseRef.current?.focus();
+  }, [colorCardOpen]);
 
   if (!active) return null;
   const selectedColor = value?.collectionId === active.id
@@ -72,21 +80,36 @@ export default function FabricSelectionDialog({
   }).toString()}#anfrage`;
 
   function chooseCollection(collection: FabricCollection) {
+    setColorCardOpen(false);
     setActiveId(collection.id);
     onChange({ collectionId: collection.id });
+  }
+
+  function closeColorCard() {
+    setColorCardOpen(false);
+    requestAnimationFrame(() => colorCardTriggerRef.current?.focus());
+  }
+
+  function handleCancel(event: SyntheticEvent<HTMLDialogElement>) {
+    event.preventDefault();
+    if (colorCardOpen) {
+      closeColorCard();
+      return;
+    }
+    onClose();
   }
 
   return (
     <dialog
       ref={dialogRef}
       aria-labelledby="fabric-dialog-title"
-      onCancel={(event) => { event.preventDefault(); onClose(); }}
+      onCancel={handleCancel}
       onClose={onClose}
       className="m-0 h-dvh max-h-none w-full max-w-none bg-transparent p-0 backdrop:bg-premium-ink/45 sm:m-auto sm:h-auto sm:max-h-[90vh] sm:w-[min(1120px,calc(100%-2rem))] sm:rounded-4xl"
       data-testid="fabric-dialog"
     >
-      <div className="flex h-full flex-col overflow-hidden bg-premium-canvas shadow-2xl sm:max-h-[90vh] sm:rounded-4xl">
-        <header className="flex items-start justify-between gap-5 border-b border-premium-beige/80 px-5 py-5 sm:px-8">
+      <div className="relative flex h-full flex-col overflow-hidden bg-premium-canvas shadow-2xl sm:max-h-[90vh] sm:rounded-4xl">
+        <header className="flex items-start justify-between gap-5 border-b border-premium-beige/80 px-5 py-5 sm:px-8" aria-hidden={colorCardOpen} inert={colorCardOpen}>
           <div>
             <p className="section-eyebrow">Stoffgruppe {group}</p>
             <h2 id="fabric-dialog-title" className="mt-2 font-display text-2xl font-medium text-premium-ink sm:text-3xl">Kollektion und Farbe wählen</h2>
@@ -95,7 +118,7 @@ export default function FabricSelectionDialog({
           <button type="button" onClick={onClose} className="flex size-11 shrink-0 items-center justify-center rounded-full border border-premium-beige bg-white text-xl text-premium-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand" aria-label="Materialauswahl schließen">×</button>
         </header>
 
-        <div className="grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[minmax(15rem,.68fr)_minmax(0,1.32fr)] lg:overflow-hidden">
+        <div className="grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[minmax(15rem,.68fr)_minmax(0,1.32fr)] lg:overflow-hidden" aria-hidden={colorCardOpen} inert={colorCardOpen}>
           <nav aria-label="Stoffkollektionen" className="border-b border-premium-beige/80 p-5 lg:overflow-y-auto lg:border-b-0 lg:border-r sm:p-7">
             <p className="text-xs font-semibold uppercase tracking-[.14em] text-premium-subtle">Kollektionen</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
@@ -147,15 +170,16 @@ export default function FabricSelectionDialog({
                 </div>
               ) : <p className="mt-4 rounded-2xl border border-premium-beige/70 bg-white/60 p-4 text-sm leading-6 text-premium-muted">Die aktuelle Gesamtpalette finden Sie in der Farbkarte. Den gewünschten Code übernehmen wir anschließend in Ihre Anfrage.</p>}
               {active.colorCardPublicationStatus === "approved" ? (
-                <details className="mt-5 rounded-2xl border border-premium-beige/70 bg-white/65 p-4" data-testid="fabric-color-card">
-                  <summary className="cursor-pointer text-sm font-semibold text-premium-forest underline underline-offset-4">Vollständige Farbkarte ansehen</summary>
-                  <div className="mt-4 overflow-hidden rounded-xl border border-premium-beige bg-white">
-                    <object data={active.colorCardUrl} type="application/pdf" className="h-[65vh] min-h-96 w-full" aria-label={`Farbkarte ${active.name}`}>
-                      <p className="p-4 text-sm text-premium-muted">Die PDF-Vorschau wird von diesem Browser nicht unterstützt.</p>
-                    </object>
-                  </div>
-                  <a href={active.colorCardUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline underline-offset-4">Farbkarte in neuem Tab öffnen ↗</a>
-                </details>
+                <button
+                  ref={colorCardTriggerRef}
+                  type="button"
+                  onClick={() => setColorCardOpen(true)}
+                  className="mt-5 inline-flex min-h-12 w-full items-center justify-between gap-4 rounded-2xl border border-premium-beige/70 bg-white/65 px-5 py-3 text-left text-sm font-semibold text-premium-forest transition hover:border-premium-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand"
+                  data-testid="fabric-color-card"
+                >
+                  <span>Vollständige Farbkarte ansehen</span>
+                  <span aria-hidden="true">→</span>
+                </button>
               ) : (
                 <p className="mt-5 rounded-2xl border border-premium-beige/70 bg-premium-warm/55 p-4 text-sm leading-6 text-premium-muted" data-testid="fabric-color-card-rights-review">Die vollständige Farbkarte wird nach Bestätigung der Veröffentlichungsrechte hier bereitgestellt.</p>
               )}
@@ -181,6 +205,50 @@ export default function FabricSelectionDialog({
             </div>
           </section>
         </div>
+
+        {colorCardOpen ? (
+          <section
+            className="absolute inset-0 z-10 flex min-h-0 flex-col bg-premium-canvas"
+            aria-labelledby="fabric-color-card-title"
+            data-testid="fabric-color-card-preview"
+          >
+            <header className="flex shrink-0 items-center justify-between gap-3 border-b border-premium-beige/80 bg-white px-4 py-3 sm:px-6 sm:py-4">
+              <div className="min-w-0">
+                <p className="section-eyebrow">Farbkarte</p>
+                <h3 id="fabric-color-card-title" className="truncate font-display text-xl font-medium text-premium-ink sm:text-2xl">{active.name}</h3>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <a
+                  href={active.colorCardUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hidden min-h-11 items-center rounded-full border border-premium-beige bg-white px-4 text-sm font-semibold text-premium-forest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand sm:inline-flex"
+                >
+                  In neuem Tab öffnen ↗
+                </a>
+                <button
+                  ref={colorCardCloseRef}
+                  type="button"
+                  onClick={closeColorCard}
+                  className="inline-flex min-h-11 items-center rounded-full border border-premium-beige bg-white px-4 text-sm font-semibold text-premium-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand"
+                  aria-label="Farbkarte schließen und zur Stoffauswahl zurückkehren"
+                >
+                  <span aria-hidden="true">←</span>
+                  <span className="ml-2">Zurück</span>
+                </button>
+              </div>
+            </header>
+            <iframe
+              src={active.colorCardUrl}
+              title={`Farbkarte ${active.name}`}
+              className="min-h-0 flex-1 bg-white"
+              data-testid="fabric-color-card-document"
+            />
+            <div className="shrink-0 border-t border-premium-beige/80 bg-white p-3 text-center sm:hidden">
+              <a href={active.colorCardUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline underline-offset-4">Farbkarte in neuem Tab öffnen ↗</a>
+            </div>
+          </section>
+        ) : null}
       </div>
     </dialog>
   );

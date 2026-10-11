@@ -241,6 +241,55 @@ test.describe("Modell 1021 Konfigurator", () => {
     await expect(page.locator("textarea[name=message]")).toHaveValue(/Modell: 1021[\s\S]*Stoffgruppe: 3[\s\S]*Stoffkollektion: Xtreme[\s\S]*Farbe: Ocean[\s\S]*Farbcode: 3100/);
   });
 
+  test("öffnet alle zwölf Farbkarten ausschließlich über lokale PDF-Pfade", async ({ page }) => {
+    const groups = [
+      { group: 2, cards: [["Bondai", "bondai"]] },
+      { group: 3, cards: [["Radio", "radio"], ["Pisa", "pisa"], ["Xtreme", "xtreme"], ["X2", "x2"], ["King Flex", "king-flex"], ["King L", "king-l"], ["Era", "era"], ["Advantage", "advantage"], ["Pulfero", "pulfero"]] },
+      { group: 4, cards: [["Pure", "pure"], ["Mini", "mini"]] },
+    ] as const;
+
+    for (const { group, cards } of groups) {
+      await page.goto(`/produkte/stapelstuehle/1021?polster=sitz&gruppe=${group}`);
+      await page.getByRole("button", { name: /Kollektionen, Eigenschaften/ }).click();
+      const dialog = page.getByTestId("fabric-dialog");
+      for (const [name, id] of cards) {
+        await dialog.getByRole("button", { name: new RegExp(`^${name}`) }).click();
+        await dialog.getByRole("button", { name: "Vollständige Farbkarte ansehen" }).click();
+        const preview = dialog.getByTestId("fabric-color-card-preview");
+        const localPath = `/materials/fabrics/${id}.pdf`;
+        const pdfResponse = await page.request.get(localPath);
+        expect(pdfResponse.ok()).toBe(true);
+        expect(pdfResponse.headers()["content-type"]).toContain("application/pdf");
+        await expect(preview).toBeVisible();
+        await expect(preview.getByTestId("fabric-color-card-document")).toHaveAttribute("src", localPath);
+        for (const link of await preview.getByRole("link", { name: /neuem Tab öffnen/ }).all()) {
+          await expect(link).toHaveAttribute("href", localPath);
+        }
+        await preview.getByRole("button", { name: "Farbkarte schließen und zur Stoffauswahl zurückkehren" }).click();
+      }
+    }
+  });
+
+  test("behält Stoff- und Farbauswahl beim Zurückkehren aus der Farbkarte", async ({ page }) => {
+    await page.goto("/produkte/stapelstuehle/1021?polster=sitz&gruppe=3");
+    await page.getByRole("button", { name: /Kollektionen, Eigenschaften/ }).click();
+    const dialog = page.getByTestId("fabric-dialog");
+    await dialog.getByRole("button", { name: /^Xtreme/ }).click();
+    await dialog.getByRole("button", { name: /Ocean.*Code 3100/ }).click();
+
+    await dialog.getByRole("button", { name: "Vollständige Farbkarte ansehen" }).click();
+    const preview = dialog.getByTestId("fabric-color-card-preview");
+    await expect(preview).toBeVisible();
+    await expect(preview.getByTestId("fabric-color-card-document")).toHaveAttribute("src", "/materials/fabrics/xtreme.pdf");
+    await expect(preview.getByRole("link", { name: /In neuem Tab öffnen/ }).first()).toHaveAttribute("href", "/materials/fabrics/xtreme.pdf");
+    await preview.getByRole("button", { name: "Farbkarte schließen und zur Stoffauswahl zurückkehren" }).click();
+
+    await expect(preview).not.toBeVisible();
+    await expect(dialog.getByRole("button", { name: "Vollständige Farbkarte ansehen" })).toBeFocused();
+    await expect(dialog.getByRole("button", { name: /Ocean.*Code 3100/ })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("selected-fabric")).toContainText("Xtreme · Ocean · 3100");
+  });
+
   test("Materialdialog ist mobil bedienbar und schließt per Escape", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto("/produkte/stapelstuehle/1021?polster=sitz&gruppe=4");
@@ -250,6 +299,22 @@ test.describe("Modell 1021 Konfigurator", () => {
     await page.keyboard.press("Escape");
     await expect(page.getByTestId("fabric-dialog")).not.toBeVisible();
     await expect(trigger).toBeFocused();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow).toBeLessThanOrEqual(1);
+  });
+
+  test("Farbkartenvorschau ist mobil bedienbar und Escape führt zur Stoffauswahl zurück", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto("/produkte/stapelstuehle/1021?polster=sitz&gruppe=4");
+    await page.getByRole("button", { name: /Kollektionen, Eigenschaften/ }).click();
+    const dialog = page.getByTestId("fabric-dialog");
+    await dialog.getByRole("button", { name: /^Pure/ }).click();
+    await dialog.getByRole("button", { name: "Vollständige Farbkarte ansehen" }).click();
+    await expect(dialog.getByTestId("fabric-color-card-preview")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog.getByTestId("fabric-color-card-preview")).not.toBeVisible();
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("button", { name: /^Pure/ })).toHaveAttribute("aria-pressed", "true");
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(1);
   });

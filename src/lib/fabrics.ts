@@ -42,7 +42,7 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "26071", name: "Royal" },
     ],
     colorCardUrl: "/materials/fabrics/bondai.pdf",
-    colorCardPublicationStatus: "rights-review",
+    colorCardPublicationStatus: "approved",
     informationAsOf: currentAsOf,
   },
   {
@@ -56,7 +56,7 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
     fireSafety: ["DIN 4102 B1", "EN 1021-1 & 2", "Klassifizierung teils abhängig vom Polsteraufbau"],
     colors: [],
     colorCardUrl: "/materials/fabrics/radio.pdf",
-    colorCardPublicationStatus: "rights-review",
+    colorCardPublicationStatus: "approved",
     informationAsOf: currentAsOf,
   },
   {
@@ -76,7 +76,7 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "3338", name: "Agave" }, { code: "3343", name: "Orchidee" },
     ],
     colorCardUrl: "/materials/fabrics/pisa.pdf",
-    colorCardPublicationStatus: "rights-review",
+    colorCardPublicationStatus: "approved",
     informationAsOf: currentAsOf,
   },
   {
@@ -95,7 +95,7 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "3100", name: "Ocean" },
     ],
     colorCardUrl: "/materials/fabrics/xtreme.pdf",
-    colorCardPublicationStatus: "rights-review",
+    colorCardPublicationStatus: "approved",
     informationAsOf: currentAsOf,
   },
   {
@@ -110,7 +110,7 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
     fireSafety: ["DIN 4102 B1", "EN 1021-1 & 2", "Prüfungen gelten für den Stoff bzw. angegebenen Aufbau"],
     colors: [],
     colorCardUrl: "/materials/fabrics/x2.pdf",
-    colorCardPublicationStatus: "rights-review",
+    colorCardPublicationStatus: "approved",
     informationAsOf: currentAsOf,
   },
   {
@@ -129,7 +129,7 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "36026", name: "Hellblau" }, { code: "36071", name: "Blau" },
     ],
     colorCardUrl: "/materials/fabrics/king-flex.pdf",
-    colorCardPublicationStatus: "rights-review",
+    colorCardPublicationStatus: "approved",
     informationAsOf: currentAsOf,
   },
   {
@@ -148,7 +148,7 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "34027", name: "Rot" }, { code: "35004", name: "Lila" },
     ],
     colorCardUrl: "/materials/fabrics/king-l.pdf",
-    colorCardPublicationStatus: "rights-review",
+    colorCardPublicationStatus: "approved",
     informationAsOf: currentAsOf,
   },
   {
@@ -167,7 +167,7 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "CSE17", name: "Phase / Pink" },
     ],
     colorCardUrl: "/materials/fabrics/era.pdf",
-    colorCardPublicationStatus: "rights-review",
+    colorCardPublicationStatus: "approved",
     informationAsOf: currentAsOf,
   },
   {
@@ -182,7 +182,7 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
     fireSafety: ["EN 1021-1 & 2", "BS 7176 Low Hazard"],
     colors: [],
     colorCardUrl: "/materials/fabrics/advantage.pdf",
-    colorCardPublicationStatus: "rights-review",
+    colorCardPublicationStatus: "approved",
     informationAsOf: currentAsOf,
   },
   {
@@ -196,7 +196,7 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
     fireSafety: ["DIN EN 1021-1 & 2"],
     colors: [{ code: "3672", name: "Schwarz" }],
     colorCardUrl: "/materials/fabrics/pulfero.pdf",
-    colorCardPublicationStatus: "rights-review",
+    colorCardPublicationStatus: "approved",
     informationAsOf: currentAsOf,
   },
   {
@@ -210,7 +210,7 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
     fireSafety: ["DIN EN 1021-1 & 2"],
     colors: [],
     colorCardUrl: "/materials/fabrics/pure.pdf",
-    colorCardPublicationStatus: "rights-review",
+    colorCardPublicationStatus: "approved",
     informationAsOf: currentAsOf,
   },
   {
@@ -228,7 +228,7 @@ export const FABRIC_COLLECTIONS: readonly FabricCollection[] = [
       { code: "47522", name: "Grün" },
     ],
     colorCardUrl: "/materials/fabrics/mini.pdf",
-    colorCardPublicationStatus: "rights-review",
+    colorCardPublicationStatus: "approved",
     informationAsOf: currentAsOf,
   },
 ] as const;

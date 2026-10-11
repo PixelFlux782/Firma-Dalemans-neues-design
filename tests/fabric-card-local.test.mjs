@@ -20,19 +20,21 @@ const expectedFiles = [
   "mini.pdf",
 ];
 
-test("all configured fabric cards are local, valid PDFs awaiting rights review", async () => {
+test("all twelve approved fabric cards are local, valid PDFs", async () => {
   const sourceDocumentation = JSON.parse(await readFile(path.join(root, "config", "fabric-material-sources.json"), "utf8"));
   const fabricsSource = await readFile(path.join(root, "src", "lib", "fabrics.ts"), "utf8");
 
   assert.equal(Object.keys(sourceDocumentation.pdfSources).length, expectedFiles.length);
-  assert.equal(sourceDocumentation.rightsReview.status, "unconfirmed");
+  assert.equal(sourceDocumentation.rightsReview.status, "approved");
   assert.doesNotMatch(fabricsSource, /colorCardUrl:\s*["']https?:\/\//);
+  assert.equal((fabricsSource.match(/^ {4}colorCardPublicationStatus:\s*"approved"/gm) ?? []).length, expectedFiles.length);
+  assert.doesNotMatch(fabricsSource, /^ {4}colorCardPublicationStatus:\s*"rights-review"/m);
 
   for (const filename of expectedFiles) {
     const id = filename.replace(/\.pdf$/, "");
     const source = sourceDocumentation.pdfSources[id];
     assert.equal(source.localPath, `/materials/fabrics/${filename}`);
-    assert.equal(source.publicationRights, "unconfirmed");
+    assert.equal(source.publicationRights, "approved");
     assert.match(fabricsSource, new RegExp(`colorCardUrl: ["']${source.localPath.replaceAll("/", "\\/")}["']`));
 
     const contents = await readFile(path.join(root, "public", "materials", "fabrics", filename));
@@ -44,9 +46,13 @@ test("all configured fabric cards are local, valid PDFs awaiting rights review",
   }
 });
 
-test("the UI only exposes a local color card after publication approval", async () => {
+test("the UI opens approved local color cards in a closeable embedded preview", async () => {
   const dialogSource = await readFile(path.join(root, "src", "components", "chairs", "FabricSelectionDialog.tsx"), "utf8");
   assert.match(dialogSource, /colorCardPublicationStatus === "approved"/);
   assert.match(dialogSource, /Vollständige Farbkarte ansehen/);
+  assert.match(dialogSource, /data-testid="fabric-color-card-preview"/);
+  assert.match(dialogSource, /<iframe/);
+  assert.match(dialogSource, /setColorCardOpen\(false\)/);
+  assert.match(dialogSource, /Farbkarte schließen und zur Stoffauswahl zurückkehren/);
   assert.doesNotMatch(dialogSource, /zachert-gmbh\.de|camirafabrics\.com|fidivi\.com|vowalon\.eu/);
 });

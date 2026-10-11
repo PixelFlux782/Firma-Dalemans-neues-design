@@ -168,6 +168,7 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
     <color attach="background" args={["#f5f3ee"]} />
     <hemisphereLight args={["#ffffff", "#b8afa1", 1.5]} /><directionalLight position={[8, 15, 10]} intensity={2.1} />
     {floor && <mesh geometry={floor} rotation={[-Math.PI / 2, 0, 0]}><meshStandardMaterial color="#dcd6c9" roughness={0.94} side={THREE.DoubleSide} /></mesh>}
+    {(plan.zones ?? []).map((zone, index) => <mesh key={zone.id} renderOrder={1 + index} position={[zone.geometry.x, 0.004, zone.geometry.y]} rotation={[0, -zone.rotation * Math.PI / 180, 0]}><boxGeometry args={[zone.geometry.width, 0.006, zone.geometry.depth]} /><meshStandardMaterial color={zone.type === "tables" ? "#d7b56d" : "#91a99a"} transparent opacity={0.32} depthWrite={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} /></mesh>)}
     {plan.contour.walls.map(wall => {
       const a = points.find(p => p.id === wall.startPointId), b = points.find(p => p.id === wall.endPointId);
       if (!a || !b) return null;
@@ -191,7 +192,7 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
       }
       if (object.type === "aisle") {
         const dx = object.end.x - object.start.x, dz = object.end.y - object.start.y;
-        return <mesh key={object.id} renderOrder={2 + index} position={[(object.start.x + object.end.x) / 2, 0.016, (object.start.y + object.end.y) / 2]} rotation={[0, -Math.atan2(dz, dx), 0]}><boxGeometry args={[Math.hypot(dx, dz), 0.025, object.width]} /><meshStandardMaterial color={object.source === "generated" ? "#d6a964" : "#67a3a7"} transparent opacity={0.32} depthWrite={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} /></mesh>;
+        return <mesh key={object.id} renderOrder={2 + index} position={[(object.start.x + object.end.x) / 2, 0.007, (object.start.y + object.end.y) / 2]} rotation={[0, -Math.atan2(dz, dx), 0]}><boxGeometry args={[Math.hypot(dx, dz), 0.008, object.width]} /><meshStandardMaterial color={object.source === "generated" ? "#d6a964" : "#67a3a7"} transparent opacity={0.32} depthWrite={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} /></mesh>;
       }
       if (object.type === "front") {
         const segment = frontSegment(object);

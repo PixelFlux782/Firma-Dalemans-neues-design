@@ -11,6 +11,7 @@ import {
   chairAddonPriceForQuantity,
   isChairAddonCompatible,
 } from "../src/lib/commerce/chair-addons";
+import { FABRIC_COLLECTIONS } from "../src/lib/fabrics";
 
 const configurations: ChairConfiguration[] = [
   { upholstery: "none", rowConnector: false },
@@ -58,6 +59,22 @@ test.describe("provider-neutrales Stapelstuhlmodell", () => {
         expect(variant.erpArticleNumber).toBeTruthy();
       }
     }
+  });
+
+  test("stellt für jedes gepolsterte Stuhlmodell ausschließlich die Gruppen 2, 3 und 4 bereit", () => {
+    for (const product of localStackingChairProducts) {
+      const upholsteredGroups = [...new Set(product.variants.flatMap((variant) => {
+        const configuration = variant.selectedOptions.find((option) => option.name === "Stoffgruppe")?.value;
+        return configuration ? [Number(configuration.replace("Gruppe ", ""))] : [];
+      }))].sort();
+      expect(upholsteredGroups, product.handle).toEqual([2, 3, 4]);
+    }
+    expect(FABRIC_COLLECTIONS.map((collection) => [collection.group, collection.name])).toEqual([
+      [2, "Bondai"],
+      [3, "Radio"], [3, "Pisa"], [3, "Xtreme"], [3, "X2"], [3, "King Flex"],
+      [3, "King L"], [3, "Era"], [3, "Advantage"], [3, "Pulfero"],
+      [4, "Pure"], [4, "Mini"],
+    ]);
   });
 
   test("übernimmt sieben Erweiterungen und die Buchablagen-Staffeln aus Export_Flo", () => {
@@ -181,6 +198,62 @@ test.describe("Modell 1021 Konfigurator", () => {
     }).toEqual(["sitz", "3", "ja"]);
   });
 
+  test("zeigt in allen Stoffgruppen die zentralen Kollektionen, aber nie Gruppen 5 oder 6", async ({ page }) => {
+    await page.goto("/produkte/stapelstuehle/1021?polster=sitz&gruppe=2");
+    await expect(page.locator('input[name="fabricGroup"]')).toHaveCount(3);
+    await expect(page.locator('input[name="fabricGroup"][value="5"], input[name="fabricGroup"][value="6"]')).toHaveCount(0);
+
+    const openMaterials = page.getByRole("button", { name: /Kollektionen, Eigenschaften/ });
+    await openMaterials.click();
+    const dialog = page.getByTestId("fabric-dialog");
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("button", { name: /Bondai/ })).toBeVisible();
+    await dialog.getByRole("button", { name: "Materialauswahl schließen" }).click();
+
+    await page.getByRole("radio", { name: "Gruppe 3" }).check({ force: true });
+    await openMaterials.click();
+    for (const collection of ["Radio", "Pisa", "Xtreme", "X2", "King Flex", "King L", "Era", "Advantage", "Pulfero"]) {
+      await expect(dialog.getByRole("button", { name: new RegExp(`^${collection}`) })).toBeVisible();
+    }
+    await dialog.getByRole("button", { name: "Materialauswahl schließen" }).click();
+
+    await page.getByRole("radio", { name: "Gruppe 4" }).check({ force: true });
+    await openMaterials.click();
+    await expect(dialog.getByRole("button", { name: /^Pure/ })).toBeVisible();
+    await expect(dialog.getByRole("button", { name: /^Mini/ })).toBeVisible();
+  });
+
+  test("behält Kollektion und Farbcode im Zustand und übernimmt sie in die Stoffmuster-Anfrage", async ({ page }) => {
+    await page.goto("/produkte/stapelstuehle/1021?polster=sitz&gruppe=3");
+    await page.getByRole("button", { name: /Kollektionen, Eigenschaften/ }).click();
+    const dialog = page.getByTestId("fabric-dialog");
+    await dialog.getByRole("button", { name: /^Xtreme/ }).click();
+    await dialog.getByRole("button", { name: /Ocean.*Code 3100/ }).click();
+    await expect(page.getByTestId("selected-fabric")).toContainText("Xtreme · Ocean · 3100");
+    await expect(page.getByRole("button", { name: "Mit Stoffauswahl bitte anfragen" })).toBeDisabled();
+    await expect.poll(() => {
+      const params = new URL(page.url()).searchParams;
+      return [params.get("stoff"), params.get("farbe")];
+    }).toEqual(["xtreme", "3100"]);
+
+    await dialog.getByRole("link", { name: "Stoffmuster anfragen" }).click();
+    await expect(page).toHaveURL(/\/kontakt\?.*#anfrage$/);
+    await expect(page.locator("textarea[name=message]")).toHaveValue(/Modell: 1021[\s\S]*Stoffgruppe: 3[\s\S]*Stoffkollektion: Xtreme[\s\S]*Farbe: Ocean[\s\S]*Farbcode: 3100/);
+  });
+
+  test("Materialdialog ist mobil bedienbar und schließt per Escape", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto("/produkte/stapelstuehle/1021?polster=sitz&gruppe=4");
+    const trigger = page.getByRole("button", { name: /Kollektionen, Eigenschaften/ });
+    await trigger.click();
+    await expect(page.getByTestId("fabric-dialog")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("fabric-dialog")).not.toBeVisible();
+    await expect(trigger).toBeFocused();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow).toBeLessThanOrEqual(1);
+  });
+
   test("summiert Erweiterungen, reduziert sie wieder und berechnet Menge sowie Buchablagen-Staffeln", async ({ page }) => {
     await page.goto("/produkte/stapelstuehle/1021");
     const price = page.getByTestId("chair-price");
@@ -250,7 +323,7 @@ test.describe("Modell 1021 Konfigurator", () => {
 
   test("liefert kanonische Metadaten und Product-/Breadcrumb-Daten", async ({ page }) => {
     await page.goto("/produkte/stapelstuehle/1021?polster=sitz&gruppe=2&reihe=ja");
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/produkte\/stapelstuehle\/1021$/);
+    await expect(page.locator('link[rel="canonical"]').first()).toHaveAttribute("href", /\/produkte\/stapelstuehle\/1021$/);
     const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
     expect(jsonLd.some((entry) => entry.includes('"@type":"Product"'))).toBe(true);
     expect(jsonLd.some((entry) => entry.includes('"@type":"BreadcrumbList"'))).toBe(true);

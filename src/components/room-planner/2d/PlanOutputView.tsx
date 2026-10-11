@@ -6,7 +6,7 @@ import { seatPolygon } from "@/lib/room-planner/seating";
 import { calculatePlanDemand, calculateRecommendedDemand } from "@/lib/room-planner/chairSelection";
 import type { analyzeCurrentPlan } from "@/lib/room-planner/currentPlanAnalysis";
 import MeasurementLayer from "./MeasurementLayer";
-import { calculateTableDemand, planCapacity, tableModel, tablePolygon } from "@/lib/room-planner/tables";
+import { calculateTableDemand, planCapacity, tableModel, tablePolygon, zonePolygon } from "@/lib/room-planner/tables";
 
 type ReturnTypeAnalysis = ReturnType<typeof analyzeCurrentPlan>;
 type Props = { plan: RoomPlan; name: string; issuedAt: Date; profileName: string; analysis: ReturnTypeAnalysis | null; reservePercent: number; inquiryHref: string; shopHref?: string; onClose: () => void };
@@ -17,7 +17,7 @@ export default function PlanOutputView({ plan, name, issuedAt, profileName, anal
   const demand = calculatePlanDemand(plan);
   const recommended = calculateRecommendedDemand(plan, reservePercent);
   const tableDemand = calculateTableDemand(plan);
-  const points = [...plan.contour.points, ...plan.objects.flatMap((object) => object.type === "aisle" ? aislePolygon(object) : isBlockingObject(object) ? obstaclePolygon(object) : object.type === "front" ? Object.values(frontSegment(object)) : object.type === "door" ? Object.values(doorSegment(plan.contour, object) ?? {}) : []), ...(seating?.seats ?? []), ...(plan.tables ?? []).flatMap(tablePolygon)];
+  const points = [...plan.contour.points, ...plan.objects.flatMap((object) => object.type === "aisle" ? aislePolygon(object) : isBlockingObject(object) ? obstaclePolygon(object) : object.type === "front" ? Object.values(frontSegment(object)) : object.type === "door" ? Object.values(doorSegment(plan.contour, object) ?? {}) : []), ...(seating?.seats ?? []), ...(plan.tables ?? []).flatMap(tablePolygon), ...(plan.zones ?? []).flatMap(zonePolygon)];
   const minX = points.length ? Math.min(...points.map((p) => p.x)) : 0, maxX = points.length ? Math.max(...points.map((p) => p.x)) : 1;
   const minY = points.length ? Math.min(...points.map((p) => p.y)) : 0, maxY = points.length ? Math.max(...points.map((p) => p.y)) : 1;
   const width = maxX - minX, height = maxY - minY, margin = Math.max(1.7, Math.max(width, height) * .08 + .5);
@@ -37,6 +37,7 @@ export default function PlanOutputView({ plan, name, issuedAt, profileName, anal
       <svg role="img" aria-label="Grundriss mit Sitzen, Gängen, Objekten und Ausgängen" viewBox={`${minX - margin} ${minY - margin} ${width + 2 * margin} ${height + 2 * margin}`} preserveAspectRatio="xMidYMid meet">
         {plan.contour.closed && <polygon points={polygon(plan.contour.points)} fill="#edf2e9" stroke="#314c3a" strokeWidth=".05" />}
         {plan.objects.filter((o) => o.type === "aisle").map((o) => o.type === "aisle" && <polygon key={o.id} points={polygon(aislePolygon(o))} fill="#a9d2d8" stroke="#357682" strokeWidth=".025" />)}
+        {(plan.zones ?? []).map((zone) => <g key={zone.id}><polygon points={polygon(zonePolygon(zone))} fill="#e8d8ad" fillOpacity=".55" stroke="#8a6a2f" strokeWidth=".035" strokeDasharray=".12 .08" /><text x={zone.geometry.x} y={zone.geometry.y} textAnchor="middle" dominantBaseline="middle" fontSize=".22" fill="#684d20">{zone.type === "tables" ? "Tischbereich" : "Bereich"}</text></g>)}
         {plan.objects.filter(isBlockingObject).map((o) => <g key={o.id}><polygon points={polygon(obstaclePolygon(o))} fill={o.type === "stage" || o.type === "obstacle" && o.obstacleType === "stage" ? "#aa7854" : o.type === "reservedArea" || o.type === "obstacle" && o.obstacleType === "restricted" ? "#957bb4" : "#bb7558"} stroke="#694d43" strokeWidth=".025" /><text x={o.x} y={o.y} textAnchor="middle" dominantBaseline="middle" fontSize=".24" fill="white">{o.type === "stage" || o.type === "obstacle" && o.obstacleType === "stage" ? "Bühne" : o.type === "reservedArea" || o.type === "obstacle" && o.obstacleType === "restricted" ? "Sperrfläche" : "Hindernis"}</text></g>)}
         {(plan.tables ?? []).map(table => <g key={table.id}><polygon points={polygon(tablePolygon(table))} fill="#d9c49a" stroke="#725b36" strokeWidth=".03" /><text x={table.x} y={table.y} textAnchor="middle" dominantBaseline="middle" fontSize=".18" fill="#5f4b2e">{tableModel(table.modelId).name.replace("DLMNS ", "")}</text></g>)}
         {(plan.chairs ?? []).map(chair => <polygon key={chair.id} points={polygon([{ x: chair.x - chair.width/2, y: chair.y-chair.depth/2 }, { x: chair.x+chair.width/2, y: chair.y-chair.depth/2 }, { x: chair.x+chair.width/2, y: chair.y+chair.depth/2 }, { x: chair.x-chair.width/2, y: chair.y+chair.depth/2 }])} fill="#557a69" stroke="white" strokeWidth=".012" transform={`rotate(${chair.rotation} ${chair.x} ${chair.y})`} />)}

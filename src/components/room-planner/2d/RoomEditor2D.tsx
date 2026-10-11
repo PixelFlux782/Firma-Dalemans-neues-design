@@ -22,36 +22,35 @@ import PlanOutputView from "./PlanOutputView";
 import MeasurementLayer from "./MeasurementLayer";
 import { calculatePlanDemand, calculateRecommendedDemand, changeChairSelection, chairProducts, DEFAULT_CHAIR_SELECTION, resolveChairShopTarget } from "@/lib/room-planner/chairSelection";
 import { calculateTableDemand, DEFAULT_TABLE_MODEL_ID, TABLE_MODELS, TABLE_PRESETS, fitTableLayout, generateTableLayout, moveTableGroup, planCapacity, tableLayoutConflicts, tableModel, tablePolygon, transformTableLayout, validateTables, type GeneratedTableLayout, type LayoutTransform, type TablePresetId } from "@/lib/room-planner/tables";
+import { zonePolygon, type PlanningZone } from "@/lib/room-planner/tables";
+import { markGeneratedSeating, replanningImpact, supplementSeatingPlan } from "@/lib/room-planner/planning";
 
 const INITIAL_SCALE = 45;
 const MIN_SCALE = 12;
 const MAX_SCALE = 240;
 const POINT_RADIUS = 5;
-type Tool = "wall" | "select" | "door" | "obstacle" | "aisle" | "front" | "stage" | "reservedArea" | "table";
-type Selection = { type: "point" | "wall" | "object" | "block" | "seat" | "table" | "chair"; id: string } | null;
+type Tool = "wall" | "select" | "door" | "obstacle" | "aisle" | "area";
+type Selection = { type: "point" | "wall" | "object" | "block" | "seat" | "table" | "chair" | "zone"; id: string } | null;
 type Camera = { x: number; y: number; scale: number };
 type HydratedRoomPlan = RoomPlan & { tables: NonNullable<RoomPlan["tables"]>; chairs: NonNullable<RoomPlan["chairs"]>; zones: NonNullable<RoomPlan["zones"]>; tableGroups: NonNullable<RoomPlan["tableGroups"]> };
 type ResizeCorner = "nw" | "ne" | "se" | "sw";
 type WorkflowStep = "room" | "furnishing" | "result";
 type Drag = { type: "pan"; startX: number; startY: number; camera: Camera }
-  | { type: "point" | "object" | "start" | "end" | "block" | "seat" | "table" | "chair"; id: string; at: { x: number; y: number }; original: RoomPlan }
-  | { type: "resize"; kind: "table" | "object"; id: string; corner: ResizeCorner; original: RoomPlan }
-  | { type: "rotate"; kind: "table" | "object"; id: string; original: RoomPlan }
+  | { type: "point" | "object" | "start" | "end" | "block" | "seat" | "table" | "chair" | "zone"; id: string; at: { x: number; y: number }; original: RoomPlan }
+  | { type: "resize"; kind: "table" | "object" | "zone"; id: string; corner: ResizeCorner; original: RoomPlan }
+  | { type: "rotate"; kind: "table" | "object" | "zone"; id: string; original: RoomPlan }
   | { type: "layoutMove" | "layoutRotate" | "layoutScale"; at: { x: number; y: number }; original: LayoutTransform };
 
 const TOOL_INFO: { name: Tool; label: string; help: string }[] = [
   { name: "select", label: "Auswahl", help: "Objekte oder Eckpunkte anklicken und ziehen, um sie zu bearbeiten." },
   { name: "wall", label: "Raum / Kontur", help: "Eckpunkte nacheinander setzen. Den ersten Punkt anklicken, um den Raum zu schließen." },
   { name: "door", label: "Tür", help: "Typ und Breite hier wählen, dann an einer Wand klicken. Mehrere Türen mit derselben Auswahl platzieren." },
-  { name: "obstacle", label: "Hindernis", help: "Art und Maße hier wählen, dann im Raum platzieren." },
   { name: "aisle", label: "Gang", help: "Breite hier einstellen, dann Startpunkt und Endpunkt anklicken. Shift rastet auf 45° ein." },
-  { name: "table", label: "Tisch", help: "Modell und Optionen wählen, dann zum Platzieren in den Raum klicken." },
-  { name: "front", label: "Front", help: "Im Raum klicken, um die Ausrichtung der Bestuhlung zu markieren." },
-  { name: "stage", label: "Bühne", help: "Im Raum klicken, um eine Bühne einzufügen." },
-  { name: "reservedArea", label: "Sperrfläche", help: "Im Raum klicken, um eine freizuhaltende Fläche anzulegen." },
+  { name: "area", label: "Bereich", help: "Einen Tischbereich mit zwei Eckpunkten zeichnen oder ein vorhandenes Tischobjekt setzen." },
+  { name: "obstacle", label: "Sperr-/Hindernis", help: "Sperrfläche, Hindernis, Bühne oder Front wählen und im Raum platzieren." },
 ];
 const TOOL_PATHS: Record<Tool, string> = {
-  select: "M4 3l5 16 2-6 6-2z", wall: "M3 18V5h18v13M3 18h18", door: "M4 20V4h14v16M8 20V8h10v12M14 14h1", obstacle: "M4 4h16v16H4zM4 4l16 16M20 4L4 20", aisle: "M4 3v18M9 3v18M15 3v18M20 3v18", table: "M3 6h18v10H3zM6 16v5m12-5v5", front: "M3 18h18M12 16V4m-4 4 4-4 4 4", stage: "M3 17h18v4H3zM6 17V7h12v10M8 7l4-4 4 4", reservedArea: "M4 4h16v16H4zM4 20 20 4",
+  select: "M4 3l5 16 2-6 6-2z", wall: "M3 18V5h18v13M3 18h18", door: "M4 20V4h14v16M8 20V8h10v12M14 14h1", obstacle: "M4 4h16v16H4zM4 4l16 16M20 4L4 20", aisle: "M4 3v18M9 3v18M15 3v18M20 3v18", area: "M4 5h16v14H4zM8 9h8v6H8z",
 };
 function ToolIcon({ name }: { name: Tool }) { return <svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={TOOL_PATHS[name]} /></svg>; }
 
@@ -74,9 +73,12 @@ export default function RoomEditor2D() {
   const [doorRole, setDoorRoleChoice] = useState<"normal" | "entrance" | "exit" | "emergency_exit">("normal");
   const [doorWidth, setDoorWidth] = useState(1);
   const [obstacleType, setObstacleType] = useState<ObstacleObject["obstacleType"]>("restricted");
+  const [obstacleElement, setObstacleElement] = useState<"obstacle" | "stage" | "reservedArea" | "front">("obstacle");
   const [obstacleWidth, setObstacleWidth] = useState(1);
   const [obstacleDepth, setObstacleDepth] = useState(1);
   const [aisleWidth, setAisleWidth] = useState(1.2);
+  const [areaMode, setAreaMode] = useState<"tables" | "table">("tables");
+  const [areaStart, setAreaStart] = useState<{ x: number; y: number } | null>(null);
   const [selectedTableModelId, setSelectedTableModelId] = useState(DEFAULT_TABLE_MODEL_ID);
   const [tableRotation, setTableRotation] = useState(0);
   const [tableWithChairs, setTableWithChairs] = useState(false);
@@ -96,6 +98,7 @@ export default function RoomEditor2D() {
   const [shiftDown, setShiftDown] = useState(false);
   const [spaceDown, setSpaceDown] = useState(false);
   const [notice, setNotice] = useState("");
+  const [replanDialogOpen, setReplanDialogOpen] = useState(false);
   const [rowEditCount, setRowEditCount] = useState(1);
   const [seatingRules, setSeatingRules] = useState<SeatingRules>({ ...DEFAULT_SEATING_RULES });
   const [orientation, setOrientation] = useState<SeatingOrientation>("horizontal");
@@ -177,7 +180,7 @@ export default function RoomEditor2D() {
     setApplicabilityConfirmed(project.settings.applicabilityConfirmed);
     setReservePercent(project.settings.reservePercent);
     setCalculated(null); setVariantCalculation(null); setActiveVariantId(null); setPreviewPlan(null); setLayoutDraft(null);
-    setSelection(null); setAisleStart(null); setHover(null); setActiveCheckId(null); setActiveSuggestionId(null); setNotice("");
+    setSelection(null); setAisleStart(null); setAreaStart(null); setHover(null); setActiveCheckId(null); setActiveSuggestionId(null); setNotice("");
     parameterHistory.current = new WeakMap();
     nextId.current = Math.max(0, ...[...project.plan.contour.points, ...project.plan.objects, ...(project.plan.tables ?? []), ...(project.plan.chairs ?? [])].map((item) => Number(item.id.match(/(\d+)$/)?.[1] ?? 0))) + 1;
     setSaveStatus("saved");
@@ -319,7 +322,9 @@ export default function RoomEditor2D() {
     setNotice("");
   };
   const removeObject = useCallback((id: string) => { setHistory((current) => commit(current, { ...current.present, objects: current.present.objects.filter((object) => object.id !== id) })); setSelection(null); }, []);
-  const updateTable = (id: string, change: (table: NonNullable<RoomPlan["tables"]>[number]) => NonNullable<RoomPlan["tables"]>[number]) => add({ ...plan, tables: plan.tables.map(table => table.id === id ? change(table) : table) });
+  const updateTable = (id: string, change: (table: NonNullable<RoomPlan["tables"]>[number]) => NonNullable<RoomPlan["tables"]>[number]) => add({ ...plan, tables: plan.tables.map(table => table.id === id ? { ...change(table), edited: true } : table) });
+  const updateZone = (id: string, change: (zone: PlanningZone) => PlanningZone) => add({ ...plan, zones: plan.zones.map(zone => zone.id === id ? change(zone) : zone) });
+  const removeZone = (id: string) => { add({ ...plan, zones: plan.zones.filter(zone => zone.id !== id) }); setSelection(null); };
   const removeTable = (id: string) => {
     const table = plan.tables.find(item => item.id === id), group = table?.groupId && plan.tableGroups.find(item => item.id === table.groupId);
     add({ ...plan, tables: plan.tables.filter(item => item.id !== id), chairs: group ? plan.chairs.filter(item => !group.chairIds.includes(item.id)) : plan.chairs, tableGroups: group ? plan.tableGroups.filter(item => item.id !== group.id) : plan.tableGroups });
@@ -334,6 +339,7 @@ export default function RoomEditor2D() {
     if (selection?.type === "object") removeObject(selection.id);
     if (selection?.type === "table") removeTable(selection.id);
     if (selection?.type === "chair") { add({ ...plan, chairs: plan.chairs.filter(chair => chair.id !== selection.id), tableGroups: plan.tableGroups.map(group => ({ ...group, chairIds: group.chairIds.filter(id => id !== selection.id) })) }); setSelection(null); }
+    if (selection?.type === "zone") removeZone(selection.id);
     if (selection?.type === "block" && plan.seating) { add({ ...plan, seating: removeBlock(plan.seating, selection.id) }); setSelection(null); }
     if (selection?.type === "seat" && plan.seating) { add({ ...plan, seating: removeSeat(plan.seating, selection.id) }); setSelection(null); }
   };
@@ -369,6 +375,7 @@ export default function RoomEditor2D() {
   const historyAction = useCallback((action: "undo" | "redo") => {
     setPreviewPlan(null);
     setAisleStart(null);
+    setAreaStart(null);
     setNotice("");
     setSelection(null);
     setActiveVariantId(null);
@@ -387,7 +394,7 @@ export default function RoomEditor2D() {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") { event.preventDefault(); historyAction(event.shiftKey ? "redo" : "undo"); }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "y") { event.preventDefault(); historyAction("redo"); }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d" && selection?.type === "table") { event.preventDefault(); duplicateTable(selection.id); }
-      if (event.key === "Escape") { setHover(null); setSelection(null); setAisleStart(null); setWallEdit(null); setToolOptions(null); setLayoutDraft(null); }
+      if (event.key === "Escape") { setHover(null); setSelection(null); setAisleStart(null); setAreaStart(null); setWallEdit(null); setToolOptions(null); setLayoutDraft(null); setReplanDialogOpen(false); }
       if ((event.key === "Delete" || event.key === "Backspace") && selection && !(event.target instanceof HTMLInputElement) && !(event.target instanceof HTMLSelectElement)) { event.preventDefault(); deleteSelection(); }
     };
     const keyUp = (event: KeyboardEvent) => { if (event.code === "Space") setSpaceDown(false); if (event.key === "Shift") setShiftDown(false); };
@@ -417,6 +424,7 @@ export default function RoomEditor2D() {
   const selectedSeatBlock = selectedSeat && seating?.blocks.find((block) => block.seats.some((seat) => seat.id === selectedSeat.id));
   const selectedTable = selection?.type === "table" ? shownPlan.tables.find(table => table.id === selection.id) : undefined;
   const selectedFurnitureChair = selection?.type === "chair" ? shownPlan.chairs.find(chair => chair.id === selection.id) : undefined;
+  const selectedZone = selection?.type === "zone" ? shownPlan.zones.find(zone => zone.id === selection.id) : undefined;
   const shapePoints = (points: { x: number; y: number }[]) => points.map((point) => { const p = screen(point); return `${p.x},${p.y}`; }).join(" ");
   const aisleEnd = (raw: { x: number; y: number }, shift: boolean) => {
     const p = snapPoint(raw);
@@ -438,14 +446,16 @@ export default function RoomEditor2D() {
   };
   const dragged = (drag: Extract<Drag, { original: RoomPlan }>, at: { x: number; y: number }): RoomPlan => {
     if (drag.type === "resize") {
-      if (drag.kind === "table") return { ...drag.original, tables: (drag.original.tables ?? []).map(item => item.id === drag.id ? resizeItem(item, drag.corner, at) : item) };
+      if (drag.kind === "table") return { ...drag.original, tables: (drag.original.tables ?? []).map(item => item.id === drag.id ? { ...resizeItem(item, drag.corner, at), edited: true } : item) };
+      if (drag.kind === "zone") return { ...drag.original, zones: (drag.original.zones ?? []).map(item => item.id === drag.id ? (() => { const resized = resizeItem({ ...item.geometry, rotation: item.rotation }, drag.corner, at); return { ...item, geometry: { ...item.geometry, x: resized.x, y: resized.y, width: resized.width, depth: resized.depth } }; })() : item) };
       return { ...drag.original, objects: drag.original.objects.map(item => item.id === drag.id && isBlockingObject(item) ? resizeItem(item, drag.corner, at) : item) };
     }
     if (drag.type === "rotate") {
-      const item = drag.kind === "table" ? (drag.original.tables ?? []).find(entry => entry.id === drag.id) : drag.original.objects.find(entry => entry.id === drag.id && isBlockingObject(entry));
+      const item = drag.kind === "table" ? (drag.original.tables ?? []).find(entry => entry.id === drag.id) : drag.kind === "zone" ? (drag.original.zones ?? []).find(entry => entry.id === drag.id)?.geometry : drag.original.objects.find(entry => entry.id === drag.id && isBlockingObject(entry));
       if (!item || !("x" in item)) return drag.original;
       const rotation = Math.round(Math.atan2(at.y - item.y, at.x - item.x) * 180 / Math.PI + 90);
-      if (drag.kind === "table") return { ...drag.original, tables: (drag.original.tables ?? []).map(entry => entry.id === drag.id ? { ...entry, rotation } : entry) };
+      if (drag.kind === "table") return { ...drag.original, tables: (drag.original.tables ?? []).map(entry => entry.id === drag.id ? { ...entry, rotation, edited: true } : entry) };
+      if (drag.kind === "zone") return { ...drag.original, zones: (drag.original.zones ?? []).map(entry => entry.id === drag.id ? { ...entry, rotation } : entry) };
       return { ...drag.original, objects: drag.original.objects.map(entry => entry.id === drag.id && isBlockingObject(entry) ? { ...entry, rotation } : entry) };
     }
     if (drag.type === "seat" && drag.original.seating) {
@@ -460,9 +470,10 @@ export default function RoomEditor2D() {
     const dx = at.x - drag.at.x, dy = at.y - drag.at.y;
     if (drag.type === "table") {
       const table = (drag.original.tables ?? []).find(item => item.id === drag.id); if (!table) return drag.original;
-      return table.groupId ? moveTableGroup(drag.original, table.groupId, dx, dy) : { ...drag.original, tables: (drag.original.tables ?? []).map(item => item.id === drag.id ? { ...item, x: Number((item.x + dx).toFixed(2)), y: Number((item.y + dy).toFixed(2)) } : item) };
+      return table.groupId ? moveTableGroup(drag.original, table.groupId, dx, dy) : { ...drag.original, tables: (drag.original.tables ?? []).map(item => item.id === drag.id ? { ...item, x: Number((item.x + dx).toFixed(2)), y: Number((item.y + dy).toFixed(2)), edited: true } : item) };
     }
-    if (drag.type === "chair") return { ...drag.original, chairs: (drag.original.chairs ?? []).map(chair => chair.id === drag.id ? { ...chair, x: Number((chair.x + dx).toFixed(2)), y: Number((chair.y + dy).toFixed(2)) } : chair) };
+    if (drag.type === "chair") return { ...drag.original, chairs: (drag.original.chairs ?? []).map(chair => chair.id === drag.id ? { ...chair, x: Number((chair.x + dx).toFixed(2)), y: Number((chair.y + dy).toFixed(2)), edited: true } : chair) };
+    if (drag.type === "zone") return { ...drag.original, zones: (drag.original.zones ?? []).map(zone => zone.id === drag.id ? { ...zone, geometry: { ...zone.geometry, x: Number((zone.geometry.x + dx).toFixed(2)), y: Number((zone.geometry.y + dy).toFixed(2)) } } : zone) };
     const object = drag.original.objects.find((item) => item.id === drag.id);
     if (!object) return drag.original;
     const changed: RoomObject = object.type === "door" ? (() => {
@@ -478,7 +489,8 @@ export default function RoomEditor2D() {
   const preview = hover && lastPoint && tool === "wall" && !room.closed ? drawingPoint(hover, shiftDown) : null;
   const previewScreen = preview ? screen(preview) : null;
   const nearestFirst = previewScreen && firstScreen && room.points.length >= 3 && Math.hypot(previewScreen.x - firstScreen.x, previewScreen.y - firstScreen.y) <= 14;
-  const help = tool === "door" ? "Klicken Sie auf eine Wand, um eine Tür zu setzen." : tool === "obstacle" ? "Klicken Sie in den Raum, um ein Hindernis zu setzen." : tool === "aisle" ? "Klicken Sie Start und Ende des Gangs. Shift rastet auf 45° ein." : tool === "table" ? "Klicken Sie in den Raum, um den gewählten Tisch zu setzen." : room.closed ? "Raum geschlossen. Mit „Auswahl“ können Sie Eckpunkte und Objekte verschieben." : room.points.length ? "Klicken Sie auf den ersten Punkt, um den Raum zu schließen. Shift hält Wände gerade." : "Wählen Sie „Raum / Kontur“ und klicken Sie die Ecken Ihres Raums nacheinander an.";
+  const areaPreviewZone: PlanningZone | null = areaStart && hover && areaMode === "tables" ? { id: "zone-preview", type: "tables", geometry: { kind: "rectangle", x: (areaStart.x + hover.x) / 2, y: (areaStart.y + hover.y) / 2, width: Math.abs(hover.x - areaStart.x), depth: Math.abs(hover.y - areaStart.y) }, rotation: 0 } : null;
+  const help = tool === "door" ? "Klicken Sie auf eine Wand, um eine Tür zu setzen." : tool === "obstacle" ? "Klicken Sie in den Raum, um das gewählte Element zu setzen." : tool === "aisle" ? "Klicken Sie Start und Ende des Gangs. Shift rastet auf 45° ein." : tool === "area" ? areaMode === "tables" ? "Klicken Sie zwei gegenüberliegende Ecken des Tischbereichs." : "Klicken Sie in den Raum, um den gewählten Tisch zu setzen." : room.closed ? "Raum geschlossen. Mit „Auswahl“ können Sie Eckpunkte und Objekte verschieben." : room.points.length ? "Klicken Sie auf den ersten Punkt, um den Raum zu schließen. Shift hält Wände gerade." : "Wählen Sie „Raum“ und klicken Sie die Ecken Ihres Raums nacheinander an.";
 
   const zoomAt = (factor: number, x: number, y: number) => setCamera((current) => {
     const scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, current.scale * factor));
@@ -519,10 +531,11 @@ export default function RoomEditor2D() {
     const seatId = target.getAttribute("data-seat-id");
     const tableId = target.getAttribute("data-table-id");
     const chairId = target.getAttribute("data-chair-id");
+    const zoneId = target.getAttribute("data-zone-id");
     const handle = target.getAttribute("data-handle") as "start" | "end" | null;
-    const resizeId = target.getAttribute("data-resize-id"), resizeKind = target.getAttribute("data-resize-kind") as "table" | "object" | null;
+    const resizeId = target.getAttribute("data-resize-id"), resizeKind = target.getAttribute("data-resize-kind") as "table" | "object" | "zone" | null;
     const corner = target.getAttribute("data-corner") as ResizeCorner | null;
-    const rotateId = target.getAttribute("data-rotate-id"), rotateKind = target.getAttribute("data-rotate-kind") as "table" | "object" | null;
+    const rotateId = target.getAttribute("data-rotate-id"), rotateKind = target.getAttribute("data-rotate-kind") as "table" | "object" | "zone" | null;
     const draftHandle = target.getAttribute("data-draft-handle") as "move" | "rotate" | "scale" | null;
     if (layoutDraft && draftHandle) {
       dragRef.current = { type: draftHandle === "move" ? "layoutMove" : draftHandle === "rotate" ? "layoutRotate" : "layoutScale", at: world(at.x, at.y), original: layoutTransform };
@@ -539,6 +552,7 @@ export default function RoomEditor2D() {
       else if (rotateId && rotateKind) { dragRef.current = { type: "rotate", kind: rotateKind, id: rotateId, original: roomRef.current }; event.currentTarget.setPointerCapture(event.pointerId); }
       else if (tableId) { setSelection({ type: "table", id: tableId }); dragRef.current = { type: "table", id: tableId, at: world(at.x, at.y), original: roomRef.current }; event.currentTarget.setPointerCapture(event.pointerId); }
       else if (chairId) { setSelection({ type: "chair", id: chairId }); dragRef.current = { type: "chair", id: chairId, at: world(at.x, at.y), original: roomRef.current }; event.currentTarget.setPointerCapture(event.pointerId); }
+      else if (zoneId) { setSelection({ type: "zone", id: zoneId }); dragRef.current = { type: "zone", id: zoneId, at: world(at.x, at.y), original: roomRef.current }; event.currentTarget.setPointerCapture(event.pointerId); }
       else if (seatId && event.altKey) { setSelection({ type: "seat", id: seatId }); }
       else if (seatId && selection?.type === "seat" && plan.seating) {
         dragRef.current = { type: "seat", id: seatId, at: world(at.x, at.y), original: roomRef.current };
@@ -559,12 +573,12 @@ export default function RoomEditor2D() {
       } else setSelection(wallId ? { type: "wall", id: wallId } : null);
       return;
     }
-    if (tool === "table") {
+    if (tool === "area" && areaMode === "table") {
       const p = snapPoint(world(at.x, at.y)), model = tableModel(selectedTableModelId), prefix = `table-${nextId.current++}`;
       const generated = generateTableLayout({ preset: "single", modelId: model.id, count: 1, spacing: tableSpacing, rotation: tableRotation, withChairs: tableWithChairs }, prefix);
       const placedTables = generated.tables.map(table => ({ ...table, x: p.x, y: p.y, source: "manual" as const }));
       const origin = generated.tables[0] ?? { x: 0, y: 0 }, placedChairs = generated.chairs.map(chair => ({ ...chair, x: chair.x - origin.x + p.x, y: chair.y - origin.y + p.y, source: "manual" as const }));
-      add({ ...plan, tables: [...plan.tables, ...placedTables], chairs: [...plan.chairs, ...placedChairs], tableGroups: [...plan.tableGroups, ...generated.groups] }); setSelection({ type: "table", id: placedTables[0].id }); setNotice(""); return;
+      add({ ...plan, tables: [...plan.tables, ...placedTables], chairs: [...plan.chairs, ...placedChairs], tableGroups: [...plan.tableGroups, ...generated.groups] }); setSelection({ type: "table", id: placedTables[0].id }); setToolOptions(null); setNotice(""); return;
     }
     if (tool === "door") {
       if (!wallId) return;
@@ -572,23 +586,31 @@ export default function RoomEditor2D() {
       if (!ends || offset === null || wallLength(ends.a, ends.b) < doorWidth) { setNotice(`Diese Wand ist zu kurz für eine Tür mit ${formatMeters(doorWidth)} Breite.`); return; }
       const base: DoorObject = { id: `object-${nextId.current++}`, type: "door", wallId, offset: Number(Math.max(0, Math.min(offset - doorWidth / 2, wallLength(ends.a, ends.b) - doorWidth)).toFixed(2)), width: doorWidth };
       const object: RoomObject = doorRole === "normal" || doorRole === "entrance" ? base : setDoorRole(base, doorRole);
-      add({ ...plan, objects: [...plan.objects, object] }); setSelection({ type: "object", id: object.id }); setNotice(""); return;
+      add({ ...plan, objects: [...plan.objects, object] }); setSelection({ type: "object", id: object.id }); setToolOptions(null); setNotice(""); return;
     }
-    if (tool === "obstacle" || tool === "stage" || tool === "reservedArea" || tool === "front") {
-      if (tool === "front" && plan.objects.some((object) => object.type === "front")) { setNotice("Es gibt bereits eine Front. Wählen Sie sie zum Bearbeiten aus."); return; }
+    if (tool === "area" && areaMode === "tables") {
+      const p = snapPoint(world(at.x, at.y));
+      if (!areaStart) { setAreaStart(p); return; }
+      const width = Math.abs(p.x - areaStart.x), depth = Math.abs(p.y - areaStart.y);
+      if (width < .1 || depth < .1) { setNotice("Der Tischbereich braucht Breite und Tiefe von mindestens 0,10 m."); return; }
+      const zone: PlanningZone = { id: `zone-${nextId.current++}`, type: "tables", geometry: { kind: "rectangle", x: Number(((p.x + areaStart.x) / 2).toFixed(2)), y: Number(((p.y + areaStart.y) / 2).toFixed(2)), width: Number(width.toFixed(2)), depth: Number(depth.toFixed(2)) }, rotation: 0, source: "manual" };
+      add({ ...plan, zones: [...plan.zones, zone] }); setSelection({ type: "zone", id: zone.id }); setAreaStart(null); setToolOptions(null); setNotice("Tischbereich angelegt. Die Reihenbestuhlung hält diese Fläche frei."); return;
+    }
+    if (tool === "obstacle") {
+      if (obstacleElement === "front" && plan.objects.some((object) => object.type === "front")) { setNotice("Es gibt bereits eine Front. Wählen Sie sie zum Bearbeiten aus."); return; }
       const position = snapPoint(world(at.x, at.y));
-      const object: RoomObject = tool === "front" ? { id: `object-${nextId.current++}`, type: "front", ...position, width: 2, rotation: 0 }
-        : tool === "stage" ? { id: `object-${nextId.current++}`, type: "stage", ...position, width: 3, depth: 2, rotation: 0 }
-        : tool === "reservedArea" ? { id: `object-${nextId.current++}`, type: "reservedArea", ...position, width: 2, depth: 2, rotation: 0 }
+      const object: RoomObject = obstacleElement === "front" ? { id: `object-${nextId.current++}`, type: "front", ...position, width: 2, rotation: 0 }
+        : obstacleElement === "stage" ? { id: `object-${nextId.current++}`, type: "stage", ...position, width: obstacleWidth, depth: obstacleDepth, rotation: 0 }
+        : obstacleElement === "reservedArea" ? { id: `object-${nextId.current++}`, type: "reservedArea", ...position, width: obstacleWidth, depth: obstacleDepth, rotation: 0 }
         : { id: `object-${nextId.current++}`, type: "obstacle", obstacleType, ...position, width: obstacleWidth, depth: obstacleDepth, rotation: 0 };
-      add({ ...plan, objects: [...plan.objects, object] }); setSelection({ type: "object", id: object.id }); setNotice(""); return;
+      add({ ...plan, objects: [...plan.objects, object] }); setSelection({ type: "object", id: object.id }); setToolOptions(null); setNotice(""); return;
     }
     if (tool === "aisle") {
       const p = aisleEnd(world(at.x, at.y), event.shiftKey);
       if (!aisleStart) { setAisleStart(p); return; }
       if (wallLength(aisleStart, p) < 0.01) { setNotice("Der Gang braucht eine Länge größer als 0."); return; }
       const object: RoomObject = { id: `object-${nextId.current++}`, type: "aisle", start: aisleStart, end: p, width: aisleWidth };
-      add({ ...plan, objects: [...plan.objects, object] }); setSelection({ type: "object", id: object.id }); setAisleStart(null); setNotice(""); return;
+      add({ ...plan, objects: [...plan.objects, object] }); setSelection({ type: "object", id: object.id }); setAisleStart(null); setToolOptions(null); setNotice(""); return;
     }
     if (room.closed) { setNotice("Setzen Sie die Planung zurück, um einen neuen Raum zu zeichnen."); return; }
     if (pointId === room.points[0]?.id && room.points.length >= 3 || firstScreen && room.points.length >= 3 && Math.hypot(at.x - firstScreen.x, at.y - firstScreen.y) <= 12) {
@@ -639,7 +661,7 @@ export default function RoomEditor2D() {
     dragRef.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
-  const reset = () => { add(emptyPlan()); setSelection(null); setPreviewPlan(null); setLayoutDraft(null); setAisleStart(null); setHover(null); setNotice(""); setTool("wall"); setCamera({ x: 0, y: 0, scale: INITIAL_SCALE }); };
+  const reset = () => { add(emptyPlan()); setSelection(null); setPreviewPlan(null); setLayoutDraft(null); setAisleStart(null); setAreaStart(null); setHover(null); setNotice(""); setTool("wall"); setCamera({ x: 0, y: 0, scale: INITIAL_SCALE }); };
   const selectedPoint = selection?.type === "point" ? pointById(shownRoom, selection.id) : null;
   const selectedWall = selection?.type === "wall" ? shownRoom.walls.find((wall) => wall.id === selection.id) : null;
   const wallStart = selectedWall && pointById(shownRoom, selectedWall.startPointId);
@@ -665,7 +687,8 @@ export default function RoomEditor2D() {
   const conflictedTables = new Set(issues.filter(issue => issue.objectId.startsWith("table-")).map(issue => issue.objectId));
   const capacity = planCapacity(shownPlan);
   const selectedResizable = selectedTable ? { kind: "table" as const, id: selectedTable.id, points: tablePolygon(selectedTable), center: selectedTable }
-    : selectedObject && isBlockingObject(selectedObject) ? { kind: "object" as const, id: selectedObject.id, points: obstaclePolygon(selectedObject), center: selectedObject } : null;
+    : selectedObject && isBlockingObject(selectedObject) ? { kind: "object" as const, id: selectedObject.id, points: obstaclePolygon(selectedObject), center: selectedObject }
+    : selectedZone ? { kind: "zone" as const, id: selectedZone.id, points: zonePolygon(selectedZone), center: selectedZone.geometry } : null;
   const draftPoints = transformedDraft?.tables.flatMap(tablePolygon) ?? [];
   const draftBounds = draftPoints.length ? { minX: Math.min(...draftPoints.map(p => p.x)), maxX: Math.max(...draftPoints.map(p => p.x)), minY: Math.min(...draftPoints.map(p => p.y)), maxY: Math.max(...draftPoints.map(p => p.y)) } : null;
   const prepareTableDraft = (automatic = true) => {
@@ -722,6 +745,44 @@ export default function RoomEditor2D() {
     setNotice(variant.feasible ? "Variante übernommen. Der gesamte vorherige Plan ist mit einem Schritt rückgängig zu machen." : "Technische Annäherung übernommen. Regelabweichungen sind im aktuellen Plan sichtbar und bearbeitbar.");
     return adoptedPlan;
   };
+  const runAutomaticSeating = () => {
+    if (generatingRef.current) return;
+    generatingRef.current = true;
+    setVariantsBusy(true);
+    setVariantError("");
+    window.setTimeout(() => {
+      try {
+        const input = { ...plan, seating: undefined };
+        const result = generatePlanVariants(input, seatingRules, profile, "automatic");
+        const choice = result.variants.find((variant) => variant.profileId === "balanced") ?? result.variants[0] ?? result.fallback;
+        let adopted: RoomPlan;
+        if (choice) adopted = materializeVariant(choice);
+        else {
+          const horizontal = generateSeatingPlan(input, seatingRules, "horizontal", gridOffset);
+          const vertical = generateSeatingPlan(input, seatingRules, "vertical", gridOffset);
+          const seating = vertical.totalSeats > horizontal.totalSeats ? vertical : horizontal;
+          adopted = { ...input, seating: markGeneratedSeating(seating) };
+        }
+        add(adopted);
+        setCalculated(null); setVariantCalculation(null); setActiveVariantId(null); setSelection(null);
+        setNotice(`Bestuhlung erstellt: ${adopted.seating?.totalSeats ?? 0} Plätze. Alle erzeugten Elemente sind frei bearbeitbar.`);
+      } catch {
+        setVariantError("Die Bestuhlung konnte nicht berechnet werden. Bitte prüfen Sie Raum und Eingaben.");
+      } finally {
+        generatingRef.current = false;
+        setVariantsBusy(false);
+      }
+    }, 0);
+  };
+  const supplementFreeArea = () => {
+    const current = plan.seating;
+    const next = supplementSeatingPlan(plan, seatingRules, current?.orientation ?? orientation, gridOffset, current?.rotation);
+    if (next === current) { setNotice("Keine weitere freie Fläche für zusätzliche Sitzplätze gefunden."); return; }
+    add({ ...plan, seating: next });
+    setSelection(null);
+    setNotice(`${next.totalSeats - (current?.totalSeats ?? 0)} Sitzplätze auf freier Fläche ergänzt. Bestehende und manuell angepasste Elemente blieben unverändert.`);
+  };
+  const replanSummary = replanningImpact(plan);
 
   if (outputIssuedAt) return <PlanOutputView plan={plan} name={projects.find((project) => project.id === activeProjectId)?.name ?? "Unbenanntes Projekt"} issuedAt={outputIssuedAt} profileName={profile.name} analysis={currentAnalysis} reservePercent={reservePercent} inquiryHref={inquiryHref} shopHref={shopTarget?.href} onClose={() => setOutputIssuedAt(null)} />;
 
@@ -736,21 +797,21 @@ export default function RoomEditor2D() {
         ] as const).map(([step, number, label]) => <button key={step} type="button" aria-current={workflowStep === step ? "step" : undefined} onClick={() => setWorkflowStep(step)} className={`planner-step ${workflowStep === step ? "planner-step-active" : ""}`}><span>{number}</span>{label}</button>)}
         <p className="ml-2 hidden truncate text-xs text-premium-muted xl:block">Wie viele Stühle und Tische passen in Ihren Raum?</p>
       </div>
-      <button type="button" disabled={!room.closed || variantsBusy || errors.length > 0 || issues.some((issue) => issue.severity === "error")} onClick={() => { setWorkflowStep("result"); calculateVariants(); }} className="planner-auto-action rounded-lg bg-premium-forest px-4 py-2 text-xs font-bold uppercase tracking-wide text-white disabled:opacity-40">{variantsBusy ? "Planung läuft …" : "Automatisch planen"}</button>
+      <div className="flex items-center gap-2"><button type="button" disabled={!room.closed || variantsBusy || errors.length > 0 || issues.some((issue) => issue.severity === "error")} onClick={() => { setWorkflowStep("result"); if (plan.seating) supplementFreeArea(); else runAutomaticSeating(); }} className="planner-auto-action rounded-lg bg-premium-forest px-4 py-2 text-xs font-bold uppercase tracking-wide text-white disabled:opacity-40">{variantsBusy ? "Planung läuft …" : plan.seating ? "Freie Fläche ergänzen" : "Bestuhlen"}</button>{plan.seating && <button type="button" onClick={() => setReplanDialogOpen(true)} className="rounded-lg border border-premium-beige bg-white px-3 py-2 text-xs font-semibold text-premium-charcoal">Planung neu erstellen</button>}</div>
     </div>
     <div className="planner-toolbar relative z-20 flex flex-wrap items-center gap-1 border-b border-premium-beige bg-white/90 px-2 py-1">
       <div className="mr-auto flex flex-wrap gap-1" aria-label="Werkzeuge">
         {TOOL_INFO.map(({ name, label, help }) => <div key={name} className="group relative">
-          <button type="button" aria-label={label} aria-pressed={tool === name} aria-expanded={["door", "obstacle", "aisle", "table"].includes(name) ? toolOptions === name : undefined} aria-describedby={`tool-help-${name}`} onClick={() => { setTool(name); setAisleStart(null); setToolOptions(["door", "obstacle", "aisle", "table"].includes(name) ? toolOptions === name ? null : name : null); }} className={`relative flex h-9 w-10 items-center justify-center rounded-md ${tool === name ? "bg-premium-forest text-white" : "border border-premium-beige text-premium-charcoal"}`}><ToolIcon name={name} />{["door", "obstacle", "aisle", "table"].includes(name) ? <span aria-hidden="true" className="absolute bottom-0 right-0.5 text-[9px]">▾</span> : null}{name === "door" && doorRole !== "normal" ? <span aria-hidden="true" className="absolute -right-1 -top-1 rounded bg-amber-500 px-0.5 text-[8px] font-bold text-white">{{ entrance: "E", exit: "A", emergency_exit: "N" }[doorRole]}</span> : null}{name === "obstacle" && obstacleType !== "restricted" ? <span aria-hidden="true" className="absolute -right-1 -top-1 rounded bg-amber-500 px-0.5 text-[8px] font-bold text-white">{{ column: "S", stage: "B", technical: "T", furniture: "M", restricted: "F" }[obstacleType]}</span> : null}</button>
+          <button type="button" aria-label={label} aria-pressed={tool === name} aria-expanded={["door", "obstacle", "aisle", "area"].includes(name) ? toolOptions === name : undefined} aria-describedby={`tool-help-${name}`} onClick={() => { setTool(name); setAisleStart(null); setAreaStart(null); setToolOptions(["door", "obstacle", "aisle", "area"].includes(name) ? toolOptions === name ? null : name : null); }} className={`relative flex h-9 w-10 items-center justify-center rounded-md ${tool === name ? "bg-premium-forest text-white" : "border border-premium-beige text-premium-charcoal"}`}><ToolIcon name={name} />{["door", "obstacle", "aisle", "area"].includes(name) ? <span aria-hidden="true" className="absolute bottom-0 right-0.5 text-[9px]">▾</span> : null}{name === "door" && doorRole !== "normal" ? <span aria-hidden="true" className="absolute -right-1 -top-1 rounded bg-amber-500 px-0.5 text-[8px] font-bold text-white">{{ entrance: "E", exit: "A", emergency_exit: "N" }[doorRole]}</span> : null}{name === "obstacle" && obstacleElement === "obstacle" && obstacleType !== "restricted" ? <span aria-hidden="true" className="absolute -right-1 -top-1 rounded bg-amber-500 px-0.5 text-[8px] font-bold text-white">{{ column: "S", stage: "B", technical: "T", furniture: "M", restricted: "F" }[obstacleType]}</span> : null}</button>
           <div id={`tool-help-${name}`} role="tooltip" className={`pointer-events-none absolute left-0 top-full z-40 mt-1 hidden w-52 rounded-lg border border-premium-beige bg-white p-2 text-xs text-premium-charcoal shadow-lg ${toolOptions === name ? "" : "group-hover:block group-focus-within:block"}`}><strong>{label}</strong><p>{help}</p></div>
         </div>)}
       </div>
       {toolOptions && <div role="group" aria-label={`${TOOL_INFO.find((item) => item.name === toolOptions)?.label} Optionen`} className="absolute left-2 top-full z-30 mt-1 w-64 space-y-2 rounded-lg border border-premium-beige bg-white p-3 text-sm shadow-xl">
         <div className="flex items-center justify-between"><strong>{TOOL_INFO.find((item) => item.name === toolOptions)?.label}</strong><button type="button" aria-label="Werkzeugoptionen schließen" onClick={() => setToolOptions(null)}>×</button></div>
         {toolOptions === "door" && <><label className="block">Typ<select aria-label="Türtyp am Werkzeug" value={doorRole} onChange={(event) => setDoorRoleChoice(event.target.value as typeof doorRole)} className="mt-1 w-full rounded border border-premium-beige p-1"><option value="normal">Normale Tür</option><option value="entrance">Eingang (normale Tür)</option><option value="exit">Ausgang</option><option value="emergency_exit">Notausgang</option></select></label><label className="block">Breite (m)<input aria-label="Türbreite am Werkzeug" type="number" min="0.01" step="0.1" value={doorWidth} onChange={(event) => { if (event.currentTarget.valueAsNumber > 0) setDoorWidth(event.currentTarget.valueAsNumber); }} className="mt-1 w-full rounded border border-premium-beige p-1" /></label></>}
-        {toolOptions === "obstacle" && <><label className="block">Typ<select aria-label="Hindernistyp am Werkzeug" value={obstacleType} onChange={(event) => setObstacleType(event.target.value as ObstacleObject["obstacleType"])} className="mt-1 w-full rounded border border-premium-beige p-1"><option value="column">Säule</option><option value="stage">Bühne</option><option value="technical">Technik / Mischpult</option><option value="furniture">Festes Möbel</option><option value="restricted">Sperrfläche</option></select></label><label className="block">Breite (m)<input aria-label="Hindernisbreite am Werkzeug" type="number" min="0.01" step="0.1" value={obstacleWidth} onChange={(event) => { if (event.currentTarget.valueAsNumber > 0) setObstacleWidth(event.currentTarget.valueAsNumber); }} className="mt-1 w-full rounded border border-premium-beige p-1" /></label><label className="block">Tiefe (m)<input aria-label="Hindernistiefe am Werkzeug" type="number" min="0.01" step="0.1" value={obstacleDepth} onChange={(event) => { if (event.currentTarget.valueAsNumber > 0) setObstacleDepth(event.currentTarget.valueAsNumber); }} className="mt-1 w-full rounded border border-premium-beige p-1" /></label></>}
+        {toolOptions === "obstacle" && <><label className="block">Element<select aria-label="Sperr- oder Hindernistyp" value={obstacleElement} onChange={(event) => setObstacleElement(event.target.value as typeof obstacleElement)} className="mt-1 w-full rounded border border-premium-beige p-1"><option value="obstacle">Sperrfläche / Hindernis</option><option value="stage">Bühne</option><option value="reservedArea">Reservierte Fläche</option><option value="front">Front / Ausrichtung</option></select></label>{obstacleElement === "obstacle" && <label className="block">Typ<select aria-label="Hindernistyp am Werkzeug" value={obstacleType} onChange={(event) => setObstacleType(event.target.value as ObstacleObject["obstacleType"])} className="mt-1 w-full rounded border border-premium-beige p-1"><option value="column">Säule</option><option value="stage">Bühne</option><option value="technical">Technik / Mischpult</option><option value="furniture">Festes Möbel</option><option value="restricted">Sperrfläche</option></select></label>}{obstacleElement !== "front" && <><label className="block">Breite (m)<input aria-label="Hindernisbreite am Werkzeug" type="number" min="0.01" step="0.1" value={obstacleWidth} onChange={(event) => { if (event.currentTarget.valueAsNumber > 0) setObstacleWidth(event.currentTarget.valueAsNumber); }} className="mt-1 w-full rounded border border-premium-beige p-1" /></label><label className="block">Tiefe (m)<input aria-label="Hindernistiefe am Werkzeug" type="number" min="0.01" step="0.1" value={obstacleDepth} onChange={(event) => { if (event.currentTarget.valueAsNumber > 0) setObstacleDepth(event.currentTarget.valueAsNumber); }} className="mt-1 w-full rounded border border-premium-beige p-1" /></label></>}</>}
         {toolOptions === "aisle" && <label className="block">Gangbreite (m)<input aria-label="Gangbreite am Werkzeug" type="number" min="0.01" step="0.1" value={aisleWidth} onChange={(event) => { if (event.currentTarget.valueAsNumber > 0) setAisleWidth(event.currentTarget.valueAsNumber); }} className="mt-1 w-full rounded border border-premium-beige p-1" /></label>}
-        {toolOptions === "table" && <><label className="block">Modell<select aria-label="Tischmodell am Werkzeug" value={selectedTableModelId} onChange={event => setSelectedTableModelId(event.target.value)} className="mt-1 w-full rounded border border-premium-beige p-1">{TABLE_MODELS.map(model => <option key={model.id} value={model.id}>{model.name}</option>)}</select></label><label className="block">Rotation<select aria-label="Tischrotation am Werkzeug" value={tableRotation} onChange={event => setTableRotation(Number(event.target.value))} className="mt-1 w-full rounded border border-premium-beige p-1">{[0,45,90,135,180,225,270,315].map(value => <option key={value} value={value}>{value}°</option>)}</select></label><label className="flex items-center gap-2"><input type="checkbox" checked={tableWithChairs} onChange={event => setTableWithChairs(event.target.checked)} />Mit Stühlen</label></>}
+        {toolOptions === "area" && <><label className="block">Bereichstyp<select aria-label="Bereichstyp" value={areaMode} onChange={event => { setAreaMode(event.target.value as typeof areaMode); setAreaStart(null); }} className="mt-1 w-full rounded border border-premium-beige p-1"><option value="tables">Tische (von Reihen freihalten)</option><option value="table">Einzelnes Tischobjekt</option></select></label>{areaMode === "table" && <><label className="block">Modell<select aria-label="Tischmodell am Werkzeug" value={selectedTableModelId} onChange={event => setSelectedTableModelId(event.target.value)} className="mt-1 w-full rounded border border-premium-beige p-1">{TABLE_MODELS.map(model => <option key={model.id} value={model.id}>{model.name}</option>)}</select></label><label className="block">Rotation<select aria-label="Tischrotation am Werkzeug" value={tableRotation} onChange={event => setTableRotation(Number(event.target.value))} className="mt-1 w-full rounded border border-premium-beige p-1">{[0,45,90,135,180,225,270,315].map(value => <option key={value} value={value}>{value}°</option>)}</select></label><label className="flex items-center gap-2"><input type="checkbox" checked={tableWithChairs} onChange={event => setTableWithChairs(event.target.checked)} />Mit Stühlen</label></>}</>}
       </div>}
       <button type="button" aria-label="Bemaßungen ein-/ausblenden" title="Bemaßungen ein-/ausblenden" aria-pressed={measurementsVisible} onClick={() => setMeasurementsVisible((value) => !value)} className={`flex h-9 w-10 items-center justify-center rounded-md border border-premium-beige ${measurementsVisible ? "bg-premium-forest text-white" : "text-premium-charcoal"}`}><svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M3 5v14m18-14v14M3 12h18M6 9l-3 3 3 3m12-6 3 3-3 3" /></svg></button>
       <button type="button" aria-label="Abstandsmaße ein-/ausblenden" title="Abstandsmaße bei Auswahl" aria-pressed={showDistances} onClick={() => setShowDistances((value) => !value)} className={`rounded-md border border-premium-beige px-2 py-1 text-xs ${showDistances ? "bg-premium-forest text-white" : "text-premium-charcoal"}`}>Abstände</button>
@@ -762,6 +823,7 @@ export default function RoomEditor2D() {
       <aside aria-label="Raum und Werkzeuge" className="planner-tools border-r border-premium-beige bg-white/90 p-2">
         <h3 className="mb-2 text-[10px] font-bold uppercase tracking-wide text-premium-forest">{workflowStep === "room" ? "Raum" : workflowStep === "furnishing" ? "Einrichten" : "Ergebnis"}</h3>
         <p className="mb-3 text-[11px] leading-4 text-premium-muted">{workflowStep === "room" ? room.closed ? "Raum steht. Türen, Ausgänge und Hindernisse ergänzen." : "Kontur zeichnen und durch Klick auf den ersten Punkt schließen." : workflowStep === "furnishing" ? "Stühle und Tische kompakt planen oder manuell anpassen." : "Kapazität und Prüfstatus rechts kontrollieren."}</p>
+        <div className="mb-3 grid gap-1" aria-label="Spezialwerkzeuge"><button type="button" onClick={() => { setTool("obstacle"); setObstacleElement("obstacle"); setToolOptions(null); }} className="rounded border border-premium-beige px-2 py-1 text-left text-[10px]">Hindernis</button><button type="button" onClick={() => { setTool("area"); setAreaMode("table"); setToolOptions(null); }} className="rounded border border-premium-beige px-2 py-1 text-left text-[10px]">Tisch</button><button type="button" onClick={() => { setTool("obstacle"); setObstacleElement("front"); setToolOptions(null); }} className="rounded border border-premium-beige px-2 py-1 text-left text-[10px]">Front</button><button type="button" onClick={() => { setTool("obstacle"); setObstacleElement("stage"); setToolOptions(null); }} className="rounded border border-premium-beige px-2 py-1 text-left text-[10px]">Bühne</button><button type="button" onClick={() => { setTool("obstacle"); setObstacleElement("reservedArea"); setToolOptions(null); }} className="rounded border border-premium-beige px-2 py-1 text-left text-[10px]">Sperrfläche</button></div>
         <button type="button" aria-label="Bestuhlung in der Werkzeugleiste berechnen" onClick={() => { setWorkflowStep("furnishing"); document.querySelector<HTMLButtonElement>('[data-planner-action="calculate-seating"]')?.click(); }} className="mb-1 w-full rounded-md border border-premium-beige px-2 py-1 text-left text-[11px] font-semibold">Stühle planen</button>
         <button type="button" aria-label="Planvarianten in der Werkzeugleiste berechnen" onClick={() => { setWorkflowStep("result"); document.querySelector<HTMLButtonElement>('[data-planner-action="calculate-variants"]')?.click(); }} className="w-full rounded-md border border-premium-beige px-2 py-1 text-left text-[11px] font-semibold">Varianten</button>
         <h3 className="mb-2 mt-4 text-[10px] font-bold uppercase tracking-wide text-premium-forest">Ansicht</h3>
@@ -778,6 +840,8 @@ export default function RoomEditor2D() {
         <rect width={size.width} height={size.height} fill="#f6f4ed" />
         <Grid camera={camera} size={size} />
         {shownRoom.closed && shownRoom.points.length >= 3 ? <polygon points={shownRoom.points.map((point) => { const p = coords.get(point.id)!; return `${p.x},${p.y}`; }).join(" ")} fill={errors.length ? "#c77c6c" : "#9ab393"} fillOpacity="0.24" /> : null}
+        <g aria-label="Bereiche">{shownPlan.zones.map(zone => { const selected = selection?.type === "zone" && selection.id === zone.id, conflict = issues.some(issue => issue.objectId === zone.id && issue.severity === "error"); return <g key={zone.id}><polygon data-zone-id={zone.id} points={shapePoints(zonePolygon(zone))} fill={zone.type === "tables" ? "#d7b56d" : "#91a99a"} fillOpacity="0.25" stroke={conflict ? "#b53b32" : selected ? "#bd7647" : "#8a6a2f"} strokeWidth={selected || conflict ? 3 : 2} strokeDasharray="8 5" className={tool === "select" ? "cursor-move" : ""} /><text x={screen(zone.geometry).x} y={screen(zone.geometry).y + 4} textAnchor="middle" fontSize="12" fontWeight="700" fill="#684d20" pointerEvents="none">{zone.type === "tables" ? "Tischbereich" : "Bereich"}</text></g>; })}</g>
+        {areaPreviewZone && <polygon points={shapePoints(zonePolygon(areaPreviewZone))} fill="#d7b56d" fillOpacity="0.2" stroke="#8a6a2f" strokeWidth="2" strokeDasharray="8 5" pointerEvents="none" />}
         <g aria-label="Tische">{shownPlan.tables.map(table => { const model = tableModel(table.modelId), p = screen(table), width = table.width * camera.scale, depth = table.depth * camera.scale, selected = selection?.type === "table" && selection.id === table.id, conflict = conflictedTables.has(table.id); return <g key={table.id} transform={`translate(${p.x} ${p.y}) rotate(${table.rotation})`} className={tool === "select" ? "cursor-move" : ""}>{model.shape === "round" ? <circle data-table-id={table.id} r={width / 2} fill="#d9c49a" stroke={conflict ? "#b53b32" : selected ? "#bd7647" : "#725b36"} strokeWidth={selected || conflict ? 3 : 1.5} /> : <rect data-table-id={table.id} x={-width/2} y={-depth/2} width={width} height={depth} rx={model.shape === "square" ? 2 : 6} fill="#d9c49a" stroke={conflict ? "#b53b32" : selected ? "#bd7647" : "#725b36"} strokeWidth={selected || conflict ? 3 : 1.5} />}<path d={`M${-width*.28} 0H${width*.28}M0 ${-depth*.22}V${depth*.22}`} stroke="#816b43" strokeWidth="1" pointerEvents="none" /></g>; })}</g>
         <g aria-label="Tischstühle">{shownPlan.chairs.map(chair => { const p = screen(chair), w = chair.width * camera.scale, d = chair.depth * camera.scale; return <rect key={chair.id} data-chair-id={chair.id} x={p.x-w/2} y={p.y-d/2} width={w} height={d} rx="3" transform={`rotate(${chair.rotation} ${p.x} ${p.y})`} fill={selection?.type === "chair" && selection.id === chair.id ? "#bd7647" : "#557a69"} stroke="#fff" className={tool === "select" ? "cursor-move" : ""} />; })}</g>
         {transformedDraft && <g aria-label="Vorschau der Tischanordnung">
@@ -830,7 +894,8 @@ export default function RoomEditor2D() {
       {blockers.length ? <details aria-label="Probleme" className="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-900" open><summary className="cursor-pointer font-semibold">{blockers.length} {blockers.length === 1 ? "Problem" : "Probleme"}</summary><div className="mt-2 space-y-1">{blockers.map((message) => <p key={message}>{message}</p>)}</div></details> : seating ? <p role="status" className="rounded border border-green-200 bg-green-50 p-2 text-sm font-semibold text-green-900">✓ Regelprüfung ohne Blocker</p> : null}
       <details className="rounded border border-premium-beige p-2" open={!!selection}><summary className="cursor-pointer text-xs font-semibold">Eigenschaften {selection ? "· Auswahl" : "· keine Auswahl"}</summary><div className="mt-2 space-y-2">
       {selectedTable && <><p className="text-sm font-semibold">{tableModel(selectedTable.modelId).name}</p><p className="text-xs text-premium-muted">{formatMeters(selectedTable.width)} × {formatMeters(selectedTable.depth)} · {selectedTable.source === "manual" ? "manuell" : "Preset"}</p>{field("X (m)", selectedTable.x, value => updateTable(selectedTable.id, table => ({ ...table, x: value })))}{field("Y (m)", selectedTable.y, value => updateTable(selectedTable.id, table => ({ ...table, y: value })))}{field("Breite (m)", selectedTable.width, value => updateTable(selectedTable.id, table => ({ ...table, width: value })), .1)}{field("Tiefe (m)", selectedTable.depth, value => updateTable(selectedTable.id, table => ({ ...table, depth: value })), .1)}<label className="flex items-center justify-between gap-2 text-sm">Rotation<select aria-label="Tischrotation" value={selectedTable.rotation} onChange={event => updateTable(selectedTable.id, table => ({ ...table, rotation: Number(event.target.value) }))} className="rounded border border-premium-beige px-2 py-1">{[0,45,90,135,180,225,270,315].map(value => <option key={value} value={value}>{value}°</option>)}</select></label><button type="button" onClick={() => duplicateTable(selectedTable.id)} className="rounded-lg border border-premium-beige px-3 py-2 text-sm">Tisch duplizieren</button>{selectedTable.groupId && <button type="button" onClick={() => { const groupId = selectedTable.groupId; add({ ...plan, tables: plan.tables.map(table => table.groupId === groupId ? { ...table, groupId: undefined } : table), chairs: plan.chairs.map(chair => chair.groupId === groupId ? { ...chair, groupId: undefined } : chair), tableGroups: plan.tableGroups.filter(group => group.id !== groupId) }); }} className="rounded-lg border border-premium-beige px-3 py-2 text-sm">Gruppe auflösen</button>}<button type="button" onClick={() => removeTable(selectedTable.id)} className="rounded-lg border border-red-300 px-3 py-2 text-sm text-red-800">Tisch löschen</button></>}
-      {selectedFurnitureChair && <><p className="text-sm font-semibold">Tischstuhl</p>{field("X (m)", selectedFurnitureChair.x, value => add({ ...plan, chairs: plan.chairs.map(chair => chair.id === selectedFurnitureChair.id ? { ...chair, x: value } : chair) }))}{field("Y (m)", selectedFurnitureChair.y, value => add({ ...plan, chairs: plan.chairs.map(chair => chair.id === selectedFurnitureChair.id ? { ...chair, y: value } : chair) }))}{field("Rotation (°)", selectedFurnitureChair.rotation, value => add({ ...plan, chairs: plan.chairs.map(chair => chair.id === selectedFurnitureChair.id ? { ...chair, rotation: value } : chair) }))}<button type="button" onClick={deleteSelection} className="rounded border border-red-300 px-2 py-1 text-red-800">Stuhl entfernen</button></>}
+      {selectedFurnitureChair && <><p className="text-sm font-semibold">Tischstuhl</p><p className="text-xs text-premium-muted">{selectedFurnitureChair.source === "auto" ? "automatisch" : "manuell / Preset"}{selectedFurnitureChair.edited ? " · bearbeitet" : ""}</p>{field("X (m)", selectedFurnitureChair.x, value => add({ ...plan, chairs: plan.chairs.map(chair => chair.id === selectedFurnitureChair.id ? { ...chair, x: value, edited: true } : chair) }))}{field("Y (m)", selectedFurnitureChair.y, value => add({ ...plan, chairs: plan.chairs.map(chair => chair.id === selectedFurnitureChair.id ? { ...chair, y: value, edited: true } : chair) }))}{field("Rotation (°)", selectedFurnitureChair.rotation, value => add({ ...plan, chairs: plan.chairs.map(chair => chair.id === selectedFurnitureChair.id ? { ...chair, rotation: value, edited: true } : chair) }))}<button type="button" onClick={deleteSelection} className="rounded border border-red-300 px-2 py-1 text-red-800">Stuhl entfernen</button></>}
+      {selectedZone && <><p className="text-sm font-semibold">Tischbereich</p><p className="text-xs text-premium-muted">Wird von der automatischen Reihenbestuhlung freigehalten.</p>{field("X (m)", selectedZone.geometry.x, value => updateZone(selectedZone.id, zone => ({ ...zone, geometry: { ...zone.geometry, x: value } })))}{field("Y (m)", selectedZone.geometry.y, value => updateZone(selectedZone.id, zone => ({ ...zone, geometry: { ...zone.geometry, y: value } })))}{field("Breite (m)", selectedZone.geometry.width, value => updateZone(selectedZone.id, zone => ({ ...zone, geometry: { ...zone.geometry, width: value } })), .1)}{field("Tiefe (m)", selectedZone.geometry.depth, value => updateZone(selectedZone.id, zone => ({ ...zone, geometry: { ...zone.geometry, depth: value } })), .1)}{field("Rotation (°)", selectedZone.rotation, value => updateZone(selectedZone.id, zone => ({ ...zone, rotation: value })))}<button type="button" onClick={() => removeZone(selectedZone.id)} className="rounded border border-red-300 px-2 py-1 text-red-800">Tischbereich löschen</button></>}
       {selectedObject?.type === "door" && <><p className="text-sm font-semibold">Tür</p>{field("Breite (m)", selectedObject.width, (value) => updateObject(selectedObject.id, (object) => ({ ...object, width: value })), 0.01)}{field("Position auf Wand (m)", selectedObject.offset, (value) => updateObject(selectedObject.id, (object) => ({ ...object, offset: value })), 0)}<label className="flex items-center justify-between gap-2 text-sm">Rolle<select aria-label="Türrolle" value={selectedObject.role ?? "normal"} onChange={(event) => updateObject(selectedObject.id, (object) => object.type === "door" ? setDoorRole(object, event.target.value as "normal" | "exit" | "emergency_exit") : object)} className="rounded border border-premium-beige px-2 py-1"><option value="normal">Normale Tür</option><option value="exit">Ausgang</option><option value="emergency_exit">Notausgang</option></select></label>{selectedObject.role && selectedObject.role !== "normal" && field("Lichte Breite (m)", selectedObject.clearWidth ?? selectedObject.width, (value) => updateObject(selectedObject.id, (object) => ({ ...object, clearWidth: value })), 0.01)}</>}
       {selectedObject?.type === "obstacle" && <><label className="flex items-center justify-between gap-2 text-sm">Hindernistyp<select aria-label="Hindernistyp" value={selectedObject.obstacleType} onChange={(event) => updateObject(selectedObject.id, (object) => ({ ...object, obstacleType: event.target.value as ObstacleObject["obstacleType"] }))} className="max-w-32 rounded border border-premium-beige"><option value="column">Säule</option><option value="stage">Bühne</option><option value="technical">Technik / Mischpult</option><option value="furniture">Festes Möbel</option><option value="restricted">Sperrfläche</option></select></label>{field("X (m)", selectedObject.x, (v) => updateObject(selectedObject.id, (o) => ({ ...o, x: v })))}{field("Y (m)", selectedObject.y, (v) => updateObject(selectedObject.id, (o) => ({ ...o, y: v })))}{field("Breite (m)", selectedObject.width, (v) => updateObject(selectedObject.id, (o) => ({ ...o, width: v })), 0.01)}{field("Tiefe (m)", selectedObject.depth, (v) => updateObject(selectedObject.id, (o) => ({ ...o, depth: v })), 0.01)}{field("Rotation (°)", selectedObject.rotation, (v) => updateObject(selectedObject.id, (o) => ({ ...o, rotation: v })))}</>}
       {(selectedObject?.type === "stage" || selectedObject?.type === "reservedArea" || selectedObject?.type === "front") && <><p className="text-sm font-semibold">{selectedObject.type === "front" ? "Front" : selectedObject.type === "stage" ? "Bühne" : "Reservierte Fläche"}</p>{selectedObject.type === "reservedArea" && <label className="flex items-center justify-between gap-2 text-sm">Name<input aria-label="Name der reservierten Fläche" maxLength={40} value={selectedObject.name ?? ""} onChange={(event) => updateObject(selectedObject.id, (object) => object.type === "reservedArea" ? { ...object, name: event.target.value } : object)} className="w-32 rounded border border-premium-beige px-2 py-1" /></label>}{field("X (m)", selectedObject.x, (v) => updateObject(selectedObject.id, (o) => ({ ...o, x: v })))}{field("Y (m)", selectedObject.y, (v) => updateObject(selectedObject.id, (o) => ({ ...o, y: v })))}{field("Breite (m)", selectedObject.width, (v) => updateObject(selectedObject.id, (o) => ({ ...o, width: v })), 0.01)}{selectedObject.type !== "front" && field("Tiefe (m)", selectedObject.depth, (v) => updateObject(selectedObject.id, (o) => o.type === "stage" || o.type === "reservedArea" ? { ...o, depth: v } : o), 0.01)}{field("Rotation (°)", selectedObject.rotation, (v) => updateObject(selectedObject.id, (o) => ({ ...o, rotation: v })))}{selectedObject.type === "stage" && <button type="button" onClick={() => { const existing = plan.objects.find((object) => object.type === "front"); const front = { id: existing?.id ?? `object-${nextId.current++}`, type: "front" as const, x: selectedObject.x, y: selectedObject.y, width: selectedObject.width, rotation: selectedObject.rotation }; add({ ...plan, objects: [...plan.objects.filter((object) => object.type !== "front"), front] }); setSelection({ type: "object", id: front.id }); }} className="rounded-lg border border-premium-beige px-3 py-2 text-sm">Als Front verwenden</button>}</>}
@@ -838,7 +903,7 @@ export default function RoomEditor2D() {
       {selectedObject && <button type="button" onClick={() => removeObject(selectedObject.id)} className="rounded-lg border border-red-300 px-3 py-2 text-sm text-red-800">Objekt löschen</button>}
       {selectedBlock && seating && <div className="space-y-2 text-sm"><p className="font-semibold">Sitzblock {selectedBlock.id}</p><p>{selectedBlock.seats.length} Plätze · {selectedBlock.rowCount} Reihen</p><p>Quelle: {selectedBlock.source === "generated" ? "automatisch" : "manuell"}{selectedBlock.edited ? " · bearbeitet" : ""}</p><p className="text-xs text-premium-muted">Alt + Klick auf einen Sitz wählt ihn einzeln aus.</p><CommitNumberField label="Blockwinkel (°)" value={selectedBlock.rotation ?? selectedBlock.seats[0]?.rotation ?? 0} onCommit={(value) => applySeatingEdit(rotateBlock(plan, seating, selectedBlock.id, value))} />{report?.checks.filter((check) => check.affectedIds.includes(selectedBlock.id) && check.status !== "pass").map((check) => <p key={check.id} className="text-xs text-amber-800">{check.message}</p>)}<label className="flex items-center justify-between gap-2">Sitze je Schritt<input aria-label="Sitze je Schritt" type="number" min="1" step="1" value={rowEditCount} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isInteger(value) && value > 0) setRowEditCount(value); }} className="w-20 rounded border border-premium-beige px-2 py-1 text-right" /></label><div className="max-h-48 space-y-2 overflow-auto">{rowsOf(selectedBlock).map((row, index) => <div key={row.id} className="rounded border border-premium-beige p-2"><p>Reihe {index + 1}: {row.seats.length} Plätze</p>{(["left", "right"] as const).map((end) => <div key={end} className="flex gap-1"><button type="button" aria-label={`Reihe ${index + 1} ${end === "left" ? "links" : "rechts"} kürzen`} onClick={() => applySeatingEdit(editRow(plan, seating, selectedBlock.id, row.id, end, -rowEditCount))} className="rounded border px-2">−</button><button type="button" aria-label={`Reihe ${index + 1} ${end === "left" ? "links" : "rechts"} verlängern`} onClick={() => applySeatingEdit(editRow(plan, seating, selectedBlock.id, row.id, end, rowEditCount))} className="rounded border px-2">+</button><span>{end === "left" ? "links" : "rechts"}</span></div>)}</div>)}</div><button type="button" onClick={deleteSelection} className="rounded-lg border border-red-300 px-3 py-2 text-red-800">Block löschen</button></div>}
       {selectedSeat && <div className="space-y-2 text-sm"><p className="font-semibold">Sitz {selectedSeat.id}</p><p>Reihe {selectedSeat.row} · Position {selectedSeat.index}</p><p>Block {selectedSeatBlock?.id}</p>{plan.seating && <><CommitNumberField label="Sitz X (m)" value={selectedSeat.x} onCommit={(value) => applySeatingEdit(moveSeat(plan, plan.seating!, selectedSeat.id, value - selectedSeat.x, 0))} /><CommitNumberField label="Sitz Y (m)" value={selectedSeat.y} onCommit={(value) => applySeatingEdit(moveSeat(plan, plan.seating!, selectedSeat.id, 0, value - selectedSeat.y))} /></>}<button type="button" onClick={() => selectedSeatBlock && setSelection({ type: "block", id: selectedSeatBlock.id })} className="rounded border px-2 py-1">Block auswählen</button><button type="button" onClick={deleteSelection} className="rounded border border-red-300 px-2 py-1 text-red-800">Sitz entfernen</button></div>}
-      {!selectedObject && !selectedBlock && !selectedSeat && !selectedTable && !selectedFurnitureChair && <p className="text-sm text-premium-muted">Wählen Sie ein Objekt im Grundriss.</p>}
+      {!selectedObject && !selectedBlock && !selectedSeat && !selectedTable && !selectedFurnitureChair && !selectedZone && <p className="text-sm text-premium-muted">Wählen Sie ein Objekt im Grundriss.</p>}
       </div></details>
       <div aria-label="Tischplanung" className="space-y-3 rounded border border-premium-beige p-3">
         <label className="block text-sm">Tischanordnung<select aria-label="Tischanordnung" value={tablePreset} onChange={event => setTablePreset(event.target.value as TablePresetId)} className="mt-1 w-full rounded border border-premium-beige p-1">{TABLE_PRESETS.map(preset => <option key={preset.id} value={preset.id}>{preset.name}</option>)}</select></label>
@@ -860,12 +925,13 @@ export default function RoomEditor2D() {
         <label className="block text-sm">Stuhlmodell<select aria-label="Stuhlmodell" value={chairSelection.productId} onChange={(event) => { const product = chairProducts.find((item) => item.id === event.target.value)!; selectChair(product.id, product.variants[0].id); }} className="mt-1 w-full rounded border border-premium-beige p-1">{chairProducts.map((product) => <option key={product.id} value={product.id}>{product.title}</option>)}</select></label>
         <label className="block text-sm">Variante<select aria-label="Stuhlvariante" value={chairSelection.variantId} onChange={(event) => selectChair(chairSelection.productId, event.target.value)} className="mt-1 w-full rounded border border-premium-beige p-1">{(demand.product?.variants ?? []).map((variant) => <option key={variant.id} value={variant.id}>{variant.title}</option>)}</select></label>
 
-        <details className="rounded-lg border border-premium-beige p-2" open><summary className="cursor-pointer text-xs font-semibold text-premium-forest">Erweitert</summary><div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1">{seatingField("Stuhlbreite (m)", "chairWidth", 0.1, "0.05")}
+        <details className="rounded-lg border border-premium-beige p-2"><summary className="cursor-pointer text-xs font-semibold text-premium-forest">Planungsannahmen</summary><div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1">{seatingField("Stuhlbreite (m)", "chairWidth", 0.1, "0.05")}
         {seatingField("Stuhltiefe (m)", "chairDepth", 0.1, "0.05")}
         {seatingField("Reihenabstand (m)", "rowPitch", 0.1, "0.05")}
         {seatingField("Max. Stühle pro Reihe", "maximumChairsPerRow", 1, "1")}</div>
         <label className="mt-2 flex items-center justify-between gap-2 text-sm">Ausrichtung<select aria-label="Ausrichtung" value={orientation} onChange={(event) => setOrientation(event.target.value as SeatingOrientation)} className="rounded border border-premium-beige px-2 py-1"><option value="horizontal">Horizontal</option><option value="vertical">Vertikal</option></select></label></details>
-        <button data-planner-action="calculate-seating" type="button" disabled={!room.closed || errors.length > 0 || issues.some((issue) => issue.severity === "error") || seatingRules.rowPitch < seatingRules.chairDepth} onClick={() => { setActiveVariantId(null); const result = generateSeatingPlan(plan, seatingRules, orientation, gridOffset); if (plan.seating) { add({ ...plan, seating: { ...result, blocks: result.blocks.map((block) => ({ ...block, source: "generated" as const })) } }); setCalculated(null); setSelection(null); setNotice("Bestuhlung bewusst neu berechnet. Undo stellt den vorherigen Zustand wieder her."); } else setCalculated({ plan, rules: seatingRules, orientation, offset: gridOffset, result }); }} className="w-full rounded-lg bg-premium-forest px-3 py-2 text-sm font-semibold text-white disabled:opacity-40">Bestuhlung berechnen</button>
+        <button data-planner-action="calculate-seating" type="button" disabled={!room.closed || errors.length > 0 || issues.some((issue) => issue.severity === "error") || seatingRules.rowPitch < seatingRules.chairDepth} onClick={() => { setActiveVariantId(null); if (plan.seating) { supplementFreeArea(); return; } const result = generateSeatingPlan(plan, seatingRules, orientation, gridOffset); setCalculated({ plan, rules: seatingRules, orientation, offset: gridOffset, result }); }} className="w-full rounded-lg bg-premium-forest px-3 py-2 text-sm font-semibold text-white disabled:opacity-40">{plan.seating ? "Freie Fläche ergänzen" : "Bestuhlung berechnen"}</button>
+        {plan.seating && <button type="button" onClick={() => setReplanDialogOpen(true)} className="w-full rounded-lg border border-premium-beige px-3 py-2 text-sm font-semibold">Planung neu erstellen …</button>}
         {calculated?.plan === plan && !plan.seating && <button type="button" onClick={adoptCalculatedSeating} className="w-full rounded-lg border border-premium-forest px-3 py-2 text-sm font-semibold text-premium-forest">Bestuhlung übernehmen und bearbeiten</button>}
         {seatingRules.rowPitch < seatingRules.chairDepth && <p className="text-xs text-amber-800">Der Reihenabstand muss mindestens der Stuhltiefe entsprechen.</p>}
         {seating && <div aria-live="polite" className="space-y-1 rounded-lg bg-[#f1f5ef] p-3 text-sm"><p className="font-semibold">{seating.totalSeats} Sitzplätze · {seating.blocks.length} Sitzblöcke</p><p>{seating.totalRows} Reihen · längste Reihe: {seating.longestRow} Plätze</p><p>Stuhl: {formatMeters(seating.rules.chairWidth)} × {formatMeters(seating.rules.chairDepth)}</p><p>Reihenabstand: {formatMeters(seating.rules.rowPitch)}</p>{seating.hints.map((hint) => <p key={hint} className="text-amber-900">Hinweis: {hint}</p>)}</div>}
@@ -923,6 +989,7 @@ export default function RoomEditor2D() {
     </div>
     <div className="border-t border-premium-beige px-4 py-2 text-xs text-premium-muted">Mausrad: zoomen · Mittlere Maustaste oder Leertaste + ziehen: verschieben · Shift: gerade Wand · Rasterfang: 0,10 m</div>
     {(errors.length > 0 || issues.length > 0 || notice) ? <div role="alert" className="border-t border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">{errors.map((message) => <p key={message}>Fehler: {message}</p>)}{issues.map((issue, index) => <p key={`${issue.objectId}-${index}`}>{issue.severity === "error" ? "Fehler" : "Warnung"}: {issue.message}</p>)}{notice && <p>{notice}</p>}</div> : null}
+    {replanDialogOpen && <div className="fixed inset-0 z-50 grid place-items-center bg-black/35 p-4"><div role="dialog" aria-modal="true" aria-labelledby="replan-title" className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl"><h2 id="replan-title" className="font-display text-xl text-premium-ink">Planung neu erstellen?</h2><p className="mt-2 text-sm text-premium-charcoal">Die aktuelle Reihenbestuhlung mit {replanSummary.seatsRemoved} Sitzen wird ersetzt. Dazu gehören {replanSummary.protectedBlocks} manuelle oder manuell angepasste Blöcke. {replanSummary.generatedAislesReplaced} unveränderte automatisch erzeugte Gänge dürfen neu vorgeschlagen werden. Türen, Hindernisse, Tischbereiche, Tische und manuelle Gänge bleiben erhalten.</p><p className="mt-2 text-xs text-premium-muted">Abbrechen lässt den Originalzustand vollständig unverändert. Nach dem Erstellen kann die gesamte Änderung mit Rückgängig wiederhergestellt werden.</p><div className="mt-5 flex justify-end gap-2"><button type="button" onClick={() => setReplanDialogOpen(false)} className="rounded-lg border border-premium-beige px-3 py-2 text-sm font-semibold">Abbrechen</button><button type="button" onClick={() => { setReplanDialogOpen(false); runAutomaticSeating(); }} className="rounded-lg bg-premium-forest px-3 py-2 text-sm font-semibold text-white">Ersetzen und neu bestuhlen</button></div></div></div>}
   </section>;
 }
 

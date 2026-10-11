@@ -1,7 +1,7 @@
 import { validateRoom } from "./geometry";
 import { seatingRegions, SEATING_REGION_LIMITS } from "./seatingRegions";
 import { aislePolygon, doorSegment, isBlockingObject, obstaclePolygon, pointInPolygon, polygonInsideRoom, polygonsOverlap, validateObjects, type Position, type RoomPlan } from "./objects";
-import { rotatedRectangle, tablePolygon } from "./tables";
+import { rotatedRectangle, tablePolygon, zonePolygon } from "./tables";
 
 export type SeatingOrientation = "horizontal" | "vertical";
 export type SeatingGridOffset = { along: number; cross: number };
@@ -79,7 +79,7 @@ export function seatPolygon(x: number, y: number, rules: SeatingRules, orientati
 type Exclusions = { obstacles: Position[][]; furnitureChairs: Position[][]; aisles: Position[][]; doors: { start: Position; end: Position }[] };
 function exclusions(plan: RoomPlan): Exclusions {
   return {
-    obstacles: [...plan.objects.filter(isBlockingObject).map(obstaclePolygon), ...(plan.tables ?? []).map(tablePolygon)],
+    obstacles: [...plan.objects.filter(isBlockingObject).map(obstaclePolygon), ...(plan.tables ?? []).map(tablePolygon), ...(plan.zones ?? []).filter((zone) => zone.type === "tables").map(zonePolygon)],
     furnitureChairs: (plan.chairs ?? []).map(rotatedRectangle),
     aisles: plan.objects.filter((o) => o.type === "aisle").map(aislePolygon),
     doors: plan.objects.filter((o) => o.type === "door").map((o) => doorSegment(plan.contour, o)).filter((o): o is { start: Position; end: Position } => o !== null),

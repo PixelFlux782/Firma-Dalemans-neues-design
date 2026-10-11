@@ -1,0 +1,33 @@
+{
+  "verifiedAt": "2026-10-11",
+  "primaryPages": [
+    "https://zachert-gmbh.de/stoffe-und-leder.html",
+    "https://zachert-gmbh.de/downloads.html",
+    "https://zachert-gmbh.de/konferenzstuhl-polsterstuhl-stapelstuhl-besprechungsstuhl-besucherstuhl.html"
+  ],
+  "assignment": {
+    "2": ["Bondai"],
+    "3": ["Radio", "Pisa", "Xtreme", "X2", "King Flex", "King L", "Era", "Advantage", "Pulfero"],
+    "4": ["Pure", "Mini"]
+  },
+  "collectionSources": {
+    "bondai": "https://www.fidivi.com/de/produkte/bondai",
+    "radio": "https://www.fidivi.com/de/produkte/radio",
+    "pisa": "https://www.vowalon.eu/produkte/kollektionsuebersicht/vowaled-pisa",
+    "xtreme": "https://www.camirafabrics.com/de/contract/fabrics/xtreme",
+    "x2": "https://www.camirafabrics.com/de/contract/fabrics/x2",
+    "king-flex": "https://www.fidivi.com/de/produkte/king-flex",
+    "king-l": "https://www.fidivi.com/de/produkte/king-l",
+    "era": "https://www.camirafabrics.com/de/contract/fabrics/era",
+    "advantage": "https://www.camirafabrics.com/de/contract/fabrics/advantage",
+    "pulfero": "https://www.vowalon.eu/produkte/kollektionsuebersicht/vowaclassic-pulferoel",
+    "pure": "https://www.krallroth.com/produkte/bezugsstoffe/pure",
+    "mini": "https://www.fidivi.com/de/produkte/mini"
+  },
+  "notes": [
+    "Die CLAAS-Seite bestätigt am 11.10.2026 die beauftragte Gruppenzuordnung 2/3/4.",
+    "Eine andere aktuelle Produktseite führt Era als P4; für Dalemans gilt bewusst die modellübergreifende CLAAS-Zuordnung Era=P3.",
+    "Auswählbare Farbcodes stammen aus einer am 11.10.2026 erreichbaren aktuellen Produktkonfiguration. Hersteller-Gesamtpaletten werden nur als Farbkarte verlinkt und nicht als bestellbare Dalemans-Variante behauptet.",
+    "Rehosting- und Bildnutzungsrechte für Stoffbilder und PDFs sind nicht dokumentiert. Daher wurden keine fremden Dateien lokal kopiert."
+  ]
+}

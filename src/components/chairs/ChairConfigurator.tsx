@@ -23,6 +23,8 @@ import type { CommerceProduct } from "@/lib/commerce/types";
 import type { CommerceImage } from "@/lib/commerce/types";
 import KnowledgeInfoTrigger from "@/components/knowledge/KnowledgeInfoTrigger";
 import { getKnowledgeOptionIdForProductOption } from "@/lib/knowledge/product-options";
+import FabricSelectionDialog, { type FabricSelection } from "@/components/chairs/FabricSelectionDialog";
+import { FABRIC_GROUP_SUMMARIES, fabricById } from "@/lib/fabrics";
 
 const upholsteryOptions: Array<{ value: ChairUpholstery; label: string; note: string }> = [
   { value: "none", label: "Ungepolstert", note: "ohne Stoffgruppe" },
@@ -40,15 +42,20 @@ function contactHref(
   product: CommerceProduct,
   configuration: ChairConfiguration,
   quantity: number,
-  intent: "Angebot" | "Musterstuhl" | "Beratung",
+  intent: "Angebot" | "Musterstuhl" | "Stoffmuster" | "Beratung",
   selectedAddonSkus: string[],
+  fabricSelection: FabricSelection | null,
 ) {
   const upholstery = CHAIR_OPTION_VALUES.upholstery[configuration.upholstery];
   const rowConnector = configuration.rowConnector ? "ja" : "nein";
+  const collection = fabricById(fabricSelection?.collectionId);
+  const color = collection?.colors.find((entry) => entry.code === fabricSelection?.colorCode);
   const message = [
     `Modell: ${product.stackingChair?.modelCode ?? product.title}`,
     `Polsterung: ${upholstery}`,
     ...(configuration.fabricGroup ? [`Stoffgruppe: ${configuration.fabricGroup}`] : []),
+    ...(collection ? [`Stoffkollektion: ${collection.name}`] : []),
+    ...(color ? [`Farbe: ${color.name}`, `Farbcode: ${color.code}`] : []),
     `Reihenverbindung: ${rowConnector}`,
     ...(selectedAddonSkus.length > 0
       ? [`Erweiterungen: ${selectedAddonSkus.map((sku) => chairAddonBySku(sku)?.name ?? sku).join(", ")}`]
@@ -61,6 +68,8 @@ function contactHref(
     variante: [
       upholstery,
       configuration.fabricGroup ? `Gruppe ${configuration.fabricGroup}` : null,
+      collection?.name,
+      color ? `${color.name} ${color.code}` : null,
       configuration.rowConnector ? "mit Reihenverbindung" : "ohne Reihenverbindung",
     ].filter(Boolean).join(" · "),
     nachricht: message,
@@ -80,6 +89,9 @@ export default function ChairConfigurator({
   onVariantImageChange?: (image: CommerceImage | null) => void;
 }) {
   const [configuration, setConfiguration] = useState(initialConfiguration);
+  const [fabricSelection, setFabricSelection] = useState<FabricSelection | null>(null);
+  const [fabricDialogOpen, setFabricDialogOpen] = useState(false);
+  const [fabricUrlReady, setFabricUrlReady] = useState(false);
   const [selectedAddonSkus, setSelectedAddonSkus] = useState<string[]>(
     initialConfiguration.rowConnector ? ["APRV"] : [],
   );
@@ -146,10 +158,15 @@ export default function ChairConfigurator({
   }, [product.stackingChair?.modelCode]);
 
   useEffect(() => {
+    if (!fabricUrlReady) return;
     const params = new URLSearchParams(window.location.search);
     params.set("polster", configuration.upholstery === "none" ? "ungepolstert" : configuration.upholstery === "seat" ? "sitz" : "sitz-ruecken");
     if (configuration.fabricGroup) params.set("gruppe", String(configuration.fabricGroup));
     else params.delete("gruppe");
+    if (fabricSelection) params.set("stoff", fabricSelection.collectionId);
+    else params.delete("stoff");
+    if (fabricSelection?.colorCode) params.set("farbe", fabricSelection.colorCode);
+    else params.delete("farbe");
     params.set("reihe", configuration.rowConnector ? "ja" : "nein");
     window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
 
@@ -162,7 +179,22 @@ export default function ChairConfigurator({
       model: product.stackingChair?.modelCode,
       variantId: selectedVariant?.id,
     });
-  }, [configuration, product.stackingChair?.modelCode, selectedVariant?.id]);
+  }, [configuration, fabricSelection, fabricUrlReady, product.stackingChair?.modelCode, selectedVariant?.id]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const collection = fabricById(params.get("stoff"));
+    if (collection && collection.group === configuration.fabricGroup) {
+      const colorCode = params.get("farbe") ?? undefined;
+      setFabricSelection({
+        collectionId: collection.id,
+        ...(collection.colors.some((color) => color.code === colorCode) ? { colorCode } : {}),
+      });
+    }
+    setFabricUrlReady(true);
+  // Initial URL state only; later changes are controlled locally.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function selectUpholstery(upholstery: ChairUpholstery) {
     setConfiguration((current) => ({
@@ -172,6 +204,12 @@ export default function ChairConfigurator({
         ? { fabricGroup: undefined }
         : { fabricGroup: current.fabricGroup ?? 2 }),
     }));
+    if (upholstery === "none") setFabricSelection(null);
+  }
+
+  function selectFabricGroup(group: ChairFabricGroup) {
+    setConfiguration((current) => ({ ...current, fabricGroup: group }));
+    if (fabricById(fabricSelection?.collectionId)?.group !== group) setFabricSelection(null);
   }
 
   function setNextQuantity(value: number) {
@@ -195,7 +233,12 @@ export default function ChairConfigurator({
   }
 
   const price = configuredPrice ? formatCommerceMoney(configuredPrice) : null;
-  const configurationSummary = selectedVariant?.title ?? "Keine gültige Ausführung";
+  const selectedFabric = fabricById(fabricSelection?.collectionId);
+  const selectedFabricColor = selectedFabric?.colors.find((color) => color.code === fabricSelection?.colorCode);
+  const configurationSummary = selectedVariant
+    ? [selectedVariant.title, selectedFabric?.name, selectedFabricColor ? `${selectedFabricColor.name} ${selectedFabricColor.code}` : null].filter(Boolean).join(" · ")
+    : "Keine gültige Ausführung";
+  const requiresQuoteForFabric = configuration.upholstery !== "none" && Boolean(selectedFabric);
 
   return (
     <div className="border-t border-premium-beige/80 pt-7" data-testid="chair-configurator">
@@ -242,7 +285,7 @@ export default function ChairConfigurator({
         {configuration.upholstery !== "none" ? (
           <fieldset data-testid="fabric-group-selector">
             <legend className="text-sm font-semibold text-premium-ink">2. Stoffgruppe</legend>
-            <p className="mt-1 text-xs leading-5 text-premium-muted">Material- und Farbinformationen zu den Gruppen werden noch ergänzt.</p>
+            <p className="mt-1 text-xs leading-5 text-premium-muted">Alle Modelle nutzen dieselben Gruppen. Kollektion und Farbe können Sie anschließend im Detail prüfen.</p>
             <div className="mt-3 grid grid-cols-3 gap-2">
               {fabricGroups.map((group) => (
                 <div key={group} className="relative min-w-0">
@@ -252,7 +295,7 @@ export default function ChairConfigurator({
                       name="fabricGroup"
                       value={group}
                       checked={configuration.fabricGroup === group}
-                      onChange={() => setConfiguration((current) => ({ ...current, fabricGroup: group }))}
+                      onChange={() => selectFabricGroup(group)}
                       className="peer sr-only"
                     />
                     <span className="flex min-h-12 items-center justify-center rounded-xl border border-premium-beige bg-white/65 px-10 text-sm font-semibold transition peer-checked:border-premium-forest peer-checked:bg-premium-forest peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-premium-sand peer-focus-visible:ring-offset-2">
@@ -266,6 +309,11 @@ export default function ChairConfigurator({
                   />
                 </div>
               ))}
+            </div>
+            <div className="mt-3 rounded-2xl border border-premium-beige/70 bg-premium-warm/55 p-4">
+              <p className="text-xs leading-5 text-premium-muted">{FABRIC_GROUP_SUMMARIES[configuration.fabricGroup ?? 2]}</p>
+              {selectedFabric ? <p className="mt-1 text-sm font-semibold text-premium-ink" data-testid="selected-fabric">{selectedFabric.name}{selectedFabricColor ? ` · ${selectedFabricColor.name} · ${selectedFabricColor.code}` : ""}</p> : null}
+              <button type="button" onClick={() => setFabricDialogOpen(true)} className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">Kollektionen, Eigenschaften &amp; Farben ansehen →</button>
             </div>
           </fieldset>
         ) : null}
@@ -357,27 +405,28 @@ export default function ChairConfigurator({
             <button
               type="button"
               onClick={() => addLines([cartLineFromProduct({ product, variant: selectedVariant, quantity, selectedAddonSkus })])}
-              disabled={pending || !selectedVariant?.price || !selectedVariant.priceTiers?.length}
+              disabled={pending || requiresQuoteForFabric || !selectedVariant?.price || !selectedVariant.priceTiers?.length}
               className="btn-primary text-center disabled:cursor-not-allowed disabled:opacity-50"
             >
-              In den Warenkorb
+              {requiresQuoteForFabric ? "Mit Stoffauswahl bitte anfragen" : "In den Warenkorb"}
             </button>
             <Link
-              href={contactHref(product, configuration, quantity, "Angebot", selectedAddonSkus)}
+              href={contactHref(product, configuration, quantity, "Angebot", selectedAddonSkus, fabricSelection)}
               onClick={() => recordChairAction({ action: "chair_quote_request", model: product.stackingChair?.modelCode, variantId: selectedVariant.id, quantity })}
               className="btn-primary text-center"
             >
               Angebot anfragen
             </Link>
             <Link
-              href={contactHref(product, configuration, quantity, "Musterstuhl", selectedAddonSkus)}
+              href={contactHref(product, configuration, quantity, "Musterstuhl", selectedAddonSkus, fabricSelection)}
               onClick={() => recordChairAction({ action: "chair_sample_request", model: product.stackingChair?.modelCode, variantId: selectedVariant.id, quantity })}
               className="btn-secondary text-center"
             >
               Musterstuhl anfragen
             </Link>
           </div>
-          <Link href={contactHref(product, configuration, quantity, "Beratung", selectedAddonSkus)} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">
+          {configuration.upholstery !== "none" ? <Link href={contactHref(product, configuration, quantity, "Stoffmuster", selectedAddonSkus, fabricSelection)} className="mt-4 mr-6 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">Stoffmuster anfragen →</Link> : null}
+          <Link href={contactHref(product, configuration, quantity, "Beratung", selectedAddonSkus, fabricSelection)} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">
             Fragen zum Modell? Persönlich beraten lassen →
           </Link>
         </>
@@ -386,6 +435,14 @@ export default function ChairConfigurator({
       <p className="mt-5 text-xs leading-5 text-premium-subtle">
         * Mengenpreis für die gewählte Stückzahl. Verbindlich wird der Preis im Angebot.
       </p>
+      {configuration.fabricGroup ? <FabricSelectionDialog
+        open={fabricDialogOpen}
+        group={configuration.fabricGroup}
+        value={fabricSelection}
+        model={product.stackingChair?.modelCode ?? product.title}
+        onChange={setFabricSelection}
+        onClose={() => setFabricDialogOpen(false)}
+      /> : null}
     </div>
   );
 }

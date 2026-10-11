@@ -12,7 +12,7 @@ export const stackingChairCategoryFaq = [
   },
   {
     question: "Was bedeuten die Stoffgruppen 2, 3 und 4?",
-    answer: "Die aktuelle Preisliste unterscheidet diese drei Gruppen bei gepolsterten Ausführungen. Material-, Farb- und Qualitätsangaben werden noch ergänzt und deshalb nicht vorweggenommen.",
+    answer: "Die Gruppen ordnen Bezugskollektionen und Preise. Sie sind keine genormten Qualitätsstufen: Material, Scheuerbeständigkeit, Pflege und Brandschutznachweise unterscheiden sich je Kollektion und lassen sich im Konfigurator prüfen.",
   },
   {
     question: "Sind die Modelle mit Reihenverbindung erhältlich?",

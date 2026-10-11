@@ -45,8 +45,8 @@ export const TABLE_MODELS: readonly TableModel[] = [
 export const DEFAULT_TABLE_MODEL_ID = TABLE_MODELS[0].id;
 export const tableModel = (id: string) => TABLE_MODELS.find(model => model.id === id) ?? TABLE_MODELS[0];
 
-export type TableInstance = { id: string; modelId: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; source: TableSource };
-export type FurnitureChair = { id: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; source: TableSource };
+export type TableInstance = { id: string; modelId: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; source: TableSource; edited?: boolean };
+export type FurnitureChair = { id: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; source: TableSource; edited?: boolean };
 export type TableGroup = { id: string; tableIds: string[]; chairIds: string[] };
 export type PlanningZoneType = "seating" | "tables" | "free";
 export type PlanningZone = { id: string; type: PlanningZoneType; geometry: { kind: "rectangle"; x: number; y: number; width: number; depth: number }; rotation: number; source?: "manual" | "preset" };
@@ -63,6 +63,9 @@ export const zonePolygon = (zone: PlanningZone) => rotatedRectangle({ ...zone.ge
 
 export function validateTables(plan: RoomPlan): Issue[] {
   const tables = plan.tables ?? [], chairs = plan.chairs ?? [], issues: Issue[] = [];
+  for (const zone of plan.zones ?? []) {
+    if (!polygonInsideRoom(zonePolygon(zone), plan.contour)) issues.push({ objectId: zone.id, severity: "error", message: zone.type === "tables" ? "Tischbereich liegt teilweise außerhalb des Raums oder schneidet eine Wand." : "Bereich liegt teilweise außerhalb des Raums oder schneidet eine Wand." });
+  }
   for (const table of tables) {
     const polygon = tablePolygon(table);
     if (!polygonInsideRoom(polygon, plan.contour)) issues.push({ objectId: table.id, severity: "error", message: "Tisch liegt teilweise außerhalb des Raums oder schneidet eine Wand." });
@@ -215,7 +218,11 @@ export function moveTableGroup(plan: RoomPlan, groupId: string, dx: number, dy: 
     const angle = rotationDelta * Math.PI / 180, x = item.x - center.x, y = item.y - center.y;
     return { ...item, x: Number((center.x + dx + x * Math.cos(angle) - y * Math.sin(angle)).toFixed(3)), y: Number((center.y + dy + x * Math.sin(angle) + y * Math.cos(angle)).toFixed(3)), rotation: (item.rotation + rotationDelta + 360) % 360 };
   };
-  return { ...plan, tables: (plan.tables ?? []).map(transform), chairs: (plan.chairs ?? []).map(transform) };
+  return {
+    ...plan,
+    tables: (plan.tables ?? []).map((item) => group.tableIds.includes(item.id) ? { ...transform(item), edited: true } : item),
+    chairs: (plan.chairs ?? []).map((item) => group.chairIds.includes(item.id) ? { ...transform(item), edited: true } : item),
+  };
 }
 
 export const planCapacity = (plan: RoomPlan) => ({ rowSeats: plan.seating?.seats.length ?? 0, tableSeats: (plan.chairs ?? []).length, total: (plan.seating?.seats.length ?? 0) + (plan.chairs ?? []).length });

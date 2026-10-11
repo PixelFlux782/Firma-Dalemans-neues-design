@@ -11,7 +11,7 @@ import { absoluteUrl, buildMetadata } from "@/lib/seo";
 interface Props { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }
 const modelPath = (slug: string) => `/produkte/stapelstuehle/${slug}`;
 const referenceFaq = [
-  { question: "Was bedeuten Stoffgruppe 2, 3 und 4?", answer: "Die Preisliste unterscheidet diese drei Gruppen bei gepolsterten Ausführungen. Verlässliche Angaben zu Material, Farbe oder Eigenschaften der Gruppen werden noch ergänzt." },
+  { question: "Was bedeuten Stoffgruppe 2, 3 und 4?", answer: "Die Gruppen ordnen die verfügbaren Bezugskollektionen und Preise. Sie sind keine genormten Qualitätsstufen: Material, Scheuerbeständigkeit, Pflege und Brandschutznachweise unterscheiden sich je Kollektion und können im Konfigurator verglichen werden." },
   { question: "Kann ich einen Musterstuhl erhalten?", answer: "Ja. Ein Musterstuhl kann persönlich angefragt und passend zum Projekt abgestimmt werden." },
   { question: "Kann ich später Stühle nachbestellen?", answer: "Dalemans begleitet Nachbestellungen persönlich. Die konkrete Ausführung und Verfügbarkeit werden anhand des vorhandenen Bestands geprüft." },
   { question: "Gibt es Ersatzteile?", answer: "Ersatzteile und Reparaturen sind Teil des Dalemans-Service. Die Zuordnung erfolgt produktbezogen anhand von Modell, Fotos und Maßen." },

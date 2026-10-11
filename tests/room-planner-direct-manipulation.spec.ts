@@ -26,6 +26,8 @@ test("table arrangements are previewed before all tables are adopted", async ({ 
   const canvas = editor.getByRole("img", { name: "Grundriss Zeichenfläche" });
   for (const position of [{ x: 80, y: 70 }, { x: 560, y: 70 }, { x: 560, y: 410 }, { x: 80, y: 410 }]) await canvas.click({ position });
   await canvas.locator("[data-point-id]").first().click();
+  await page.keyboard.press("Escape");
+  await editor.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await editor.getByRole("button", { name: "Automatisch einpassen" }).click();
   await expect(canvas.locator("[data-draft-table-id]")).toHaveCount(6);
   await expect(editor.getByRole("button", { name: "Anordnung übernehmen" })).toBeEnabled();
@@ -35,7 +37,7 @@ test("table arrangements are previewed before all tables are adopted", async ({ 
   await canvas.locator("[data-table-id]").first().click();
   await expect(canvas.locator("[data-resize-id]")).toHaveCount(4);
   await expect(canvas.locator("[data-rotate-id]")).toHaveCount(1);
-  const properties = editor.getByLabel("Eigenschaften");
+  const properties = editor.getByRole("complementary", { name: "Eigenschaften" });
   const width = properties.getByLabel("Breite (m)");
   const before = await width.inputValue();
   const handle = canvas.locator("[data-resize-id]").nth(2);

@@ -36,6 +36,8 @@ async function prepareRoomWithSeats(page: Page) {
   await canvas.click({ position: { x: 500, y: 400 } });
   await canvas.click({ position: { x: 180, y: 400 } });
   await canvas.locator("[data-point-id]").first().click();
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await page.locator('[data-planner-action="calculate-seating"]').click();
   await expect(page.getByText(/55 Sitzplätze/).first()).toBeVisible();
   return canvas;

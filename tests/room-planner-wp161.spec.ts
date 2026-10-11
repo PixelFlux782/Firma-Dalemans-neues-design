@@ -7,7 +7,8 @@ test("WP16.1 desktop workspace keeps planning, results and actions together", as
   await expect(workspace).toBeVisible();
   await expect(page.getByLabel("Raum und Werkzeuge")).toBeVisible();
   await expect(page.getByRole("img", { name: "Grundriss Zeichenfläche" })).toBeVisible();
-  await expect(page.getByLabel("Eigenschaften")).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "Eigenschaften" })).toBeVisible();
+  await workspace.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await expect(page.getByLabel("Stuhlmodell")).toBeVisible();
   await expect(page.getByLabel("Reserve in Prozent")).toHaveValue("5");
   await expect(page.getByLabel("Bedarf")).toContainText("Empfohlene Gesamtmenge");
@@ -26,6 +27,7 @@ test("WP16.1 desktop workspace keeps planning, results and actions together", as
 test("WP16.1 reserve updates the existing inquiry and product handoff", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto("/raumplaner");
+  await page.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await page.getByLabel("Reserve in Prozent").selectOption("10");
   await expect(page.getByLabel("Bedarf")).toContainText("Reserve 0");
   const inquiry = page.getByRole("link", { name: "Angebot für diese Bestuhlung anfordern" });
@@ -37,9 +39,9 @@ test("WP16.1 reserve updates the existing inquiry and product handoff", async ({
 test("WP16.1 tools, history and project actions reuse the existing state", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/raumplaner");
-  await page.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Tür" }).click();
-  await expect(page.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Tür" })).toHaveAttribute("aria-pressed", "true");
-  await page.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Raum / Kontur" }).click();
+  await page.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Türen" }).click();
+  await expect(page.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Türen" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Raum" }).click();
   const canvas = page.getByRole("img", { name: "Grundriss Zeichenfläche" });
   await canvas.click({ position: { x: 240, y: 190 } });
   await expect(page.getByRole("button", { name: "Rückgängig" })).toBeEnabled();

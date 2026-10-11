@@ -91,6 +91,8 @@ test("Editor-Vorschau schreibt keinen Plan und Planänderungen markieren Variant
   const left = box!.width / 2 - 160, top = box!.height / 2 - 130;
   const click = (x: number, y: number) => svg.click({ position: { x, y } });
   await click(left, top); await click(left + 320, top); await click(left + 320, top + 260); await click(left, top + 260); await click(left, top);
+  await page.keyboard.press("Escape");
+  await editor.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   const variants = editor.getByLabel("Planvarianten");
   await variants.getByRole("button", { name: "Planvarianten berechnen" }).click();
   await expect(variants.getByText(/Kandidaten mit dem gewählten Regelprofil geprüft/)).toBeVisible({ timeout: 30000 });

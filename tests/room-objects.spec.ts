@@ -50,15 +50,15 @@ test("2D editor creates, edits, deletes and undoes objects", async ({ page }) =>
   const box = (await surface.boundingBox())!;
   const click = async (x: number, y: number) => page.mouse.click(box.x + box.width / 2 + x * 45, box.y + box.height / 2 + y * 45);
   await click(-4, -3); await click(6, -3); await click(6, 5); await click(-4, 5); await click(-4, -3);
-  await page.getByRole("button", { name: "Tür", exact: true }).click();
+  await page.getByRole("button", { name: "Türen", exact: true }).click();
   await click(0, -3);
   await expect(page.getByText("Position auf Wand (m)")).toBeVisible();
   await page.getByLabel("Breite (m)").fill("1.5");
-  await page.getByRole("button", { name: "Hindernis", exact: true }).click();
+  await page.getByRole("button", { name: "Hindernisse", exact: true }).click();
   await click(0, 0);
   await expect(page.getByLabel("Hindernistyp", { exact: true })).toBeVisible();
   await page.getByLabel("Rotation (°)").fill("45");
-  await page.getByRole("button", { name: "Gang", exact: true }).click();
+  await page.getByRole("button", { name: "Gänge", exact: true }).click();
   await click(-2, 2); await click(3, 2);
   await expect(page.getByText("Gang / Freihaltezone")).toBeVisible();
   await page.getByLabel("Breite (m)").fill("1.5");

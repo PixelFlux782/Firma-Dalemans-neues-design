@@ -4,6 +4,7 @@ import { chairProducts } from "../src/lib/room-planner/chairSelection";
 test("Raumplaner verbindet Stuhlmodell und Angebotsbedarf im gemeinsamen Editor", async ({ page }) => {
   await page.goto("/raumplaner");
   const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
+  await editor.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await expect(editor.getByLabel("Stuhlmodell")).toBeVisible();
   await editor.getByLabel("Stuhlmodell").selectOption(chairProducts[1].id);
   await expect(editor.getByLabel("Stuhlmodell")).toHaveValue(chairProducts[1].id);
@@ -23,7 +24,7 @@ test("Raumplaner behält Türen und Hindernisse beim Ansichtswechsel", async ({ 
   await canvas.click({ position: { x: 420, y: 360 } });
   await canvas.click({ position: { x: 160, y: 360 } });
   await canvas.click({ position: { x: 160, y: 140 } });
-  await editor.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Tür" }).click();
+  await editor.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Türen" }).click();
   await canvas.click({ position: { x: 280, y: 140 } });
   await expect(editor.getByRole("button", { name: /Rückgängig/ })).toBeEnabled();
   await editor.getByRole("button", { name: "3D", exact: true }).click();

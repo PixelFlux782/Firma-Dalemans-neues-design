@@ -48,6 +48,7 @@ test("WP14 editor preserves model changes in undo and prints current demand", as
   await page.goto("/raumplaner");
   const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
   await editor.getByLabel("Projektverwaltung").getByLabel("Projektdatei importieren").setInputFiles({ name: "wp14.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(createProject("WP14", current))) });
+  await editor.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   const selected = chairProducts[1];
   await editor.getByLabel("Stuhlmodell").selectOption(selected.id);
   await expect(editor.getByLabel("Bedarf")).toContainText(selected.title);

@@ -66,13 +66,13 @@ test("WP17 editor places, selects, rotates, duplicates and deletes a table", asy
   const canvas = page.getByRole("img", { name: /Grundriss Zeichenfläche/ });
   for (const position of [{x:140,y:110},{x:500,y:110},{x:500,y:380},{x:140,y:380}]) await canvas.click({ position });
   await canvas.locator("[data-point-id]").first().click();
-  await page.getByRole("button", { name: "Tisch", exact: true }).click(); await canvas.click({ position: { x: 390, y: 300 } });
+  await page.getByRole("button", { name: "Tische", exact: true }).click(); await page.getByLabel("Tischwerkzeug").selectOption("table"); await canvas.click({ position: { x: 390, y: 300 } });
   await expect(canvas.locator("[data-table-id]")).toHaveCount(1);
   await page.getByRole("button", { name: "Auswahl", exact: true }).click(); await canvas.locator("[data-table-id]").click();
   await page.getByLabel("Tischrotation").selectOption("90"); await expect(page.getByLabel("Tischrotation")).toHaveValue("90");
-  await page.getByRole("button", { name: "Tisch duplizieren" }).click(); await expect(canvas.locator("[data-table-id]")).toHaveCount(2);
+  await page.getByLabel("Kontextbezogene Eigenschaften").getByRole("button", { name: "Duplizieren" }).click(); await expect(canvas.locator("[data-table-id]")).toHaveCount(2);
   await page.getByRole("button", { name: "3D", exact: true }).click(); await expect(page.getByLabel("3D-Raumansicht").locator("canvas")).toBeVisible();
   await expect.poll(() => tableModelRequests).toBe(1);
   await page.getByRole("button", { name: "2D", exact: true }).click(); await expect(canvas.locator("[data-table-id]")).toHaveCount(2);
-  await page.getByRole("button", { name: "Tisch löschen" }).click(); await expect(canvas.locator("[data-table-id]")).toHaveCount(1);
+  await page.getByLabel("Kontextbezogene Eigenschaften").getByRole("button", { name: "Löschen" }).click(); await expect(canvas.locator("[data-table-id]")).toHaveCount(1);
 });

@@ -54,20 +54,20 @@ test("WP16.3.2 wall labels edit one geometry step, reject invalid lengths and su
 test("WP16.3.2 tool groups expose persistent options and keyboard help", async ({ page }) => {
   await page.goto("/raumplaner");
   const tools = page.getByLabel("Werkzeuge", { exact: true });
-  const door = tools.getByRole("button", { name: "Tür" });
+  const door = tools.getByRole("button", { name: "Türen" });
   await door.focus();
   await expect(page.getByRole("tooltip", { name: /Tür/ })).toBeVisible();
   await door.click();
-  await expect(page.getByRole("group", { name: "Tür Optionen" })).toBeVisible();
+  await expect(page.getByRole("group", { name: "Türen Optionen" })).toBeVisible();
   await page.getByLabel("Türtyp am Werkzeug").selectOption("emergency_exit");
   await page.getByLabel("Türbreite am Werkzeug").fill("1.4");
   await page.getByRole("button", { name: "Werkzeugoptionen schließen" }).click();
   await door.click();
   await expect(page.getByLabel("Türtyp am Werkzeug")).toHaveValue("emergency_exit");
   await expect(page.getByLabel("Türbreite am Werkzeug")).toHaveValue("1.4");
-  await tools.getByRole("button", { name: "Hindernis" }).click();
+  await tools.getByRole("button", { name: "Hindernisse" }).click();
   await expect(page.getByLabel("Hindernistyp am Werkzeug")).toBeVisible();
-  await tools.getByRole("button", { name: "Gang" }).click();
+  await tools.getByRole("button", { name: "Gänge" }).click();
   await expect(page.getByLabel("Gangbreite am Werkzeug")).toBeVisible();
 });
 
@@ -80,7 +80,7 @@ test("WP16.3.2 repeated doors keep the chosen role and width", async ({ page }) 
   await canvas.click({ position: { x: 560, y: 420 } });
   await canvas.click({ position: { x: 200, y: 420 } });
   await canvas.locator("[data-point-id]").first().click();
-  await page.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Tür" }).click();
+  await page.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Türen" }).click();
   await page.getByLabel("Türtyp am Werkzeug").selectOption("emergency_exit");
   await page.getByLabel("Türbreite am Werkzeug").fill("1.4");
   await page.getByRole("button", { name: "Werkzeugoptionen schließen" }).click();
@@ -103,6 +103,8 @@ test("WP16.3.2 sidebar puts blockers first and keeps demand details available", 
   await canvas.click({ position: { x: 500, y: 400 } });
   await canvas.click({ position: { x: 180, y: 400 } });
   await canvas.locator("[data-point-id]").first().click();
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await page.locator('[data-planner-action="calculate-seating"]').click();
   await expect(page.getByLabel("Probleme")).toBeVisible();
   await expect(page.getByLabel("Probleme")).toContainText(/Problem/);

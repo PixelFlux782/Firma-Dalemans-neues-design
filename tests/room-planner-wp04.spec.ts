@@ -119,6 +119,7 @@ test("größerer Raum bleibt bei der Analyse interaktiv", () => {
 test("Editor zeigt Profil, Ausgangsrolle und Prüfbericht", async ({ page }) => {
   await page.goto("/raumplaner");
   const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
+  await editor.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await expect(editor.getByLabel("Regelprofil", { exact: true })).toHaveValue("bavstaettv-reference");
   const svg = editor.getByRole("img", { name: "Grundriss Zeichenfläche" });
   const box = await svg.boundingBox();
@@ -130,10 +131,11 @@ test("Editor zeigt Profil, Ausgangsrolle und Prüfbericht", async ({ page }) => 
   await click(w / 2 + 180, h / 2 + 135);
   await click(w / 2 - 180, h / 2 + 135);
   await click(w / 2 - 180, h / 2 - 135);
-  await editor.getByRole("button", { name: "Tür", exact: true }).click();
+  await editor.getByRole("button", { name: "Türen", exact: true }).click();
   await click(w / 2, h / 2 - 135);
   await editor.getByLabel("Türrolle").selectOption("exit");
   await expect(editor.getByLabel("Lichte Breite (m)")).toBeVisible();
+  await page.keyboard.press("Escape");
   await editor.getByRole("button", { name: "Bestuhlung berechnen" }).click();
   await expect(editor.getByLabel("Prüfergebnisse")).toBeVisible();
   await expect(editor.getByText("Rettungswege", { exact: true })).toBeVisible();

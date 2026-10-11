@@ -1,4 +1,5 @@
-import { aislePolygon, isBlockingObject, obstaclePolygon, polygonInsideRoom, polygonsOverlap, type Issue, type Position, type RoomPlan } from "./objects";
+import { aislePolygon, doorSegment, isBlockingObject, obstaclePolygon, polygonInsideRoom, polygonsOverlap, type Issue, type Position, type RoomPlan } from "./objects";
+import { polygonArea, validateRoom, type Point2D, type RoomGeometry } from "./geometry";
 
 export type TableShape = "rectangular" | "round" | "square" | "trapezoid";
 export type TableSource = "manual" | "auto" | "preset";
@@ -45,11 +46,13 @@ export const TABLE_MODELS: readonly TableModel[] = [
 export const DEFAULT_TABLE_MODEL_ID = TABLE_MODELS[0].id;
 export const tableModel = (id: string) => TABLE_MODELS.find(model => model.id === id) ?? TABLE_MODELS[0];
 
-export type TableInstance = { id: string; modelId: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; source: TableSource; edited?: boolean };
+export type TableInstance = { id: string; modelId: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; zoneId?: string; fillClearance?: number; source: TableSource; edited?: boolean };
 export type FurnitureChair = { id: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; source: TableSource; edited?: boolean };
 export type TableGroup = { id: string; tableIds: string[]; chairIds: string[] };
 export type PlanningZoneType = "seating" | "tables" | "free";
-export type PlanningZone = { id: string; type: PlanningZoneType; geometry: { kind: "rectangle"; x: number; y: number; width: number; depth: number }; rotation: number; source?: "manual" | "preset" };
+export type RectangleZoneGeometry = { kind: "rectangle"; x: number; y: number; width: number; depth: number };
+export type PolygonZoneGeometry = { kind: "polygon"; points: Position[] };
+export type PlanningZone = { id: string; type: PlanningZoneType; geometry: RectangleZoneGeometry | PolygonZoneGeometry; rotation: number; source?: "manual" | "preset" };
 
 export const rotatedRectangle = (item: { x: number; y: number; width: number; depth: number; rotation?: number }): Position[] => {
   const angle = (item.rotation ?? 0) * Math.PI / 180, c = Math.cos(angle), s = Math.sin(angle);
@@ -59,12 +62,67 @@ export const rotatedRectangle = (item: { x: number; y: number; width: number; de
   });
 };
 export const tablePolygon = (table: TableInstance) => rotatedRectangle(table);
-export const zonePolygon = (zone: PlanningZone) => rotatedRectangle({ ...zone.geometry, rotation: zone.rotation });
+export const zonePolygon = (zone: PlanningZone): Position[] => zone.geometry.kind === "polygon"
+  ? zone.geometry.points.map((point) => ({ ...point }))
+  : rotatedRectangle({ ...zone.geometry, rotation: zone.rotation });
+
+export function polygonCenter(points: Position[]): Position {
+  if (!points.length) return { x: 0, y: 0 };
+  const signedArea = points.reduce((sum, point, index) => {
+    const next = points[(index + 1) % points.length];
+    return sum + point.x * next.y - next.x * point.y;
+  }, 0) / 2;
+  if (Math.abs(signedArea) < 1e-9) return points.reduce((sum, point) => ({ x: sum.x + point.x / points.length, y: sum.y + point.y / points.length }), { x: 0, y: 0 });
+  return points.reduce((sum, point, index) => {
+    const next = points[(index + 1) % points.length], factor = point.x * next.y - next.x * point.y;
+    return { x: sum.x + (point.x + next.x) * factor / (6 * signedArea), y: sum.y + (point.y + next.y) * factor / (6 * signedArea) };
+  }, { x: 0, y: 0 });
+}
+
+export const zoneCenter = (zone: PlanningZone) => zone.geometry.kind === "rectangle" ? { x: zone.geometry.x, y: zone.geometry.y } : polygonCenter(zone.geometry.points);
+
+export function moveZone(zone: PlanningZone, dx: number, dy: number): PlanningZone {
+  return zone.geometry.kind === "rectangle"
+    ? { ...zone, geometry: { ...zone.geometry, x: Number((zone.geometry.x + dx).toFixed(3)), y: Number((zone.geometry.y + dy).toFixed(3)) } }
+    : { ...zone, geometry: { ...zone.geometry, points: zone.geometry.points.map((point) => ({ x: Number((point.x + dx).toFixed(3)), y: Number((point.y + dy).toFixed(3)) })) } };
+}
+
+export function moveZonePoint(zone: PlanningZone, index: number, position: Position): PlanningZone {
+  if (zone.geometry.kind !== "polygon") return zone;
+  return { ...zone, geometry: { ...zone.geometry, points: zone.geometry.points.map((point, pointIndex) => pointIndex === index ? { ...position } : point) } };
+}
+
+function polygonAsRoom(points: Position[]): RoomGeometry {
+  const roomPoints: Point2D[] = points.map((point, index) => ({ id: `zone-point-${index}`, ...point }));
+  return { points: roomPoints, walls: roomPoints.map((point, index) => ({ id: `zone-wall-${index}`, startPointId: point.id, endPointId: roomPoints[(index + 1) % roomPoints.length]?.id ?? point.id })), closed: true };
+}
+
+export function validateZonePolygon(points: Position[]): string[] {
+  if (points.length < 3) return ["Ein Tischbereich benötigt mindestens drei Eckpunkte."];
+  const errors = validateRoom(polygonAsRoom(points)).map((message) => message.replace("Raumkontur", "Tischbereich").replace("Ein Raum", "Ein Tischbereich"));
+  if (polygonArea(points.map((point, index) => ({ id: `zone-point-${index}`, ...point }))) < .01 && !errors.some((message) => message.includes("gültige Fläche"))) errors.push("Der Tischbereich hat keine gültige Fläche.");
+  return errors;
+}
+
+function doorKeepClearPolygon(plan: RoomPlan, doorId: string): Position[] {
+  const door = plan.objects.find((object) => object.id === doorId && object.type === "door");
+  if (!door || door.type !== "door") return [];
+  const segment = doorSegment(plan.contour, door);
+  if (!segment) return [];
+  const center = { x: (segment.start.x + segment.end.x) / 2, y: (segment.start.y + segment.end.y) / 2 };
+  const rotation = Math.atan2(segment.end.y - segment.start.y, segment.end.x - segment.start.x) * 180 / Math.PI;
+  return rotatedRectangle({ ...center, width: door.width + .4, depth: 1.2, rotation });
+}
 
 export function validateTables(plan: RoomPlan): Issue[] {
   const tables = plan.tables ?? [], chairs = plan.chairs ?? [], issues: Issue[] = [];
   for (const zone of plan.zones ?? []) {
-    if (!polygonInsideRoom(zonePolygon(zone), plan.contour)) issues.push({ objectId: zone.id, severity: "error", message: zone.type === "tables" ? "Tischbereich liegt teilweise außerhalb des Raums oder schneidet eine Wand." : "Bereich liegt teilweise außerhalb des Raums oder schneidet eine Wand." });
+    const polygon = zonePolygon(zone);
+    const geometryErrors = zone.geometry.kind === "polygon" ? validateZonePolygon(polygon) : [];
+    geometryErrors.forEach((message) => issues.push({ objectId: zone.id, severity: "error", message }));
+    if (!geometryErrors.length && !polygonInsideRoom(polygon, plan.contour)) issues.push({ objectId: zone.id, severity: "error", message: zone.type === "tables" ? "Tischbereich liegt teilweise außerhalb des Raums oder schneidet eine Wand." : "Bereich liegt teilweise außerhalb des Raums oder schneidet eine Wand." });
+    const exclusion = plan.objects.find((object) => isBlockingObject(object) && polygonsOverlap(polygon, obstaclePolygon(object)) || object.type === "aisle" && polygonsOverlap(polygon, aislePolygon(object)));
+    if (exclusion) issues.push({ objectId: zone.id, severity: "error", message: exclusion.type === "aisle" ? "Tischbereich überschneidet einen Gang." : "Tischbereich überschneidet eine Sperrfläche oder ein Hindernis." });
   }
   for (const table of tables) {
     const polygon = tablePolygon(table);
@@ -180,7 +238,7 @@ function chairRing(table: TableInstance, count: number, groupId: string, idPrefi
 
 export function generateTableLayout(options: TableLayoutOptions, idPrefix = `layout-${Date.now()}`): GeneratedTableLayout {
   const model = tableModel(options.modelId), count = Math.max(1, Math.floor(options.count)), spacing = Math.max(0, options.spacing);
-  const center = options.center ?? (options.zone ? { x: options.zone.geometry.x, y: options.zone.geometry.y } : { x: 0, y: 0 });
+  const center = options.center ?? (options.zone ? zoneCenter(options.zone) : { x: 0, y: 0 });
   const columns = Math.max(1, Math.floor(options.columns ?? Math.ceil(Math.sqrt(count))));
   const rows = Math.ceil(count / columns);
   const stepX = model.width + spacing, stepY = model.depth + spacing;
@@ -207,6 +265,78 @@ export function generateTableLayout(options: TableLayoutOptions, idPrefix = `lay
   const chairs = options.withChairs ? tables.flatMap((table, index) => chairRing(table, options.chairsPerTable ?? model.defaultSeats, table.groupId!, `${idPrefix}-${index + 1}`)) : [];
   const groups = tables.map(table => ({ id: table.groupId!, tableIds: [table.id], chairIds: chairs.filter(chair => chair.groupId === table.groupId).map(chair => chair.id) }));
   return { tables, chairs, groups };
+}
+
+export type ZoneTableFillOptions = {
+  zoneId: string;
+  modelId: string;
+  rotation: number;
+  /** Clear walking space between neighbouring tables and the zone edge, in metres. */
+  clearance?: number;
+};
+
+export type ZoneTableFillResult = {
+  tables: TableInstance[];
+  replaceableTableIds: string[];
+  protectedTableIds: string[];
+  unchanged: boolean;
+  message: string;
+  assumption: string;
+};
+
+/** Deterministically fills a table zone. It only returns normal RoomPlan table objects;
+ * applying or replacing them remains an explicit history operation in the editor. */
+export function fillTableZone(plan: RoomPlan, options: ZoneTableFillOptions): ZoneTableFillResult {
+  const zone = (plan.zones ?? []).find((candidate) => candidate.id === options.zoneId && candidate.type === "tables");
+  const model = tableModel(options.modelId);
+  const clearance = Math.max(.2, options.clearance ?? .8);
+  const assumption = `Bewegungsabstand ${clearance.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m; Tischmaße ${model.width.toLocaleString("de-DE")} × ${model.depth.toLocaleString("de-DE")} m aus dem vorhandenen Modellkatalog.`;
+  if (!zone) return { tables: [], replaceableTableIds: [], protectedTableIds: [], unchanged: false, message: "Der Tischbereich wurde nicht gefunden.", assumption };
+  const polygon = zonePolygon(zone);
+  const geometryErrors = zone.geometry.kind === "polygon" ? validateZonePolygon(polygon) : [];
+  if (geometryErrors.length || !polygonInsideRoom(polygon, plan.contour)) return { tables: [], replaceableTableIds: [], protectedTableIds: [], unchanged: false, message: geometryErrors[0] ?? "Der Tischbereich liegt nicht vollständig im Raum.", assumption };
+
+  const linked = (plan.tables ?? []).filter((table) => table.zoneId === zone.id);
+  const replaceable = linked.filter((table) => table.source === "auto" && !table.edited);
+  const protectedTables = linked.filter((table) => table.source !== "auto" || table.edited);
+  const normalizedRotation = (options.rotation % 360 + 360) % 360;
+  if (replaceable.length && !protectedTables.length && replaceable.every((table) => table.modelId === model.id && (table.rotation % 360 + 360) % 360 === normalizedRotation && table.fillClearance === clearance)) {
+    return { tables: replaceable, replaceableTableIds: replaceable.map((table) => table.id), protectedTableIds: [], unchanged: true, message: "Dieser Tischbereich ist bereits mit derselben Anordnung befüllt.", assumption };
+  }
+
+  const blockers = plan.objects.filter(isBlockingObject).map(obstaclePolygon);
+  const aisles = plan.objects.filter((object) => object.type === "aisle").map((object) => object.type === "aisle" ? aislePolygon(object) : []);
+  const doors = plan.objects.filter((object) => object.type === "door").map((door) => doorKeepClearPolygon(plan, door.id));
+  const replaceableIds = new Set(replaceable.map((table) => table.id));
+  const fixedTables = (plan.tables ?? []).filter((table) => !replaceableIds.has(table.id));
+  const zoneRoom = polygonAsRoom(polygon);
+  const bounds = { minX: Math.min(...polygon.map((point) => point.x)), maxX: Math.max(...polygon.map((point) => point.x)), minY: Math.min(...polygon.map((point) => point.y)), maxY: Math.max(...polygon.map((point) => point.y)) };
+  const clearanceShape = rotatedRectangle({ x: 0, y: 0, width: model.width + clearance, depth: model.depth + clearance, rotation: normalizedRotation });
+  const shapeWidth = Math.max(...clearanceShape.map((point) => point.x)) - Math.min(...clearanceShape.map((point) => point.x));
+  const shapeDepth = Math.max(...clearanceShape.map((point) => point.y)) - Math.min(...clearanceShape.map((point) => point.y));
+  const candidates: TableInstance[] = [];
+  const usedIds = new Set((plan.tables ?? []).map((table) => table.id));
+  const occupied: Position[][] = fixedTables.map((table) => rotatedRectangle({ ...table, width: table.width + clearance, depth: table.depth + clearance }));
+  const forbidden = [...blockers, ...aisles, ...doors];
+  let candidateIndex = 1;
+  for (let y = bounds.minY + shapeDepth / 2; y <= bounds.maxY - shapeDepth / 2 + 1e-8 && candidateIndex <= 1000; y += shapeDepth + .001) {
+    for (let x = bounds.minX + shapeWidth / 2; x <= bounds.maxX - shapeWidth / 2 + 1e-8 && candidateIndex <= 1000; x += shapeWidth + .001) {
+      while (usedIds.has(`${zone.id}-table-${candidateIndex}`)) candidateIndex++;
+      const table: TableInstance = { id: `${zone.id}-table-${candidateIndex}`, modelId: model.id, x: Number(x.toFixed(3)), y: Number(y.toFixed(3)), rotation: normalizedRotation, width: model.width, depth: model.depth, zoneId: zone.id, fillClearance: clearance, source: "auto" };
+      candidateIndex++;
+      const actual = tablePolygon(table);
+      const clear = rotatedRectangle({ ...table, width: table.width + clearance, depth: table.depth + clearance });
+      if (!polygonInsideRoom(actual, plan.contour) || !polygonInsideRoom(clear, zoneRoom)) continue;
+      if (forbidden.some((area) => area.length >= 3 && polygonsOverlap(clear, area)) || occupied.some((area) => polygonsOverlap(clear, area))) continue;
+      candidates.push(table);
+      usedIds.add(table.id);
+      occupied.push(clear);
+    }
+  }
+  const message = candidates.length
+    ? `${candidates.length} ${candidates.length === 1 ? "Tisch passt" : "Tische passen"} kollisionsfrei in den Bereich.`
+    : "In diesem Tischbereich ist mit dem gewählten Modell und Bewegungsabstand nicht genügend freie Fläche vorhanden.";
+  return { tables: candidates, replaceableTableIds: replaceable.map((table) => table.id), protectedTableIds: protectedTables.map((table) => table.id), unchanged: false, message, assumption };
 }
 
 export function moveTableGroup(plan: RoomPlan, groupId: string, dx: number, dy: number, rotationDelta = 0): RoomPlan {

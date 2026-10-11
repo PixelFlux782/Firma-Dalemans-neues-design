@@ -61,6 +61,8 @@ test("Editor zeigt bei fehlendem Ausgang eine technische Annäherung ohne Übern
   await click(w / 2 + 160, h / 2 + 120);
   await click(w / 2 - 160, h / 2 + 120);
   await click(w / 2 - 160, h / 2 - 120);
+  await page.keyboard.press("Escape");
+  await editor.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await editor.getByRole("button", { name: "Planvarianten berechnen" }).click();
   await expect(editor.getByText("Keine Variante ohne technische Regelabweichung gefunden.", { exact: false })).toBeVisible();
   await expect(editor.getByText(/Beste Annäherung · technische Annäherung/)).toBeVisible();
@@ -78,13 +80,15 @@ test("Variantenübernahme und Undo stellen Bestuhlungsparameter gemeinsam wieder
   const w = box!.width, h = box!.height;
   const left = w / 2 - 225, top = h / 2 - 180;
   await click(left, top); await click(left + 450, top); await click(left + 450, top + 360); await click(left, top + 360); await click(left, top);
-  await editor.getByRole("button", { name: "Tür", exact: true }).click();
+  await editor.getByRole("button", { name: "Türen", exact: true }).click();
   await click(left + 45, top);
   await editor.getByLabel("Türrolle").selectOption("exit");
   await editor.getByLabel("Breite (m)", { exact: true }).fill("1.2");
   await editor.getByLabel("Lichte Breite (m)").fill("1.2");
-  await editor.getByRole("button", { name: "Gang", exact: true }).click();
+  await editor.getByRole("button", { name: "Gänge", exact: true }).click();
   await click(left + 45, top + 32); await click(left + 45, top + 328);
+  await page.keyboard.press("Escape");
+  await editor.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await editor.getByRole("button", { name: "Planvarianten berechnen" }).click();
   const variants = editor.getByLabel("Planvarianten");
   await expect(variants.getByText(/Kandidaten mit dem gewählten Regelprofil geprüft/)).toBeVisible({ timeout: 30000 });

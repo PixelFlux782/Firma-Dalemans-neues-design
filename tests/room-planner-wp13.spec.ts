@@ -31,6 +31,7 @@ test("Plan-Ausgabe zeigt den aktuellen bearbeiteten Plan und verändert ihn nich
   await expect(output.getByRole("button", { name: "Drucken / als PDF speichern" })).toBeVisible();
   await output.getByRole("button", { name: "Zurück zum Editor" }).click();
   await expect(editor.getByRole("button", { name: "Rückgängig" })).toBeDisabled();
+  await editor.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await expect(editor.getByLabel("Aktueller Plan")).toContainText("3 Plätze");
   await expect(editor.getByLabel("Planvarianten").getByText(/Kandidaten mit/)).toHaveCount(0);
 });

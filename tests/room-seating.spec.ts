@@ -73,6 +73,8 @@ test("2D editor calculates and invalidates a seating result when rules change", 
   const box = (await surface.boundingBox())!;
   const click = async (x: number, y: number) => page.mouse.click(box.x + box.width / 2 + x * 45, box.y + box.height / 2 + y * 45);
   await click(-4, -3); await click(6, -3); await click(6, 5); await click(-4, 5); await click(-4, -3);
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await page.getByRole("button", { name: "Bestuhlung berechnen" }).click();
   await expect(page.getByText(/Sitzplätze · .* Sitzblöcke/)).toBeVisible();
   await expect(surface.getByLabel("Berechnete Sitzplätze").locator("path").first()).toBeVisible();

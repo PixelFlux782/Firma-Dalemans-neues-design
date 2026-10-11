@@ -8,7 +8,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
 import { doorSegment, frontSegment, type DoorObject, type RoomPlan } from "@/lib/room-planner/objects";
 import { chairDisplayAngle, planBounds } from "@/lib/room-planner/visualization3d";
-import { TABLE_MODELS, type TableModel } from "@/lib/room-planner/tables";
+import { TABLE_MODELS, zonePolygon, type PlanningZone, type TableModel } from "@/lib/room-planner/tables";
 
 const DEFAULT_WALL_HEIGHT = 2.9;
 const CHAIR_MODEL = "/models/dalemans-chair-low.glb";
@@ -155,6 +155,17 @@ function ModelTables({ plan, model }: { plan: RoomPlan; model: TableModel }) {
   return tables.length ? <instancedMesh ref={ref} args={[source.geometry, source.material, tables.length]} castShadow receiveShadow /> : null;
 }
 
+function PlanningZoneMesh({ zone, index }: { zone: PlanningZone; index: number }) {
+  const geometry = useMemo(() => {
+    const points = zonePolygon(zone);
+    const shape = new THREE.Shape();
+    points.forEach((point, pointIndex) => pointIndex ? shape.lineTo(point.x, -point.y) : shape.moveTo(point.x, -point.y));
+    shape.closePath();
+    return new THREE.ShapeGeometry(shape);
+  }, [zone]);
+  return <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, .004, 0]} renderOrder={1 + index}><meshStandardMaterial color={zone.type === "tables" ? "#d7b56d" : "#91a99a"} transparent opacity={.32} depthWrite={false} side={THREE.DoubleSide} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} /></mesh>;
+}
+
 function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
   const points = plan.contour.points;
   const floor = useMemo(() => {
@@ -168,7 +179,7 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
     <color attach="background" args={["#f5f3ee"]} />
     <hemisphereLight args={["#ffffff", "#b8afa1", 1.5]} /><directionalLight position={[8, 15, 10]} intensity={2.1} />
     {floor && <mesh geometry={floor} rotation={[-Math.PI / 2, 0, 0]}><meshStandardMaterial color="#dcd6c9" roughness={0.94} side={THREE.DoubleSide} /></mesh>}
-    {(plan.zones ?? []).map((zone, index) => <mesh key={zone.id} renderOrder={1 + index} position={[zone.geometry.x, 0.004, zone.geometry.y]} rotation={[0, -zone.rotation * Math.PI / 180, 0]}><boxGeometry args={[zone.geometry.width, 0.006, zone.geometry.depth]} /><meshStandardMaterial color={zone.type === "tables" ? "#d7b56d" : "#91a99a"} transparent opacity={0.32} depthWrite={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} /></mesh>)}
+    {(plan.zones ?? []).map((zone, index) => <PlanningZoneMesh key={zone.id} zone={zone} index={index} />)}
     {plan.contour.walls.map(wall => {
       const a = points.find(p => p.id === wall.startPointId), b = points.find(p => p.id === wall.endPointId);
       if (!a || !b) return null;

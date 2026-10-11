@@ -227,11 +227,13 @@ test("Importierter WP11-Plan bleibt nach Neuladen unverändert und wird neu gepr
   const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
   const projects = editor.getByLabel("Projektverwaltung");
   await projects.getByLabel("Projektdatei importieren").setInputFiles({ name: "wp11.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(project)) });
+  await editor.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await expect(editor.getByLabel("Aktueller Plan")).toContainText("2 Plätze");
   await expect(editor.getByLabel("Aktueller Plan")).toContainText("1 Gänge");
   await expect(editor.getByLabel("Aktueller Plan")).toContainText("2 Plätze ohne Weg");
   expect(await editor.getByLabel("Planvarianten").getByText(/Kandidaten mit/).count()).toBe(0);
   await page.reload();
+  await editor.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await expect(editor.getByLabel("Aktueller Plan")).toContainText("2 Plätze");
   await expect(editor.getByRole("button", { name: "Rückgängig" })).toBeDisabled();
   await editor.getByRole("button", { name: "Auswahl" }).click();

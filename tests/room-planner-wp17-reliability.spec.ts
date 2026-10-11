@@ -67,23 +67,27 @@ test("WP17 JSON hält Tischbereich und Bearbeitungsherkunft kompatibel", () => {
   expect(parsed.plan.tables?.[0].edited).toBe(true);
 });
 
-test("WP17 Oberfläche zeigt genau sechs Primärwerkzeuge und zeichnet einen Tischbereich", async ({ page }) => {
+test("WP17.1 Oberfläche zeigt acht Primärwerkzeuge und zeichnet einen polygonalen Tischbereich", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/raumplaner");
   const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
   const toolbar = editor.getByLabel("Werkzeuge", { exact: true });
-  await expect(toolbar.getByRole("button")).toHaveCount(6);
-  for (const label of ["Auswahl", "Raum / Kontur", "Tür", "Gang", "Bereich", "Sperr-/Hindernis"]) await expect(toolbar.getByRole("button", { name: label, exact: true })).toBeVisible();
+  await expect(toolbar.getByRole("button")).toHaveCount(8);
+  for (const label of ["Auswahl", "Raum", "Türen", "Gänge", "Stühle", "Tische", "Sperrflächen", "Hindernisse"]) await expect(toolbar.getByRole("button", { name: label, exact: true })).toBeVisible();
   const canvas = editor.getByRole("img", { name: "Grundriss Zeichenfläche" });
   for (const position of [{ x: 120, y: 90 }, { x: 570, y: 90 }, { x: 570, y: 390 }, { x: 120, y: 390 }]) await canvas.click({ position });
   await canvas.locator("[data-point-id]").first().click();
-  await toolbar.getByRole("button", { name: "Bereich", exact: true }).click();
+  await toolbar.getByRole("button", { name: "Tische", exact: true }).click();
+  await page.getByLabel("Tischwerkzeug").selectOption("tables");
   await canvas.click({ position: { x: 260, y: 190 } });
+  await canvas.click({ position: { x: 430, y: 190 } });
   await canvas.click({ position: { x: 430, y: 310 } });
+  await canvas.click({ position: { x: 260, y: 310 } });
+  await page.getByRole("button", { name: "Tischbereich abschließen" }).click();
   await expect(canvas.locator("[data-zone-id]")).toHaveCount(1);
   await editor.getByRole("button", { name: "Auswahl", exact: true }).click();
   await canvas.locator("[data-zone-id]").click();
-  await expect(editor.getByLabel("Eigenschaften").getByText("Tischbereich", { exact: true })).toBeVisible();
+  await expect(editor.getByLabel("Kontextbezogene Eigenschaften").getByRole("heading", { name: "Tischbereich" })).toBeVisible();
   await editor.getByRole("button", { name: "Tischbereich löschen" }).click();
   await expect(canvas.locator("[data-zone-id]")).toHaveCount(0);
 });

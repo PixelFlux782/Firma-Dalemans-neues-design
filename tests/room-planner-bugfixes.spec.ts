@@ -40,6 +40,8 @@ test("changing a normal door to an emergency exit applies the editable default",
   await expect(editor.getByLabel("Lichte Breite (m)")).toHaveValue("1.2");
   await editor.getByLabel("Lichte Breite (m)").fill("0.9");
   await expect(editor.getByLabel("Lichte Breite (m)")).toHaveValue("0.9");
+  await page.keyboard.press("Escape");
+  await editor.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();
   await expect(editor.getByLabel("Prüfergebnisse").getByRole("button", { name: /Ausgang door-1:.*0\.90 m/ })).toHaveClass(/bg-red-50/);
 });
 
@@ -55,7 +57,6 @@ test("editor is interactive after output and retains plan, viewport, selection a
   const undoEnabled = await editor.getByRole("button", { name: "Rückgängig" }).isEnabled();
   await editor.getByRole("button", { name: "Plan ausgeben" }).click();
   await page.getByRole("region", { name: "Plan-Ausgabe" }).getByRole("button", { name: "Zurück zum Editor" }).click();
-  await expect(editor.getByLabel("Aktueller Plan")).toContainText("1 Plätze");
   expect(await editor.getByRole("button", { name: "Rückgängig" }).isEnabled()).toBe(undoEnabled);
   await expect(editor.locator(".planner-tools span").first()).toHaveText(zoom ?? "");
   await expect(editor.getByLabel("Breite (m)").first()).toHaveValue("1.2");

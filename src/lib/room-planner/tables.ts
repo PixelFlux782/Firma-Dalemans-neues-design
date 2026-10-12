@@ -33,10 +33,10 @@ export const TABLE_MODELS: readonly TableModel[] = [
   { id: "table-310c-150x75", name: "Klapptisch 310c · 150 × 75 cm", articleNumbers: ["T310C1575", "T310C1575N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.5, depth: .75, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
   { id: "table-310c-160x70", name: "Klapptisch 310c · 160 × 70 cm", articleNumbers: ["T310C167", "T310C167N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.6, depth: .7, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
   { id: "table-310c-160x80", name: "Klapptisch 310c · 160 × 80 cm", articleNumbers: ["T310C168", "T310C168N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.6, depth: .8, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
-  { id: "table-310c-170x70", name: "Klapptisch 310c · 170 × 70 cm", articleNumbers: ["T310C177", "T310C177N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.7, depth: .7, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
-  { id: "table-310c-170x80", name: "Klapptisch 310c · 170 × 80 cm", articleNumbers: ["T310C178", "T310C178N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.7, depth: .8, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
-  { id: "table-310c-180x70", name: "Klapptisch 310c · 180 × 70 cm", articleNumbers: ["T310C187", "T310C187N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.8, depth: .7, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
-  { id: "table-310c-180x80", name: "Klapptisch 310c · 180 × 80 cm", articleNumbers: ["T310C188", "T310C188N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.8, depth: .8, height: .94, shape: "rectangular", defaultSeats: 6, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-170x70", name: "Klapptisch 310c · 170 × 70 cm", articleNumbers: ["T310C177", "T310C177N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.7, depth: .7, height: .94, shape: "rectangular", defaultSeats: 8, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-170x80", name: "Klapptisch 310c · 170 × 80 cm", articleNumbers: ["T310C178", "T310C178N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.7, depth: .8, height: .94, shape: "rectangular", defaultSeats: 8, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-180x70", name: "Klapptisch 310c · 180 × 70 cm", articleNumbers: ["T310C187", "T310C187N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.8, depth: .7, height: .94, shape: "rectangular", defaultSeats: 8, modelBounds: MODEL_BOUNDS["310c"] },
+  { id: "table-310c-180x80", name: "Klapptisch 310c · 180 × 80 cm", articleNumbers: ["T310C188", "T310C188N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.8, depth: .8, height: .94, shape: "rectangular", defaultSeats: 8, modelBounds: MODEL_BOUNDS["310c"] },
   { id: "table-210c-120x60", name: "Seminarklapptisch 210c · 120 × 60 cm", articleNumbers: ["T210C126"], modelPath: "/models/dalemans-tisch-210-low.glb", width: 1.2, depth: .6, height: .86, shape: "rectangular", defaultSeats: 4, modelBounds: MODEL_BOUNDS["210c"] },
   { id: "table-210c-140x70", name: "Seminarklapptisch 210c · 140 × 70 cm", articleNumbers: ["T210C147"], modelPath: "/models/dalemans-tisch-210-low.glb", width: 1.4, depth: .7, height: .86, shape: "rectangular", defaultSeats: 4, modelBounds: MODEL_BOUNDS["210c"] },
   { id: "table-310c-trapez-140x70", name: "Trapez-Klapptisch 310c · 140 × 70 cm", articleNumbers: ["T310CT147", "T310CT147N"], modelPath: "/models/dalemans-tisch-trapez-low.glb", width: 1.4, depth: .7, height: .94, shape: "trapezoid", defaultSeats: 4, modelBounds: MODEL_BOUNDS.trapezoid },
@@ -47,7 +47,7 @@ export const DEFAULT_TABLE_MODEL_ID = TABLE_MODELS[0].id;
 export const tableModel = (id: string) => TABLE_MODELS.find(model => model.id === id) ?? TABLE_MODELS[0];
 
 export type TableInstance = { id: string; modelId: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; zoneId?: string; fillClearance?: number; source: TableSource; edited?: boolean };
-export type FurnitureChair = { id: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; source: TableSource; edited?: boolean };
+export type FurnitureChair = { id: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; tableId?: string; source: TableSource; edited?: boolean };
 export type TableGroup = { id: string; tableIds: string[]; chairIds: string[] };
 export type PlanningZoneType = "seating" | "tables" | "free";
 export type RectangleZoneGeometry = { kind: "rectangle"; x: number; y: number; width: number; depth: number };
@@ -211,7 +211,7 @@ export function fitTableLayout(options: TableLayoutOptions, idPrefix = `layout-$
   const allColumns = Array.from({ length: options.count }, (_, index) => index + 1);
   const columnCandidates = options.columns ? [options.columns] : [...new Set([ideal, ideal + 1, ideal - 1, ...allColumns])].filter(value => value >= 1 && value <= options.count);
   const rotations = [...new Set([options.rotation, options.rotation + 90])];
-  for (const columns of columnCandidates) for (const rotation of rotations) for (const spread of [1, 1.1, 1.2, .9, .8, .7, .6]) {
+  for (const columns of columnCandidates) for (const rotation of rotations) for (const spread of [1, 1.1, 1.2, 1.3, 1.4, .9, .8, .7, .6]) {
     const layout = generateTableLayout({ ...options, plan: undefined, center: { x: 0, y: 0 }, columns }, idPrefix);
     const transform = { center, rotation: rotation - options.rotation, spread };
     const transformed = transformTableLayout(layout, transform);
@@ -223,17 +223,59 @@ export function fitTableLayout(options: TableLayoutOptions, idPrefix = `layout-$
   return best!;
 }
 
-function chairRing(table: TableInstance, count: number, groupId: string, idPrefix: string): FurnitureChair[] {
+function chairRing(table: TableInstance, count: number, groupId: string, idPrefix: string, chairSize = { width: .5, depth: .55 }): FurnitureChair[] {
   const result: FurnitureChair[] = [];
   const longSide = Math.max(1, Math.floor((count - 2) / 2));
   const local: { x: number; y: number; rotation: number }[] = [];
-  for (let i = 0; i < longSide && local.length < count; i++) local.push({ x: -table.width / 2 + table.width * (i + 1) / (longSide + 1), y: -table.depth / 2 - 0.36, rotation: 0 });
-  for (let i = 0; i < longSide && local.length < count; i++) local.push({ x: table.width / 2 - table.width * (i + 1) / (longSide + 1), y: table.depth / 2 + 0.36, rotation: 180 });
-  if (local.length < count) local.push({ x: -table.width / 2 - 0.36, y: 0, rotation: 270 });
-  if (local.length < count) local.push({ x: table.width / 2 + 0.36, y: 0, rotation: 90 });
+  const sideOffset = table.depth / 2 + chairSize.depth / 2 + .1;
+  const endOffset = table.width / 2 + chairSize.depth / 2 + .1;
+  for (let i = 0; i < longSide && local.length < count; i++) local.push({ x: -table.width / 2 + table.width * (i + .5) / longSide, y: -sideOffset, rotation: 0 });
+  for (let i = 0; i < longSide && local.length < count; i++) local.push({ x: table.width / 2 - table.width * (i + .5) / longSide, y: sideOffset, rotation: 180 });
+  if (local.length < count) local.push({ x: -endOffset, y: 0, rotation: 270 });
+  if (local.length < count) local.push({ x: endOffset, y: 0, rotation: 90 });
   const a = table.rotation * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
-  local.slice(0, count).forEach((chair, index) => result.push({ id: `${idPrefix}-chair-${index + 1}`, x: table.x + chair.x * c - chair.y * s, y: table.y + chair.x * s + chair.y * c, rotation: (chair.rotation + table.rotation) % 360, width: 0.5, depth: 0.55, groupId, source: table.source }));
+  local.slice(0, count).forEach((chair, index) => result.push({ id: `${idPrefix}-chair-${index + 1}`, x: table.x + chair.x * c - chair.y * s, y: table.y + chair.x * s + chair.y * c, rotation: (chair.rotation + table.rotation) % 360, width: chairSize.width, depth: chairSize.depth, groupId, tableId: table.id, source: table.source }));
   return result;
+}
+
+export type TableSeatingResult = { chairs: FurnitureChair[]; requested: number; placed: number; maximum: number; message: string };
+
+/** Builds a compact, deterministic set of normal furniture-chair objects for one
+ * table. Every candidate is checked against the current room, its table zone and
+ * all other furniture. The owner table is the only table ignored for collision. */
+export function seatTable(plan: RoomPlan, tableId: string, requested?: number): TableSeatingResult {
+  const table = (plan.tables ?? []).find((item) => item.id === tableId);
+  if (!table) return { chairs: [], requested: 0, placed: 0, maximum: 0, message: "Tisch nicht gefunden." };
+  const chairSize = { width: plan.chairSelection?.width ?? .5, depth: plan.chairSelection?.depth ?? .55 };
+  const model = tableModel(table.modelId);
+  const longSideSlots = Math.max(1, Math.min(3, Math.floor((table.width - .1) / Math.max(.5, chairSize.width))));
+  const maximum = longSideSlots * 2 + (table.depth >= .6 ? 2 : 0);
+  const requestedCount = Math.max(0, Math.floor(requested ?? model.defaultSeats));
+  const desired = Math.min(maximum, requestedCount);
+  const groupId = table.groupId ?? `${table.id}-group`;
+  const all = chairRing(table, maximum, groupId, table.id, chairSize);
+  const ends = all.slice(longSideSlots * 2);
+  const sides = all.slice(0, longSideSlots * 2);
+  const sideCount = Math.min(sides.length, desired - Math.max(0, desired - sides.length));
+  const balancedSides = Array.from({ length: sideCount }, (_, index) => sides[index % 2 ? longSideSlots + Math.floor(index / 2) : Math.floor(index / 2)]).filter(Boolean);
+  const candidates = [...balancedSides, ...ends.slice(0, Math.max(0, desired - balancedSides.length))];
+  const zone = table.zoneId ? (plan.zones ?? []).find((item) => item.id === table.zoneId) : undefined;
+  const zoneRoom = zone ? polygonAsRoom(zonePolygon(zone)) : undefined;
+  const existing = (plan.chairs ?? []).filter((chair) => chair.tableId !== table.id && (!table.groupId || chair.groupId !== table.groupId));
+  const accepted: FurnitureChair[] = [];
+  for (const chair of candidates) {
+    const polygon = rotatedRectangle(chair);
+    const fits = polygonInsideRoom(polygon, plan.contour)
+      && (!zoneRoom || polygonInsideRoom(polygon, zoneRoom))
+      && !plan.objects.some((object) => isBlockingObject(object) && polygonsOverlap(polygon, obstaclePolygon(object)) || object.type === "aisle" && polygonsOverlap(polygon, aislePolygon(object)))
+      && !(plan.tables ?? []).some((other) => other.id !== table.id && polygonsOverlap(polygon, tablePolygon(other)))
+      && ![...existing, ...accepted].some((other) => polygonsOverlap(polygon, rotatedRectangle(other)));
+    if (fits) accepted.push(chair);
+  }
+  const message = accepted.length === requestedCount
+    ? `${accepted.length} ${accepted.length === 1 ? "Stuhl wurde" : "Stühle wurden"} am Tisch platziert.`
+    : `${accepted.length} von ${requestedCount} gewünschten Stühlen passen kollisionsfrei an diesen Tisch (maximal ${maximum} geometrisch mögliche Plätze).`;
+  return { chairs: accepted, requested: requestedCount, placed: accepted.length, maximum, message };
 }
 
 export function generateTableLayout(options: TableLayoutOptions, idPrefix = `layout-${Date.now()}`): GeneratedTableLayout {
@@ -262,7 +304,7 @@ export function generateTableLayout(options: TableLayoutOptions, idPrefix = `lay
       && !options.plan!.objects.some((object) => isBlockingObject(object) && polygonsOverlap(polygon, obstaclePolygon(object)) || object.type === "aisle" && polygonsOverlap(polygon, aislePolygon(object)))
       && !(options.plan!.tables ?? []).some((other) => polygonsOverlap(polygon, tablePolygon(other)));
   });
-  const chairs = options.withChairs ? tables.flatMap((table, index) => chairRing(table, options.chairsPerTable ?? model.defaultSeats, table.groupId!, `${idPrefix}-${index + 1}`)) : [];
+  const chairs = options.withChairs ? tables.flatMap((table, index) => chairRing(table, options.chairsPerTable ?? model.defaultSeats, table.groupId!, `${idPrefix}-${index + 1}`, { width: options.plan?.chairSelection?.width ?? .5, depth: options.plan?.chairSelection?.depth ?? .55 })) : [];
   const groups = tables.map(table => ({ id: table.groupId!, tableIds: [table.id], chairIds: chairs.filter(chair => chair.groupId === table.groupId).map(chair => chair.id) }));
   return { tables, chairs, groups };
 }
@@ -273,10 +315,13 @@ export type ZoneTableFillOptions = {
   rotation: number;
   /** Clear walking space between neighbouring tables and the zone edge, in metres. */
   clearance?: number;
+  withChairs?: boolean;
 };
 
 export type ZoneTableFillResult = {
   tables: TableInstance[];
+  chairs: FurnitureChair[];
+  groups: TableGroup[];
   replaceableTableIds: string[];
   protectedTableIds: string[];
   unchanged: boolean;
@@ -291,17 +336,19 @@ export function fillTableZone(plan: RoomPlan, options: ZoneTableFillOptions): Zo
   const model = tableModel(options.modelId);
   const clearance = Math.max(.2, options.clearance ?? .8);
   const assumption = `Bewegungsabstand ${clearance.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m; Tischmaße ${model.width.toLocaleString("de-DE")} × ${model.depth.toLocaleString("de-DE")} m aus dem vorhandenen Modellkatalog.`;
-  if (!zone) return { tables: [], replaceableTableIds: [], protectedTableIds: [], unchanged: false, message: "Der Tischbereich wurde nicht gefunden.", assumption };
+  if (!zone) return { tables: [], chairs: [], groups: [], replaceableTableIds: [], protectedTableIds: [], unchanged: false, message: "Der Tischbereich wurde nicht gefunden.", assumption };
   const polygon = zonePolygon(zone);
   const geometryErrors = zone.geometry.kind === "polygon" ? validateZonePolygon(polygon) : [];
-  if (geometryErrors.length || !polygonInsideRoom(polygon, plan.contour)) return { tables: [], replaceableTableIds: [], protectedTableIds: [], unchanged: false, message: geometryErrors[0] ?? "Der Tischbereich liegt nicht vollständig im Raum.", assumption };
+  if (geometryErrors.length || !polygonInsideRoom(polygon, plan.contour)) return { tables: [], chairs: [], groups: [], replaceableTableIds: [], protectedTableIds: [], unchanged: false, message: geometryErrors[0] ?? "Der Tischbereich liegt nicht vollständig im Raum.", assumption };
 
   const linked = (plan.tables ?? []).filter((table) => table.zoneId === zone.id);
-  const replaceable = linked.filter((table) => table.source === "auto" && !table.edited);
-  const protectedTables = linked.filter((table) => table.source !== "auto" || table.edited);
+  const editedGroupIds = new Set((plan.chairs ?? []).filter((chair) => chair.edited).map((chair) => chair.groupId).filter((id): id is string => !!id));
+  const replaceable = linked.filter((table) => table.source === "auto" && !table.edited && (!table.groupId || !editedGroupIds.has(table.groupId)));
+  const protectedTables = linked.filter((table) => !replaceable.includes(table));
   const normalizedRotation = (options.rotation % 360 + 360) % 360;
   if (replaceable.length && !protectedTables.length && replaceable.every((table) => table.modelId === model.id && (table.rotation % 360 + 360) % 360 === normalizedRotation && table.fillClearance === clearance)) {
-    return { tables: replaceable, replaceableTableIds: replaceable.map((table) => table.id), protectedTableIds: [], unchanged: true, message: "Dieser Tischbereich ist bereits mit derselben Anordnung befüllt.", assumption };
+    const currentChairs = (plan.chairs ?? []).filter((chair) => replaceable.some((table) => chair.tableId === table.id || !!table.groupId && chair.groupId === table.groupId));
+    if (!!options.withChairs === !!currentChairs.length) return { tables: replaceable, chairs: currentChairs, groups: (plan.tableGroups ?? []).filter((group) => replaceable.some((table) => group.tableIds.includes(table.id))), replaceableTableIds: replaceable.map((table) => table.id), protectedTableIds: [], unchanged: true, message: "Dieser Tischbereich ist bereits mit derselben Anordnung befüllt.", assumption };
   }
 
   const blockers = plan.objects.filter(isBlockingObject).map(obstaclePolygon);
@@ -322,7 +369,7 @@ export function fillTableZone(plan: RoomPlan, options: ZoneTableFillOptions): Zo
   for (let y = bounds.minY + shapeDepth / 2; y <= bounds.maxY - shapeDepth / 2 + 1e-8 && candidateIndex <= 1000; y += shapeDepth + .001) {
     for (let x = bounds.minX + shapeWidth / 2; x <= bounds.maxX - shapeWidth / 2 + 1e-8 && candidateIndex <= 1000; x += shapeWidth + .001) {
       while (usedIds.has(`${zone.id}-table-${candidateIndex}`)) candidateIndex++;
-      const table: TableInstance = { id: `${zone.id}-table-${candidateIndex}`, modelId: model.id, x: Number(x.toFixed(3)), y: Number(y.toFixed(3)), rotation: normalizedRotation, width: model.width, depth: model.depth, zoneId: zone.id, fillClearance: clearance, source: "auto" };
+      const table: TableInstance = { id: `${zone.id}-table-${candidateIndex}`, modelId: model.id, x: Number(x.toFixed(3)), y: Number(y.toFixed(3)), rotation: normalizedRotation, width: model.width, depth: model.depth, groupId: `${zone.id}-table-${candidateIndex}-group`, zoneId: zone.id, fillClearance: clearance, source: "auto" };
       candidateIndex++;
       const actual = tablePolygon(table);
       const clear = rotatedRectangle({ ...table, width: table.width + clearance, depth: table.depth + clearance });
@@ -333,10 +380,21 @@ export function fillTableZone(plan: RoomPlan, options: ZoneTableFillOptions): Zo
       occupied.push(clear);
     }
   }
+  let chairs: FurnitureChair[] = [];
+  const groups: TableGroup[] = [];
+  if (options.withChairs) {
+    let chairPlan: RoomPlan = { ...plan, tables: [...fixedTables, ...candidates], chairs: (plan.chairs ?? []).filter((chair) => !replaceable.some((table) => chair.tableId === table.id || !!table.groupId && chair.groupId === table.groupId)) };
+    for (const table of candidates) {
+      const result = seatTable(chairPlan, table.id);
+      chairs = [...chairs, ...result.chairs];
+      chairPlan = { ...chairPlan, chairs: [...(chairPlan.chairs ?? []), ...result.chairs] };
+      groups.push({ id: table.groupId!, tableIds: [table.id], chairIds: result.chairs.map((chair) => chair.id) });
+    }
+  }
   const message = candidates.length
     ? `${candidates.length} ${candidates.length === 1 ? "Tisch passt" : "Tische passen"} kollisionsfrei in den Bereich.`
     : "In diesem Tischbereich ist mit dem gewählten Modell und Bewegungsabstand nicht genügend freie Fläche vorhanden.";
-  return { tables: candidates, replaceableTableIds: replaceable.map((table) => table.id), protectedTableIds: protectedTables.map((table) => table.id), unchanged: false, message, assumption };
+  return { tables: candidates, chairs, groups, replaceableTableIds: replaceable.map((table) => table.id), protectedTableIds: protectedTables.map((table) => table.id), unchanged: false, message: options.withChairs ? `${message} ${chairs.length} Tischplätze wurden angelegt.` : message, assumption };
 }
 
 export function moveTableGroup(plan: RoomPlan, groupId: string, dx: number, dy: number, rotationDelta = 0): RoomPlan {

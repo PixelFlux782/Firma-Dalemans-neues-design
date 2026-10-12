@@ -1,6 +1,7 @@
 import type { RoomPlan } from "./objects";
-import { generateSeatingPlan, type SeatPlacement, type SeatingGridOffset, type SeatingOrientation, type SeatingPlan, type SeatingRules } from "./seating";
-import { rowsOf, seatProblems } from "./seatingEditing";
+import { polygonsOverlap } from "./objects";
+import { generateSeatingPlan, seatPolygon, type SeatPlacement, type SeatingGridOffset, type SeatingOrientation, type SeatingPlan, type SeatingRules } from "./seating";
+import { rowsOf } from "./seatingEditing";
 
 export type ReplanningImpact = {
   seatsRemoved: number;
@@ -12,6 +13,16 @@ export type ReplanningImpact = {
 
 export function markGeneratedSeating(seating: SeatingPlan): SeatingPlan {
   return { ...seating, blocks: seating.blocks.map((block) => ({ ...block, source: "generated" as const, edited: false })) };
+}
+
+/** Global fast path used by the primary "free area" action. It deliberately uses
+ * only the RoomPlan and its exclusions and does not inspect editor selection/tool
+ * state or run the substantially more expensive variant/egress pipeline. */
+export function generateFreeAreaSeating(plan: RoomPlan, rules: SeatingRules, offset: SeatingGridOffset = { along: 0, cross: 0 }): SeatingPlan {
+  const input = { ...plan, seating: undefined };
+  const horizontal = generateSeatingPlan(input, rules, "horizontal", offset);
+  const vertical = generateSeatingPlan(input, rules, "vertical", offset);
+  return markGeneratedSeating(vertical.totalSeats > horizontal.totalSeats ? vertical : horizontal);
 }
 
 export function replanningImpact(plan: RoomPlan): ReplanningImpact {
@@ -55,15 +66,26 @@ export function supplementSeatingPlan(
   const usedSeatIds = new Set(existing.seats.map((seat) => seat.id));
   const usedBlockIds = new Set(existing.blocks.map((block) => block.id));
   const addedBlocks: SeatingPlan["blocks"] = [];
-  let accumulated: SeatingPlan = existing;
+  const cellSize = Math.max(rules.chairWidth, rules.chairDepth) + rules.minimumSideClearance;
+  const key = (seat: SeatPlacement) => `${Math.floor(seat.x / cellSize)}:${Math.floor(seat.y / cellSize)}`;
+  const occupied = new Map<string, SeatPlacement[]>();
+  const remember = (seat: SeatPlacement) => { const id = key(seat); occupied.set(id, [...(occupied.get(id) ?? []), seat]); };
+  existing.seats.forEach(remember);
+  const conflicts = (seat: SeatPlacement) => {
+    const cx = Math.floor(seat.x / cellSize), cy = Math.floor(seat.y / cellSize);
+    const nearby: SeatPlacement[] = [];
+    for (let y = cy - 1; y <= cy + 1; y++) for (let x = cx - 1; x <= cx + 1; x++) nearby.push(...(occupied.get(`${x}:${y}`) ?? []));
+    const polygon = seatPolygon(seat.x, seat.y, rules, orientation, seat.rotation);
+    return nearby.some((other) => polygonsOverlap(polygon, seatPolygon(other.x, other.y, rules, orientation, other.rotation)));
+  };
 
   for (const block of proposal.blocks) {
     const accepted: SeatPlacement[] = [];
     for (const seat of block.seats) {
       const candidate = { ...seat, id: uniqueId("supplement", seat.id, usedSeatIds) };
-      if (!seatProblems(plan, accumulated, [candidate]).length) {
+      if (!conflicts(candidate)) {
         accepted.push(candidate);
-        accumulated = { ...accumulated, seats: [...accumulated.seats, candidate] };
+        remember(candidate);
       }
     }
     if (!accepted.length) continue;

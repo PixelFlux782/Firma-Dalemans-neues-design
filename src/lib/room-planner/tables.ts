@@ -49,7 +49,9 @@ export const DEFAULT_TABLE_MODEL_ID = TABLE_MODELS[0].id;
 const TABLE_MODELS_BY_ID = new Map(TABLE_MODELS.map((model) => [model.id, model]));
 export const tableModel = (id: string) => TABLE_MODELS_BY_ID.get(id) ?? TABLE_MODELS[0];
 
-export type TableInstance = { id: string; modelId: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; zoneId?: string; fillClearance?: number; source: TableSource; edited?: boolean };
+export type TableLayoutMode = "individual" | "long-tables" | "l-shape" | "u-shape";
+export type TablePlanningGoal = "balanced" | "capacity" | "comfort";
+export type TableInstance = { id: string; modelId: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; zoneId?: string; fillClearance?: number; autoLayout?: TableLayoutMode; autoGoal?: TablePlanningGoal; source: TableSource; edited?: boolean };
 export type FurnitureChair = { id: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; tableId?: string; source: TableSource; edited?: boolean };
 export type TableGroup = { id: string; tableIds: string[]; chairIds: string[] };
 export type PlanningZoneType = "seating" | "tables" | "free";

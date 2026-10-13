@@ -20,6 +20,7 @@ import dynamic from "next/dynamic";
 const RoomView3D = dynamic(() => import("../3d/RoomView3D"), { ssr: false });
 import PlanOutputView from "./PlanOutputView";
 import MeasurementLayer from "./MeasurementLayer";
+import PlannerBrand from "../PlannerBrand";
 import { calculatePlanDemand, calculateRecommendedDemand, changeChairSelection, chairProducts, DEFAULT_CHAIR_SELECTION, resolveChairShopTarget } from "@/lib/room-planner/chairSelection";
 import { calculateTableDemand, DEFAULT_TABLE_MODEL_ID, TABLE_MODELS, TABLE_PRESETS, fillTableZone, fitTableLayout, generateTableLayout, moveTableGroup, moveZone, moveZonePoint, planCapacity, seatTable, tableLayoutConflicts, tableModel, tablePolygon, transformTableLayout, validateTables, validateZonePolygon, zoneCenter, zonePolygon, type GeneratedTableLayout, type LayoutTransform, type PlanningZone, type TablePresetId } from "@/lib/room-planner/tables";
 import { generateFreeAreaSeating, replanningImpact, supplementSeatingPlan } from "@/lib/room-planner/planning";
@@ -880,11 +881,12 @@ export default function RoomEditor2D() {
         <div className="flex items-center justify-between gap-1 text-xs"><button type="button" aria-label="Ansicht verkleinern" onClick={() => zoomAt(1 / 1.25, size.width / 2, size.height / 2)} className="rounded border border-premium-beige px-2 py-1">−</button><span>{Math.round(camera.scale / INITIAL_SCALE * 100)} %</span><button type="button" aria-label="Ansicht vergrößern" onClick={() => zoomAt(1.25, size.width / 2, size.height / 2)} className="rounded border border-premium-beige px-2 py-1">+</button></div>
       </aside>
       <div className="planner-canvas relative min-w-0 bg-[#f6f4ed]">
+      {view === "2d" && <PlannerBrand className="absolute left-3 top-3 z-10" />}
       <div className="absolute right-3 top-3 z-10 flex rounded-full border border-premium-beige bg-white p-1 shadow-sm" aria-label="Ansichtsmodus">
         <button type="button" aria-pressed={view === "2d"} onClick={() => setView("2d")} className={`rounded-full px-4 py-1 text-xs font-semibold ${view === "2d" ? "bg-premium-forest text-white" : "text-premium-charcoal"}`}>2D</button>
         <button type="button" aria-pressed={view === "3d"} onClick={() => setView("3d")} className={`rounded-full px-4 py-1 text-xs font-semibold ${view === "3d" ? "bg-premium-forest text-white" : "text-premium-charcoal"}`}>3D</button>
       </div>
-      {view === "3d" && <div className="absolute inset-0" aria-label="3D-Raumansicht"><RoomView3D plan={seating && !shownPlan.seating ? { ...shownPlan, seating } : shownPlan} /></div>}
+      {view === "3d" && <div className="absolute inset-0" aria-label="3D-Raumansicht"><RoomView3D plan={seating && !shownPlan.seating ? { ...shownPlan, seating } : shownPlan} selectedZoneId={selection?.type === "zone" ? selection.id : undefined} selectedObjectId={selection?.type === "object" ? selection.id : undefined} /></div>}
       <div hidden={view !== "2d"} className="h-full">
       <svg ref={svgRef} role="img" aria-label="Grundriss Zeichenfläche" className={`block h-full min-h-[420px] w-full touch-none ${spaceDown ? "cursor-grab" : tool === "wall" ? "cursor-crosshair" : "cursor-default"}`} viewBox={`0 0 ${size.width} ${size.height}`} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onPointerLeave={() => { if (!dragRef.current) setHover(null); }}>
         <rect width={size.width} height={size.height} fill="#f6f4ed" />

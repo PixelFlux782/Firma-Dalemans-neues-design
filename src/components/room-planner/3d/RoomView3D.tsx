@@ -9,6 +9,7 @@ import * as THREE from "three";
 import { doorSegment, frontSegment, type DoorObject, type RoomPlan } from "@/lib/room-planner/objects";
 import { chairDisplayAngle, planBounds } from "@/lib/room-planner/visualization3d";
 import { TABLE_MODELS, zonePolygon, type PlanningZone, type TableModel } from "@/lib/room-planner/tables";
+import PlannerBrand from "../PlannerBrand";
 
 const DEFAULT_WALL_HEIGHT = 2.9;
 const CHAIR_MODEL = "/models/dalemans-chair-low.glb";
@@ -155,18 +156,23 @@ function ModelTables({ plan, model }: { plan: RoomPlan; model: TableModel }) {
   return tables.length ? <instancedMesh ref={ref} args={[source.geometry, source.material, tables.length]} castShadow receiveShadow /> : null;
 }
 
-function PlanningZoneMesh({ zone, index }: { zone: PlanningZone; index: number }) {
-  const geometry = useMemo(() => {
+function PlanningZoneMesh({ zone, index, selected }: { zone: PlanningZone; index: number; selected: boolean }) {
+  const { geometry, outline } = useMemo(() => {
     const points = zonePolygon(zone);
     const shape = new THREE.Shape();
     points.forEach((point, pointIndex) => pointIndex ? shape.lineTo(point.x, -point.y) : shape.moveTo(point.x, -point.y));
     shape.closePath();
-    return new THREE.ShapeGeometry(shape);
+    const shapeGeometry = new THREE.ShapeGeometry(shape);
+    return { geometry: shapeGeometry, outline: new THREE.EdgesGeometry(shapeGeometry) };
   }, [zone]);
-  return <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, .004, 0]} renderOrder={1 + index}><meshStandardMaterial color={zone.type === "tables" ? "#d7b56d" : "#91a99a"} transparent opacity={.32} depthWrite={false} side={THREE.DoubleSide} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} /></mesh>;
+  const color = zone.type === "tables" ? "#c5a663" : "#789588";
+  return <group rotation={[-Math.PI / 2, 0, 0]} position={[0, .006, 0]} renderOrder={1 + index}>
+    <mesh geometry={geometry}><meshStandardMaterial color={color} transparent opacity={selected ? .42 : .25} depthWrite={false} side={THREE.DoubleSide} roughness={.94} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} /></mesh>
+    <lineSegments geometry={outline} position={[0, 0, .002]}><lineBasicMaterial color={selected ? "#a65f35" : color} transparent opacity={selected ? .95 : .62} /></lineSegments>
+  </group>;
 }
 
-function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
+function Scene({ plan, reset, selectedZoneId, selectedObjectId }: { plan: RoomPlan; reset: number; selectedZoneId?: string; selectedObjectId?: string }) {
   const points = plan.contour.points;
   const floor = useMemo(() => {
     if (!plan.contour.closed || points.length < 3) return null;
@@ -176,10 +182,14 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
     return new THREE.ShapeGeometry(shape);
   }, [plan.contour.closed, points]);
   return <>
-    <color attach="background" args={["#f5f3ee"]} />
-    <hemisphereLight args={["#ffffff", "#b8afa1", 1.5]} /><directionalLight position={[8, 15, 10]} intensity={2.1} />
-    {floor && <mesh geometry={floor} rotation={[-Math.PI / 2, 0, 0]}><meshStandardMaterial color="#dcd6c9" roughness={0.94} side={THREE.DoubleSide} /></mesh>}
-    {(plan.zones ?? []).map((zone, index) => <PlanningZoneMesh key={zone.id} zone={zone} index={index} />)}
+    <color attach="background" args={["#eeeae1"]} />
+    <fog attach="fog" args={["#eeeae1", 35, 95]} />
+    <ambientLight intensity={.42} />
+    <hemisphereLight args={["#fffdf7", "#9b9385", 1.3]} />
+    <directionalLight position={[9, 16, 7]} intensity={1.75} color="#fff8ea" />
+    <directionalLight position={[-8, 7, -5]} intensity={.42} color="#d9e5dc" />
+    {floor && <mesh geometry={floor} rotation={[-Math.PI / 2, 0, 0]} receiveShadow><meshStandardMaterial color="#d8d1c3" roughness={0.9} metalness={.01} side={THREE.DoubleSide} /></mesh>}
+    {(plan.zones ?? []).map((zone, index) => <PlanningZoneMesh key={zone.id} zone={zone} index={index} selected={zone.id === selectedZoneId} />)}
     {plan.contour.walls.map(wall => {
       const a = points.find(p => p.id === wall.startPointId), b = points.find(p => p.id === wall.endPointId);
       if (!a || !b) return null;
@@ -190,7 +200,7 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
       if (cursor < length) parts.push({ start: cursor, end: length });
       return <group key={wall.id}>{parts.map((part, index) => {
         const t = (part.start + part.end) / (2 * length);
-        return <mesh key={index} position={[a.x + (b.x - a.x) * t, DEFAULT_WALL_HEIGHT / 2, a.y + (b.y - a.y) * t]} rotation={[0, -Math.atan2(b.y - a.y, b.x - a.x), 0]}><boxGeometry args={[part.end - part.start, DEFAULT_WALL_HEIGHT, 0.1]} /><meshStandardMaterial color="#e8e4db" transparent opacity={0.72} roughness={0.95} /></mesh>;
+        return <mesh key={index} position={[a.x + (b.x - a.x) * t, DEFAULT_WALL_HEIGHT / 2, a.y + (b.y - a.y) * t]} rotation={[0, -Math.atan2(b.y - a.y, b.x - a.x), 0]}><boxGeometry args={[part.end - part.start, DEFAULT_WALL_HEIGHT, 0.11]} /><meshStandardMaterial color="#e5e0d6" transparent opacity={0.82} roughness={0.88} metalness={.015} /></mesh>;
       })}</group>;
     })}
     {plan.objects.map((object, index) => {
@@ -203,17 +213,21 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
       }
       if (object.type === "aisle") {
         const dx = object.end.x - object.start.x, dz = object.end.y - object.start.y;
-        return <mesh key={object.id} renderOrder={2 + index} position={[(object.start.x + object.end.x) / 2, 0.007, (object.start.y + object.end.y) / 2]} rotation={[0, -Math.atan2(dz, dx), 0]}><boxGeometry args={[Math.hypot(dx, dz), 0.008, object.width]} /><meshStandardMaterial color={object.source === "generated" ? "#d6a964" : "#67a3a7"} transparent opacity={0.32} depthWrite={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} /></mesh>;
+        const generated = object.source === "generated", selected = object.id === selectedObjectId, length = Math.hypot(dx, dz);
+        return <group key={object.id} renderOrder={2 + index} position={[(object.start.x + object.end.x) / 2, 0.009, (object.start.y + object.end.y) / 2]} rotation={[0, -Math.atan2(dz, dx), 0]}>
+          <mesh position={[0, -.003, 0]}><boxGeometry args={[length + .035, .004, object.width + .035]} /><meshBasicMaterial color={generated ? "#a97a31" : "#47777b"} transparent opacity={selected ? .78 : .48} depthWrite={false} /></mesh>
+          <mesh><boxGeometry args={[length, .006, object.width]} /><meshStandardMaterial color={generated ? "#d7b26b" : "#78a7a5"} transparent opacity={selected ? .48 : .32} roughness={.9} depthWrite={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} /></mesh>
+        </group>;
       }
       if (object.type === "front") {
         const segment = frontSegment(object);
         const angle = object.rotation * Math.PI / 180;
-        return <group key={object.id}><mesh position={[(segment.start.x + segment.end.x) / 2, 0.055, (segment.start.y + segment.end.y) / 2]} rotation={[0, -angle, 0]}><boxGeometry args={[object.width, 0.11, 0.12]} /><meshStandardMaterial color="#235e89" /></mesh><mesh position={[object.x + Math.sin(angle) * 0.35, 0.07, object.y - Math.cos(angle) * 0.35]} rotation={[0, angle, 0]}><coneGeometry args={[0.16, 0.38, 3]} /><meshStandardMaterial color="#235e89" /></mesh></group>;
+        return <group key={object.id}><mesh position={[(segment.start.x + segment.end.x) / 2, 0.065, (segment.start.y + segment.end.y) / 2]} rotation={[0, -angle, 0]}><boxGeometry args={[object.width, 0.13, 0.14]} /><meshStandardMaterial color="#245f7c" roughness={.7} /></mesh><mesh position={[object.x + Math.sin(angle) * 0.4, 0.085, object.y - Math.cos(angle) * 0.4]} rotation={[0, angle, 0]}><coneGeometry args={[0.17, 0.42, 3]} /><meshStandardMaterial color="#245f7c" roughness={.72} /></mesh></group>;
       }
       const stage = object.type === "stage" || object.type === "obstacle" && object.obstacleType === "stage";
       const reserved = object.type === "reservedArea" || object.type === "obstacle" && object.obstacleType === "restricted";
       const height = reserved ? 0.035 : stage ? 0.35 : 1.2;
-      return <mesh key={object.id} renderOrder={reserved ? 1 : 0} position={[object.x, height / 2, object.y]} rotation={[0, -object.rotation * Math.PI / 180, 0]}><boxGeometry args={[object.width, height, object.depth]} /><meshStandardMaterial color={reserved ? "#947bb2" : stage ? "#a47752" : "#81776d"} transparent={reserved} opacity={reserved ? 0.4 : 1} depthWrite={!reserved} /></mesh>;
+      return <mesh key={object.id} renderOrder={reserved ? 1 : 0} position={[object.x, height / 2, object.y]} rotation={[0, -object.rotation * Math.PI / 180, 0]}><boxGeometry args={[object.width, height, object.depth]} /><meshStandardMaterial color={reserved ? "#8d78a6" : stage ? "#9d7151" : "#776f66"} transparent={reserved} opacity={reserved ? 0.34 : 1} roughness={stage ? .78 : .9} depthWrite={!reserved} /></mesh>;
     })}
     {TABLE_MODELS.filter(model => plan.tables?.some(table => table.modelId === model.id)).map(model => <Suspense key={model.id} fallback={null}><ModelTables plan={plan} model={model} /></Suspense>)}
     {!!plan.seating?.seats.length && <ChairErrorBoundary fallback={<FallbackSeats plan={plan} />}><Suspense fallback={<FallbackSeats plan={plan} />}><ModelSeats plan={plan} /></Suspense></ChairErrorBoundary>}
@@ -222,8 +236,8 @@ function Scene({ plan, reset }: { plan: RoomPlan; reset: number }) {
   </>;
 }
 
-export default function RoomView3D({ plan }: { plan: RoomPlan }) {
+export default function RoomView3D({ plan, selectedZoneId, selectedObjectId }: { plan: RoomPlan; selectedZoneId?: string; selectedObjectId?: string }) {
   const [reset, setReset] = useState(0);
   const resetView = useCallback(() => setReset(value => value + 1), []);
-  return <div className="relative h-full w-full"><Canvas camera={{ fov: 48, near: 0.1, far: 1000 }} dpr={[1, 1.5]}><Scene plan={plan} reset={reset} /></Canvas><button type="button" onClick={resetView} className="absolute bottom-4 right-4 rounded-md border border-stone-300 bg-white/90 px-3 py-1.5 text-sm text-stone-700 shadow-sm hover:bg-white">Ansicht zurücksetzen</button></div>;
+  return <div className="relative h-full w-full overflow-hidden bg-[#eeeae1]"><Canvas camera={{ fov: 48, near: 0.1, far: 1000 }} dpr={[1, 1.5]} gl={{ antialias: true, powerPreference: "high-performance" }} onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.04; }}><Scene plan={plan} reset={reset} selectedZoneId={selectedZoneId} selectedObjectId={selectedObjectId} /></Canvas><PlannerBrand className="absolute left-3 top-3 z-10" /><button type="button" onClick={resetView} className="absolute bottom-4 right-4 rounded-md border border-stone-300 bg-white/90 px-3 py-1.5 text-sm text-stone-700 shadow-sm hover:bg-white">Ansicht zurücksetzen</button></div>;
 }

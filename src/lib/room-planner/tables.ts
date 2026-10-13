@@ -14,6 +14,8 @@ export type TableModel = {
   height: number;
   shape: TableShape;
   defaultSeats: number;
+  /** Rotation from the GLB's native axes into the shared local table axes. */
+  modelRotationOffset?: number;
   /** Measured GLB bounds, used to normalize model scale and its non-centered origin. */
   modelBounds: { width: number; depth: number; height: number; centerX: number; centerY: number; centerZ: number; floorY: number };
 };
@@ -39,12 +41,13 @@ export const TABLE_MODELS: readonly TableModel[] = [
   { id: "table-310c-180x80", name: "Klapptisch 310c · 180 × 80 cm", articleNumbers: ["T310C188", "T310C188N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.8, depth: .8, height: .94, shape: "rectangular", defaultSeats: 8, modelBounds: MODEL_BOUNDS["310c"] },
   { id: "table-210c-120x60", name: "Seminarklapptisch 210c · 120 × 60 cm", articleNumbers: ["T210C126"], modelPath: "/models/dalemans-tisch-210-low.glb", width: 1.2, depth: .6, height: .86, shape: "rectangular", defaultSeats: 4, modelBounds: MODEL_BOUNDS["210c"] },
   { id: "table-210c-140x70", name: "Seminarklapptisch 210c · 140 × 70 cm", articleNumbers: ["T210C147"], modelPath: "/models/dalemans-tisch-210-low.glb", width: 1.4, depth: .7, height: .86, shape: "rectangular", defaultSeats: 4, modelBounds: MODEL_BOUNDS["210c"] },
-  { id: "table-310c-trapez-140x70", name: "Trapez-Klapptisch 310c · 140 × 70 cm", articleNumbers: ["T310CT147", "T310CT147N"], modelPath: "/models/dalemans-tisch-trapez-low.glb", width: 1.4, depth: .7, height: .94, shape: "trapezoid", defaultSeats: 4, modelBounds: MODEL_BOUNDS.trapezoid },
-  { id: "table-310c-trapez-160x80", name: "Trapez-Klapptisch 310c · 160 × 80 cm", articleNumbers: ["T310CT168", "T310CT168N"], modelPath: "/models/dalemans-tisch-trapez-low.glb", width: 1.6, depth: .8, height: .94, shape: "trapezoid", defaultSeats: 5, modelBounds: MODEL_BOUNDS.trapezoid },
+  { id: "table-310c-trapez-140x70", name: "Trapez-Klapptisch 310c · 140 × 70 cm", articleNumbers: ["T310CT147", "T310CT147N"], modelPath: "/models/dalemans-tisch-trapez-low.glb", width: 1.4, depth: .7, height: .94, shape: "trapezoid", defaultSeats: 4, modelRotationOffset: 0, modelBounds: MODEL_BOUNDS.trapezoid },
+  { id: "table-310c-trapez-160x80", name: "Trapez-Klapptisch 310c · 160 × 80 cm", articleNumbers: ["T310CT168", "T310CT168N"], modelPath: "/models/dalemans-tisch-trapez-low.glb", width: 1.6, depth: .8, height: .94, shape: "trapezoid", defaultSeats: 5, modelRotationOffset: 0, modelBounds: MODEL_BOUNDS.trapezoid },
 ] as const;
 
 export const DEFAULT_TABLE_MODEL_ID = TABLE_MODELS[0].id;
-export const tableModel = (id: string) => TABLE_MODELS.find(model => model.id === id) ?? TABLE_MODELS[0];
+const TABLE_MODELS_BY_ID = new Map(TABLE_MODELS.map((model) => [model.id, model]));
+export const tableModel = (id: string) => TABLE_MODELS_BY_ID.get(id) ?? TABLE_MODELS[0];
 
 export type TableInstance = { id: string; modelId: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; zoneId?: string; fillClearance?: number; source: TableSource; edited?: boolean };
 export type FurnitureChair = { id: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; tableId?: string; source: TableSource; edited?: boolean };
@@ -61,7 +64,142 @@ export const rotatedRectangle = (item: { x: number; y: number; width: number; de
     return { x: item.x + x * c - y * s, y: item.y + x * s + y * c };
   });
 };
-export const tablePolygon = (table: TableInstance) => rotatedRectangle(table);
+/**
+ * Shared local table axes: width runs left/right, depth runs short/long.
+ * For trapezoids the long, three-chair edge is local -Y; the opposite +Y edge
+ * is short. 2D, collision checks, seating, snapping and 3D all use this rule.
+ */
+export function tableLocalPolygon(table: Pick<TableInstance, "modelId" | "width" | "depth">): Position[] {
+  const model = tableModel(table.modelId);
+  if (model.shape === "trapezoid") {
+    const shortWidth = Math.min(table.width, table.depth);
+    return [
+      { x: -table.width / 2, y: -table.depth / 2 },
+      { x: table.width / 2, y: -table.depth / 2 },
+      { x: shortWidth / 2, y: table.depth / 2 },
+      { x: -shortWidth / 2, y: table.depth / 2 },
+    ];
+  }
+  return [
+    { x: -table.width / 2, y: -table.depth / 2 },
+    { x: table.width / 2, y: -table.depth / 2 },
+    { x: table.width / 2, y: table.depth / 2 },
+    { x: -table.width / 2, y: table.depth / 2 },
+  ];
+}
+
+export function tablePolygon(table: TableInstance): Position[] {
+  const angle = table.rotation * Math.PI / 180, c = Math.cos(angle), s = Math.sin(angle);
+  return tableLocalPolygon(table).map((point) => ({ x: table.x + point.x * c - point.y * s, y: table.y + point.x * s + point.y * c }));
+}
+
+export type TableEdgeKind = "long" | "short" | "end";
+export type TableEdge = { tableId: string; index: number; kind: TableEdgeKind; start: Position; end: Position; midpoint: Position; length: number };
+export type TableSnapCandidate = {
+  table: TableInstance;
+  targetTableId: string;
+  movingEdge: TableEdge;
+  targetEdge: TableEdge;
+  valid: boolean;
+  conflict?: "room" | "table" | "obstacle" | "aisle";
+  distance: number;
+};
+
+const edgeKind = (table: TableInstance, index: number): TableEdgeKind => {
+  if (index === 1 || index === 3) return "end";
+  return tableModel(table.modelId).shape === "trapezoid" ? index === 0 ? "long" : "short" : "long";
+};
+
+export function tableEdges(table: TableInstance): TableEdge[] {
+  const polygon = tablePolygon(table);
+  return polygon.map((start, index) => {
+    const end = polygon[(index + 1) % polygon.length];
+    return { tableId: table.id, index, kind: edgeKind(table, index), start, end, midpoint: { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 }, length: Math.hypot(end.x - start.x, end.y - start.y) };
+  });
+}
+
+/** Convex SAT test that treats a shared boundary as contact, not overlap. */
+export function polygonsInteriorOverlap(a: Position[], b: Position[], epsilon = 1e-6): boolean {
+  for (const polygon of [a, b]) for (let index = 0; index < polygon.length; index++) {
+    const start = polygon[index], end = polygon[(index + 1) % polygon.length];
+    const axis = { x: -(end.y - start.y), y: end.x - start.x };
+    const length = Math.hypot(axis.x, axis.y);
+    if (length < epsilon) continue;
+    axis.x /= length; axis.y /= length;
+    const first = a.map((point) => point.x * axis.x + point.y * axis.y);
+    const second = b.map((point) => point.x * axis.x + point.y * axis.y);
+    if (Math.min(...first) >= Math.max(...second) - epsilon || Math.min(...second) >= Math.max(...first) - epsilon) return false;
+  }
+  return true;
+}
+
+function snapEdgeCompatible(moving: TableEdge, target: TableEdge): boolean {
+  if (moving.kind === "end" || target.kind === "end") return moving.kind === "end" && target.kind === "end" && Math.abs(moving.length - target.length) <= Math.max(.15, Math.min(moving.length, target.length) * .18);
+  if (moving.kind !== target.kind) return false;
+  return Math.abs(moving.length - target.length) <= Math.max(.15, Math.min(moving.length, target.length) * .18);
+}
+
+export function tablePlacementConflict(plan: RoomPlan, table: TableInstance): TableSnapCandidate["conflict"] | undefined {
+  const polygon = tablePolygon(table);
+  if (!polygonInsideRoom(polygon, plan.contour)) return "room";
+  if ((plan.tables ?? []).some((other) => other.id !== table.id && polygonsInteriorOverlap(polygon, tablePolygon(other)))) return "table";
+  if (plan.objects.some((object) => isBlockingObject(object) && polygonsOverlap(polygon, obstaclePolygon(object)))) return "obstacle";
+  if (plan.objects.some((object) => object.type === "aisle" && polygonsOverlap(polygon, aislePolygon(object)))) return "aisle";
+  return undefined;
+}
+
+/**
+ * Finds a stable edge-to-edge placement close to the pointer-proposed table.
+ * The threshold is expressed in room metres, so zoom never changes snapping.
+ */
+export function findTableSnap(plan: RoomPlan, movingTableId: string, proposed: TableInstance, threshold = .22, disabled = false): TableSnapCandidate | null {
+  if (disabled) return null;
+  let best: TableSnapCandidate | null = null;
+  const localEdges = tableEdges({ ...proposed, x: 0, y: 0, rotation: 0 });
+  for (const target of plan.tables ?? []) {
+    if (target.id === movingTableId) continue;
+    if (Math.hypot(target.x - proposed.x, target.y - proposed.y) > Math.hypot(target.width, target.depth) / 2 + Math.hypot(proposed.width, proposed.depth) / 2 + threshold) continue;
+    for (const targetEdge of tableEdges(target)) for (const localEdge of localEdges) {
+      if (!snapEdgeCompatible(localEdge, targetEdge)) continue;
+      const targetAngle = Math.atan2(targetEdge.end.y - targetEdge.start.y, targetEdge.end.x - targetEdge.start.x);
+      const movingAngle = Math.atan2(localEdge.end.y - localEdge.start.y, localEdge.end.x - localEdge.start.x);
+      const rotation = (targetAngle + Math.PI - movingAngle) * 180 / Math.PI;
+      const rotated = tableEdges({ ...proposed, x: 0, y: 0, rotation })[localEdge.index];
+      const snapped = {
+        ...proposed,
+        x: Number((targetEdge.midpoint.x - rotated.midpoint.x).toFixed(3)),
+        y: Number((targetEdge.midpoint.y - rotated.midpoint.y).toFixed(3)),
+        rotation: Number(((rotation % 360 + 360) % 360).toFixed(3)),
+        edited: true,
+      };
+      const distance = Math.hypot(snapped.x - proposed.x, snapped.y - proposed.y);
+      if (distance > threshold) continue;
+      const movingEdge = tableEdges(snapped)[localEdge.index];
+      const conflict = tablePlacementConflict(plan, snapped);
+      const candidate: TableSnapCandidate = { table: snapped, targetTableId: target.id, movingEdge, targetEdge, valid: !conflict, conflict, distance };
+      if (!best || candidate.valid && !best.valid || candidate.valid === best.valid && candidate.distance < best.distance) best = candidate;
+    }
+  }
+  return best;
+}
+
+/** Moves/rotates a table and all members of its existing furniture group. */
+export function placeTable(plan: RoomPlan, tableId: string, placement: Pick<TableInstance, "x" | "y" | "rotation">): RoomPlan {
+  const table = (plan.tables ?? []).find((item) => item.id === tableId);
+  if (!table) return plan;
+  const angle = (placement.rotation - table.rotation) * Math.PI / 180, c = Math.cos(angle), s = Math.sin(angle);
+  const ids = table.groupId ? plan.tableGroups?.find((group) => group.id === table.groupId) : undefined;
+  const transform = <T extends { id: string; x: number; y: number; rotation: number }>(item: T): T => {
+    if (item.id !== table.id && !ids?.tableIds.includes(item.id) && !ids?.chairIds.includes(item.id)) return item;
+    const x = item.x - table.x, y = item.y - table.y;
+    return { ...item, x: Number((placement.x + x * c - y * s).toFixed(3)), y: Number((placement.y + x * s + y * c).toFixed(3)), rotation: Number(((item.rotation + placement.rotation - table.rotation) % 360 + 360) % 360) };
+  };
+  return {
+    ...plan,
+    tables: (plan.tables ?? []).map((item) => item.id === table.id || ids?.tableIds.includes(item.id) ? { ...transform(item), edited: true } : item),
+    chairs: (plan.chairs ?? []).map((item) => ids?.chairIds.includes(item.id) ? { ...transform(item), edited: true } : item),
+  };
+}
 export const zonePolygon = (zone: PlanningZone): Position[] => zone.geometry.kind === "polygon"
   ? zone.geometry.points.map((point) => ({ ...point }))
   : rotatedRectangle({ ...zone.geometry, rotation: zone.rotation });
@@ -127,7 +265,7 @@ export function validateTables(plan: RoomPlan): Issue[] {
   for (const table of tables) {
     const polygon = tablePolygon(table);
     if (!polygonInsideRoom(polygon, plan.contour)) issues.push({ objectId: table.id, severity: "error", message: "Tisch liegt teilweise außerhalb des Raums oder schneidet eine Wand." });
-    const other = tables.find(candidate => candidate.id !== table.id && candidate.id > table.id && polygonsOverlap(polygon, tablePolygon(candidate)));
+    const other = tables.find(candidate => candidate.id !== table.id && candidate.id > table.id && polygonsInteriorOverlap(polygon, tablePolygon(candidate)));
     if (other) issues.push({ objectId: table.id, severity: "warning", message: `Tisch kollidiert mit ${other.id}.` });
     const obstacle = plan.objects.find(object => isBlockingObject(object) && polygonsOverlap(polygon, obstaclePolygon(object)));
     if (obstacle) issues.push({ objectId: table.id, severity: "warning", message: "Tisch kollidiert mit Hindernis, Bühne oder Sperrfläche." });
@@ -225,6 +363,29 @@ export function fitTableLayout(options: TableLayoutOptions, idPrefix = `layout-$
 
 function chairRing(table: TableInstance, count: number, groupId: string, idPrefix: string, chairSize = { width: .5, depth: .55 }): FurnitureChair[] {
   const result: FurnitureChair[] = [];
+  const model = tableModel(table.modelId);
+  if (model.shape === "trapezoid") {
+    const local: { x: number; y: number; rotation: number }[] = [];
+    const sideOffset = table.depth / 2 + chairSize.depth / 2 + .1;
+    // The first three positions always belong to the explicitly defined long
+    // local -Y edge. The short opposite edge deliberately has only two slots.
+    for (let index = 0; index < 3; index++) local.push({ x: -table.width / 2 + table.width * (index + .5) / 3, y: -sideOffset, rotation: 180 });
+    local.push({ x: 0, y: sideOffset, rotation: 0 });
+    const polygon = tableLocalPolygon(table);
+    // Add the sloping ends symmetrically: the first chair on each end is used
+    // for six-place layouts, then the second pair completes an eight-place one.
+    for (let slot = 0; slot < 2; slot++) for (const edgeIndex of [1, 3]) {
+        const start = polygon[edgeIndex], end = polygon[(edgeIndex + 1) % polygon.length];
+        const dx = end.x - start.x, dy = end.y - start.y, length = Math.hypot(dx, dy);
+        const outward = { x: dy / length, y: -dx / length }, along = (slot + .5) / 2;
+        const edgePoint = { x: start.x + dx * along, y: start.y + dy * along };
+        const inward = { x: -outward.x, y: -outward.y };
+        local.push({ x: edgePoint.x + outward.x * (chairSize.depth / 2 + .1), y: edgePoint.y + outward.y * (chairSize.depth / 2 + .1), rotation: Math.atan2(inward.x, -inward.y) * 180 / Math.PI });
+      }
+    const a = table.rotation * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+    local.slice(0, count).forEach((chair, index) => result.push({ id: `${idPrefix}-chair-${index + 1}`, x: table.x + chair.x * c - chair.y * s, y: table.y + chair.x * s + chair.y * c, rotation: (chair.rotation + table.rotation + 360) % 360, width: chairSize.width, depth: chairSize.depth, groupId, tableId: table.id, source: table.source }));
+    return result;
+  }
   const longSide = Math.max(1, Math.floor((count - 2) / 2));
   const local: { x: number; y: number; rotation: number }[] = [];
   const sideOffset = table.depth / 2 + chairSize.depth / 2 + .1;
@@ -251,17 +412,20 @@ export function seatTable(plan: RoomPlan, tableId: string, requested?: number): 
   if (!table) return { chairs: [], requested: 0, placed: 0, maximum: 0, message: "Tisch nicht gefunden." };
   const chairSize = { width: plan.chairSelection?.width ?? .5, depth: plan.chairSelection?.depth ?? .55 };
   const model = tableModel(table.modelId);
-  const longSideSlots = Math.max(1, Math.min(3, Math.floor((table.width - .1) / Math.max(.5, chairSize.width))));
-  const maximum = longSideSlots * 2 + (table.depth >= .6 ? 2 : 0);
+  const trapezoid = model.shape === "trapezoid";
+  const longSideSlots = trapezoid ? 3 : Math.max(1, Math.min(3, Math.floor((table.width - .1) / Math.max(.5, chairSize.width))));
+  const maximum = trapezoid ? 8 : longSideSlots * 2 + (table.depth >= .6 ? 2 : 0);
   const requestedCount = Math.max(0, Math.floor(requested ?? model.defaultSeats));
   const desired = Math.min(maximum, requestedCount);
   const groupId = table.groupId ?? `${table.id}-group`;
   const all = chairRing(table, maximum, groupId, table.id, chairSize);
-  const ends = all.slice(longSideSlots * 2);
-  const sides = all.slice(0, longSideSlots * 2);
-  const sideCount = Math.min(sides.length, desired - Math.max(0, desired - sides.length));
-  const balancedSides = Array.from({ length: sideCount }, (_, index) => sides[index % 2 ? longSideSlots + Math.floor(index / 2) : Math.floor(index / 2)]).filter(Boolean);
-  const candidates = [...balancedSides, ...ends.slice(0, Math.max(0, desired - balancedSides.length))];
+  const candidates = trapezoid ? all.slice(0, desired) : (() => {
+    const ends = all.slice(longSideSlots * 2);
+    const sides = all.slice(0, longSideSlots * 2);
+    const sideCount = Math.min(sides.length, desired - Math.max(0, desired - sides.length));
+    const balancedSides = Array.from({ length: sideCount }, (_, index) => sides[index % 2 ? longSideSlots + Math.floor(index / 2) : Math.floor(index / 2)]).filter(Boolean);
+    return [...balancedSides, ...ends.slice(0, Math.max(0, desired - balancedSides.length))];
+  })();
   const zone = table.zoneId ? (plan.zones ?? []).find((item) => item.id === table.zoneId) : undefined;
   const zoneRoom = zone ? polygonAsRoom(zonePolygon(zone)) : undefined;
   const existing = (plan.chairs ?? []).filter((chair) => chair.tableId !== table.id && (!table.groupId || chair.groupId !== table.groupId));
@@ -272,7 +436,8 @@ export function seatTable(plan: RoomPlan, tableId: string, requested?: number): 
       && (!zoneRoom || polygonInsideRoom(polygon, zoneRoom))
       && !plan.objects.some((object) => isBlockingObject(object) && polygonsOverlap(polygon, obstaclePolygon(object)) || object.type === "aisle" && polygonsOverlap(polygon, aislePolygon(object)))
       && !(plan.tables ?? []).some((other) => other.id !== table.id && polygonsOverlap(polygon, tablePolygon(other)))
-      && ![...existing, ...accepted].some((other) => polygonsOverlap(polygon, rotatedRectangle(other)));
+      && !existing.some((other) => polygonsOverlap(polygon, rotatedRectangle(other)))
+      && (trapezoid || !accepted.some((other) => polygonsOverlap(polygon, rotatedRectangle(other))));
     if (fits) accepted.push(chair);
   }
   const message = accepted.length === requestedCount

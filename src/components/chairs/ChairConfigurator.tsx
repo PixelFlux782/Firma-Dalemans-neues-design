@@ -21,10 +21,8 @@ import {
 } from "@/lib/commerce/stacking-chairs";
 import type { CommerceProduct } from "@/lib/commerce/types";
 import type { CommerceImage } from "@/lib/commerce/types";
-import KnowledgeInfoTrigger from "@/components/knowledge/KnowledgeInfoTrigger";
-import { getKnowledgeOptionIdForProductOption } from "@/lib/knowledge/product-options";
 import FabricSelectionDialog, { type FabricSelection } from "@/components/chairs/FabricSelectionDialog";
-import { FABRIC_GROUP_SUMMARIES, fabricById } from "@/lib/fabrics";
+import { fabricById } from "@/lib/fabrics";
 
 const upholsteryOptions: Array<{ value: ChairUpholstery; label: string; note: string }> = [
   { value: "none", label: "Ungepolstert", note: "ohne Stoffgruppe" },
@@ -91,6 +89,7 @@ export default function ChairConfigurator({
   const [configuration, setConfiguration] = useState(initialConfiguration);
   const [fabricSelection, setFabricSelection] = useState<FabricSelection | null>(null);
   const [fabricDialogOpen, setFabricDialogOpen] = useState(false);
+  const [fabricAdviceGroup, setFabricAdviceGroup] = useState<ChairFabricGroup>(() => initialConfiguration.fabricGroup ?? 2);
   const [fabricUrlReady, setFabricUrlReady] = useState(false);
   const [selectedAddonSkus, setSelectedAddonSkus] = useState<string[]>(
     initialConfiguration.rowConnector ? ["APRV"] : [],
@@ -302,19 +301,22 @@ export default function ChairConfigurator({
                       Gruppe {group}
                     </span>
                   </label>
-                  <KnowledgeInfoTrigger
-                    optionId={getKnowledgeOptionIdForProductOption("Stoffgruppe", `Gruppe ${group}`)}
-                    label={`Stoffgruppe ${group}`}
-                    className="absolute right-2 top-2 size-8"
-                  />
+                  <button
+                    type="button"
+                    aria-label={`Materialberater für Stoffgruppe ${group} öffnen`}
+                    aria-haspopup="dialog"
+                    onClick={() => {
+                      setFabricAdviceGroup(group);
+                      setFabricDialogOpen(true);
+                    }}
+                    className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-full border border-premium-beige bg-white/95 text-sm font-semibold text-premium-forest shadow-sm transition hover:border-premium-leaf hover:bg-premium-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-2"
+                  >
+                    <span aria-hidden="true">ⓘ</span>
+                  </button>
                 </div>
               ))}
             </div>
-            <div className="mt-3 rounded-2xl border border-premium-beige/70 bg-premium-warm/55 p-4">
-              <p className="text-xs leading-5 text-premium-muted">{FABRIC_GROUP_SUMMARIES[configuration.fabricGroup ?? 2]}</p>
-              {selectedFabric ? <p className="mt-1 text-sm font-semibold text-premium-ink" data-testid="selected-fabric">{selectedFabric.name}{selectedFabricColor ? ` · ${selectedFabricColor.name} · ${selectedFabricColor.code}` : ""}</p> : null}
-              <button type="button" onClick={() => setFabricDialogOpen(true)} className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">Kollektionen, Eigenschaften &amp; Farben ansehen →</button>
-            </div>
+            {selectedFabric ? <p className="mt-3 text-sm font-semibold text-premium-ink" data-testid="selected-fabric">Ausgewählt: {selectedFabric.name}{selectedFabricColor ? ` · ${selectedFabricColor.name} · ${selectedFabricColor.code}` : ""}</p> : null}
           </fieldset>
         ) : null}
 
@@ -435,12 +437,16 @@ export default function ChairConfigurator({
       <p className="mt-5 text-xs leading-5 text-premium-subtle">
         * Mengenpreis für die gewählte Stückzahl. Verbindlich wird der Preis im Angebot.
       </p>
-      {configuration.fabricGroup ? <FabricSelectionDialog
+      {configuration.upholstery !== "none" ? <FabricSelectionDialog
         open={fabricDialogOpen}
-        group={configuration.fabricGroup}
+        group={fabricAdviceGroup}
         value={fabricSelection}
         model={product.stackingChair?.modelCode ?? product.title}
-        onChange={setFabricSelection}
+        onGroupChange={setFabricAdviceGroup}
+        onChange={(selection) => {
+          setConfiguration((current) => ({ ...current, fabricGroup: fabricAdviceGroup }));
+          setFabricSelection(selection);
+        }}
         onClose={() => setFabricDialogOpen(false)}
       /> : null}
     </div>

@@ -191,7 +191,7 @@ export default function HomePage() {
             </div>
           </article>
           <article id="transport">
-            <ProductVisual src="/neue bilder/Zubehör/zubehör-hero.png" alt="Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile" sizes="(min-width: 1024px) 33vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
+            <ProductVisual src="/neue bilder/Zubehör/Tischtransportwagen_03.png" alt="Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile" sizes="(min-width: 1024px) 33vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
             <div className="p-7">
               <p className="section-eyebrow">Transport & Lagerung</p>
               <h3 className="mt-4 font-display text-2xl font-medium text-premium-ink">Flexibel wird Ausstattung erst mit guten Abläufen.</h3>

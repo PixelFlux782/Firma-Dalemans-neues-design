@@ -145,7 +145,7 @@ function ModelTables({ plan, model }: { plan: RoomPlan; model: TableModel }) {
     const translate = new THREE.Matrix4(), rotate = new THREE.Matrix4(), scale = new THREE.Matrix4(), normalize = new THREE.Matrix4(), matrix = new THREE.Matrix4();
     tables.forEach((table, index) => {
       translate.makeTranslation(table.x, -model.modelBounds.floorY * (model.height / model.modelBounds.height), table.y);
-      rotate.makeRotationY(Math.PI - table.rotation * Math.PI / 180);
+      rotate.makeRotationY((model.modelRotationOffset ?? 180) * Math.PI / 180 - table.rotation * Math.PI / 180);
       scale.makeScale(table.width / model.modelBounds.width, model.height / model.modelBounds.height, table.depth / model.modelBounds.depth);
       normalize.makeTranslation(-model.modelBounds.centerX, 0, -model.modelBounds.centerZ);
       matrix.copy(translate).multiply(rotate).multiply(scale).multiply(normalize);

@@ -49,10 +49,10 @@ test("all twelve approved fabric cards are local, valid PDFs", async () => {
 test("the UI opens approved local color cards in a closeable embedded preview", async () => {
   const dialogSource = await readFile(path.join(root, "src", "components", "chairs", "FabricSelectionDialog.tsx"), "utf8");
   assert.match(dialogSource, /colorCardPublicationStatus === "approved"/);
-  assert.match(dialogSource, /Vollständige Farbkarte ansehen/);
+  assert.match(dialogSource, /Farbkarte &amp; technische Daten öffnen/);
   assert.match(dialogSource, /data-testid="fabric-color-card-preview"/);
   assert.match(dialogSource, /<iframe/);
   assert.match(dialogSource, /setColorCardOpen\(false\)/);
-  assert.match(dialogSource, /Farbkarte schließen und zur Stoffauswahl zurückkehren/);
+  assert.match(dialogSource, /Farbkarte schließen und zum Materialberater zurückkehren/);
   assert.doesNotMatch(dialogSource, /zachert-gmbh\.de|camirafabrics\.com|fidivi\.com|vowalon\.eu/);
 });

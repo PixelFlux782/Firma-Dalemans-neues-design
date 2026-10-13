@@ -203,32 +203,27 @@ test.describe("Modell 1021 Konfigurator", () => {
     await expect(page.locator('input[name="fabricGroup"]')).toHaveCount(3);
     await expect(page.locator('input[name="fabricGroup"][value="5"], input[name="fabricGroup"][value="6"]')).toHaveCount(0);
 
-    const openMaterials = page.getByRole("button", { name: /Kollektionen, Eigenschaften/ });
-    await openMaterials.click();
+    await page.getByRole("button", { name: "Materialberater für Stoffgruppe 2 öffnen" }).click();
     const dialog = page.getByTestId("fabric-dialog");
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole("button", { name: /Bondai/ })).toBeVisible();
-    await dialog.getByRole("button", { name: "Materialauswahl schließen" }).click();
 
-    await page.getByRole("radio", { name: "Gruppe 3" }).check({ force: true });
-    await openMaterials.click();
+    await dialog.getByRole("button", { name: "Gruppe 3" }).click();
     for (const collection of ["Radio", "Pisa", "Xtreme", "X2", "King Flex", "King L", "Era", "Advantage", "Pulfero"]) {
       await expect(dialog.getByRole("button", { name: new RegExp(`^${collection}`) })).toBeVisible();
     }
-    await dialog.getByRole("button", { name: "Materialauswahl schließen" }).click();
 
-    await page.getByRole("radio", { name: "Gruppe 4" }).check({ force: true });
-    await openMaterials.click();
+    await dialog.getByRole("button", { name: "Gruppe 4" }).click();
     await expect(dialog.getByRole("button", { name: /^Pure/ })).toBeVisible();
     await expect(dialog.getByRole("button", { name: /^Mini/ })).toBeVisible();
   });
 
   test("behält Kollektion und Farbcode im Zustand und übernimmt sie in die Stoffmuster-Anfrage", async ({ page }) => {
     await page.goto("/produkte/stapelstuehle/1021?polster=sitz&gruppe=3");
-    await page.getByRole("button", { name: /Kollektionen, Eigenschaften/ }).click();
+    await page.getByRole("button", { name: "Materialberater für Stoffgruppe 3 öffnen" }).click();
     const dialog = page.getByTestId("fabric-dialog");
     await dialog.getByRole("button", { name: /^Xtreme/ }).click();
-    await dialog.getByRole("button", { name: /Ocean.*Code 3100/ }).click();
+    await dialog.getByRole("button", { name: /Ocean.*Farbcode 3100/ }).click();
     await expect(page.getByTestId("selected-fabric")).toContainText("Xtreme · Ocean · 3100");
     await expect(page.getByRole("button", { name: "Mit Stoffauswahl bitte anfragen" })).toBeDisabled();
     await expect.poll(() => {
@@ -250,11 +245,11 @@ test.describe("Modell 1021 Konfigurator", () => {
 
     for (const { group, cards } of groups) {
       await page.goto(`/produkte/stapelstuehle/1021?polster=sitz&gruppe=${group}`);
-      await page.getByRole("button", { name: /Kollektionen, Eigenschaften/ }).click();
+      await page.getByRole("button", { name: `Materialberater für Stoffgruppe ${group} öffnen` }).click();
       const dialog = page.getByTestId("fabric-dialog");
       for (const [name, id] of cards) {
         await dialog.getByRole("button", { name: new RegExp(`^${name}`) }).click();
-        await dialog.getByRole("button", { name: "Vollständige Farbkarte ansehen" }).click();
+        await dialog.getByRole("button", { name: "Farbkarte & technische Daten öffnen" }).click();
         const preview = dialog.getByTestId("fabric-color-card-preview");
         const localPath = `/materials/fabrics/${id}.pdf`;
         const pdfResponse = await page.request.get(localPath);
@@ -265,38 +260,43 @@ test.describe("Modell 1021 Konfigurator", () => {
         for (const link of await preview.getByRole("link", { name: /neuem Tab öffnen/ }).all()) {
           await expect(link).toHaveAttribute("href", localPath);
         }
-        await preview.getByRole("button", { name: "Farbkarte schließen und zur Stoffauswahl zurückkehren" }).click();
+        await preview.getByRole("button", { name: "Farbkarte schließen und zum Materialberater zurückkehren" }).click();
       }
     }
   });
 
   test("behält Stoff- und Farbauswahl beim Zurückkehren aus der Farbkarte", async ({ page }) => {
     await page.goto("/produkte/stapelstuehle/1021?polster=sitz&gruppe=3");
-    await page.getByRole("button", { name: /Kollektionen, Eigenschaften/ }).click();
+    await page.getByRole("button", { name: "Materialberater für Stoffgruppe 3 öffnen" }).click();
     const dialog = page.getByTestId("fabric-dialog");
     await dialog.getByRole("button", { name: /^Xtreme/ }).click();
-    await dialog.getByRole("button", { name: /Ocean.*Code 3100/ }).click();
+    await dialog.getByRole("button", { name: /Ocean.*Farbcode 3100/ }).click();
 
-    await dialog.getByRole("button", { name: "Vollständige Farbkarte ansehen" }).click();
+    await dialog.getByRole("button", { name: "Farbkarte & technische Daten öffnen" }).click();
     const preview = dialog.getByTestId("fabric-color-card-preview");
     await expect(preview).toBeVisible();
     await expect(preview.getByTestId("fabric-color-card-document")).toHaveAttribute("src", "/materials/fabrics/xtreme.pdf");
     await expect(preview.getByRole("link", { name: /In neuem Tab öffnen/ }).first()).toHaveAttribute("href", "/materials/fabrics/xtreme.pdf");
-    await preview.getByRole("button", { name: "Farbkarte schließen und zur Stoffauswahl zurückkehren" }).click();
+    await preview.getByRole("button", { name: "Farbkarte schließen und zum Materialberater zurückkehren" }).click();
 
     await expect(preview).not.toBeVisible();
-    await expect(dialog.getByRole("button", { name: "Vollständige Farbkarte ansehen" })).toBeFocused();
-    await expect(dialog.getByRole("button", { name: /Ocean.*Code 3100/ })).toHaveAttribute("aria-pressed", "true");
+    await expect(dialog.getByRole("button", { name: "Farbkarte & technische Daten öffnen" })).toBeFocused();
+    await expect(dialog.getByRole("button", { name: /Ocean.*Farbcode 3100/ })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByTestId("selected-fabric")).toContainText("Xtreme · Ocean · 3100");
   });
 
   test("Materialdialog ist mobil bedienbar und schließt per Escape", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto("/produkte/stapelstuehle/1021?polster=sitz&gruppe=4");
-    const trigger = page.getByRole("button", { name: /Kollektionen, Eigenschaften/ });
+    const trigger = page.getByRole("button", { name: "Materialberater für Stoffgruppe 4 öffnen" });
     await trigger.click();
     await expect(page.getByTestId("fabric-dialog")).toBeVisible();
     await page.keyboard.press("Escape");
+    await expect(page.getByTestId("fabric-dialog")).not.toBeVisible();
+    await expect(trigger).toBeFocused();
+    await trigger.click();
+    await expect(page.getByTestId("fabric-dialog")).toBeVisible();
+    await page.mouse.click(8, 8);
     await expect(page.getByTestId("fabric-dialog")).not.toBeVisible();
     await expect(trigger).toBeFocused();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -306,10 +306,10 @@ test.describe("Modell 1021 Konfigurator", () => {
   test("Farbkartenvorschau ist mobil bedienbar und Escape führt zur Stoffauswahl zurück", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto("/produkte/stapelstuehle/1021?polster=sitz&gruppe=4");
-    await page.getByRole("button", { name: /Kollektionen, Eigenschaften/ }).click();
+    await page.getByRole("button", { name: "Materialberater für Stoffgruppe 4 öffnen" }).click();
     const dialog = page.getByTestId("fabric-dialog");
     await dialog.getByRole("button", { name: /^Pure/ }).click();
-    await dialog.getByRole("button", { name: "Vollständige Farbkarte ansehen" }).click();
+    await dialog.getByRole("button", { name: "Farbkarte & technische Daten öffnen" }).click();
     await expect(dialog.getByTestId("fabric-color-card-preview")).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(dialog.getByTestId("fabric-color-card-preview")).not.toBeVisible();

@@ -22,7 +22,7 @@ import PlanOutputView from "./PlanOutputView";
 import MeasurementLayer from "./MeasurementLayer";
 import PlannerBrand from "../PlannerBrand";
 import { calculatePlanDemand, calculateRecommendedDemand, changeChairSelection, chairProducts, DEFAULT_CHAIR_SELECTION, resolveChairShopTarget } from "@/lib/room-planner/chairSelection";
-import { calculateTableDemand, DEFAULT_TABLE_MODEL_ID, TABLE_MODELS, TABLE_PRESETS, fillTableZone, fitTableLayout, generateTableLayout, moveTableGroup, moveZone, moveZonePoint, planCapacity, seatTable, tableLayoutConflicts, tableModel, tablePolygon, transformTableLayout, validateTables, validateZonePolygon, zoneCenter, zonePolygon, type GeneratedTableLayout, type LayoutTransform, type PlanningZone, type TablePresetId } from "@/lib/room-planner/tables";
+import { calculateTableDemand, DEFAULT_TABLE_MODEL_ID, TABLE_MODELS, TABLE_PRESETS, fillTableZone, findTableSnap, fitTableLayout, generateTableLayout, moveTableGroup, moveZone, moveZonePoint, placeTable, planCapacity, seatTable, tableLayoutConflicts, tableModel, tablePlacementConflict, tablePolygon, transformTableLayout, validateTables, validateZonePolygon, zoneCenter, zonePolygon, type GeneratedTableLayout, type LayoutTransform, type PlanningZone, type TablePresetId, type TableSnapCandidate } from "@/lib/room-planner/tables";
 import { generateFreeAreaSeating, replanningImpact, supplementSeatingPlan } from "@/lib/room-planner/planning";
 
 const INITIAL_SCALE = 45;
@@ -73,6 +73,7 @@ export default function RoomEditor2D() {
   const recommended = calculateRecommendedDemand(plan, reservePercent);
   const shopTarget = resolveChairShopTarget(plan, recommended.recommendedQuantity);
   const [previewPlan, setPreviewPlan] = useState<RoomPlan | null>(null);
+  const [snapPreview, setSnapPreview] = useState<TableSnapCandidate | null>(null);
   const [tool, setTool] = useState<Tool>("wall");
   const [toolOptions, setToolOptions] = useState<Tool | null>(null);
   const [doorRole, setDoorRoleChoice] = useState<"normal" | "entrance" | "exit" | "emergency_exit">("normal");
@@ -402,7 +403,7 @@ export default function RoomEditor2D() {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") { event.preventDefault(); historyAction(event.shiftKey ? "redo" : "undo"); }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "y") { event.preventDefault(); historyAction("redo"); }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d" && selection?.type === "table") { event.preventDefault(); duplicateTable(selection.id); }
-      if (event.key === "Escape") { setHover(null); setSelection(null); setAisleStart(null); setZoneDraft([]); setWallEdit(null); setToolOptions(null); setLayoutDraft(null); setReplanDialogOpen(false); setZoneFillConfirm(null); }
+      if (event.key === "Escape") { dragRef.current = null; setPreviewPlan(null); setSnapPreview(null); setHover(null); setSelection(null); setAisleStart(null); setZoneDraft([]); setWallEdit(null); setToolOptions(null); setLayoutDraft(null); setReplanDialogOpen(false); setZoneFillConfirm(null); }
       if ((event.key === "Delete" || event.key === "Backspace") && selection && !(event.target instanceof HTMLInputElement) && !(event.target instanceof HTMLSelectElement)) { event.preventDefault(); deleteSelection(); }
     };
     const keyUp = (event: KeyboardEvent) => { if (event.code === "Space") setSpaceDown(false); if (event.key === "Shift") setShiftDown(false); };
@@ -664,16 +665,32 @@ export default function RoomEditor2D() {
       const point = world(at.x, at.y), before = Math.max(.01, Math.hypot(drag.at.x - drag.original.center.x, drag.at.y - drag.original.center.y));
       setLayoutTransform({ ...drag.original, spread: Math.max(.45, Math.min(1.8, drag.original.spread * Math.hypot(point.x - drag.original.center.x, point.y - drag.original.center.y) / before)) });
     } else if (drag && "id" in drag) {
-      setPreviewPlan(dragged(drag, world(at.x, at.y)));
+      const point = world(at.x, at.y);
+      const moved = dragged(drag, point);
+      if (drag.type === "table") {
+        const proposed = (moved.tables ?? []).find((table) => table.id === drag.id);
+        const candidate = proposed ? findTableSnap(moved, drag.id, proposed, .22, event.altKey) : null;
+        setSnapPreview(candidate);
+        setPreviewPlan(candidate?.valid ? placeTable(moved, drag.id, candidate.table) : moved);
+      } else {
+        setSnapPreview(null);
+        setPreviewPlan(moved);
+      }
     } else setHover(world(at.x, at.y));
   };
   const onPointerUp = (event: ReactPointerEvent<SVGSVGElement>) => {
     const drag = dragRef.current;
     if (drag && "id" in drag) {
       const at = local(event);
-      const next = dragged(drag, world(at.x, at.y));
+      const moved = dragged(drag, world(at.x, at.y));
+      const proposed = drag.type === "table" ? (moved.tables ?? []).find((table) => table.id === drag.id) : undefined;
+      const candidate = proposed ? findTableSnap(moved, drag.id, proposed, .22, event.altKey) : null;
+      const next = candidate?.valid ? placeTable(moved, drag.id, candidate.table) : moved;
       if (JSON.stringify(next) !== JSON.stringify(drag.original)) {
-        if (drag.original.objects.some((object) => object.id === drag.id && object.type === "aisle") && validateObjects(next).some((issue) => issue.objectId === drag.id && issue.severity === "error")) setNotice("Gang liegt außerhalb des Raums oder hat ungültige Maße.");
+        const movedTable = drag.type === "table" ? (next.tables ?? []).find((table) => table.id === drag.id) : undefined;
+        const tableConflict = movedTable ? tablePlacementConflict(next, movedTable) : undefined;
+        if (tableConflict) setNotice(tableConflict === "room" ? "Tisch liegt außerhalb des Raums." : tableConflict === "table" ? "Tische dürfen sich nicht überlappen." : tableConflict === "aisle" ? "Tisch darf keinen Gang überlagern." : "Tisch kollidiert mit einem Hindernis oder einer Sperrfläche.");
+        else if (drag.original.objects.some((object) => object.id === drag.id && object.type === "aisle") && validateObjects(next).some((issue) => issue.objectId === drag.id && issue.severity === "error")) setNotice("Gang liegt außerhalb des Raums oder hat ungültige Maße.");
         else if ((drag.type === "zone" || drag.type === "zonePoint" || drag.type === "resize" && drag.kind === "zone") && validateTables(next).some((issue) => issue.objectId === drag.id && issue.severity === "error")) setNotice(validateTables(next).find((issue) => issue.objectId === drag.id && issue.severity === "error")!.message);
         else { add(next); setNotice(""); }
       }
@@ -686,11 +703,12 @@ export default function RoomEditor2D() {
         if (result.message && Math.hypot(at.x - screen(drag.at).x, at.y - screen(drag.at).y) > 3) setNotice(result.message);
       }
       setPreviewPlan(null);
+      setSnapPreview(null);
     }
     dragRef.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
-  const reset = () => { add(emptyPlan()); setSelection(null); setPreviewPlan(null); setLayoutDraft(null); setAisleStart(null); setZoneDraft([]); setHover(null); setNotice(""); setTool("wall"); setCamera({ x: 0, y: 0, scale: INITIAL_SCALE }); };
+  const reset = () => { add(emptyPlan()); setSelection(null); setPreviewPlan(null); setSnapPreview(null); setLayoutDraft(null); setAisleStart(null); setZoneDraft([]); setHover(null); setNotice(""); setTool("wall"); setCamera({ x: 0, y: 0, scale: INITIAL_SCALE }); };
   const selectedPoint = selection?.type === "point" ? pointById(shownRoom, selection.id) : null;
   const selectedWall = selection?.type === "wall" ? shownRoom.walls.find((wall) => wall.id === selection.id) : null;
   const wallStart = selectedWall && pointById(shownRoom, selectedWall.startPointId);
@@ -894,7 +912,8 @@ export default function RoomEditor2D() {
         {shownRoom.closed && shownRoom.points.length >= 3 ? <polygon points={shownRoom.points.map((point) => { const p = coords.get(point.id)!; return `${p.x},${p.y}`; }).join(" ")} fill={errors.length ? "#c77c6c" : "#9ab393"} fillOpacity="0.24" /> : null}
         <g aria-label="Bereiche">{shownPlan.zones.map(zone => { const selected = selection?.type === "zone" && selection.id === zone.id, conflict = issues.some(issue => issue.objectId === zone.id && issue.severity === "error"), center = zoneCenter(zone), points = zonePolygon(zone); return <g key={zone.id}><polygon data-zone-id={zone.id} points={shapePoints(points)} fill={zone.type === "tables" ? "#d7b56d" : "#91a99a"} fillOpacity="0.25" stroke={conflict ? "#b53b32" : selected ? "#bd7647" : "#8a6a2f"} strokeWidth={selected || conflict ? 3 : 2} strokeDasharray="8 5" className={tool === "select" ? "cursor-move" : ""} /><text x={screen(center).x} y={screen(center).y + 4} textAnchor="middle" fontSize="12" fontWeight="700" fill="#684d20" pointerEvents="none">{zone.type === "tables" ? "Tischbereich" : "Bereich"}</text>{selected && zone.geometry.kind === "polygon" && points.map((point, index) => <circle key={index} data-zone-vertex-id={zone.id} data-zone-point-index={index} cx={screen(point).x} cy={screen(point).y} r="7" fill="white" stroke="#bd7647" strokeWidth="3" className="cursor-move" />)}</g>; })}</g>
         {areaPreviewZone && <g pointerEvents="none"><polygon points={shapePoints(zonePolygon(areaPreviewZone))} fill="#d7b56d" fillOpacity="0.2" stroke="#8a6a2f" strokeWidth="2" strokeDasharray="8 5" /><polyline points={shapePoints(zonePolygon(areaPreviewZone))} fill="none" stroke="#8a6a2f" strokeWidth="2" />{zoneDraft.map((point, index) => <circle key={index} cx={screen(point).x} cy={screen(point).y} r={index === 0 && zoneDraft.length >= 3 ? 8 : 5} fill={index === 0 ? "#bd7647" : "white"} stroke="#684d20" strokeWidth="2" />)}</g>}
-        <g aria-label="Tische">{shownPlan.tables.map(table => { const model = tableModel(table.modelId), p = screen(table), width = table.width * camera.scale, depth = table.depth * camera.scale, selected = selection?.type === "table" && selection.id === table.id, conflict = conflictedTables.has(table.id); return <g key={table.id} transform={`translate(${p.x} ${p.y}) rotate(${table.rotation})`} className={tool === "select" ? "cursor-move" : ""}>{model.shape === "round" ? <circle data-table-id={table.id} r={width / 2} fill="#d9c49a" stroke={conflict ? "#b53b32" : selected ? "#bd7647" : "#725b36"} strokeWidth={selected || conflict ? 3 : 1.5} /> : <rect data-table-id={table.id} x={-width/2} y={-depth/2} width={width} height={depth} rx={model.shape === "square" ? 2 : 6} fill="#d9c49a" stroke={conflict ? "#b53b32" : selected ? "#bd7647" : "#725b36"} strokeWidth={selected || conflict ? 3 : 1.5} />}<path d={`M${-width*.28} 0H${width*.28}M0 ${-depth*.22}V${depth*.22}`} stroke="#816b43" strokeWidth="1" pointerEvents="none" /></g>; })}</g>
+        {snapPreview && <g aria-label={snapPreview.valid ? "Gültige Snapping-Vorschau" : "Ungültige Snapping-Vorschau"} pointerEvents="none"><line x1={screen(snapPreview.targetEdge.start).x} y1={screen(snapPreview.targetEdge.start).y} x2={screen(snapPreview.targetEdge.end).x} y2={screen(snapPreview.targetEdge.end).y} stroke={snapPreview.valid ? "#2f7d5b" : "#b53b32"} strokeWidth="5" strokeLinecap="round" /><polygon points={shapePoints(tablePolygon(snapPreview.table))} fill={snapPreview.valid ? "#75a98d" : "#d56b60"} fillOpacity=".18" stroke={snapPreview.valid ? "#2f7d5b" : "#b53b32"} strokeWidth="2" strokeDasharray="6 4" /></g>}
+        <g aria-label="Tische">{shownPlan.tables.map(table => { const p = screen(table), width = table.width * camera.scale, depth = table.depth * camera.scale, selected = selection?.type === "table" && selection.id === table.id, conflict = conflictedTables.has(table.id); return <g key={table.id} className={tool === "select" ? "cursor-move" : ""}><polygon data-table-id={table.id} points={shapePoints(tablePolygon(table))} fill="#d9c49a" stroke={conflict ? "#b53b32" : selected ? "#bd7647" : "#725b36"} strokeWidth={selected || conflict ? 3 : 1.5} /><path d={`M${p.x-width*.28} ${p.y}H${p.x+width*.28}M${p.x} ${p.y-depth*.22}V${p.y+depth*.22}`} transform={`rotate(${table.rotation} ${p.x} ${p.y})`} stroke="#816b43" strokeWidth="1" pointerEvents="none" /></g>; })}</g>
         <g aria-label="Tischstühle">{shownPlan.chairs.map(chair => { const p = screen(chair), w = chair.width * camera.scale, d = chair.depth * camera.scale; return <rect key={chair.id} data-chair-id={chair.id} x={p.x-w/2} y={p.y-d/2} width={w} height={d} rx="3" transform={`rotate(${chair.rotation} ${p.x} ${p.y})`} fill={selection?.type === "chair" && selection.id === chair.id ? "#bd7647" : "#557a69"} stroke="#fff" className={tool === "select" ? "cursor-move" : ""} />; })}</g>
         {transformedDraft && <g aria-label="Vorschau der Tischanordnung">
           {transformedDraft.tables.map(table => <polygon key={table.id} data-draft-table-id={table.id} data-draft-handle="move" points={shapePoints(tablePolygon(table))} fill={draftConflicts.has(table.id) ? "#f4b4aa" : "#d9c49a"} fillOpacity="0.38" stroke={draftConflicts.has(table.id) ? "#b53b32" : "#725b36"} strokeWidth="2" strokeDasharray="7 5" className="cursor-move" />)}

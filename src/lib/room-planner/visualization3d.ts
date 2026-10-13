@@ -1,6 +1,11 @@
 import type { RoomPlan } from "./objects";
 
-// The chair model's back is on local -Z, opposite the seating rotation used in 2D.
+/**
+ * Plan rotations describe the seated person's facing direction (0° = plan -Y).
+ * The GLB faces local +Z because its backrest is on local -Z, so the model-only
+ * half turn maps that native axis to the plan convention. Do not store this
+ * correction in seat or furniture-chair rotations.
+ */
 export const chairDisplayAngle = (planRotationDegrees: number) => -planRotationDegrees * Math.PI / 180 + Math.PI;
 
 export function planBounds(plan: RoomPlan) {

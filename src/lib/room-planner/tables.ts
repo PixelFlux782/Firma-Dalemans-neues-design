@@ -229,10 +229,13 @@ function chairRing(table: TableInstance, count: number, groupId: string, idPrefi
   const local: { x: number; y: number; rotation: number }[] = [];
   const sideOffset = table.depth / 2 + chairSize.depth / 2 + .1;
   const endOffset = table.width / 2 + chairSize.depth / 2 + .1;
-  for (let i = 0; i < longSide && local.length < count; i++) local.push({ x: -table.width / 2 + table.width * (i + .5) / longSide, y: -sideOffset, rotation: 0 });
-  for (let i = 0; i < longSide && local.length < count; i++) local.push({ x: table.width / 2 - table.width * (i + .5) / longSide, y: sideOffset, rotation: 180 });
-  if (local.length < count) local.push({ x: -endOffset, y: 0, rotation: 270 });
-  if (local.length < count) local.push({ x: endOffset, y: 0, rotation: 90 });
+  // Chair rotations consistently describe the seated person's facing direction:
+  // 0° = -Y, 90° = +X, 180° = +Y and 270° = -X. The GLB's native
+  // orientation is corrected separately by the 3D renderer.
+  for (let i = 0; i < longSide && local.length < count; i++) local.push({ x: -table.width / 2 + table.width * (i + .5) / longSide, y: -sideOffset, rotation: 180 });
+  for (let i = 0; i < longSide && local.length < count; i++) local.push({ x: table.width / 2 - table.width * (i + .5) / longSide, y: sideOffset, rotation: 0 });
+  if (local.length < count) local.push({ x: -endOffset, y: 0, rotation: 90 });
+  if (local.length < count) local.push({ x: endOffset, y: 0, rotation: 270 });
   const a = table.rotation * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
   local.slice(0, count).forEach((chair, index) => result.push({ id: `${idPrefix}-chair-${index + 1}`, x: table.x + chair.x * c - chair.y * s, y: table.y + chair.x * s + chair.y * c, rotation: (chair.rotation + table.rotation) % 360, width: chairSize.width, depth: chairSize.depth, groupId, tableId: table.id, source: table.source }));
   return result;

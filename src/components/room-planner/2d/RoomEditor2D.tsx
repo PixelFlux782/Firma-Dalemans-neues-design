@@ -21,6 +21,7 @@ const RoomView3D = dynamic(() => import("../3d/RoomView3D"), { ssr: false });
 import PlanOutputView from "./PlanOutputView";
 import MeasurementLayer from "./MeasurementLayer";
 import PlannerBrand from "../PlannerBrand";
+import PlannerHelp from "../help/PlannerHelp";
 import { calculatePlanDemand, calculateRecommendedDemand, changeChairSelection, chairProducts, DEFAULT_CHAIR_SELECTION, resolveChairShopTarget } from "@/lib/room-planner/chairSelection";
 import { calculateTableDemand, DEFAULT_TABLE_MODEL_ID, TABLE_MODELS, TABLE_PRESETS, fillTableZone, findTableSnap, fitTableLayout, generateTableLayout, moveTableGroup, moveZone, moveZonePoint, placeTable, planCapacity, seatTable, tableLayoutConflicts, tableModel, tablePlacementConflict, tablePolygon, transformTableLayout, validateTables, validateZonePolygon, zoneCenter, zonePolygon, type GeneratedTableLayout, type LayoutTransform, type PlanningZone, type TableLayoutMode, type TablePlanningGoal, type TablePresetId, type TableSnapCandidate } from "@/lib/room-planner/tables";
 import { planTableZone, type TableZonePlanningResult } from "@/lib/room-planner/tableZonePlanning";
@@ -112,6 +113,8 @@ export default function RoomEditor2D() {
   const [shiftDown, setShiftDown] = useState(false);
   const [spaceDown, setSpaceDown] = useState(false);
   const [notice, setNotice] = useState("");
+  const [helpLayerKind, setHelpLayerKind] = useState<"menu" | "help" | "onboarding" | null>(null);
+  const [helpCloseSignal, setHelpCloseSignal] = useState(0);
   const [replanDialogOpen, setReplanDialogOpen] = useState(false);
   const [rowEditCount, setRowEditCount] = useState(1);
   const [seatingRules, setSeatingRules] = useState<SeatingRules>({ ...DEFAULT_SEATING_RULES });
@@ -407,6 +410,11 @@ export default function RoomEditor2D() {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") { event.preventDefault(); historyAction(event.shiftKey ? "redo" : "undo"); }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "y") { event.preventDefault(); historyAction("redo"); }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d" && selection?.type === "table") { event.preventDefault(); duplicateTable(selection.id); }
+      if (event.key === "Escape" && helpLayerKind) {
+        event.preventDefault();
+        setHelpCloseSignal((value) => value + 1);
+        if (helpLayerKind !== "onboarding") { event.stopImmediatePropagation(); return; }
+      }
       if (event.key === "Escape") { dragRef.current = null; setPreviewPlan(null); setSnapPreview(null); setHover(null); setSelection(null); setAisleStart(null); setZoneDraft([]); setWallEdit(null); setToolOptions(null); setLayoutDraft(null); setReplanDialogOpen(false); setZoneFillConfirm(null); }
       if ((event.key === "Delete" || event.key === "Backspace") && selection && !(event.target instanceof HTMLInputElement) && !(event.target instanceof HTMLSelectElement)) { event.preventDefault(); deleteSelection(); }
     };
@@ -416,7 +424,7 @@ export default function RoomEditor2D() {
     return () => { window.removeEventListener("keydown", keyDown); window.removeEventListener("keyup", keyUp); window.removeEventListener("blur", blur); };
   // The handler intentionally tracks the current plan and selection for editor shortcuts.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [historyAction, selection, plan]);
+  }, [historyAction, selection, plan, helpLayerKind]);
 
   const screen = (point: Pick<Point2D, "x" | "y">) => ({ x: size.width / 2 + (point.x - camera.x) * camera.scale, y: size.height / 2 + (point.y - camera.y) * camera.scale });
   const world = (x: number, y: number) => ({ x: camera.x + (x - size.width / 2) / camera.scale, y: camera.y + (y - size.height / 2) / camera.scale });
@@ -906,6 +914,7 @@ export default function RoomEditor2D() {
       <button type="button" disabled={!history.past.length} onClick={() => historyAction("undo")} className="rounded-md border border-premium-beige px-2 py-1 text-xs font-semibold disabled:opacity-40">Rückgängig</button>
       <button type="button" disabled={!history.future.length} onClick={() => historyAction("redo")} className="rounded-md border border-premium-beige px-2 py-1 text-xs font-semibold disabled:opacity-40">Wiederholen</button>
       <button type="button" disabled={!room.points.length && !plan.objects.length && !plan.tables.length} onClick={reset} className="rounded-md border border-premium-beige px-2 py-1 text-xs font-semibold disabled:opacity-40">Planung zurücksetzen</button>
+      <PlannerHelp tool={tool} roomClosed={room.closed} selectionType={selection?.type ?? null} areaMode={areaMode} hasZones={plan.zones.length > 0} hasSeating={!!plan.seating} view={view} closeSignal={helpCloseSignal} onActiveChange={setHelpLayerKind} onRequestTool={(requestedTool) => { setTool(requestedTool as Tool); setToolOptions(null); setAisleStart(null); setZoneDraft([]); }} />
     </div>
     <div className="planner-grid">
       <aside aria-label="Raum und Werkzeuge" className="planner-tools border-r border-premium-beige bg-white/90 p-2">

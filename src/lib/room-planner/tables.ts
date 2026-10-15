@@ -14,6 +14,9 @@ export type TableModel = {
   height: number;
   shape: TableShape;
   defaultSeats: number;
+  /** Short parallel edge and sloping leg for a physical trapezoid footprint. */
+  trapezoidShortEdge?: number;
+  trapezoidLeg?: number;
   /** Rotation from the GLB's native axes into the shared local table axes. */
   modelRotationOffset?: number;
   /** Measured GLB bounds, used to normalize model scale and its non-centered origin. */
@@ -41,15 +44,15 @@ export const TABLE_MODELS: readonly TableModel[] = [
   { id: "table-310c-180x80", name: "Klapptisch 310c · 180 × 80 cm", articleNumbers: ["T310C188", "T310C188N"], modelPath: "/models/dalemans-tisch-310-low.glb", width: 1.8, depth: .8, height: .94, shape: "rectangular", defaultSeats: 8, modelBounds: MODEL_BOUNDS["310c"] },
   { id: "table-210c-120x60", name: "Seminarklapptisch 210c · 120 × 60 cm", articleNumbers: ["T210C126"], modelPath: "/models/dalemans-tisch-210-low.glb", width: 1.2, depth: .6, height: .86, shape: "rectangular", defaultSeats: 4, modelBounds: MODEL_BOUNDS["210c"] },
   { id: "table-210c-140x70", name: "Seminarklapptisch 210c · 140 × 70 cm", articleNumbers: ["T210C147"], modelPath: "/models/dalemans-tisch-210-low.glb", width: 1.4, depth: .7, height: .86, shape: "rectangular", defaultSeats: 4, modelBounds: MODEL_BOUNDS["210c"] },
-  { id: "table-310c-trapez-140x70", name: "Trapez-Klapptisch 310c · 140 × 70 cm", articleNumbers: ["T310CT147", "T310CT147N"], modelPath: "/models/dalemans-tisch-trapez-low.glb", width: 1.4, depth: .7, height: .94, shape: "trapezoid", defaultSeats: 4, modelRotationOffset: 0, modelBounds: MODEL_BOUNDS.trapezoid },
-  { id: "table-310c-trapez-160x80", name: "Trapez-Klapptisch 310c · 160 × 80 cm", articleNumbers: ["T310CT168", "T310CT168N"], modelPath: "/models/dalemans-tisch-trapez-low.glb", width: 1.6, depth: .8, height: .94, shape: "trapezoid", defaultSeats: 5, modelRotationOffset: 0, modelBounds: MODEL_BOUNDS.trapezoid },
+  { id: "table-310c-trapez-140x70", name: "Trapez-Klapptisch 310c · 140 × 70 cm", articleNumbers: ["T310CT147", "T310CT147N"], modelPath: "/models/dalemans-tisch-trapez-low.glb", width: 1.4, depth: .7, height: .94, shape: "trapezoid", trapezoidShortEdge: .7, trapezoidLeg: .7, defaultSeats: 4, modelRotationOffset: 0, modelBounds: MODEL_BOUNDS.trapezoid },
+  { id: "table-310c-trapez-160x80", name: "Trapez-Klapptisch 310c · 160 × 80 cm", articleNumbers: ["T310CT168", "T310CT168N"], modelPath: "/models/dalemans-tisch-trapez-low.glb", width: 1.6, depth: .8, height: .94, shape: "trapezoid", trapezoidShortEdge: .8, trapezoidLeg: .8, defaultSeats: 5, modelRotationOffset: 0, modelBounds: MODEL_BOUNDS.trapezoid },
 ] as const;
 
 export const DEFAULT_TABLE_MODEL_ID = TABLE_MODELS[0].id;
 const TABLE_MODELS_BY_ID = new Map(TABLE_MODELS.map((model) => [model.id, model]));
 export const tableModel = (id: string) => TABLE_MODELS_BY_ID.get(id) ?? TABLE_MODELS[0];
 
-export type TableLayoutMode = "individual" | "long-tables" | "l-shape" | "u-shape";
+export type TableLayoutMode = "individual" | "long-tables" | "l-shape" | "u-shape" | "trapezoid-auto" | "trapezoid-groups" | "trapezoid-islands" | "trapezoid-long";
 export type TablePlanningGoal = "balanced" | "capacity" | "comfort";
 export type TableInstance = { id: string; modelId: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; zoneId?: string; fillClearance?: number; autoLayout?: TableLayoutMode; autoGoal?: TablePlanningGoal; source: TableSource; edited?: boolean };
 export type FurnitureChair = { id: string; x: number; y: number; rotation: number; width: number; depth: number; groupId?: string; tableId?: string; source: TableSource; edited?: boolean };
@@ -66,6 +69,19 @@ export const rotatedRectangle = (item: { x: number; y: number; width: number; de
     return { x: item.x + x * c - y * s, y: item.y + x * s + y * c };
   });
 };
+
+/** Physical distance between the two parallel edges. Persisted `depth` remains
+ * the nominal short-edge/leg dimension for backwards-compatible projects. */
+export function tableFootprintDepth(table: Pick<TableInstance, "modelId" | "width" | "depth">): number {
+  const model = tableModel(table.modelId);
+  if (model.shape !== "trapezoid") return table.depth;
+  const shortEdge = model.trapezoidShortEdge ?? Math.min(table.width, table.depth);
+  const nominalScale = model.width ? table.width / model.width : 1;
+  const short = shortEdge * nominalScale;
+  const leg = (model.trapezoidLeg ?? table.depth) * nominalScale;
+  const halfInset = Math.max(0, (table.width - short) / 2);
+  return Math.sqrt(Math.max(0, leg * leg - halfInset * halfInset));
+}
 /**
  * Shared local table axes: width runs left/right, depth runs short/long.
  * For trapezoids the long, three-chair edge is local -Y; the opposite +Y edge
@@ -74,12 +90,14 @@ export const rotatedRectangle = (item: { x: number; y: number; width: number; de
 export function tableLocalPolygon(table: Pick<TableInstance, "modelId" | "width" | "depth">): Position[] {
   const model = tableModel(table.modelId);
   if (model.shape === "trapezoid") {
-    const shortWidth = Math.min(table.width, table.depth);
+    const scale = model.width ? table.width / model.width : 1;
+    const shortWidth = (model.trapezoidShortEdge ?? Math.min(table.width, table.depth)) * scale;
+    const footprintDepth = tableFootprintDepth(table);
     return [
-      { x: -table.width / 2, y: -table.depth / 2 },
-      { x: table.width / 2, y: -table.depth / 2 },
-      { x: shortWidth / 2, y: table.depth / 2 },
-      { x: -shortWidth / 2, y: table.depth / 2 },
+      { x: -table.width / 2, y: -footprintDepth / 2 },
+      { x: table.width / 2, y: -footprintDepth / 2 },
+      { x: shortWidth / 2, y: footprintDepth / 2 },
+      { x: -shortWidth / 2, y: footprintDepth / 2 },
     ];
   }
   return [

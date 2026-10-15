@@ -9,10 +9,12 @@ import {
   type RoomPlan,
 } from "./objects";
 import {
+  TABLE_MODELS,
   polygonsInteriorOverlap,
   rotatedRectangle,
   seatTable,
   tableEdges,
+  tableFootprintDepth,
   tableModel,
   tablePolygon,
   validateZonePolygon,
@@ -62,12 +64,19 @@ type Proposal = {
   requestedSeats: number;
   clearance: number;
   score: number;
+  pattern?: TrapezoidPattern;
 };
 
+type TrapezoidPattern = "pair" | "ring" | "triangle" | "elongated";
+type PatternCandidate = { tables: TableInstance[]; pattern?: TrapezoidPattern };
+
 const MAX_CANDIDATE_TABLES = 240;
+/** Maximum geometric deviation accepted for auto-generated shared table edges. */
+export const AUTO_TABLE_CONTACT_TOLERANCE = .002;
 const GOAL_CLEARANCE: Record<TablePlanningGoal, number> = { capacity: .35, balanced: .65, comfort: 1.05 };
-const MODE_LABEL: Record<TableLayoutMode, string> = { individual: "Einzeltische", "long-tables": "Lange Tafeln", "l-shape": "L-Form", "u-shape": "U-Form" };
+const MODE_LABEL: Record<TableLayoutMode, string> = { individual: "Einzeltische", "long-tables": "Lange Tafeln", "l-shape": "L-Form", "u-shape": "U-Form", "trapezoid-auto": "Passende Trapez-Stellform", "trapezoid-groups": "Trapez-Einzelgruppen", "trapezoid-islands": "Große Trapez-Tischinseln", "trapezoid-long": "Längliche Trapez-Anordnung" };
 const GOAL_LABEL: Record<TablePlanningGoal, string> = { balanced: "Ausgewogen", capacity: "Mehr Sitzplätze", comfort: "Mehr Bewegungsfreiheit" };
+const PATTERN_LABEL: Record<TrapezoidPattern, string> = { pair: "Sechseckgruppen", ring: "hexagonale Tischinsel", triangle: "dreieckige Kombination", elongated: "verlängerte Tafel" };
 
 const normalizeRotation = (value: number) => (value % 360 + 360) % 360;
 
@@ -114,16 +123,16 @@ function nextId(prefix: string, index: number, used: Set<string>) {
 
 function createTableFactory(model: TableModel, zone: PlanningZone, goal: TablePlanningGoal, mode: TableLayoutMode, clearance: number, used: Set<string>) {
   let index = 0;
-  return (position: Position, rotation: number): TableInstance => {
+  return (position: Position, rotation: number, selectedModel = model): TableInstance => {
     const id = nextId(`${zone.id}-table`, ++index, used);
     return {
       id,
-      modelId: model.id,
-      x: Number(position.x.toFixed(3)),
-      y: Number(position.y.toFixed(3)),
+      modelId: selectedModel.id,
+      x: Number(position.x.toFixed(6)),
+      y: Number(position.y.toFixed(6)),
       rotation: normalizeRotation(rotation),
-      width: model.width,
-      depth: model.depth,
+      width: selectedModel.width,
+      depth: selectedModel.depth,
       groupId: `${id}-group`,
       zoneId: zone.id,
       fillClearance: clearance,
@@ -145,10 +154,93 @@ function dockAtEnd(target: TableInstance, moving: TableInstance): TableInstance 
   const movingEdge = tableEdges({ ...moving, x: 0, y: 0, rotation })[3];
   return {
     ...moving,
-    x: Number((targetEdge.midpoint.x - movingEdge.midpoint.x).toFixed(3)),
-    y: Number((targetEdge.midpoint.y - movingEdge.midpoint.y).toFixed(3)),
+    x: Number((targetEdge.midpoint.x - movingEdge.midpoint.x).toFixed(6)),
+    y: Number((targetEdge.midpoint.y - movingEdge.midpoint.y).toFixed(6)),
     rotation,
   };
+}
+
+/** Aligns any two real polygon edges. The reversed direction makes the table
+ * interiors lie on opposite sides of the common boundary. */
+function dockEdges(target: TableInstance, targetEdgeIndex: number, moving: TableInstance, movingEdgeIndex: number): TableInstance {
+  const targetEdge = tableEdges(target)[targetEdgeIndex];
+  const localEdge = tableEdges({ ...moving, x: 0, y: 0, rotation: 0 })[movingEdgeIndex];
+  const targetAngle = Math.atan2(targetEdge.end.y - targetEdge.start.y, targetEdge.end.x - targetEdge.start.x);
+  const localAngle = Math.atan2(localEdge.end.y - localEdge.start.y, localEdge.end.x - localEdge.start.x);
+  const rotation = normalizeRotation((targetAngle + Math.PI - localAngle) * 180 / Math.PI);
+  const movingEdge = tableEdges({ ...moving, x: 0, y: 0, rotation })[movingEdgeIndex];
+  return { ...moving, x: targetEdge.midpoint.x - movingEdge.midpoint.x, y: targetEdge.midpoint.y - movingEdge.midpoint.y, rotation };
+}
+
+function translateTables(tables: TableInstance[], target: Position): TableInstance[] {
+  const center = tables.reduce((sum, table) => ({ x: sum.x + table.x / tables.length, y: sum.y + table.y / tables.length }), { x: 0, y: 0 });
+  return tables.map((table) => ({ ...table, x: Number((table.x - center.x + target.x).toFixed(6)), y: Number((table.y - center.y + target.y).toFixed(6)), rotation: Number(table.rotation.toFixed(6)) }));
+}
+
+function trapezoidPair(center: Position, rotation: number, make: ReturnType<typeof createTableFactory>): TableInstance[] {
+  const first = make(center, rotation);
+  const second = dockEdges(first, 0, make(center, rotation + 180), 0);
+  return translateTables([first, second], center);
+}
+
+function trapezoidRing(center: Position, rotation: number, model: TableModel, make: ReturnType<typeof createTableFactory>): TableInstance[] {
+  const radius = tableFootprintDepth({ modelId: model.id, width: model.width, depth: model.depth }) * 1.5;
+  return Array.from({ length: 6 }, (_, index) => {
+    const angle = rotation + index * 60, radians = angle * Math.PI / 180;
+    return make({ x: center.x + Math.cos(radians) * radius, y: center.y + Math.sin(radians) * radius }, angle + 90, model);
+  });
+}
+
+function trapezoidTriangle(center: Position, rotation: number, make: ReturnType<typeof createTableFactory>): TableInstance[] {
+  const first = make({ x: 0, y: 0 }, rotation);
+  const second = dockEdges(first, 1, make({ x: 0, y: 0 }, rotation + 120), 2);
+  const delta = 120 * Math.PI / 180, c = Math.cos(delta), s = Math.sin(delta);
+  const determinant = (1 - c) * (1 - c) + s * s;
+  const origin = { x: ((1 - c) * second.x - s * second.y) / determinant, y: (s * second.x + (1 - c) * second.y) / determinant };
+  const x = second.x - origin.x, y = second.y - origin.y;
+  const third = make({ x: origin.x + x * c - y * s, y: origin.y + x * s + y * c }, rotation + 240);
+  return translateTables([first, second, third], center);
+}
+
+function compatibleRectangle(model: TableModel): TableModel | undefined {
+  const shortEdge = model.trapezoidShortEdge ?? model.depth;
+  return TABLE_MODELS.find((candidate) => candidate.shape === "rectangular" && Math.abs(candidate.width - model.width) < 1e-6 && Math.abs(candidate.depth - shortEdge) < 1e-6);
+}
+
+function elongatedTrapezoidGroup(center: Position, rotation: number, model: TableModel, make: ReturnType<typeof createTableFactory>): TableInstance[] {
+  const middle = compatibleRectangle(model);
+  if (!middle) return [];
+  const local = [
+    make({ x: 0, y: -middle.depth / 2 }, 0, middle),
+    make({ x: 0, y: middle.depth / 2 }, 0, middle),
+  ];
+  const footprint = tableFootprintDepth({ modelId: model.id, width: model.width, depth: model.depth });
+  local.push(make({ x: 0, y: middle.depth + footprint / 2 }, 0), make({ x: 0, y: -middle.depth - footprint / 2 }, 180));
+  return translateTables(local.map((table) => {
+    const radians = rotation * Math.PI / 180, c = Math.cos(radians), s = Math.sin(radians);
+    return { ...table, x: center.x + table.x * c - table.y * s, y: center.y + table.x * s + table.y * c, rotation: normalizeRotation(table.rotation + rotation) };
+  }), center);
+}
+
+function trapezoidGroupCandidates(zone: PlanningZone, polygon: Position[], model: TableModel, rotation: number, clearance: number, chairDepth: number, goal: TablePlanningGoal, make: ReturnType<typeof createTableFactory>): PatternCandidate[] {
+  const center = zoneCenter(zone), bounds = localBounds(polygon, center, rotation);
+  const footprint = tableFootprintDepth({ modelId: model.id, width: model.width, depth: model.depth });
+  const reach = chairDepth + .12;
+  const maxColumns = Math.max(1, Math.min(6, Math.floor((bounds.maxX - bounds.minX) / (model.width + 2 * reach + clearance))));
+  const maxRows = Math.max(1, Math.min(5, Math.floor((bounds.maxY - bounds.minY) / (2 * footprint + 2 * reach + clearance))));
+  const goalLimit = goal === "capacity" ? maxColumns * maxRows : goal === "balanced" ? Math.min(4, maxColumns * maxRows) : 1;
+  const candidates: PatternCandidate[] = [];
+  for (let count = goalLimit; count >= 1; count--) {
+    const columns = Math.min(maxColumns, Math.ceil(Math.sqrt(count * maxColumns / Math.max(1, maxRows))));
+    const rows = Math.ceil(count / columns), tables: TableInstance[] = [];
+    const stepX = model.width + 2 * reach + clearance, stepY = 2 * footprint + 2 * reach + clearance;
+    for (let index = 0; index < count; index++) {
+      const local = { x: (index % columns - (columns - 1) / 2) * stepX, y: (Math.floor(index / columns) - (rows - 1) / 2) * stepY };
+      tables.push(...trapezoidPair(rotateLocal(local, center, rotation), rotation, make));
+    }
+    candidates.push({ tables, pattern: "pair" });
+  }
+  return candidates;
 }
 
 function individualLayout(zone: PlanningZone, polygon: Position[], model: TableModel, rotation: number, clearance: number, chairDepth: number, phase: number, make: ReturnType<typeof createTableFactory>) {
@@ -182,26 +274,93 @@ function longTableLayout(zone: PlanningZone, polygon: Position[], model: TableMo
     while (chain.length < perRow) chain.push(dockAtEnd(chain.at(-1)!, make({ x: 0, y: 0 }, rotation)));
     const chainCenter = chain.reduce((sum, table) => ({ x: sum.x + table.x / chain.length, y: sum.y + table.y / chain.length }), { x: 0, y: 0 });
     const target = rotateLocal({ x: 0, y: (row - (rowCount - 1) / 2) * rowStep }, center, rotation);
-    chain.forEach((table) => result.push({ ...table, x: Number((table.x - chainCenter.x + target.x).toFixed(3)), y: Number((table.y - chainCenter.y + target.y).toFixed(3)) }));
+    chain.forEach((table) => result.push({ ...table, x: Number((table.x - chainCenter.x + target.x).toFixed(6)), y: Number((table.y - chainCenter.y + target.y).toFixed(6)) }));
   }
   return result;
 }
 
-function cornerLayout(zone: PlanningZone, polygon: Position[], model: TableModel, rotation: number, chairDepth: number, goal: TablePlanningGoal, mode: "l-shape" | "u-shape", make: ReturnType<typeof createTableFactory>) {
-  const center = zoneCenter(zone), bounds = localBounds(polygon, center, rotation), chairReach = chairDepth + .12;
-  const reduction = goal === "capacity" ? 0 : goal === "balanced" ? 1 : 2;
-  const horizontalCount = Math.min(10, Math.floor((bounds.maxX - bounds.minX - 2 * chairReach) / model.width) - reduction);
-  const verticalCount = Math.min(8, Math.floor((bounds.maxY - bounds.minY - model.depth - 2 * chairReach) / model.width) - reduction);
-  if (horizontalCount < 2 || verticalCount < 2) return [];
-  const baseY = -(verticalCount * model.width) / 4;
-  const result = Array.from({ length: horizontalCount }, (_, index) => make(rotateLocal({ x: (index - (horizontalCount - 1) / 2) * model.width, y: baseY }, center, rotation), rotation));
-  const left = -(horizontalCount - 1) * model.width / 2, right = -left;
-  for (let index = 0; index < verticalCount; index++) {
-    const y = baseY + model.depth / 2 + model.width / 2 + index * model.width;
-    result.push(make(rotateLocal({ x: left, y }, center, rotation), rotation + 90));
-    if (mode === "u-shape") result.push(make(rotateLocal({ x: right, y }, center, rotation), rotation + 90));
+type CornerCounts = { horizontal: number; vertical: number };
+
+function sharedBoundaryLength(first: TableInstance, second: TableInstance, tolerance = AUTO_TABLE_CONTACT_TOLERANCE) {
+  let longest = 0;
+  for (const firstEdge of tableEdges(first)) for (const secondEdge of tableEdges(second)) {
+    longest = Math.max(longest, edgeSharedBoundaryLength(firstEdge, secondEdge, tolerance));
   }
-  return result.slice(0, MAX_CANDIDATE_TABLES);
+  return Math.max(0, longest);
+}
+
+function edgeSharedBoundaryLength(firstEdge: ReturnType<typeof tableEdges>[number], secondEdge: ReturnType<typeof tableEdges>[number], tolerance = AUTO_TABLE_CONTACT_TOLERANCE) {
+  const dx = firstEdge.end.x - firstEdge.start.x, dy = firstEdge.end.y - firstEdge.start.y;
+  const length = Math.hypot(dx, dy), ux = dx / length, uy = dy / length;
+  const secondDx = secondEdge.end.x - secondEdge.start.x, secondDy = secondEdge.end.y - secondEdge.start.y;
+  const secondLength = Math.hypot(secondDx, secondDy);
+  if (Math.abs(ux * secondDy / secondLength - uy * secondDx / secondLength) > tolerance) return 0;
+  const lineDistance = (point: Position) => Math.abs((point.x - firstEdge.start.x) * uy - (point.y - firstEdge.start.y) * ux);
+  if (lineDistance(secondEdge.start) > tolerance || lineDistance(secondEdge.end) > tolerance) return 0;
+  const project = (point: Position) => (point.x - firstEdge.start.x) * ux + (point.y - firstEdge.start.y) * uy;
+  const projections = [project(secondEdge.start), project(secondEdge.end)];
+  return Math.max(0, Math.min(length, Math.max(...projections)) - Math.max(0, Math.min(...projections)));
+}
+
+function hasCompleteCornerContacts(tables: TableInstance[], contactLength: number) {
+  let contacts = 0;
+  for (let first = 0; first < tables.length; first++) for (let second = first + 1; second < tables.length; second++) {
+    const shared = sharedBoundaryLength(tables[first], tables[second]);
+    if (shared > AUTO_TABLE_CONTACT_TOLERANCE) {
+      if (Math.abs(shared - contactLength) > AUTO_TABLE_CONTACT_TOLERANCE) return false;
+      contacts++;
+    }
+  }
+  return contacts === tables.length - 1;
+}
+
+/**
+ * Returns complete L/U structures from largest to smallest. Reducing both counts
+ * independently is intentional: a polygon or an obstacle can constrain only one
+ * axis. No candidate ever contains a shortened or missing leg.
+ */
+function cornerCountCandidates(polygon: Position[], center: Position, model: TableModel, rotation: number, chairDepth: number, goal: TablePlanningGoal, mode: "l-shape" | "u-shape"): CornerCounts[] {
+  const bounds = localBounds(polygon, center, rotation), chairReach = chairDepth + .12;
+  const goalReduction = goal === "capacity" ? 0 : goal === "balanced" ? 1 : 2;
+  const maximumHorizontal = Math.min(10, Math.floor((bounds.maxX - bounds.minX - 2 * chairReach) / model.width) - goalReduction);
+  const maximumVertical = Math.min(8, Math.floor((bounds.maxY - bounds.minY - model.depth - 2 * chairReach) / model.width) - goalReduction);
+  const candidates: CornerCounts[] = [];
+  for (let horizontal = maximumHorizontal; horizontal >= 2; horizontal--) {
+    for (let vertical = maximumVertical; vertical >= 2; vertical--) candidates.push({ horizontal, vertical });
+  }
+  return candidates.sort((first, second) => {
+    const firstTables = first.horizontal + first.vertical * (mode === "u-shape" ? 2 : 1);
+    const secondTables = second.horizontal + second.vertical * (mode === "u-shape" ? 2 : 1);
+    return secondTables - firstTables || second.vertical - first.vertical || second.horizontal - first.horizontal;
+  });
+}
+
+/**
+ * Builds one shared geometric target before deriving table centers from it.
+ * The head occupies the full top edge. Each rotated leg starts exactly at its
+ * lower contact edge and its outside is flush with the head's outside.
+ */
+function cornerLayout(zone: PlanningZone, polygon: Position[], model: TableModel, rotation: number, counts: CornerCounts, mode: "l-shape" | "u-shape", make: ReturnType<typeof createTableFactory>) {
+  const center = zoneCenter(zone), bounds = localBounds(polygon, center, rotation);
+  const localCenter = { x: (bounds.minX + bounds.maxX) / 2, y: (bounds.minY + bounds.maxY) / 2 };
+  const headWidth = counts.horizontal * model.width;
+  const footprintDepth = model.depth + counts.vertical * model.width;
+  const headY = localCenter.y - footprintDepth / 2 + model.depth / 2;
+  const leftLegX = localCenter.x - headWidth / 2 + model.depth / 2;
+  const rightLegX = localCenter.x + headWidth / 2 - model.depth / 2;
+  const result: TableInstance[] = [];
+
+  for (let index = 0; index < counts.horizontal; index++) {
+    const x = localCenter.x - headWidth / 2 + model.width * (index + .5);
+    result.push(make(rotateLocal({ x, y: headY }, center, rotation), rotation));
+  }
+  for (let index = 0; index < counts.vertical; index++) {
+    const y = headY + model.depth / 2 + model.width * (index + .5);
+    result.push(make(rotateLocal({ x: leftLegX, y }, center, rotation), rotation + 90));
+    if (mode === "u-shape") result.push(make(rotateLocal({ x: rightLegX, y }, center, rotation), rotation + 90));
+  }
+  const limited = result.slice(0, MAX_CANDIDATE_TABLES);
+  return hasCompleteCornerContacts(limited, model.depth) ? limited : [];
 }
 
 function score(goal: TablePlanningGoal, tableCount: number, seats: number, requested: number, clearance: number) {
@@ -216,37 +375,83 @@ function tableFits(table: TableInstance, plan: RoomPlan, zoneRoom: ReturnType<ty
   return polygonInsideRoom(polygon, plan.contour)
     && polygonInsideRoom(polygon, zoneRoom)
     && !forbidden.some((area) => area.length >= 3 && polygonsOverlap(polygon, area))
-    && !fixedTables.some((other) => polygonsInteriorOverlap(polygon, tablePolygon(other)))
+    && !fixedTables.some((other) => polygonsInteriorOverlap(polygon, tablePolygon(other), AUTO_TABLE_CONTACT_TOLERANCE))
     && !fixedChairs.some((chair) => polygonsOverlap(polygon, rotatedRectangle(chair)))
-    && !accepted.some((other) => polygonsInteriorOverlap(polygon, tablePolygon(other)));
+    && !accepted.some((other) => polygonsInteriorOverlap(polygon, tablePolygon(other), AUTO_TABLE_CONTACT_TOLERANCE));
 }
 
-function evaluate(plan: RoomPlan, zone: PlanningZone, mode: TableLayoutMode, goal: TablePlanningGoal, generated: TableInstance[], fixedTables: TableInstance[], fixedChairs: FurnitureChair[], forbidden: Position[][], withChairs: boolean, clearance: number): Proposal | null {
+function seatTrapezoidExterior(plan: RoomPlan, zone: PlanningZone, tables: TableInstance[], fixedChairs: FurnitureChair[], forbidden: Position[][], pattern: TrapezoidPattern) {
+  const chairSize = { width: plan.chairSelection?.width ?? .5, depth: plan.chairSelection?.depth ?? .55 };
+  const zoneRoom = asRoom(zonePolygon(zone));
+  const chairs: FurnitureChair[] = [];
+  let requested = 0;
+  for (const table of tables) {
+    for (const edge of tableEdges(table)) {
+      const internal = tables.some((other) => other.id !== table.id && tableEdges(other).some((otherEdge) => edgeSharedBoundaryLength(edge, otherEdge) >= edge.length - AUTO_TABLE_CONTACT_TOLERANCE));
+      if (internal || pattern === "ring" && edge.kind !== "long") continue;
+      const slots = edge.kind === "long" ? 2 : 1;
+      requested += slots;
+      const dx = edge.end.x - edge.start.x, dy = edge.end.y - edge.start.y, length = Math.hypot(dx, dy);
+      const outward = { x: dy / length, y: -dx / length }, inward = { x: -outward.x, y: -outward.y };
+      for (let slot = 0; slot < slots; slot++) {
+        const along = (slot + .5) / slots;
+        const candidate: FurnitureChair = {
+          id: `${table.id}-chair-e${edge.index}-${slot + 1}`,
+          x: edge.start.x + dx * along + outward.x * (chairSize.depth / 2 + .1),
+          y: edge.start.y + dy * along + outward.y * (chairSize.depth / 2 + .1),
+          rotation: normalizeRotation(Math.atan2(inward.x, -inward.y) * 180 / Math.PI),
+          width: chairSize.width,
+          depth: chairSize.depth,
+          groupId: table.groupId,
+          tableId: table.id,
+          source: "auto",
+        };
+        const polygon = rotatedRectangle(candidate);
+        if (polygonInsideRoom(polygon, plan.contour)
+          && polygonInsideRoom(polygon, zoneRoom)
+          && !forbidden.some((area) => area.length >= 3 && polygonsOverlap(polygon, area))
+          && !tables.some((other) => polygonsOverlap(polygon, tablePolygon(other)))
+          && !fixedChairs.some((other) => polygonsOverlap(polygon, rotatedRectangle(other)))
+          && !chairs.some((other) => polygonsOverlap(polygon, rotatedRectangle(other)))) chairs.push(candidate);
+      }
+    }
+  }
+  return { chairs, requested };
+}
+
+function evaluate(plan: RoomPlan, zone: PlanningZone, mode: TableLayoutMode, goal: TablePlanningGoal, generated: TableInstance[], fixedTables: TableInstance[], fixedChairs: FurnitureChair[], forbidden: Position[][], withChairs: boolean, clearance: number, pattern?: TrapezoidPattern): Proposal | null {
   const zoneRoom = asRoom(zonePolygon(zone));
   const accepted: TableInstance[] = [];
   for (const table of generated) {
     if (tableFits(table, plan, zoneRoom, fixedTables, fixedChairs, forbidden, accepted)) accepted.push(table);
-    else if (mode === "l-shape" || mode === "u-shape") return null;
+    else if (mode === "l-shape" || mode === "u-shape" || mode.startsWith("trapezoid-")) return null;
   }
   if (!accepted.length || mode === "long-tables" && accepted.length < 2) return null;
   let chairs: FurnitureChair[] = [], requestedSeats = 0;
   const groups: TableGroup[] = [];
-  let chairPlan: RoomPlan = { ...plan, tables: [...fixedTables, ...accepted], chairs: fixedChairs };
-  for (const table of accepted) {
-    const requested = tableModel(table.modelId).defaultSeats;
-    requestedSeats += withChairs ? requested : 0;
-    const result = withChairs ? seatTable(chairPlan, table.id, requested) : undefined;
-    const placed = result?.chairs ?? [];
-    chairs = [...chairs, ...placed];
-    chairPlan = { ...chairPlan, chairs: [...(chairPlan.chairs ?? []), ...placed] };
-    groups.push({ id: table.groupId!, tableIds: [table.id], chairIds: placed.map((chair) => chair.id) });
+  if (withChairs && pattern) {
+    const exterior = seatTrapezoidExterior(plan, zone, accepted, fixedChairs, forbidden, pattern);
+    chairs = exterior.chairs;
+    requestedSeats = exterior.requested;
+    for (const table of accepted) groups.push({ id: table.groupId!, tableIds: [table.id], chairIds: chairs.filter((chair) => chair.tableId === table.id).map((chair) => chair.id) });
+  } else {
+    let chairPlan: RoomPlan = { ...plan, tables: [...fixedTables, ...accepted], chairs: fixedChairs };
+    for (const table of accepted) {
+      const requested = tableModel(table.modelId).defaultSeats;
+      requestedSeats += withChairs ? requested : 0;
+      const result = withChairs ? seatTable(chairPlan, table.id, tableModel(table.modelId).shape === "trapezoid" ? 6 : requested) : undefined;
+      const placed = result?.chairs ?? [];
+      chairs = [...chairs, ...placed];
+      chairPlan = { ...chairPlan, chairs: [...(chairPlan.chairs ?? []), ...placed] };
+      groups.push({ id: table.groupId!, tableIds: [table.id], chairIds: placed.map((chair) => chair.id) });
+    }
   }
-  return { tables: accepted, chairs, groups, requestedSeats, clearance, score: score(goal, accepted.length, chairs.length, requestedSeats, clearance) };
+  return { tables: accepted, chairs, groups, requestedSeats, clearance, score: score(goal, accepted.length, chairs.length, requestedSeats, clearance), pattern };
 }
 
 /**
- * Bounded deterministic search. It evaluates at most six geometry candidates,
- * never runs the full rule/egress pipeline inside the search, and returns only
+ * Bounded deterministic search. It evaluates a finite set of complete geometry
+ * candidates, never runs the full rule/egress pipeline, and returns only
  * ordinary RoomPlan tables, chairs and existing furniture groups.
  */
 export function planTableZone(plan: RoomPlan, options: TableZonePlanningOptions): TableZonePlanningResult {
@@ -263,6 +468,12 @@ export function planTableZone(plan: RoomPlan, options: TableZonePlanningOptions)
   if (!zone) return done({ ...base, message: "Der Tischbereich wurde nicht gefunden." });
   const polygon = zonePolygon(zone), geometryErrors = zone.geometry.kind === "polygon" ? validateZonePolygon(polygon) : [];
   if (geometryErrors.length || !polygonInsideRoom(polygon, plan.contour)) return done({ ...base, message: geometryErrors[0] ?? "Der Tischbereich liegt nicht vollständig im Raum." });
+  if (options.mode.startsWith("trapezoid-") && model.shape !== "trapezoid") {
+    return done({ ...base, suggestedMode: "individual", message: `${MODE_LABEL[options.mode]} benötigt ein Trapeztischmodell.` });
+  }
+  if ((options.mode === "l-shape" || options.mode === "u-shape") && model.shape !== "rectangular") {
+    return done({ ...base, suggestedMode: "individual", message: `${MODE_LABEL[options.mode]} benötigt für bündige 90°-Anschlüsse ein rechteckiges Tischmodell. Für Trapeztische steht die passende Stellform bereit.` });
+  }
 
   const linked = (plan.tables ?? []).filter((table) => table.zoneId === zone.id);
   const editedChairGroups = new Set((plan.chairs ?? []).filter((chair) => chair.edited).map((chair) => chair.groupId).filter((id): id is string => !!id));
@@ -285,19 +496,57 @@ export function planTableZone(plan: RoomPlan, options: TableZonePlanningOptions)
   const rotations = [...new Set([normalizeRotation(options.rotation ?? 0), normalizeRotation((options.rotation ?? 0) + 90)])];
   const phases = options.mode === "individual" ? [0, 1, 2] : [0];
   const proposals: Proposal[] = [];
-  for (const rotation of rotations) for (const phase of phases) {
-    const used = new Set([...fixedTables.map((table) => table.id), ...fixedChairs.map((chair) => chair.id)]);
-    const make = createTableFactory(model, zone, options.goal, options.mode, clearance, used);
-    const chairDepth = plan.chairSelection?.depth ?? .55;
-    const generated = options.mode === "individual"
-      ? individualLayout(zone, polygon, model, rotation, clearance, chairDepth, phase, make)
-      : options.mode === "long-tables"
-        ? longTableLayout(zone, polygon, model, rotation, clearance, chairDepth, options.goal, make)
-        : cornerLayout(zone, polygon, model, rotation, chairDepth, options.goal, options.mode, make);
-    const proposal = evaluate(plan, zone, options.mode, options.goal, generated, fixedTables, fixedChairs, forbidden, options.withChairs, clearance);
-    if (proposal) proposals.push(proposal);
+  const chairDepth = plan.chairSelection?.depth ?? .55;
+  let evaluatedVariants = 0;
+  for (const rotation of rotations) {
+    if (options.mode.startsWith("trapezoid-")) {
+      const candidates: PatternCandidate[] = [];
+      if (options.mode === "trapezoid-auto" || options.mode === "trapezoid-groups") {
+        const used = new Set([...fixedTables.map((table) => table.id), ...fixedChairs.map((chair) => chair.id)]);
+        candidates.push(...trapezoidGroupCandidates(zone, polygon, model, rotation, clearance, chairDepth, options.goal, createTableFactory(model, zone, options.goal, options.mode, clearance, used)));
+      }
+      if (options.mode === "trapezoid-auto" || options.mode === "trapezoid-islands") {
+        for (const pattern of ["ring", "triangle"] as const) {
+          const used = new Set([...fixedTables.map((table) => table.id), ...fixedChairs.map((chair) => chair.id)]);
+          const make = createTableFactory(model, zone, options.goal, options.mode, clearance, used);
+          candidates.push({ tables: pattern === "ring" ? trapezoidRing(zoneCenter(zone), rotation, model, make) : trapezoidTriangle(zoneCenter(zone), rotation, make), pattern });
+        }
+      }
+      if (options.mode === "trapezoid-auto" || options.mode === "trapezoid-long") {
+        const used = new Set([...fixedTables.map((table) => table.id), ...fixedChairs.map((chair) => chair.id)]);
+        const make = createTableFactory(model, zone, options.goal, options.mode, clearance, used);
+        candidates.push({ tables: elongatedTrapezoidGroup(zoneCenter(zone), rotation, model, make), pattern: "elongated" });
+      }
+      for (const candidate of candidates) {
+        const proposal = evaluate(plan, zone, options.mode, options.goal, candidate.tables, fixedTables, fixedChairs, forbidden, options.withChairs, clearance, candidate.pattern);
+        evaluatedVariants++;
+        if (proposal) proposals.push(proposal);
+      }
+      continue;
+    }
+    if (options.mode === "l-shape" || options.mode === "u-shape") {
+      const counts = cornerCountCandidates(polygon, zoneCenter(zone), model, rotation, chairDepth, options.goal, options.mode);
+      for (const count of counts) {
+        const used = new Set([...fixedTables.map((table) => table.id), ...fixedChairs.map((chair) => chair.id)]);
+        const make = createTableFactory(model, zone, options.goal, options.mode, clearance, used);
+        const generated = cornerLayout(zone, polygon, model, rotation, count, options.mode, make);
+        const proposal = evaluate(plan, zone, options.mode, options.goal, generated, fixedTables, fixedChairs, forbidden, options.withChairs, clearance);
+        evaluatedVariants++;
+        if (proposal) proposals.push(proposal);
+      }
+      continue;
+    }
+    for (const phase of phases) {
+      const used = new Set([...fixedTables.map((table) => table.id), ...fixedChairs.map((chair) => chair.id)]);
+      const make = createTableFactory(model, zone, options.goal, options.mode, clearance, used);
+      const generated = options.mode === "individual"
+        ? individualLayout(zone, polygon, model, rotation, clearance, chairDepth, phase, make)
+        : longTableLayout(zone, polygon, model, rotation, clearance, chairDepth, options.goal, make);
+      const proposal = evaluate(plan, zone, options.mode, options.goal, generated, fixedTables, fixedChairs, forbidden, options.withChairs, clearance);
+      evaluatedVariants++;
+      if (proposal) proposals.push(proposal);
+    }
   }
-  const evaluatedVariants = rotations.length * phases.length;
   const best = proposals.sort((a, b) => b.score - a.score || b.chairs.length - a.chairs.length || b.tables.length - a.tables.length || a.tables[0].id.localeCompare(b.tables[0].id))[0];
   if (!best) {
     const suggestedMode = options.mode === "individual" ? undefined : "individual";
@@ -314,6 +563,6 @@ export function planTableZone(plan: RoomPlan, options: TableZonePlanningOptions)
     evaluatedVariants,
     usableSeats: best.chairs.length,
     uncheckedSeats: best.chairs.length,
-    message: `${MODE_LABEL[options.mode]}: ${best.tables.length} ${best.tables.length === 1 ? "Tisch" : "Tische"} und ${best.chairs.length} tatsächlich angelegte Tischplätze.${omittedSeats ? ` ${omittedSeats} mögliche Plätze wurden wegen Geometrie, Kollision oder Zugang nicht angelegt.` : ""} Sicherheits- und Rettungswegdetails der Tischplätze sind ungeprüft und fachlich zu bewerten.`,
+    message: `${MODE_LABEL[options.mode]}${best.pattern ? ` – ${PATTERN_LABEL[best.pattern]}` : ""}: ${best.tables.length} ${best.tables.length === 1 ? "Tisch" : "Tische"} und ${best.chairs.length} tatsächlich angelegte Tischplätze.${omittedSeats ? ` ${omittedSeats} mögliche Plätze wurden wegen Geometrie, Kollision oder Zugang nicht angelegt.` : ""} Sicherheits- und Rettungswegdetails der Tischplätze sind ungeprüft und fachlich zu bewerten.`,
   });
 }

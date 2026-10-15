@@ -8,7 +8,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
 import { doorSegment, frontSegment, type DoorObject, type RoomPlan } from "@/lib/room-planner/objects";
 import { chairDisplayAngle, planBounds } from "@/lib/room-planner/visualization3d";
-import { TABLE_MODELS, zonePolygon, type PlanningZone, type TableModel } from "@/lib/room-planner/tables";
+import { TABLE_MODELS, tableFootprintDepth, zonePolygon, type PlanningZone, type TableModel } from "@/lib/room-planner/tables";
 import PlannerBrand from "../PlannerBrand";
 
 const DEFAULT_WALL_HEIGHT = 2.9;
@@ -146,7 +146,7 @@ function ModelTables({ plan, model }: { plan: RoomPlan; model: TableModel }) {
     tables.forEach((table, index) => {
       translate.makeTranslation(table.x, -model.modelBounds.floorY * (model.height / model.modelBounds.height), table.y);
       rotate.makeRotationY((model.modelRotationOffset ?? 180) * Math.PI / 180 - table.rotation * Math.PI / 180);
-      scale.makeScale(table.width / model.modelBounds.width, model.height / model.modelBounds.height, table.depth / model.modelBounds.depth);
+      scale.makeScale(table.width / model.modelBounds.width, model.height / model.modelBounds.height, tableFootprintDepth(table) / model.modelBounds.depth);
       normalize.makeTranslation(-model.modelBounds.centerX, 0, -model.modelBounds.centerZ);
       matrix.copy(translate).multiply(rotate).multiply(scale).multiply(normalize);
       ref.current!.setMatrixAt(index, matrix);

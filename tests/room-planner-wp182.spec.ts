@@ -2,8 +2,8 @@ import { expect, test } from "@playwright/test";
 import { commit, createHistory, redo, undo } from "../src/lib/room-planner/history";
 import { emptyPlan, polygonInsideRoom, polygonsOverlap, type RoomPlan } from "../src/lib/room-planner/objects";
 import { createProject, parseProject } from "../src/lib/room-planner/projects";
-import { planTableZone } from "../src/lib/room-planner/tableZonePlanning";
-import { planCapacity, polygonsInteriorOverlap, rotatedRectangle, tablePolygon, zonePolygon, type PlanningZone, type TableInstance } from "../src/lib/room-planner/tables";
+import { AUTO_TABLE_CONTACT_TOLERANCE, planTableZone } from "../src/lib/room-planner/tableZonePlanning";
+import { planCapacity, polygonsInteriorOverlap, rotatedRectangle, tableEdges, tablePolygon, zonePolygon, type PlanningZone, type TableInstance } from "../src/lib/room-planner/tables";
 
 const room = (width = 14, depth = 11): RoomPlan => ({
   ...emptyPlan(),
@@ -17,6 +17,48 @@ const room = (width = 14, depth = 11): RoomPlan => ({
 const zone = (width = 11, depth = 8): PlanningZone => ({ id: "zone-wp182", type: "tables", geometry: { kind: "polygon", points: [{ x: 1.5, y: 1.5 }, { x: 1.5 + width, y: 1.5 }, { x: 1.5 + width, y: 1.5 + depth }, { x: 1.5, y: 1.5 + depth }] }, rotation: 0, source: "manual" });
 const base = (width = 11, depth = 8): RoomPlan => ({ ...room(), zones: [zone(width, depth)] });
 const apply = (plan: RoomPlan, result: ReturnType<typeof planTableZone>): RoomPlan => ({ ...plan, tables: result.tables, chairs: result.chairs, tableGroups: result.groups });
+
+const normalizedRotation = (value: number) => (value % 360 + 360) % 360;
+const contactTolerance = AUTO_TABLE_CONTACT_TOLERANCE;
+type Contact = { first: TableInstance; second: TableInstance; length: number; midpoint: { x: number; y: number } };
+
+function sharedContacts(tables: TableInstance[]): Contact[] {
+  const result: Contact[] = [];
+  for (let firstIndex = 0; firstIndex < tables.length; firstIndex++) for (let secondIndex = firstIndex + 1; secondIndex < tables.length; secondIndex++) {
+    const first = tables[firstIndex], second = tables[secondIndex];
+    for (const firstEdge of tableEdges(first)) for (const secondEdge of tableEdges(second)) {
+      const dx = firstEdge.end.x - firstEdge.start.x, dy = firstEdge.end.y - firstEdge.start.y;
+      const length = Math.hypot(dx, dy), ux = dx / length, uy = dy / length;
+      const secondDx = secondEdge.end.x - secondEdge.start.x, secondDy = secondEdge.end.y - secondEdge.start.y;
+      const secondLength = Math.hypot(secondDx, secondDy);
+      const parallel = Math.abs(ux * secondDy / secondLength - uy * secondDx / secondLength) <= contactTolerance;
+      const lineDistance = (point: { x: number; y: number }) => Math.abs((point.x - firstEdge.start.x) * uy - (point.y - firstEdge.start.y) * ux);
+      if (!parallel || lineDistance(secondEdge.start) > contactTolerance || lineDistance(secondEdge.end) > contactTolerance) continue;
+      const project = (point: { x: number; y: number }) => (point.x - firstEdge.start.x) * ux + (point.y - firstEdge.start.y) * uy;
+      const projections = [project(secondEdge.start), project(secondEdge.end)];
+      const from = Math.max(0, Math.min(...projections)), to = Math.min(length, Math.max(...projections));
+      if (to - from <= contactTolerance) continue;
+      result.push({ first, second, length: to - from, midpoint: { x: firstEdge.start.x + ux * (from + to) / 2, y: firstEdge.start.y + uy * (from + to) / 2 } });
+    }
+  }
+  return result;
+}
+
+function expectCleanCornerGeometry(result: ReturnType<typeof planTableZone>, mode: "l-shape" | "u-shape", depth: number) {
+  expect(result.tables.length).toBeGreaterThanOrEqual(mode === "u-shape" ? 6 : 4);
+  expect(new Set(result.tables.map((table) => normalizedRotation(table.rotation))).size).toBe(2);
+  for (let first = 0; first < result.tables.length; first++) for (let second = first + 1; second < result.tables.length; second++) {
+    expect(polygonsInteriorOverlap(tablePolygon(result.tables[first]), tablePolygon(result.tables[second]))).toBe(false);
+  }
+  const contacts = sharedContacts(result.tables);
+  expect(contacts).toHaveLength(result.tables.length - 1);
+  for (const contact of contacts) expect(contact.length).toBeCloseTo(depth, 2);
+  for (const chair of result.chairs) {
+    expect(result.tables.filter((table) => table.id !== chair.tableId).some((table) => polygonsOverlap(rotatedRectangle(chair), tablePolygon(table)))).toBe(false);
+    expect(contacts.some((contact) => Math.hypot(chair.x - contact.midpoint.x, chair.y - contact.midpoint.y) < chair.depth / 2)).toBe(false);
+  }
+  expect(result.usableSeats).toBe(result.chairs.length);
+}
 
 test("WP18.2 polygonaler Tischbereich erzeugt gemeinsam geplante Einzeltische und Stühle", () => {
   const plan = base();
@@ -49,6 +91,59 @@ for (const mode of ["l-shape", "u-shape"] as const) {
     expect(result.groups.every((group) => group.tableIds.length === 1)).toBe(true);
   });
 }
+
+for (const [modelId, depth] of [["table-310c-120x70", .7], ["table-310c-180x80", .8]] as const) {
+  for (const mode of ["l-shape", "u-shape"] as const) {
+    test(`WP18.2a ${mode} mit ${modelId} hat bündige Kontaktkanten ohne Versatz`, () => {
+      const result = planTableZone(base(11, 8), { zoneId: zone(11, 8).id, modelId, mode, goal: "capacity", withChairs: true });
+      expectCleanCornerGeometry(result, mode, depth);
+    });
+  }
+}
+
+test("WP18.2a U-Form hat geraden Kopf und symmetrische parallele Schenkel", () => {
+  const result = planTableZone(base(11, 8), { zoneId: zone(11, 8).id, modelId: "table-310c-120x70", mode: "u-shape", goal: "capacity", withChairs: false, rotation: 0 });
+  const rotations = [...new Set(result.tables.map((table) => normalizedRotation(table.rotation)))];
+  const local = (table: TableInstance, rotation: number) => {
+    const angle = rotation * Math.PI / 180;
+    return { x: Number((table.x * Math.cos(angle) + table.y * Math.sin(angle)).toFixed(3)), y: Number((-table.x * Math.sin(angle) + table.y * Math.cos(angle)).toFixed(3)) };
+  };
+  const headRotation = rotations.find((rotation) => {
+    const group = result.tables.filter((table) => normalizedRotation(table.rotation) === rotation);
+    return new Set(group.map((table) => local(table, rotation).y)).size === 1;
+  });
+  expect(headRotation).toBeDefined();
+  const head = result.tables.filter((table) => normalizedRotation(table.rotation) === headRotation);
+  const legs = result.tables.filter((table) => normalizedRotation(table.rotation) !== headRotation);
+  expect(new Set(head.map((table) => local(table, headRotation!).y)).size).toBe(1);
+  const legColumns = [...new Set(legs.map((table) => local(table, headRotation!).x))].sort((a, b) => a - b);
+  expect(legColumns).toHaveLength(2);
+  const left = legs.filter((table) => local(table, headRotation!).x === legColumns[0]).sort((a, b) => local(a, headRotation!).y - local(b, headRotation!).y);
+  const right = legs.filter((table) => local(table, headRotation!).x === legColumns[1]).sort((a, b) => local(a, headRotation!).y - local(b, headRotation!).y);
+  expect(left.map((table) => local(table, headRotation!).y)).toEqual(right.map((table) => local(table, headRotation!).y));
+  const legRotation = normalizedRotation(headRotation! + 90);
+  expect(left.every((table) => normalizedRotation(table.rotation) === legRotation)).toBe(true);
+  expect(right.every((table) => normalizedRotation(table.rotation) === legRotation)).toBe(true);
+  expect(Math.min(...legs.map((table) => local(table, headRotation!).y))).toBeGreaterThan(local(head[0], headRotation!).y);
+});
+
+test("WP18.2a bleibt in einem nicht-rechteckigen polygonalen Tischbereich vollständig", () => {
+  const polygonZone: PlanningZone = { id: "polygon-corner-zone", type: "tables", geometry: { kind: "polygon", points: [{ x: 1.5, y: 1.5 }, { x: 12.5, y: 1.5 }, { x: 12, y: 9.5 }, { x: 2, y: 9.5 }, { x: 1.5, y: 6 }] }, rotation: 0, source: "manual" };
+  const plan = { ...room(), zones: [polygonZone] };
+  const result = planTableZone(plan, { zoneId: polygonZone.id, modelId: "table-310c-120x70", mode: "u-shape", goal: "balanced", withChairs: true });
+  expectCleanCornerGeometry(result, "u-shape", .7);
+  const polygonRoom = { points: zonePolygon(polygonZone).map((point, index) => ({ ...point, id: `p${index}` })), walls: zonePolygon(polygonZone).map((_, index, points) => ({ id: `w${index}`, startPointId: `p${index}`, endPointId: `p${(index + 1) % points.length}` })), closed: true };
+  expect(result.tables.every((table) => polygonInsideRoom(tablePolygon(table), polygonRoom))).toBe(true);
+});
+
+test("WP18.2a erzwingt mit Trapeztischen keine geometrisch falsche L-/U-Verbindung", () => {
+  for (const mode of ["l-shape", "u-shape"] as const) {
+    const result = planTableZone(base(), { zoneId: zone().id, modelId: "table-310c-trapez-160x80", mode, goal: "capacity", withChairs: true });
+    expect(result.tables).toHaveLength(0);
+    expect(result.suggestedMode).toBe("individual");
+    expect(result.message).toContain("rechteckiges Tischmodell");
+  }
+});
 
 test("WP18.2 Planungsziele sind fachlich messbar verschieden", () => {
   const plan = base();

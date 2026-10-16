@@ -26,7 +26,9 @@ export default function PlannerHelp({ tool, roomClosed, selectionType, areaMode,
   const previousTool = useRef(tool);
   const manualOpen = useRef(false);
   const onboardingStepRef = useRef(onboardingStep);
+  const openHelpRef = useRef(openHelp);
   onboardingStepRef.current = onboardingStep;
+  openHelpRef.current = openHelp;
   const active = menuOpen || openHelp !== null || onboardingStep !== null;
 
   useEffect(() => {
@@ -38,6 +40,12 @@ export default function PlannerHelp({ tool, roomClosed, selectionType, areaMode,
   useEffect(() => { onActiveChange(onboardingStep !== null ? "onboarding" : menuOpen ? "menu" : openHelp ? "help" : null); }, [menuOpen, onboardingStep, onActiveChange, openHelp]);
   useEffect(() => {
     if (!closeSignal) return;
+    const contextualId = openHelpRef.current;
+    if (contextualId && !manualOpen.current) setPreferences((current) => {
+      const next = { ...current, dismissed: [...new Set([...(current.dismissed ?? []), contextualId])] };
+      writeHelpPreferences(next);
+      return next;
+    });
     setMenuOpen(false); setOpenHelp(null); setOnboardingStep(null);
     if (onboardingStepRef.current !== null) setPreferences((current) => {
       const next = { ...current, onboardingSkipped: true };

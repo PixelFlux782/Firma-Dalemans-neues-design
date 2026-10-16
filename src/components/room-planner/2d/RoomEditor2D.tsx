@@ -24,9 +24,10 @@ import type { Measurement } from "@/lib/room-planner/measurements";
 import PlannerBrand from "../PlannerBrand";
 import PlannerHelp from "../help/PlannerHelp";
 import { calculatePlanDemand, calculateRecommendedDemand, changeChairSelection, chairProducts, DEFAULT_CHAIR_SELECTION, resolveChairShopTarget } from "@/lib/room-planner/chairSelection";
-import { calculateTableDemand, DEFAULT_TABLE_MODEL_ID, TABLE_MODELS, TABLE_PRESETS, fillTableZone, findTableSnap, fitTableLayout, generateTableLayout, moveTableGroup, moveZone, moveZonePoint, placeTable, planCapacity, seatTable, tableLayoutConflicts, tableModel, tablePlacementConflict, tablePolygon, transformTableLayout, validateTables, validateZonePolygon, zoneCenter, zonePolygon, type GeneratedTableLayout, type LayoutTransform, type PlanningZone, type TableLayoutMode, type TablePlanningGoal, type TablePresetId, type TableSnapCandidate } from "@/lib/room-planner/tables";
+import { calculateTableDemand, DEFAULT_TABLE_MODEL_ID, TABLE_MODELS, TABLE_PRESETS, fillTableZone, findTableSnap, fitTableLayout, generateTableLayout, moveTableGroup, moveZone, moveZonePoint, placeTable, planCapacity, rotatedRectangle, seatTable, tableLayoutConflicts, tableModel, tablePlacementConflict, tablePolygon, transformTableLayout, validateTables, validateZonePolygon, zoneCenter, zonePolygon, type GeneratedTableLayout, type LayoutTransform, type PlanningZone, type TableLayoutMode, type TablePlanningGoal, type TablePresetId, type TableSnapCandidate } from "@/lib/room-planner/tables";
 import { planTableZone, type TableZonePlanningResult } from "@/lib/room-planner/tableZonePlanning";
 import { generateFreeAreaSeating, replanningImpact } from "@/lib/room-planner/planning";
+import { deleteFurnitureSelection, duplicateFurnitureSelection, furnitureSelectionBounds, furnitureSelectionConflicts, normalizeFurnitureSelection, selectFurnitureInMarquee, transformFurnitureSelection } from "@/lib/room-planner/furnitureSelection";
 
 const INITIAL_SCALE = 45;
 const MIN_SCALE = 12;
@@ -40,6 +41,9 @@ type ResizeCorner = "nw" | "ne" | "se" | "sw";
 type WorkflowStep = "room" | "furnishing" | "result";
 type Drag = { type: "pan"; startX: number; startY: number; camera: Camera }
   | { type: "point" | "object" | "start" | "end" | "block" | "seat" | "table" | "chair" | "zone"; id: string; at: { x: number; y: number }; original: RoomPlan }
+  | { type: "furniture"; ids: string[]; at: Position; original: RoomPlan }
+  | { type: "furnitureRotate"; ids: string[]; center: Position; startAngle: number; original: RoomPlan }
+  | { type: "marquee"; at: Position; current: Position; additive: boolean; initialIds: string[]; clickSelection: Selection }
   | { type: "zonePoint"; id: string; pointIndex: number; at: { x: number; y: number }; original: RoomPlan }
   | { type: "resize"; kind: "table" | "object" | "zone"; id: string; corner: ResizeCorner; original: RoomPlan }
   | { type: "rotate"; kind: "table" | "object" | "zone"; id: string; original: RoomPlan }
@@ -107,6 +111,10 @@ export default function RoomEditor2D() {
   const [measurementsVisible, setMeasurementsVisible] = useState(true);
   const [showDistances, setShowDistances] = useState(false);
   const [selection, setSelection] = useState<Selection>(null);
+  const [furnitureSelection, setFurnitureSelection] = useState<string[]>([]);
+  const [marquee, setMarquee] = useState<{ at: Position; current: Position } | null>(null);
+  const [previewConflicts, setPreviewConflicts] = useState<Set<string>>(() => new Set());
+  const [lastAutoFurnitureIds, setLastAutoFurnitureIds] = useState<string[]>([]);
   const [camera, setCamera] = useState<Camera>({ x: 0, y: 0, scale: INITIAL_SCALE });
   const [size, setSize] = useState({ width: 900, height: 580 });
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
@@ -198,7 +206,7 @@ export default function RoomEditor2D() {
     setApplicabilityConfirmed(project.settings.applicabilityConfirmed);
     setReservePercent(project.settings.reservePercent);
     setCalculated(null); setVariantCalculation(null); setActiveVariantId(null); setPreviewPlan(null); setLayoutDraft(null);
-    setSelection(null); setAisleStart(null); setZoneDraft([]); setHover(null); setActiveCheckId(null); setActiveSuggestionId(null); setNotice("");
+    setSelection(null); setFurnitureSelection([]); setMarquee(null); setPreviewConflicts(new Set()); setLastAutoFurnitureIds([]); setAisleStart(null); setZoneDraft([]); setHover(null); setActiveCheckId(null); setActiveSuggestionId(null); setNotice("");
     parameterHistory.current = new WeakMap();
     nextId.current = Math.max(0, ...[...project.plan.contour.points, ...project.plan.objects, ...(project.plan.tables ?? []), ...(project.plan.chairs ?? []), ...(project.plan.zones ?? [])].map((item) => Number(item.id.match(/(\d+)$/)?.[1] ?? 0))) + 1;
     setSaveStatus("saved");
@@ -302,6 +310,23 @@ export default function RoomEditor2D() {
     } catch (error) { setProjectError(error instanceof Error ? error.message : "Die Projektdatei konnte nicht importiert werden."); }
   };
   const add = (next: RoomPlan) => setHistory((current) => commit(current, next));
+  const setFurnitureIds = (ids: Iterable<string>, sourcePlan: RoomPlan = plan) => {
+    const normalized = normalizeFurnitureSelection(sourcePlan, ids);
+    setFurnitureSelection(normalized);
+    if (normalized.length !== 1) { setSelection(null); return; }
+    const id = normalized[0];
+    setSelection(sourcePlan.tables?.some((item) => item.id === id) ? { type: "table", id }
+      : sourcePlan.chairs?.some((item) => item.id === id) ? { type: "chair", id }
+      : sourcePlan.seating?.seats.some((item) => item.id === id) ? { type: "seat", id }
+      : null);
+  };
+  const clearFurnitureSelection = () => { setFurnitureSelection([]); setPreviewConflicts(new Set()); };
+  useEffect(() => {
+    setFurnitureSelection((current) => {
+      const normalized = normalizeFurnitureSelection(plan, current);
+      return normalized.length === current.length && normalized.every((id, index) => id === current[index]) ? current : normalized;
+    });
+  }, [plan]);
   const applyMeasurement = () => {
     if (!measurementEdit) return;
     const value = Number(measurementEdit.value.replace(",", "."));
@@ -378,13 +403,43 @@ export default function RoomEditor2D() {
     const copy = { ...source, id: `table-${nextId.current++}`, x: Number((source.x + .35).toFixed(2)), y: Number((source.y + .35).toFixed(2)), groupId: undefined, source: "manual" as const };
     add({ ...plan, tables: [...plan.tables, copy] }); setSelection({ type: "table", id: copy.id });
   };
+  const duplicateSelectedFurniture = () => {
+    if (!furnitureSelection.length) return;
+    const result = duplicateFurnitureSelection(plan, furnitureSelection, (kind) => `${kind}-${nextId.current++}`);
+    if (!result.selectedIds.length) return;
+    add(result.plan);
+    setFurnitureIds(result.selectedIds, result.plan);
+    setLastAutoFurnitureIds([]);
+    setNotice(`${result.selectedIds.length} Möbel dupliziert. Die Kopie ist ausgewählt und leicht versetzt.`);
+  };
+  const deleteSelectedFurniture = () => {
+    if (!furnitureSelection.length) return;
+    const next = deleteFurnitureSelection(plan, furnitureSelection);
+    if (next === plan) return;
+    add(next);
+    setFurnitureSelection([]);
+    setSelection(null);
+    setLastAutoFurnitureIds((current) => current.filter((id) => !furnitureSelection.includes(id)));
+    setNotice(`${furnitureSelection.length} Möbel gelöscht.`);
+  };
+  const rotateSelectedFurniture = (rotation = 90) => {
+    if (furnitureSelection.length < 2) return;
+    const next = transformFurnitureSelection(plan, furnitureSelection, { rotation });
+    const conflicts = furnitureSelectionConflicts(next, furnitureSelection);
+    if (conflicts.size) { setPreviewConflicts(conflicts); setNotice("Die Drehung würde mit Raumgrenze, Gang, Tür, Hindernis oder anderen Möbeln kollidieren."); return; }
+    add(next);
+    setPreviewConflicts(new Set());
+    setNotice(`${furnitureSelection.length} Möbel gemeinsam um ${rotation}° gedreht.`);
+  };
   const deleteSelection = () => {
+    if (furnitureSelection.length > 1) { deleteSelectedFurniture(); return; }
     if (selection?.type === "object") removeObject(selection.id);
     if (selection?.type === "table") removeTable(selection.id);
     if (selection?.type === "chair") { add({ ...plan, chairs: plan.chairs.filter(chair => chair.id !== selection.id), tableGroups: plan.tableGroups.map(group => ({ ...group, chairIds: group.chairIds.filter(id => id !== selection.id) })) }); setSelection(null); }
     if (selection?.type === "zone") removeZone(selection.id);
     if (selection?.type === "block" && plan.seating) { add({ ...plan, seating: removeBlock(plan.seating, selection.id) }); setSelection(null); }
     if (selection?.type === "seat" && plan.seating) { add({ ...plan, seating: removeSeat(plan.seating, selection.id) }); setSelection(null); }
+    if (selection?.type === "table" || selection?.type === "chair" || selection?.type === "seat") setFurnitureSelection([]);
   };
 
   useEffect(() => {
@@ -421,6 +476,9 @@ export default function RoomEditor2D() {
     setZoneDraft([]);
     setNotice("");
     setSelection(null);
+    setFurnitureSelection([]);
+    setMarquee(null);
+    setPreviewConflicts(new Set());
     setActiveVariantId(null);
     const next = action === "undo" ? undo(history) : redo(history);
     const parameters = parameterHistory.current.get(next.present);
@@ -432,18 +490,21 @@ export default function RoomEditor2D() {
   }, [history]);
   useEffect(() => {
     const keyDown = (event: KeyboardEvent) => {
-      if (event.code === "Space" && !(event.target instanceof HTMLInputElement)) { event.preventDefault(); setSpaceDown(true); }
+      const editing = event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLSelectElement || event.target instanceof HTMLElement && event.target.isContentEditable;
+      if (event.code === "Space" && !editing) { event.preventDefault(); setSpaceDown(true); }
       if (event.key === "Shift") setShiftDown(true);
+      if (editing && event.key !== "Escape") return;
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") { event.preventDefault(); historyAction(event.shiftKey ? "redo" : "undo"); }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "y") { event.preventDefault(); historyAction("redo"); }
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d" && selection?.type === "table") { event.preventDefault(); duplicateTable(selection.id); }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d" && furnitureSelection.length) { event.preventDefault(); duplicateSelectedFurniture(); }
+      else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d" && selection?.type === "table") { event.preventDefault(); duplicateTable(selection.id); }
       if (event.key === "Escape" && helpLayerKind) {
         event.preventDefault();
         setHelpCloseSignal((value) => value + 1);
-        if (helpLayerKind !== "onboarding") { event.stopImmediatePropagation(); return; }
+        event.stopImmediatePropagation();
       }
-      if (event.key === "Escape") { dragRef.current = null; setPreviewPlan(null); setSnapPreview(null); setHover(null); setSelection(null); setAisleStart(null); setZoneDraft([]); setMeasurementEdit(null); setToolOptions(null); setLayoutDraft(null); setReplanDialogOpen(false); setZoneFillConfirm(null); }
-      if ((event.key === "Delete" || event.key === "Backspace") && selection && !(event.target instanceof HTMLInputElement) && !(event.target instanceof HTMLSelectElement)) { event.preventDefault(); deleteSelection(); }
+      if (event.key === "Escape") { dragRef.current = null; setPreviewPlan(null); setSnapPreview(null); setPreviewConflicts(new Set()); setMarquee(null); setHover(null); setSelection(null); setFurnitureSelection([]); setAisleStart(null); setZoneDraft([]); setMeasurementEdit(null); setToolOptions(null); setLayoutDraft(null); setReplanDialogOpen(false); setZoneFillConfirm(null); }
+      if ((event.key === "Delete" || event.key === "Backspace") && (selection || furnitureSelection.length)) { event.preventDefault(); deleteSelection(); }
     };
     const keyUp = (event: KeyboardEvent) => { if (event.code === "Space") setSpaceDown(false); if (event.key === "Shift") setShiftDown(false); };
     const blur = () => { setSpaceDown(false); setShiftDown(false); };
@@ -451,7 +512,7 @@ export default function RoomEditor2D() {
     return () => { window.removeEventListener("keydown", keyDown); window.removeEventListener("keyup", keyUp); window.removeEventListener("blur", blur); };
   // The handler intentionally tracks the current plan and selection for editor shortcuts.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [historyAction, selection, plan, helpLayerKind]);
+  }, [historyAction, selection, furnitureSelection, plan, helpLayerKind]);
 
   const screen = (point: Pick<Point2D, "x" | "y">) => ({ x: size.width / 2 + (point.x - camera.x) * camera.scale, y: size.height / 2 + (point.y - camera.y) * camera.scale });
   const world = (x: number, y: number) => ({ x: camera.x + (x - size.width / 2) / camera.scale, y: camera.y + (y - size.height / 2) / camera.scale });
@@ -492,7 +553,7 @@ export default function RoomEditor2D() {
     const centerLocal = { x: sx * width / 2, y: sy * depth / 2 };
     return { ...item, x: Number((opposite.x + centerLocal.x * c - centerLocal.y * s).toFixed(3)), y: Number((opposite.y + centerLocal.x * s + centerLocal.y * c).toFixed(3)), width: Number(width.toFixed(3)), depth: Number(depth.toFixed(3)) };
   };
-  const dragged = (drag: Extract<Drag, { original: RoomPlan }>, at: { x: number; y: number }): RoomPlan => {
+  const dragged = (drag: Extract<Drag, { id: string; original: RoomPlan }>, at: { x: number; y: number }): RoomPlan => {
     if (drag.type === "resize") {
       if (drag.kind === "table") return { ...drag.original, tables: (drag.original.tables ?? []).map(item => item.id === drag.id ? { ...resizeItem(item, drag.corner, at), edited: true } : item) };
       if (drag.kind === "zone") return { ...drag.original, zones: (drag.original.zones ?? []).map(item => item.id === drag.id && item.geometry.kind === "rectangle" ? (() => { const resized = resizeItem({ ...item.geometry, rotation: item.rotation }, drag.corner, at); return { ...item, geometry: { ...item.geometry, x: resized.x, y: resized.y, width: resized.width, depth: resized.depth } }; })() : item) };
@@ -598,6 +659,7 @@ export default function RoomEditor2D() {
     const resizeId = target.getAttribute("data-resize-id"), resizeKind = target.getAttribute("data-resize-kind") as "table" | "object" | "zone" | null;
     const corner = target.getAttribute("data-corner") as ResizeCorner | null;
     const rotateId = target.getAttribute("data-rotate-id"), rotateKind = target.getAttribute("data-rotate-kind") as "table" | "object" | "zone" | null;
+    const furnitureRotate = target.getAttribute("data-furniture-rotate");
     const draftHandle = target.getAttribute("data-draft-handle") as "move" | "rotate" | "scale" | null;
     if (layoutDraft && draftHandle) {
       dragRef.current = { type: draftHandle === "move" ? "layoutMove" : draftHandle === "rotate" ? "layoutRotate" : "layoutScale", at: world(at.x, at.y), original: layoutTransform };
@@ -610,30 +672,66 @@ export default function RoomEditor2D() {
       return;
     }
     if (tool === "select") {
-      if (zoneId && zonePointIndex !== null) { setSelection({ type: "zone", id: zoneId }); dragRef.current = { type: "zonePoint", id: zoneId, pointIndex: Number(zonePointIndex), at: world(at.x, at.y), original: roomRef.current }; event.currentTarget.setPointerCapture(event.pointerId); }
+      const pointer = world(at.x, at.y);
+      if (furnitureRotate && furnitureSelection.length > 1) {
+        const bounds = furnitureSelectionBounds(plan, furnitureSelection);
+        if (!bounds) return;
+        dragRef.current = { type: "furnitureRotate", ids: furnitureSelection, center: bounds.center, startAngle: Math.atan2(pointer.y - bounds.center.y, pointer.x - bounds.center.x), original: roomRef.current };
+        event.currentTarget.setPointerCapture(event.pointerId);
+        return;
+      }
+      const furnitureId = tableId ?? chairId ?? seatId;
+      if (furnitureId) {
+        if (seatId && event.altKey) { setFurnitureIds([seatId]); return; }
+        if (seatId && selectedBlock && !event.altKey && !event.shiftKey && plan.seating) {
+          clearFurnitureSelection();
+          setSelection({ type: "block", id: selectedBlock.id });
+          dragRef.current = { type: "block", id: selectedBlock.id, at: pointer, original: roomRef.current };
+          event.currentTarget.setPointerCapture(event.pointerId);
+          return;
+        }
+        if (event.shiftKey) {
+          const next = furnitureSelection.includes(furnitureId) ? furnitureSelection.filter((id) => id !== furnitureId) : [...furnitureSelection, furnitureId];
+          setFurnitureIds(next);
+          return;
+        }
+        const ids = furnitureSelection.includes(furnitureId) ? furnitureSelection : [furnitureId];
+        setFurnitureIds(ids);
+        if (ids.length > 1) dragRef.current = { type: "furniture", ids, at: pointer, original: roomRef.current };
+        else if (tableId) dragRef.current = { type: "table", id: tableId, at: pointer, original: roomRef.current };
+        else if (chairId) dragRef.current = { type: "chair", id: chairId, at: pointer, original: roomRef.current };
+        else if (seatId && plan.seating) dragRef.current = { type: "seat", id: seatId, at: pointer, original: roomRef.current };
+        if (dragRef.current) event.currentTarget.setPointerCapture(event.pointerId);
+        return;
+      }
+      clearFurnitureSelection();
+      if (zoneId && zonePointIndex !== null) { setSelection({ type: "zone", id: zoneId }); dragRef.current = { type: "zonePoint", id: zoneId, pointIndex: Number(zonePointIndex), at: pointer, original: roomRef.current }; event.currentTarget.setPointerCapture(event.pointerId); }
       else if (resizeId && resizeKind && corner) { dragRef.current = { type: "resize", kind: resizeKind, id: resizeId, corner, original: roomRef.current }; event.currentTarget.setPointerCapture(event.pointerId); }
       else if (rotateId && rotateKind) { dragRef.current = { type: "rotate", kind: rotateKind, id: rotateId, original: roomRef.current }; event.currentTarget.setPointerCapture(event.pointerId); }
-      else if (tableId) { setSelection({ type: "table", id: tableId }); dragRef.current = { type: "table", id: tableId, at: world(at.x, at.y), original: roomRef.current }; event.currentTarget.setPointerCapture(event.pointerId); }
-      else if (chairId) { setSelection({ type: "chair", id: chairId }); dragRef.current = { type: "chair", id: chairId, at: world(at.x, at.y), original: roomRef.current }; event.currentTarget.setPointerCapture(event.pointerId); }
-      else if (zoneId) { setSelection({ type: "zone", id: zoneId }); dragRef.current = { type: "zone", id: zoneId, at: world(at.x, at.y), original: roomRef.current }; event.currentTarget.setPointerCapture(event.pointerId); }
-      else if (seatId && event.altKey) { setSelection({ type: "seat", id: seatId }); }
-      else if (seatId && selection?.type === "seat" && plan.seating) {
-        dragRef.current = { type: "seat", id: seatId, at: world(at.x, at.y), original: roomRef.current };
+      else if (zoneId && event.altKey) { setSelection({ type: "zone", id: zoneId }); dragRef.current = { type: "zone", id: zoneId, at: pointer, original: roomRef.current }; event.currentTarget.setPointerCapture(event.pointerId); }
+      else if (zoneId) {
+        dragRef.current = { type: "marquee", at: pointer, current: pointer, additive: event.shiftKey, initialIds: furnitureSelection, clickSelection: { type: "zone", id: zoneId } };
+        setMarquee({ at: pointer, current: pointer });
         event.currentTarget.setPointerCapture(event.pointerId);
       }
       else if (blockId && plan.seating) {
         setSelection({ type: "block", id: blockId });
-        dragRef.current = { type: "block", id: blockId, at: world(at.x, at.y), original: roomRef.current };
+        dragRef.current = { type: "block", id: blockId, at: pointer, original: roomRef.current };
         event.currentTarget.setPointerCapture(event.pointerId);
       } else if (objectId) {
         setSelection({ type: "object", id: objectId });
-        dragRef.current = { type: handle ?? "object", id: objectId, at: world(at.x, at.y), original: roomRef.current };
+        dragRef.current = { type: handle ?? "object", id: objectId, at: pointer, original: roomRef.current };
         event.currentTarget.setPointerCapture(event.pointerId);
       } else if (pointId) {
         setSelection({ type: "point", id: pointId });
-        dragRef.current = { type: "point", id: pointId, at: world(at.x, at.y), original: roomRef.current };
+        dragRef.current = { type: "point", id: pointId, at: pointer, original: roomRef.current };
         event.currentTarget.setPointerCapture(event.pointerId);
-      } else setSelection(wallId ? { type: "wall", id: wallId } : null);
+      } else if (wallId) setSelection({ type: "wall", id: wallId });
+      else {
+        dragRef.current = { type: "marquee", at: pointer, current: pointer, additive: event.shiftKey, initialIds: furnitureSelection, clickSelection: null };
+        setMarquee({ at: pointer, current: pointer });
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }
       return;
     }
     if (tool === "table" && areaMode === "table") {
@@ -703,6 +801,22 @@ export default function RoomEditor2D() {
     } else if (drag?.type === "layoutScale") {
       const point = world(at.x, at.y), before = Math.max(.01, Math.hypot(drag.at.x - drag.original.center.x, drag.at.y - drag.original.center.y));
       setLayoutTransform({ ...drag.original, spread: Math.max(.45, Math.min(1.8, drag.original.spread * Math.hypot(point.x - drag.original.center.x, point.y - drag.original.center.y) / before)) });
+    } else if (drag?.type === "furniture") {
+      const point = world(at.x, at.y);
+      const moved = transformFurnitureSelection(drag.original, drag.ids, { dx: point.x - drag.at.x, dy: point.y - drag.at.y });
+      setPreviewPlan(moved);
+      setPreviewConflicts(furnitureSelectionConflicts(moved, drag.ids));
+    } else if (drag?.type === "furnitureRotate") {
+      const point = world(at.x, at.y);
+      let rotation = (Math.atan2(point.y - drag.center.y, point.x - drag.center.x) - drag.startAngle) * 180 / Math.PI;
+      rotation = event.shiftKey ? Math.round(rotation / 15) * 15 : Math.round(rotation);
+      const moved = transformFurnitureSelection(drag.original, drag.ids, { rotation, center: drag.center });
+      setPreviewPlan(moved);
+      setPreviewConflicts(furnitureSelectionConflicts(moved, drag.ids));
+    } else if (drag?.type === "marquee") {
+      const current = world(at.x, at.y);
+      drag.current = current;
+      setMarquee({ at: drag.at, current });
     } else if (drag && "id" in drag) {
       const point = world(at.x, at.y);
       const moved = dragged(drag, point);
@@ -719,7 +833,30 @@ export default function RoomEditor2D() {
   };
   const onPointerUp = (event: ReactPointerEvent<SVGSVGElement>) => {
     const drag = dragRef.current;
-    if (drag && "id" in drag) {
+    if (drag?.type === "furniture" || drag?.type === "furnitureRotate") {
+      const at = local(event), point = world(at.x, at.y);
+      const next = drag.type === "furniture"
+        ? transformFurnitureSelection(drag.original, drag.ids, { dx: point.x - drag.at.x, dy: point.y - drag.at.y })
+        : transformFurnitureSelection(drag.original, drag.ids, { rotation: (() => { const raw = (Math.atan2(point.y - drag.center.y, point.x - drag.center.x) - drag.startAngle) * 180 / Math.PI; return event.shiftKey ? Math.round(raw / 15) * 15 : Math.round(raw); })(), center: drag.center });
+      const conflicts = furnitureSelectionConflicts(next, drag.ids);
+      if (JSON.stringify(next) !== JSON.stringify(drag.original)) {
+        if (conflicts.size) setNotice("Die Auswahl kollidiert mit Raumgrenze, Tür, Gang, Hindernis oder nicht ausgewählten Möbeln. Die Änderung wurde nicht übernommen.");
+        else { add(next); setNotice(""); }
+      }
+      setPreviewPlan(null);
+      setPreviewConflicts(new Set());
+    } else if (drag?.type === "marquee") {
+      const at = local(event), current = world(at.x, at.y);
+      const movedPixels = Math.hypot((current.x - drag.at.x) * camera.scale, (current.y - drag.at.y) * camera.scale);
+      if (movedPixels < 3) {
+        if (!drag.additive) { setFurnitureSelection([]); setSelection(drag.clickSelection); }
+      } else {
+        const found = selectFurnitureInMarquee(plan, drag.at, current);
+        setFurnitureIds(drag.additive ? [...drag.initialIds, ...found] : found);
+      }
+      setMarquee(null);
+      setPreviewConflicts(new Set());
+    } else if (drag && "id" in drag) {
       const at = local(event);
       const moved = dragged(drag, world(at.x, at.y));
       const proposed = drag.type === "table" ? (moved.tables ?? []).find((table) => table.id === drag.id) : undefined;
@@ -747,7 +884,7 @@ export default function RoomEditor2D() {
     dragRef.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
-  const reset = () => { add(emptyPlan()); setSelection(null); setPreviewPlan(null); setSnapPreview(null); setLayoutDraft(null); setAisleStart(null); setZoneDraft([]); setHover(null); setNotice(""); setTool("wall"); setCamera({ x: 0, y: 0, scale: INITIAL_SCALE }); };
+  const reset = () => { add(emptyPlan()); setSelection(null); setFurnitureSelection([]); setMarquee(null); setPreviewConflicts(new Set()); setLastAutoFurnitureIds([]); setPreviewPlan(null); setSnapPreview(null); setLayoutDraft(null); setAisleStart(null); setZoneDraft([]); setHover(null); setNotice(""); setTool("wall"); setCamera({ x: 0, y: 0, scale: INITIAL_SCALE }); };
   const selectedPoint = selection?.type === "point" ? pointById(shownRoom, selection.id) : null;
   const selectedWall = selection?.type === "wall" ? shownRoom.walls.find((wall) => wall.id === selection.id) : null;
   const wallStart = selectedWall && pointById(shownRoom, selectedWall.startPointId);
@@ -772,6 +909,8 @@ export default function RoomEditor2D() {
   const highlightedObjects = new Set(activeCheck?.affectedIds.filter((id) => shownPlan.objects.some((object) => object.id === id)) ?? []);
   const conflictedTables = new Set(issues.filter(issue => issue.objectId.startsWith("table-")).map(issue => issue.objectId));
   const capacity = planCapacity(shownPlan);
+  const selectedFurnitureIds = new Set(furnitureSelection);
+  const selectedFurnitureBounds = furnitureSelectionBounds(shownPlan, furnitureSelection);
   const selectedResizable = selectedTable ? { kind: "table" as const, id: selectedTable.id, points: tablePolygon(selectedTable), center: selectedTable }
     : selectedObject && isBlockingObject(selectedObject) ? { kind: "object" as const, id: selectedObject.id, points: obstaclePolygon(selectedObject), center: selectedObject }
     : selectedZone?.geometry.kind === "rectangle" ? { kind: "zone" as const, id: selectedZone.id, points: zonePolygon(selectedZone), center: selectedZone.geometry } : null;
@@ -793,19 +932,24 @@ export default function RoomEditor2D() {
   };
   const applyTableDraft = () => {
     if (!transformedDraft || draftConflicts.size) return;
-    add({ ...plan, tables: [...plan.tables, ...transformedDraft.tables], chairs: [...plan.chairs, ...transformedDraft.chairs], tableGroups: [...plan.tableGroups, ...transformedDraft.groups] });
-    setLayoutDraft(null); setSelection(transformedDraft.tables[0] ? { type: "table", id: transformedDraft.tables[0].id } : null); setNotice(`${transformedDraft.tables.length} Tische vollständig übernommen.`);
+    const next = { ...plan, tables: [...plan.tables, ...transformedDraft.tables], chairs: [...plan.chairs, ...transformedDraft.chairs], tableGroups: [...plan.tableGroups, ...transformedDraft.groups] };
+    const createdIds = [...transformedDraft.tables.map((item) => item.id), ...transformedDraft.chairs.map((item) => item.id)];
+    add(next);
+    setLayoutDraft(null); setFurnitureSelection([]); setSelection(transformedDraft.tables[0] ? { type: "table", id: transformedDraft.tables[0].id } : null); setLastAutoFurnitureIds(createdIds); setNotice(`${transformedDraft.tables.length} Tische vollständig übernommen.`);
   };
   const applyZoneFill = (result: TableZonePlanningResult) => {
     if (!selectedZone || !result.tables.length) { setNotice(result.message); setZoneFillConfirm(null); return; }
     const removed = new Set(result.replaceableTableIds);
     const removedGroups = new Set(plan.tables.filter((table) => removed.has(table.id) && table.groupId).map((table) => table.groupId!));
-    add({
+    const next = {
       ...plan,
       tables: [...plan.tables.filter((table) => !removed.has(table.id)), ...result.tables],
       chairs: [...plan.chairs.filter((chair) => !chair.groupId || !removedGroups.has(chair.groupId)), ...result.chairs],
       tableGroups: [...plan.tableGroups.filter((group) => !removedGroups.has(group.id)), ...result.groups],
-    });
+    };
+    add(next);
+    setFurnitureSelection([]);
+    setLastAutoFurnitureIds([...result.tables.map((item) => item.id), ...result.chairs.map((item) => item.id)]);
     setZoneFillConfirm(null);
     setZoneSetupOpen(false);
     setNotice(`${result.message}${result.protectedTableIds.length ? ` ${result.protectedTableIds.length} manuell bearbeitete oder geschützte Tische blieben unverändert.` : ""} Laufzeit: ${result.durationMs.toLocaleString("de-DE")} ms.`);
@@ -921,7 +1065,7 @@ export default function RoomEditor2D() {
     <div className="planner-toolbar relative z-20 flex flex-wrap items-center gap-1 border-b border-premium-beige bg-white/90 px-2 py-1">
       <div className="mr-auto flex flex-wrap gap-1" aria-label="Werkzeuge">
         {TOOL_INFO.map(({ name, label, help }) => <div key={name} className="group relative">
-          <button type="button" aria-label={label} title={label} aria-pressed={tool === name} aria-expanded={TOOLS_WITH_OPTIONS.includes(name) ? toolOptions === name : undefined} aria-describedby={`tool-help-${name}`} onClick={() => { setTool(name); setAisleStart(null); setZoneDraft([]); if (name === "chair") setSelection(null); setToolOptions(TOOLS_WITH_OPTIONS.includes(name) ? toolOptions === name ? null : name : null); if (name === "restricted") setObstacleElement("reservedArea"); }} className={`relative flex h-9 w-10 items-center justify-center rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-premium-forest ${tool === name ? "bg-premium-forest text-white" : "border border-premium-beige text-premium-charcoal"}`}><ToolIcon name={name} />{TOOLS_WITH_OPTIONS.includes(name) ? <span aria-hidden="true" className="absolute bottom-0 right-0.5 text-[9px]">▾</span> : null}{name === "door" && doorRole !== "normal" ? <span aria-hidden="true" className="absolute -right-1 -top-1 rounded bg-amber-500 px-0.5 text-[8px] font-bold text-white">{{ entrance: "E", exit: "A", emergency_exit: "N" }[doorRole]}</span> : null}</button>
+          <button type="button" aria-label={label} title={label} aria-pressed={tool === name} aria-expanded={TOOLS_WITH_OPTIONS.includes(name) ? toolOptions === name : undefined} aria-describedby={`tool-help-${name}`} onClick={() => { setTool(name); setAisleStart(null); setZoneDraft([]); if (name !== "select") { setSelection(null); clearFurnitureSelection(); } setToolOptions(TOOLS_WITH_OPTIONS.includes(name) ? toolOptions === name ? null : name : null); if (name === "restricted") setObstacleElement("reservedArea"); }} className={`relative flex h-9 w-10 items-center justify-center rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-premium-forest ${tool === name ? "bg-premium-forest text-white" : "border border-premium-beige text-premium-charcoal"}`}><ToolIcon name={name} />{TOOLS_WITH_OPTIONS.includes(name) ? <span aria-hidden="true" className="absolute bottom-0 right-0.5 text-[9px]">▾</span> : null}{name === "door" && doorRole !== "normal" ? <span aria-hidden="true" className="absolute -right-1 -top-1 rounded bg-amber-500 px-0.5 text-[8px] font-bold text-white">{{ entrance: "E", exit: "A", emergency_exit: "N" }[doorRole]}</span> : null}</button>
           <div id={`tool-help-${name}`} role="tooltip" className={`pointer-events-none absolute left-0 top-full z-40 mt-1 hidden w-52 rounded-lg border border-premium-beige bg-white p-2 text-xs text-premium-charcoal shadow-lg ${toolOptions === name ? "" : "group-hover:block group-focus-within:block"}`}><strong>{label}</strong><p>{help}</p></div>
         </div>)}
       </div>
@@ -961,16 +1105,16 @@ export default function RoomEditor2D() {
         <rect width={size.width} height={size.height} fill="#f6f4ed" />
         <Grid camera={camera} size={size} />
         {shownRoom.closed && shownRoom.points.length >= 3 ? <polygon points={shownRoom.points.map((point) => { const p = coords.get(point.id)!; return `${p.x},${p.y}`; }).join(" ")} fill={errors.length ? "#c77c6c" : "#9ab393"} fillOpacity="0.24" /> : null}
-        <g aria-label="Bereiche">{shownPlan.zones.map(zone => { const selected = selection?.type === "zone" && selection.id === zone.id, conflict = issues.some(issue => issue.objectId === zone.id && issue.severity === "error"), center = zoneCenter(zone), points = zonePolygon(zone); return <g key={zone.id}><polygon data-zone-id={zone.id} points={shapePoints(points)} fill={zone.type === "tables" ? "#d7b56d" : "#91a99a"} fillOpacity="0.25" stroke={conflict ? "#b53b32" : selected ? "#bd7647" : "#8a6a2f"} strokeWidth={selected || conflict ? 3 : 2} strokeDasharray="8 5" className={tool === "select" ? "cursor-move" : ""} /><text x={screen(center).x} y={screen(center).y + 4} textAnchor="middle" fontSize="12" fontWeight="700" fill="#684d20" pointerEvents="none">{zone.type === "tables" ? "Tischbereich" : "Bereich"}</text>{selected && zone.geometry.kind === "polygon" && points.map((point, index) => <circle key={index} data-zone-vertex-id={zone.id} data-zone-point-index={index} cx={screen(point).x} cy={screen(point).y} r="7" fill="white" stroke="#bd7647" strokeWidth="3" className="cursor-move" />)}</g>; })}</g>
+        <g aria-label="Bereiche">{shownPlan.zones.map(zone => { const selected = selection?.type === "zone" && selection.id === zone.id, conflict = issues.some(issue => issue.objectId === zone.id && issue.severity === "error"), center = zoneCenter(zone), points = zonePolygon(zone); return <g key={zone.id}><polygon data-zone-id={zone.id} points={shapePoints(points)} fill={zone.type === "tables" ? "#d7b56d" : "#91a99a"} fillOpacity="0.25" stroke={conflict ? "#b53b32" : selected ? "#bd7647" : "#8a6a2f"} strokeWidth={selected || conflict ? 3 : 2} strokeDasharray="8 5" className={tool === "select" ? "cursor-crosshair" : ""} /><text x={screen(center).x} y={screen(center).y + 4} textAnchor="middle" fontSize="12" fontWeight="700" fill="#684d20" pointerEvents="none">{zone.type === "tables" ? "Tischbereich" : "Bereich"}</text>{selected && zone.geometry.kind === "polygon" && points.map((point, index) => <circle key={index} data-zone-vertex-id={zone.id} data-zone-point-index={index} cx={screen(point).x} cy={screen(point).y} r="7" fill="white" stroke="#bd7647" strokeWidth="3" className="cursor-move" />)}</g>; })}</g>
         {areaPreviewZone && <g pointerEvents="none"><polygon points={shapePoints(zonePolygon(areaPreviewZone))} fill="#d7b56d" fillOpacity="0.2" stroke="#8a6a2f" strokeWidth="2" strokeDasharray="8 5" /><polyline points={shapePoints(zonePolygon(areaPreviewZone))} fill="none" stroke="#8a6a2f" strokeWidth="2" />{zoneDraft.map((point, index) => <circle key={index} cx={screen(point).x} cy={screen(point).y} r={index === 0 && zoneDraft.length >= 3 ? 8 : 5} fill={index === 0 ? "#bd7647" : "white"} stroke="#684d20" strokeWidth="2" />)}</g>}
         {snapPreview && <g aria-label={snapPreview.valid ? "Gültige Snapping-Vorschau" : "Ungültige Snapping-Vorschau"} pointerEvents="none"><line x1={screen(snapPreview.targetEdge.start).x} y1={screen(snapPreview.targetEdge.start).y} x2={screen(snapPreview.targetEdge.end).x} y2={screen(snapPreview.targetEdge.end).y} stroke={snapPreview.valid ? "#2f7d5b" : "#b53b32"} strokeWidth="5" strokeLinecap="round" /><polygon points={shapePoints(tablePolygon(snapPreview.table))} fill={snapPreview.valid ? "#75a98d" : "#d56b60"} fillOpacity=".18" stroke={snapPreview.valid ? "#2f7d5b" : "#b53b32"} strokeWidth="2" strokeDasharray="6 4" /></g>}
-        <g aria-label="Tische">{shownPlan.tables.map(table => { const p = screen(table), width = table.width * camera.scale, depth = table.depth * camera.scale, selected = selection?.type === "table" && selection.id === table.id, conflict = conflictedTables.has(table.id); return <g key={table.id} className={tool === "select" ? "cursor-move" : ""}><polygon data-table-id={table.id} points={shapePoints(tablePolygon(table))} fill="#d9c49a" stroke={conflict ? "#b53b32" : selected ? "#bd7647" : "#725b36"} strokeWidth={selected || conflict ? 3 : 1.5} /><path d={`M${p.x-width*.28} ${p.y}H${p.x+width*.28}M${p.x} ${p.y-depth*.22}V${p.y+depth*.22}`} transform={`rotate(${table.rotation} ${p.x} ${p.y})`} stroke="#816b43" strokeWidth="1" pointerEvents="none" /></g>; })}</g>
-        <g aria-label="Tischstühle">{shownPlan.chairs.map(chair => { const p = screen(chair), w = chair.width * camera.scale, d = chair.depth * camera.scale; return <rect key={chair.id} data-chair-id={chair.id} x={p.x-w/2} y={p.y-d/2} width={w} height={d} rx="3" transform={`rotate(${chair.rotation} ${p.x} ${p.y})`} fill={selection?.type === "chair" && selection.id === chair.id ? "#bd7647" : "#557a69"} stroke="#fff" className={tool === "select" ? "cursor-move" : ""} />; })}</g>
+        <g aria-label="Tische">{shownPlan.tables.map(table => { const p = screen(table), width = table.width * camera.scale, depth = table.depth * camera.scale, selected = selectedFurnitureIds.has(table.id) || selection?.type === "table" && selection.id === table.id, conflict = conflictedTables.has(table.id) || previewConflicts.has(table.id); return <g key={table.id} className={tool === "select" ? "cursor-move" : ""}><polygon data-table-id={table.id} points={shapePoints(tablePolygon(table))} fill={conflict ? "#f1b4aa" : "#d9c49a"} stroke={conflict ? "#b53b32" : selected ? "#bd7647" : "#725b36"} strokeWidth={selected || conflict ? 3 : 1.5} /><path d={`M${p.x-width*.28} ${p.y}H${p.x+width*.28}M${p.x} ${p.y-depth*.22}V${p.y+depth*.22}`} transform={`rotate(${table.rotation} ${p.x} ${p.y})`} stroke="#816b43" strokeWidth="1" pointerEvents="none" /></g>; })}</g>
+        <g aria-label="Tischstühle">{shownPlan.chairs.map(chair => { const p = screen(chair), w = chair.width * camera.scale, d = chair.depth * camera.scale, selected = selectedFurnitureIds.has(chair.id) || selection?.type === "chair" && selection.id === chair.id, conflict = previewConflicts.has(chair.id); return <rect key={chair.id} data-chair-id={chair.id} x={p.x-w/2} y={p.y-d/2} width={w} height={d} rx="3" transform={`rotate(${chair.rotation} ${p.x} ${p.y})`} fill={conflict ? "#d56b60" : selected ? "#bd7647" : "#557a69"} stroke={conflict ? "#8f251f" : "#fff"} strokeWidth={selected || conflict ? 2.5 : 1} className={tool === "select" ? "cursor-move" : ""} />; })}</g>
         {transformedDraft && <g aria-label="Vorschau der Tischanordnung">
           {transformedDraft.tables.map(table => <polygon key={table.id} data-draft-table-id={table.id} data-draft-handle="move" points={shapePoints(tablePolygon(table))} fill={draftConflicts.has(table.id) ? "#f4b4aa" : "#d9c49a"} fillOpacity="0.38" stroke={draftConflicts.has(table.id) ? "#b53b32" : "#725b36"} strokeWidth="2" strokeDasharray="7 5" className="cursor-move" />)}
           {transformedDraft.chairs.map(chair => { const p = screen(chair), w = chair.width * camera.scale, d = chair.depth * camera.scale; return <rect key={chair.id} x={p.x-w/2} y={p.y-d/2} width={w} height={d} transform={`rotate(${chair.rotation} ${p.x} ${p.y})`} fill="#557a69" fillOpacity=".28" stroke="#405b49" strokeDasharray="4 3" pointerEvents="none" />; })}
         </g>}
-        <g aria-label="Berechnete Sitzplätze">{seatingPaths.map((block, index) => <g key={block.id}><path data-block-id={block.id} d={block.rectangles} fill={highlightedBlocks.has(block.id) || selection?.type === "block" && selection.id === block.id ? "#bf6b30" : index % 2 ? "#477b70" : "#405b49"} stroke="#fff" strokeWidth="1" className={tool === "select" && plan.seating ? "cursor-move" : ""} /><path d={block.backs} fill="none" stroke="#d6ece0" strokeWidth="2" pointerEvents="none" /></g>)}{seating?.seats.filter((seat) => highlightedSeats.has(seat.id) || currentAnalysis?.collisionSeatIds.includes(seat.id) || selection?.type === "seat" && selection.id === seat.id).map((seat) => { const p = screen(seat); return <circle key={seat.id} cx={p.x} cy={p.y} r={Math.max(5, seatingRules.chairWidth * camera.scale / 2)} fill="#e58c39" fillOpacity="0.8" pointerEvents="none" />; })}{selectedBlock?.seats.map((seat) => { const p = screen(seat); return <circle key={seat.id} data-seat-id={seat.id} data-block-id={selectedBlock.id} cx={p.x} cy={p.y} r={Math.max(5, seatingRules.chairWidth * camera.scale / 2)} fill="transparent" className="cursor-move" />; })}</g>
+        <g aria-label="Berechnete Sitzplätze">{seatingPaths.map((block, index) => <g key={block.id}><path data-block-id={block.id} d={block.rectangles} fill={highlightedBlocks.has(block.id) || selection?.type === "block" && selection.id === block.id ? "#bf6b30" : index % 2 ? "#477b70" : "#405b49"} stroke="#fff" strokeWidth="1" className={tool === "select" && plan.seating ? "cursor-move" : ""} /><path d={block.backs} fill="none" stroke="#d6ece0" strokeWidth="2" pointerEvents="none" /></g>)}{seating?.seats.filter((seat) => selectedFurnitureIds.has(seat.id) || selectedBlock?.seats.some((item) => item.id === seat.id) || highlightedSeats.has(seat.id) || currentAnalysis?.collisionSeatIds.includes(seat.id)).map((seat) => { const selected = selectedFurnitureIds.has(seat.id) || selection?.type === "seat" && selection.id === seat.id, conflict = previewConflicts.has(seat.id), highlighted = highlightedSeats.has(seat.id) || currentAnalysis?.collisionSeatIds.includes(seat.id); return <polygon key={`seat-hit-${seat.id}`} data-seat-id={seat.id} points={shapePoints(rotatedRectangle({ ...seat, width: seating.rules.chairWidth, depth: seating.rules.chairDepth }))} fill={conflict ? "#d56b60" : selected || highlighted ? "#e58c39" : "transparent"} fillOpacity={selected || highlighted || conflict ? .78 : 0} stroke={conflict ? "#8f251f" : selected ? "#f8d2b4" : "transparent"} strokeWidth={selected || conflict ? 2 : 0} className={tool === "select" ? "cursor-move" : ""} />; })}</g>
         {selectedSeat && !activeVariant && <circle data-seat-id={selectedSeat.id} cx={screen(selectedSeat).x} cy={screen(selectedSeat).y} r={Math.max(8, seatingRules.chairWidth * camera.scale / 2)} fill="transparent" className="cursor-move" />}
         {activeSuggestion && <g pointerEvents="none" aria-label="Vorschau des Gangvorschlags"><polygon points={shapePoints(aislePolygon({ id: activeSuggestion.id, type: "aisle", start: activeSuggestion.start, end: activeSuggestion.end, width: activeSuggestion.width }))} fill="#df9a45" fillOpacity="0.42" stroke="#ac5b1d" strokeWidth="3" strokeDasharray="8 5" /></g>}
         {shownPlan.objects.filter((object): object is AisleObject => object.type === "aisle").map((object) => { const proposed = object.source === "generated"; return <g key={object.id}><polygon data-object-id={object.id} points={shapePoints(aislePolygon(object))} fill={proposed ? "#df9a45" : "#5596a0"} fillOpacity="0.38" stroke={proposed ? "#ac5b1d" : highlightedObjects.has(object.id) || selection?.id === object.id ? "#bd7647" : "#357682"} strokeWidth={highlightedObjects.has(object.id) || selection?.id === object.id ? 3 : 1.5} strokeDasharray={proposed ? "8 5" : undefined} className={tool === "select" && !activeVariant ? "cursor-move" : ""} /><line x1={screen(object.start).x} y1={screen(object.start).y} x2={screen(object.end).x} y2={screen(object.end).y} stroke="#357682" strokeDasharray="5 4" pointerEvents="none" />{!activeVariant && selection?.id === object.id && (["start", "end"] as const).map((end) => <circle key={end} data-object-id={object.id} data-handle={end} cx={screen(object[end]).x} cy={screen(object[end]).y} r="7" fill="white" stroke="#bd7647" strokeWidth="3" className="cursor-move" />)}</g>; })}
@@ -986,6 +1130,12 @@ export default function RoomEditor2D() {
         </g>; })}
         {shownPlan.objects.filter((object) => object.type === "door").map((object) => { if (object.type !== "door") return null; const segment = doorSegment(shownRoom, object); if (!segment) return null; const a = screen(segment.start), b = screen(segment.end), length = Math.hypot(b.x - a.x, b.y - a.y) || 1, nx = -(b.y - a.y) / length, ny = (b.x - a.x) / length; return <g key={object.id}><line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#f6f4ed" strokeWidth="9" pointerEvents="none" /><line x1={a.x} y1={a.y} x2={a.x + nx * Math.min(length, 30)} y2={a.y + ny * Math.min(length, 30)} stroke="#347b7a" strokeWidth="3" pointerEvents="none" /><line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#347b7a" strokeWidth="2" strokeDasharray="5 4" pointerEvents="none" /><line data-object-id={object.id} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="transparent" strokeWidth="22" className={tool === "select" ? "cursor-move" : ""} /><circle cx={(a.x + b.x) / 2} cy={(a.y + b.y) / 2} r={selection?.id === object.id ? 5 : 3} fill="#347b7a" pointerEvents="none" /></g>; })}
         {shownPlan.objects.filter((object) => object.type === "door" && highlightedObjects.has(object.id)).map((object) => { if (object.type !== "door") return null; const segment = doorSegment(shownRoom, object); if (!segment) return null; const midpoint = { x: (segment.start.x + segment.end.x) / 2, y: (segment.start.y + segment.end.y) / 2 }; const p = screen(midpoint); return <circle key={`highlight-${object.id}`} cx={p.x} cy={p.y} r="12" fill="none" stroke="#d97706" strokeWidth="3" pointerEvents="none" />; })}
+        {selectedFurnitureBounds && furnitureSelection.length > 1 && <g aria-label="Mehrfachauswahl">
+          <rect x={screen({ x: selectedFurnitureBounds.minX, y: selectedFurnitureBounds.minY }).x - 5} y={screen({ x: selectedFurnitureBounds.minX, y: selectedFurnitureBounds.minY }).y - 5} width={(selectedFurnitureBounds.maxX - selectedFurnitureBounds.minX) * camera.scale + 10} height={(selectedFurnitureBounds.maxY - selectedFurnitureBounds.minY) * camera.scale + 10} rx="4" fill="none" stroke="#bd7647" strokeWidth="2" strokeDasharray="7 5" pointerEvents="none" />
+          <line x1={screen({ x: selectedFurnitureBounds.center.x, y: selectedFurnitureBounds.minY }).x} y1={screen({ x: selectedFurnitureBounds.center.x, y: selectedFurnitureBounds.minY }).y - 5} x2={screen({ x: selectedFurnitureBounds.center.x, y: selectedFurnitureBounds.minY }).x} y2={screen({ x: selectedFurnitureBounds.center.x, y: selectedFurnitureBounds.minY }).y - 34} stroke="#bd7647" strokeWidth="2" pointerEvents="none" />
+          <circle data-furniture-rotate="true" cx={screen({ x: selectedFurnitureBounds.center.x, y: selectedFurnitureBounds.minY }).x} cy={screen({ x: selectedFurnitureBounds.center.x, y: selectedFurnitureBounds.minY }).y - 40} r="8" fill="white" stroke="#bd7647" strokeWidth="3" className="cursor-grab" />
+        </g>}
+        {marquee && <rect aria-label="Auswahlrahmen" x={Math.min(screen(marquee.at).x, screen(marquee.current).x)} y={Math.min(screen(marquee.at).y, screen(marquee.current).y)} width={Math.abs(screen(marquee.current).x - screen(marquee.at).x)} height={Math.abs(screen(marquee.current).y - screen(marquee.at).y)} fill="#4f7e70" fillOpacity=".12" stroke="#35695b" strokeWidth="1.5" strokeDasharray="6 4" pointerEvents="none" />}
         {selectedResizable && !previewPlan && <g aria-label="Größe und Drehung direkt bearbeiten">
           {selectedResizable.points.map((point, index) => <rect key={index} data-resize-id={selectedResizable.id} data-resize-kind={selectedResizable.kind} data-corner={(["nw","ne","se","sw"] as const)[index]} x={screen(point).x-6} y={screen(point).y-6} width="12" height="12" rx="2" fill="white" stroke="#bd7647" strokeWidth="2" className="cursor-nwse-resize" />)}
           {(() => { const top = { x: (selectedResizable.points[0].x + selectedResizable.points[1].x) / 2, y: (selectedResizable.points[0].y + selectedResizable.points[1].y) / 2 }; const center = selectedResizable.center; const length = Math.hypot(top.x-center.x, top.y-center.y) || 1; const handlePoint = { x: top.x + (top.x-center.x)/length*.45, y: top.y + (top.y-center.y)/length*.45 }; return <><line x1={screen(top).x} y1={screen(top).y} x2={screen(handlePoint).x} y2={screen(handlePoint).y} stroke="#bd7647" strokeWidth="2" /><circle data-rotate-id={selectedResizable.id} data-rotate-kind={selectedResizable.kind} cx={screen(handlePoint).x} cy={screen(handlePoint).y} r="7" fill="white" stroke="#bd7647" strokeWidth="2" className="cursor-grab" /></>; })()}
@@ -999,6 +1149,10 @@ export default function RoomEditor2D() {
         {previewScreen && lastPoint && !nearestFirst ? <g><line x1={screen(lastPoint).x} y1={screen(lastPoint).y} x2={previewScreen.x} y2={previewScreen.y} stroke="#bd7647" strokeWidth="2" strokeDasharray="7 5" /><Dimension a={screen(lastPoint)} b={previewScreen} label={formatMeters(wallLength(lastPoint, preview!))} /><circle cx={previewScreen.x} cy={previewScreen.y} r="5" fill="#bd7647" /></g> : null}
         {shownRoom.points.map((point) => { const p = coords.get(point.id)!; return <g key={point.id}><circle cx={p.x} cy={p.y} r={POINT_RADIUS + 8} fill="transparent" data-point-id={point.id} className={tool === "select" || point.id === room.points[0]?.id && tool === "wall" ? "cursor-pointer" : ""} /><circle cx={p.x} cy={p.y} r={selection?.id === point.id ? POINT_RADIUS + 2 : POINT_RADIUS} fill={selection?.id === point.id || nearestFirst && point.id === room.points[0]?.id ? "#bd7647" : "#fff"} stroke="#405b49" strokeWidth="2" pointerEvents="none" /></g>; })}
        </svg>
+       {furnitureSelection.length > 1 && selectedFurnitureBounds && <div role="toolbar" aria-label="Aktionen für Mehrfachauswahl" className="absolute z-20 flex -translate-x-1/2 items-center gap-1 rounded-full border border-premium-beige bg-white/95 p-1.5 text-xs shadow-xl" style={{ left: Math.max(170, Math.min(size.width - 170, screen({ x: selectedFurnitureBounds.center.x, y: selectedFurnitureBounds.minY }).x)), top: Math.max(54, Math.min(size.height - 44, screen({ x: selectedFurnitureBounds.center.x, y: selectedFurnitureBounds.minY }).y - 88)) }}>
+         <span className="px-2 font-bold text-premium-forest">{furnitureSelection.length} Möbel</span><span className="hidden text-premium-muted xl:inline">Ziehen zum Verschieben</span><button type="button" onClick={() => rotateSelectedFurniture(90)} className="rounded-full px-2 py-1 font-semibold hover:bg-[#f3eee4]">90° drehen</button><button type="button" onClick={duplicateSelectedFurniture} className="rounded-full px-2 py-1 font-semibold hover:bg-[#f3eee4]">Duplizieren</button><button type="button" onClick={deleteSelectedFurniture} className="rounded-full px-2 py-1 font-semibold text-red-800 hover:bg-red-50">Löschen</button><button type="button" aria-label="Mehrfachauswahl aufheben" onClick={() => { setFurnitureSelection([]); setSelection(null); setPreviewConflicts(new Set()); }} className="rounded-full px-2 py-1 font-semibold">×</button>
+       </div>}
+       {!!lastAutoFurnitureIds.length && <div role="status" className="absolute left-1/2 top-14 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full border border-premium-beige bg-white/95 px-3 py-2 text-xs shadow-lg"><span>{lastAutoFurnitureIds.length} Möbel erzeugt</span><button type="button" onClick={() => { setTool("select"); setFurnitureIds(lastAutoFurnitureIds); setLastAutoFurnitureIds([]); }} className="font-bold text-premium-forest underline underline-offset-2">Alle erzeugten Möbel auswählen</button><button type="button" aria-label="Hinweis schließen" onClick={() => setLastAutoFurnitureIds([])}>×</button></div>}
        {selectedZone && !zoneSetupOpen && <button type="button" onClick={() => setZoneSetupOpen(true)} className="absolute z-10 -translate-x-1/2 rounded-full border border-premium-beige bg-white px-3 py-1.5 text-xs font-bold text-premium-forest shadow-lg" style={{ left: Math.max(90, Math.min(size.width - 90, screen(zoneCenter(selectedZone)).x)), top: Math.max(8, Math.min(size.height - 42, screen(zoneCenter(selectedZone)).y + 28)) }}>Bereich einrichten</button>}
        {selectedZone && zoneSetupOpen && <div role="dialog" aria-label="Tischbereich einrichten" className="absolute z-20 w-72 -translate-x-1/2 space-y-2 rounded-xl border border-premium-beige bg-white p-3 text-sm shadow-2xl" style={{ left: Math.max(150, Math.min(size.width - 150, screen(zoneCenter(selectedZone)).x)), top: Math.max(8, Math.min(size.height - 330, screen(zoneCenter(selectedZone)).y + 28)) }}>
          <div className="flex items-center justify-between"><strong>Bereich einrichten</strong><button type="button" aria-label="Einrichtung schließen" onClick={() => setZoneSetupOpen(false)} className="rounded px-2 py-1">×</button></div>

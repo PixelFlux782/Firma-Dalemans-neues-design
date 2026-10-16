@@ -128,7 +128,7 @@ test.describe("Gleiter-Finder im Browser", () => {
     await page.goto("/shop/gleiter-finder?art=chair&form=round&d=20&boden=parquet&anzahl=100&reserve=1&schritt=ergebnis");
     const result = page.getByTestId("finder-result");
     await expect(result).toHaveAttribute("data-status", "unique");
-    await expect(result.getByRole("heading", { name: "Filzgleiter für Rundrohr" })).toBeVisible();
+    await expect(result.getByRole("heading", { name: "Gleiter für Rundrohr" })).toBeVisible();
     await expect(result).toContainText("18,7–20,4 mm");
     await expect(result).toContainText("21 × 20");
     await expect(result).toContainText("Gesamt");

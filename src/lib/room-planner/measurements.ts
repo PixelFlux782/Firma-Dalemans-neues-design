@@ -6,6 +6,12 @@ import { tablePolygon } from "./tables";
 export type Measurement = { id: string; kind: "wall" | "door" | "aisle" | "object" | "block" | "detail"; a: Position; b: Position; label: string; side: number; offset: number; priority: number; selected?: boolean };
 const midpoint = (a: Position, b: Position): Position => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
 const segment = (id: string, kind: Measurement["kind"], a: Position, b: Position, label: string, side = -1, offset = .35, priority = 1, selected = false): Measurement => ({ id, kind, a, b, label, side, offset, priority, selected });
+const outsideSide = (a: Position, b: Position, center: Position): number => {
+  const dx = b.x - a.x, dy = b.y - a.y, length = Math.hypot(dx, dy) || 1;
+  const edgeCenter = midpoint(a, b);
+  const normal = { x: -dy / length, y: dx / length };
+  return (center.x - edgeCenter.x) * normal.x + (center.y - edgeCenter.y) * normal.y > 0 ? -1 : 1;
+};
 function nearestWallGap(plan: RoomPlan, id: string, vertices: Position[]): Measurement | null {
   let best: { a: Position; b: Position; length: number } | null = null;
   for (const vertex of vertices) for (const wall of plan.contour.walls) {
@@ -79,14 +85,15 @@ export function planMeasurements(plan: RoomPlan, seating: SeatingPlan | null | u
       const corners = aislePolygon(object);
       if (corners.length !== 4) continue;
       shapes.push({ id: object.id, points: corners });
-      result.push(segment(`${object.id}-length`, "aisle", corners[0], corners[1], formatMeters(wallLength(object.start, object.end)), -1, .18, 2, selected));
-      result.push(segment(`${object.id}-width`, "aisle", corners[1], corners[2], formatMeters(object.width), -1, .18, 2, selected));
+      const center = midpoint(object.start, object.end);
+      result.push(segment(`${object.id}-length`, "aisle", corners[0], corners[1], formatMeters(wallLength(object.start, object.end)), outsideSide(corners[0], corners[1], center), .18, 2, selected));
+      result.push(segment(`${object.id}-width`, "aisle", corners[1], corners[2], formatMeters(object.width), outsideSide(corners[1], corners[2], center), .18, 2, selected));
       if (selected) { const gap = nearestWallGap(plan, object.id, corners); if (gap) result.push(gap); }
     } else if (isBlockingObject(object)) {
       const corners = obstaclePolygon(object);
       shapes.push({ id: object.id, points: corners });
-      result.push(segment(`${object.id}-width`, "object", corners[0], corners[1], formatMeters(object.width), -1, .22, 2, selected));
-      result.push(segment(`${object.id}-depth`, "object", corners[1], corners[2], formatMeters(object.depth), -1, .22, 2, selected));
+      result.push(segment(`${object.id}-width`, "object", corners[0], corners[1], formatMeters(object.width), outsideSide(corners[0], corners[1], object), .22, 2, selected));
+      result.push(segment(`${object.id}-depth`, "object", corners[1], corners[2], formatMeters(object.depth), outsideSide(corners[1], corners[2], object), .22, 2, selected));
       if (selected) { const gap = nearestWallGap(plan, object.id, corners); if (gap) result.push(gap); }
     }
   }
@@ -94,8 +101,8 @@ export function planMeasurements(plan: RoomPlan, seating: SeatingPlan | null | u
     const corners = tablePolygon(table), selected = selectedId === table.id;
     shapes.push({ id: table.id, points: corners });
     if (selected) {
-      result.push(segment(`${table.id}-width`, "object", corners[0], corners[1], formatMeters(table.width), -1, .22, 2, true));
-      result.push(segment(`${table.id}-depth`, "object", corners[1], corners[2], formatMeters(table.depth), -1, .22, 2, true));
+      result.push(segment(`${table.id}-width`, "object", corners[0], corners[1], formatMeters(table.width), outsideSide(corners[0], corners[1], table), .22, 2, true));
+      result.push(segment(`${table.id}-depth`, "object", corners[1], corners[2], formatMeters(table.depth), outsideSide(corners[1], corners[2], table), .22, 2, true));
       const gap = nearestWallGap(plan, table.id, corners); if (gap) result.push(gap);
     }
   }

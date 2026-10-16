@@ -20,12 +20,13 @@ import dynamic from "next/dynamic";
 const RoomView3D = dynamic(() => import("../3d/RoomView3D"), { ssr: false });
 import PlanOutputView from "./PlanOutputView";
 import MeasurementLayer from "./MeasurementLayer";
+import type { Measurement } from "@/lib/room-planner/measurements";
 import PlannerBrand from "../PlannerBrand";
 import PlannerHelp from "../help/PlannerHelp";
 import { calculatePlanDemand, calculateRecommendedDemand, changeChairSelection, chairProducts, DEFAULT_CHAIR_SELECTION, resolveChairShopTarget } from "@/lib/room-planner/chairSelection";
 import { calculateTableDemand, DEFAULT_TABLE_MODEL_ID, TABLE_MODELS, TABLE_PRESETS, fillTableZone, findTableSnap, fitTableLayout, generateTableLayout, moveTableGroup, moveZone, moveZonePoint, placeTable, planCapacity, seatTable, tableLayoutConflicts, tableModel, tablePlacementConflict, tablePolygon, transformTableLayout, validateTables, validateZonePolygon, zoneCenter, zonePolygon, type GeneratedTableLayout, type LayoutTransform, type PlanningZone, type TableLayoutMode, type TablePlanningGoal, type TablePresetId, type TableSnapCandidate } from "@/lib/room-planner/tables";
 import { planTableZone, type TableZonePlanningResult } from "@/lib/room-planner/tableZonePlanning";
-import { generateFreeAreaSeating, replanningImpact, supplementSeatingPlan } from "@/lib/room-planner/planning";
+import { generateFreeAreaSeating, replanningImpact } from "@/lib/room-planner/planning";
 
 const INITIAL_SCALE = 45;
 const MIN_SCALE = 12;
@@ -102,7 +103,7 @@ export default function RoomEditor2D() {
   const [tableSpacing, setTableSpacing] = useState(1.2);
   const [layoutDraft, setLayoutDraft] = useState<GeneratedTableLayout | null>(null);
   const [layoutTransform, setLayoutTransform] = useState<LayoutTransform>({ center: { x: 0, y: 0 }, rotation: 0, spread: 1 });
-  const [wallEdit, setWallEdit] = useState<{ id: string; value: string; x: number; y: number; error?: string } | null>(null);
+  const [measurementEdit, setMeasurementEdit] = useState<{ measurement: Measurement; value: string; x: number; y: number; error?: string } | null>(null);
   const [measurementsVisible, setMeasurementsVisible] = useState(true);
   const [showDistances, setShowDistances] = useState(false);
   const [selection, setSelection] = useState<Selection>(null);
@@ -301,17 +302,43 @@ export default function RoomEditor2D() {
     } catch (error) { setProjectError(error instanceof Error ? error.message : "Die Projektdatei konnte nicht importiert werden."); }
   };
   const add = (next: RoomPlan) => setHistory((current) => commit(current, next));
-  const applyWallLength = () => {
-    if (!wallEdit) return;
-    const value = Number(wallEdit.value.replace(",", "."));
-    const result = resizeWall(room, wallEdit.id, value);
-    if (!result.room) { setWallEdit({ ...wallEdit, error: result.error ?? "Ungültige Raumkontur." }); return; }
-    const next = { ...plan, contour: result.room };
-    const objectError = validateObjects(next).find((issue) => issue.severity === "error" && !validateObjects(plan).some((old) => old.objectId === issue.objectId && old.severity === "error"));
-    if (objectError) { setWallEdit({ ...wallEdit, error: objectError.message }); return; }
-    if (JSON.stringify(result.room) !== JSON.stringify(room)) add(next);
-    setWallEdit(null);
-    setNotice("");
+  const applyMeasurement = () => {
+    if (!measurementEdit) return;
+    const value = Number(measurementEdit.value.replace(",", "."));
+    if (!Number.isFinite(value)) { setMeasurementEdit({ ...measurementEdit, error: "Bitte geben Sie ein gültiges Maß ein." }); return; }
+    const { measurement } = measurementEdit;
+    if (measurement.kind === "wall") {
+      const result = resizeWall(room, measurement.id, value);
+      if (!result.room) { setMeasurementEdit({ ...measurementEdit, error: result.error ?? "Ungültige Raumkontur." }); return; }
+      const next = { ...plan, contour: result.room };
+      const objectError = validateObjects(next).find((issue) => issue.severity === "error" && !validateObjects(plan).some((old) => old.objectId === issue.objectId && old.severity === "error"));
+      if (objectError) { setMeasurementEdit({ ...measurementEdit, error: objectError.message }); return; }
+      if (JSON.stringify(result.room) !== JSON.stringify(room)) add(next);
+      setMeasurementEdit(null); setNotice(""); return;
+    }
+    if (value <= 0) { setMeasurementEdit({ ...measurementEdit, error: "Bitte geben Sie ein Maß größer als 0 ein." }); return; }
+    const object = plan.objects.find((item) => measurement.id === item.id || measurement.id === `${item.id}-length` || measurement.id === `${item.id}-width` || measurement.id === `${item.id}-depth`);
+    if (object) {
+      const changed: RoomObject = object.type === "door" ? { ...object, width: value }
+        : object.type === "aisle" && measurement.id.endsWith("-length") ? (() => { const length = wallLength(object.start, object.end); return { ...object, end: { x: Number((object.start.x + (object.end.x - object.start.x) * value / length).toFixed(4)), y: Number((object.start.y + (object.end.y - object.start.y) * value / length).toFixed(4)) }, edited: true }; })()
+        : object.type === "aisle" && measurement.id.endsWith("-width") ? { ...object, width: value, edited: true }
+        : isBlockingObject(object) && measurement.id.endsWith("-width") ? { ...object, width: value }
+        : isBlockingObject(object) && measurement.id.endsWith("-depth") ? { ...object, depth: value }
+        : object;
+      const next = { ...plan, objects: plan.objects.map((item) => item.id === object.id ? changed : item) };
+      const issue = validateObjects(next).find((candidate) => candidate.objectId === object.id && candidate.severity === "error");
+      if (issue) { setMeasurementEdit({ ...measurementEdit, error: issue.message }); return; }
+      if (JSON.stringify(changed) !== JSON.stringify(object)) add(next);
+      setSelection({ type: "object", id: object.id }); setMeasurementEdit(null); setNotice(""); return;
+    }
+    const table = plan.tables.find((item) => measurement.id === `${item.id}-width` || measurement.id === `${item.id}-depth`);
+    if (table) {
+      const changed = { ...table, [measurement.id.endsWith("-depth") ? "depth" : "width"]: value, edited: true };
+      const next = { ...plan, tables: plan.tables.map((item) => item.id === table.id ? changed : item) };
+      const issue = validateTables(next).find((candidate) => candidate.objectId === table.id && candidate.severity === "error");
+      if (issue) { setMeasurementEdit({ ...measurementEdit, error: issue.message }); return; }
+      add(next); setSelection({ type: "table", id: table.id }); setMeasurementEdit(null); setNotice("");
+    }
   };
   const selectChair = (productId: string, variantId: string, width = chairSelection.width, depth = chairSelection.depth) => {
     const previous = { rules: seatingRules, orientation, offset: gridOffset, seating: calculated?.plan === plan ? calculated.result : null };
@@ -415,7 +442,7 @@ export default function RoomEditor2D() {
         setHelpCloseSignal((value) => value + 1);
         if (helpLayerKind !== "onboarding") { event.stopImmediatePropagation(); return; }
       }
-      if (event.key === "Escape") { dragRef.current = null; setPreviewPlan(null); setSnapPreview(null); setHover(null); setSelection(null); setAisleStart(null); setZoneDraft([]); setWallEdit(null); setToolOptions(null); setLayoutDraft(null); setReplanDialogOpen(false); setZoneFillConfirm(null); }
+      if (event.key === "Escape") { dragRef.current = null; setPreviewPlan(null); setSnapPreview(null); setHover(null); setSelection(null); setAisleStart(null); setZoneDraft([]); setMeasurementEdit(null); setToolOptions(null); setLayoutDraft(null); setReplanDialogOpen(false); setZoneFillConfirm(null); }
       if ((event.key === "Delete" || event.key === "Backspace") && selection && !(event.target instanceof HTMLInputElement) && !(event.target instanceof HTMLSelectElement)) { event.preventDefault(); deleteSelection(); }
     };
     const keyUp = (event: KeyboardEvent) => { if (event.code === "Space") setSpaceDown(false); if (event.key === "Shift") setShiftDown(false); };
@@ -725,7 +752,7 @@ export default function RoomEditor2D() {
   const selectedWall = selection?.type === "wall" ? shownRoom.walls.find((wall) => wall.id === selection.id) : null;
   const wallStart = selectedWall && pointById(shownRoom, selectedWall.startPointId);
   const wallEnd = selectedWall && pointById(shownRoom, selectedWall.endPointId);
-  const field = (label: string, value: number, change: (value: number) => void, min?: number) => <label className="flex items-center justify-between gap-2 text-sm"><span>{label}</span><input aria-label={label} type="number" step="0.1" min={min} value={value} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value) && (min === undefined || value >= min)) change(value); }} className="w-20 rounded border border-premium-beige px-1 py-1 text-right" /></label>;
+  const field = (label: string, value: number, change: (value: number) => void, min?: number) => <LiveNumberField label={label} value={value} min={min} onChange={change} />;
   const seatingField = (label: string, key: "chairWidth" | "chairDepth" | "rowPitch" | "maximumChairsPerRow", min: number, step: string) => <label className="flex items-center justify-between gap-2 text-sm"><span>{label}</span><input aria-label={label.replace("(m)", "in Metern")} type="number" step={step} min={min} value={seatingRules[key]} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value) && value >= min && (key !== "maximumChairsPerRow" || Number.isInteger(value))) { if (key === "chairWidth") selectChair(chairSelection.productId, chairSelection.variantId, value, chairSelection.depth); else if (key === "chairDepth") selectChair(chairSelection.productId, chairSelection.variantId, chairSelection.width, value); else setSeatingRules((current) => ({ ...current, [key]: value })); } }} className="w-24 rounded border border-premium-beige px-2 py-1 text-right" /></label>;
   const seatingPaths = useMemo(() => seating?.blocks.map((block) => {
     const rectangles: string[] = [], backs: string[] = [];
@@ -858,13 +885,11 @@ export default function RoomEditor2D() {
       }
     }, 0);
   };
-  const supplementFreeArea = () => {
-    const current = plan.seating;
-    const next = supplementSeatingPlan(plan, seatingRules, current?.orientation ?? orientation, gridOffset, current?.rotation);
-    if (next === current) { setNotice("Keine weitere freie Fläche für zusätzliche Sitzplätze gefunden."); return; }
-    add({ ...plan, seating: next });
-    setSelection(null);
-    setNotice(`${next.totalSeats - (current?.totalSeats ?? 0)} Sitzplätze auf freier Fläche ergänzt. Bestehende und manuell angepasste Elemente blieben unverändert.`);
+  const requestAutomaticSeating = () => {
+    if (!plan.seating) { runAutomaticSeating(); return; }
+    const impact = replanningImpact(plan);
+    if (impact.protectedBlocks > 0) { setReplanDialogOpen(true); return; }
+    runAutomaticSeating();
   };
   const applyTableSeating = (count?: number) => {
     if (!selectedTable) return;
@@ -907,7 +932,7 @@ export default function RoomEditor2D() {
         {toolOptions === "restricted" && <><label className="block">Breite (m)<input aria-label="Sperrflächenbreite am Werkzeug" type="number" min="0.01" step="0.1" value={obstacleWidth} onChange={(event) => { if (event.currentTarget.valueAsNumber > 0) setObstacleWidth(event.currentTarget.valueAsNumber); }} className="mt-1 w-full rounded border border-premium-beige p-1" /></label><label className="block">Tiefe (m)<input aria-label="Sperrflächentiefe am Werkzeug" type="number" min="0.01" step="0.1" value={obstacleDepth} onChange={(event) => { if (event.currentTarget.valueAsNumber > 0) setObstacleDepth(event.currentTarget.valueAsNumber); }} className="mt-1 w-full rounded border border-premium-beige p-1" /></label></>}
         {toolOptions === "aisle" && <label className="block">Gangbreite (m)<input aria-label="Gangbreite am Werkzeug" type="number" min="0.01" step="0.1" value={aisleWidth} onChange={(event) => { if (event.currentTarget.valueAsNumber > 0) setAisleWidth(event.currentTarget.valueAsNumber); }} className="mt-1 w-full rounded border border-premium-beige p-1" /></label>}
         {toolOptions === "table" && <><label className="block">Aktion<select aria-label="Tischwerkzeug" value={areaMode} onChange={event => { setAreaMode(event.target.value as typeof areaMode); setZoneDraft([]); }} className="mt-1 w-full rounded border border-premium-beige p-1"><option value="table">Einzelnen Tisch platzieren</option><option value="tables">Tischbereich zeichnen</option></select></label>{areaMode === "table" && <><label className="block">Modell<select aria-label="Tischmodell am Werkzeug" value={selectedTableModelId} onChange={event => setSelectedTableModelId(event.target.value)} className="mt-1 w-full rounded border border-premium-beige p-1">{TABLE_MODELS.map(model => <option key={model.id} value={model.id}>{model.name}</option>)}</select></label><label className="block">Rotation<select aria-label="Tischrotation am Werkzeug" value={tableRotation} onChange={event => setTableRotation(Number(event.target.value))} className="mt-1 w-full rounded border border-premium-beige p-1">{[0,45,90,135,180,225,270,315].map(value => <option key={value} value={value}>{value}°</option>)}</select></label></>}{areaMode === "tables" && <><p className="text-xs text-premium-muted">{zoneDraft.length ? `${zoneDraft.length} Eckpunkte gesetzt` : "Mindestens drei Eckpunkte setzen."}</p>{zoneDraft.length >= 3 && <button type="button" onClick={completeZoneDraft} className="w-full rounded bg-premium-forest px-3 py-2 font-semibold text-white">Tischbereich abschließen</button>}</>}</>}
-        {toolOptions === "chair" && <><label className="block">Stuhlmodell<select aria-label="Stuhlmodell am Werkzeug" value={chairSelection.productId} onChange={(event) => { const product = chairProducts.find((item) => item.id === event.target.value)!; selectChair(product.id, product.variants[0].id); }} className="mt-1 w-full rounded border border-premium-beige p-1">{chairProducts.map((product) => <option key={product.id} value={product.id}>{product.title}</option>)}</select></label><button type="button" disabled={!room.closed || variantsBusy} onClick={() => { setToolOptions(null); if (plan.seating) supplementFreeArea(); else runAutomaticSeating(); }} className="w-full rounded bg-premium-forest px-3 py-2 font-semibold text-white disabled:opacity-40">Freie Raumfläche bestuhlen</button></>}
+        {toolOptions === "chair" && <><label className="block">Stuhlmodell<select aria-label="Stuhlmodell am Werkzeug" value={chairSelection.productId} onChange={(event) => { const product = chairProducts.find((item) => item.id === event.target.value)!; selectChair(product.id, product.variants[0].id); }} className="mt-1 w-full rounded border border-premium-beige p-1">{chairProducts.map((product) => <option key={product.id} value={product.id}>{product.title}</option>)}</select></label><button type="button" disabled={!room.closed || variantsBusy} onClick={() => { setToolOptions(null); requestAutomaticSeating(); }} className="w-full rounded bg-premium-forest px-3 py-2 font-semibold text-white disabled:opacity-40">{plan.seating ? "Bestuhlung neu berechnen" : "Freie Raumfläche bestuhlen"}</button></>}
       </div>}
       <button type="button" aria-label="Bemaßungen ein-/ausblenden" title="Bemaßungen ein-/ausblenden" aria-pressed={measurementsVisible} onClick={() => setMeasurementsVisible((value) => !value)} className={`flex h-9 w-10 items-center justify-center rounded-md border border-premium-beige ${measurementsVisible ? "bg-premium-forest text-white" : "text-premium-charcoal"}`}><svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M3 5v14m18-14v14M3 12h18M6 9l-3 3 3 3m12-6 3 3-3 3" /></svg></button>
       <button type="button" aria-label="Abstandsmaße ein-/ausblenden" title="Abstandsmaße bei Auswahl" aria-pressed={showDistances} onClick={() => setShowDistances((value) => !value)} className={`rounded-md border border-premium-beige px-2 py-1 text-xs ${showDistances ? "bg-premium-forest text-white" : "text-premium-charcoal"}`}>Abstände</button>
@@ -970,7 +995,7 @@ export default function RoomEditor2D() {
           <circle data-draft-handle="rotate" cx={screen({x:(draftBounds.minX+draftBounds.maxX)/2,y:draftBounds.minY-.6}).x} cy={screen({x:0,y:draftBounds.minY-.6}).y} r="8" fill="white" stroke="#bd7647" strokeWidth="3" className="cursor-grab" />
           <rect data-draft-handle="scale" x={screen({x:draftBounds.maxX,y:draftBounds.maxY}).x-7} y={screen({x:draftBounds.maxX,y:draftBounds.maxY}).y-7} width="14" height="14" fill="white" stroke="#bd7647" strokeWidth="3" className="cursor-nwse-resize" />
         </g>}
-        {measurementsVisible && <MeasurementLayer plan={shownPlan} seating={seating} selectedId={selection?.id} project={screen} pixelsPerMeter={camera.scale} showDistances={showDistances} onWallClick={(id, at) => { const ends = wallEndpoints(shownRoom, id); if (ends) setWallEdit({ id, value: wallLength(ends.a, ends.b).toFixed(2).replace(".", ","), x: at.x, y: at.y }); }} />}
+        {measurementsVisible && <MeasurementLayer plan={shownPlan} seating={seating} selectedId={selection?.id} project={screen} pixelsPerMeter={camera.scale} showDistances={showDistances} onMeasurementClick={(measurement, at) => { setMeasurementEdit({ measurement, value: measurement.label.replace(/[^0-9,.-]/g, ""), x: at.x, y: at.y }); }} />}
         {previewScreen && lastPoint && !nearestFirst ? <g><line x1={screen(lastPoint).x} y1={screen(lastPoint).y} x2={previewScreen.x} y2={previewScreen.y} stroke="#bd7647" strokeWidth="2" strokeDasharray="7 5" /><Dimension a={screen(lastPoint)} b={previewScreen} label={formatMeters(wallLength(lastPoint, preview!))} /><circle cx={previewScreen.x} cy={previewScreen.y} r="5" fill="#bd7647" /></g> : null}
         {shownRoom.points.map((point) => { const p = coords.get(point.id)!; return <g key={point.id}><circle cx={p.x} cy={p.y} r={POINT_RADIUS + 8} fill="transparent" data-point-id={point.id} className={tool === "select" || point.id === room.points[0]?.id && tool === "wall" ? "cursor-pointer" : ""} /><circle cx={p.x} cy={p.y} r={selection?.id === point.id ? POINT_RADIUS + 2 : POINT_RADIUS} fill={selection?.id === point.id || nearestFirst && point.id === room.points[0]?.id ? "#bd7647" : "#fff"} stroke="#405b49" strokeWidth="2" pointerEvents="none" /></g>; })}
        </svg>
@@ -985,7 +1010,7 @@ export default function RoomEditor2D() {
          <button type="button" onClick={requestZoneFill} disabled={zoneFillBusy} className="w-full rounded-lg bg-premium-forest px-3 py-2 font-semibold text-white disabled:opacity-50">{zoneFillBusy ? "Vorschlag wird berechnet …" : "Vorschlag erstellen"}</button>
          <p className="text-[11px] text-premium-muted">Begrenzte temporäre Variantensuche; Ergebnis bleibt vollständig editierbar. Keine behördliche Freigabe.</p>
        </div>}
-       {wallEdit && <form onSubmit={(event) => { event.preventDefault(); applyWallLength(); }} className="absolute z-10 rounded-lg border border-premium-beige bg-white p-2 shadow-lg" style={{ left: Math.max(4, Math.min(size.width - 170, wallEdit.x - 70)), top: Math.max(4, wallEdit.y - 58) }}><label className="flex items-center gap-1 text-sm"><input autoFocus aria-label="Wandlänge in Metern" inputMode="decimal" value={wallEdit.value} onChange={(event) => setWallEdit({ ...wallEdit, value: event.target.value, error: undefined })} onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); setWallEdit(null); } }} className="w-20 rounded border border-premium-beige px-1 py-0.5" /> m</label><div className="mt-1 flex gap-1"><button type="submit" className="rounded bg-premium-forest px-2 py-0.5 text-xs text-white">Übernehmen</button><button type="button" onClick={() => setWallEdit(null)} className="rounded border px-2 py-0.5 text-xs">Abbrechen</button></div>{wallEdit.error && <p role="alert" className="mt-1 max-w-44 text-xs text-red-800">{wallEdit.error}</p>}</form>}
+       {measurementEdit && <form onSubmit={(event) => { event.preventDefault(); applyMeasurement(); }} className="absolute z-10 rounded-lg border border-premium-beige bg-white p-2 shadow-lg" style={{ left: Math.max(4, Math.min(size.width - 190, measurementEdit.x - 80)), top: Math.max(4, measurementEdit.y - 58) }}><label className="flex items-center gap-1 text-sm"><input autoFocus aria-label={`${measurementEdit.measurement.kind === "wall" ? "Wandlänge" : measurementEdit.measurement.kind === "door" ? "Türbreite" : measurementEdit.measurement.kind === "aisle" && measurementEdit.measurement.id.endsWith("-width") ? "Gangbreite" : measurementEdit.measurement.kind === "aisle" ? "Ganglänge" : measurementEdit.measurement.id.endsWith("-depth") ? "Tiefe" : "Breite"} in Metern`} inputMode="decimal" value={measurementEdit.value} onChange={(event) => setMeasurementEdit({ ...measurementEdit, value: event.target.value, error: undefined })} onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); setMeasurementEdit(null); } }} className="w-24 rounded border border-premium-beige px-1 py-0.5" /> m</label><div className="mt-1 flex gap-1"><button type="submit" className="rounded bg-premium-forest px-2 py-0.5 text-xs text-white">Übernehmen</button><button type="button" onClick={() => setMeasurementEdit(null)} className="rounded border px-2 py-0.5 text-xs">Abbrechen</button></div>{measurementEdit.error && <p role="alert" className="mt-1 max-w-48 text-xs text-red-800">{measurementEdit.error}</p>}</form>}
       {!room.points.length ? <div className="pointer-events-none absolute left-1/2 top-1/2 w-[min(85%,25rem)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-premium-beige bg-white/90 p-5 text-center shadow-sm"><p className="font-display text-xl text-premium-ink">Raumgrundriss zeichnen</p><p className="mt-2 text-sm text-premium-muted">{help}</p></div> : null}
       </div>
     </div><aside aria-label="Eigenschaften" className="planner-properties flex min-h-0 flex-col gap-2 overflow-y-auto border-t border-premium-beige bg-white/90 p-3 lg:border-l lg:border-t-0">
@@ -998,7 +1023,7 @@ export default function RoomEditor2D() {
         </div>
         <p className="mt-2 text-[11px] text-premium-muted">Reihenplätze: {capacity.rowSeats} · Tischplätze: {capacity.tableSeats} · Gesamtplätze: {capacity.total} · Tische: {shownPlan.tables.length}</p>
         <p className="mt-1 text-[11px] text-premium-muted">{ruleStatus === "pass" ? "Durch das gewählte Profil ohne Blocker geprüft." : ruleStatus === "fail" ? "Regelgeprüfte Kapazität erst nach Behebung der Konflikte." : "Noch keine regelgeprüfte Kapazität."}</p>
-        <div className="mt-2 grid grid-cols-2 gap-1"><button aria-label="Bestuhlen" type="button" disabled={!room.closed || variantsBusy} onClick={() => { setWorkflowStep("furnishing"); if (plan.seating) supplementFreeArea(); else runAutomaticSeating(); }} className="rounded bg-premium-forest px-2 py-1 text-xs font-semibold text-white disabled:opacity-40">Freie Raumfläche bestuhlen</button><button type="button" onClick={() => setRulePanelOpen((open) => !open)} className="rounded border border-premium-beige bg-white px-2 py-1 text-xs font-semibold">Details</button></div>
+        <div className="mt-2 grid grid-cols-2 gap-1"><button aria-label="Bestuhlen" type="button" disabled={!room.closed || variantsBusy} onClick={() => { setWorkflowStep("furnishing"); requestAutomaticSeating(); }} className="rounded bg-premium-forest px-2 py-1 text-xs font-semibold text-white disabled:opacity-40">{plan.seating ? "Neu berechnen" : "Freie Raumfläche bestuhlen"}</button><button type="button" onClick={() => setRulePanelOpen((open) => !open)} className="rounded border border-premium-beige bg-white px-2 py-1 text-xs font-semibold">Details</button></div>
       </section>}
       {!selection && (blockers.length ? <details aria-label="Probleme" className="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-900"><summary className="cursor-pointer font-semibold">{blockers.length} {blockers.length === 1 ? "Problem" : "Probleme"}</summary><div className="mt-2 space-y-1">{blockers.map((message) => <p key={message}>{message}</p>)}</div></details> : seating ? <p role="status" className="rounded border border-green-200 bg-green-50 p-2 text-sm font-semibold text-green-900">✓ Regelprüfung ohne Blocker</p> : null)}
       <section aria-label="Kontextbezogene Eigenschaften" className="min-h-52 rounded border border-premium-beige p-3"><h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-premium-forest">{selectedZone ? "Tischbereich" : selectedTable ? "Tisch" : selectedFurnitureChair ? "Stuhl" : selectedObject?.type === "door" ? "Tür" : selectedObject?.type === "aisle" ? "Gang" : selectedObject ? "Objekt" : selectedPoint || selectedWall ? "Raum" : "Auswahl"}</h2><div className="space-y-2">
@@ -1040,7 +1065,7 @@ export default function RoomEditor2D() {
         {seatingField("Reihenabstand (m)", "rowPitch", 0.1, "0.05")}
         {seatingField("Max. Stühle pro Reihe", "maximumChairsPerRow", 1, "1")}</div>
         <label className="mt-2 flex items-center justify-between gap-2 text-sm">Ausrichtung<select aria-label="Ausrichtung" value={orientation} onChange={(event) => setOrientation(event.target.value as SeatingOrientation)} className="rounded border border-premium-beige px-2 py-1"><option value="horizontal">Horizontal</option><option value="vertical">Vertikal</option></select></label></details>
-        <button data-planner-action="calculate-seating" type="button" disabled={!room.closed || errors.length > 0 || issues.some((issue) => issue.severity === "error") || seatingRules.rowPitch < seatingRules.chairDepth} onClick={() => { setActiveVariantId(null); if (plan.seating) { supplementFreeArea(); return; } const result = generateSeatingPlan(plan, seatingRules, orientation, gridOffset); setCalculated({ plan, rules: seatingRules, orientation, offset: gridOffset, result }); }} className="w-full rounded-lg bg-premium-forest px-3 py-2 text-sm font-semibold text-white disabled:opacity-40">{plan.seating ? "Freie Fläche ergänzen" : "Bestuhlung berechnen"}</button>
+        <button data-planner-action="calculate-seating" type="button" disabled={!room.closed || errors.length > 0 || issues.some((issue) => issue.severity === "error") || seatingRules.rowPitch < seatingRules.chairDepth} onClick={() => { setActiveVariantId(null); if (plan.seating) { requestAutomaticSeating(); return; } const result = generateSeatingPlan(plan, seatingRules, orientation, gridOffset); setCalculated({ plan, rules: seatingRules, orientation, offset: gridOffset, result }); }} className="w-full rounded-lg bg-premium-forest px-3 py-2 text-sm font-semibold text-white disabled:opacity-40">{plan.seating ? "Bestuhlung neu berechnen" : "Bestuhlung berechnen"}</button>
         {plan.seating && <button type="button" onClick={() => setReplanDialogOpen(true)} className="w-full rounded-lg border border-premium-beige px-3 py-2 text-sm font-semibold">Planung neu erstellen …</button>}
         {calculated?.plan === plan && !plan.seating && <button type="button" onClick={adoptCalculatedSeating} className="w-full rounded-lg border border-premium-forest px-3 py-2 text-sm font-semibold text-premium-forest">Bestuhlung übernehmen und bearbeiten</button>}
         {seatingRules.rowPitch < seatingRules.chairDepth && <p className="text-xs text-amber-800">Der Reihenabstand muss mindestens der Stuhltiefe entsprechen.</p>}
@@ -1108,6 +1133,12 @@ function CommitNumberField({ label, value, min, onCommit }: { label: string; val
   const [draft, setDraft] = useState(String(value));
   useEffect(() => setDraft(String(value)), [value]);
   return <label className="flex items-center justify-between gap-2 text-sm"><span>{label}</span><input aria-label={label} type="number" step="0.1" min={min} value={draft} onChange={(event) => setDraft(event.currentTarget.value)} onBlur={() => { const number = Number(draft); if (draft !== "" && Number.isFinite(number) && (min === undefined || number >= min) && number !== value) onCommit(number); else setDraft(String(value)); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} className="w-24 rounded border border-premium-beige px-2 py-1 text-right" /></label>;
+}
+
+function LiveNumberField({ label, value, min, onChange }: { label: string; value: number; min?: number; onChange: (value: number) => void }) {
+  const [draft, setDraft] = useState(String(value));
+  useEffect(() => setDraft(String(value)), [value]);
+  return <label className="flex items-center justify-between gap-2 text-sm"><span>{label}</span><input aria-label={label} type="number" step="0.1" min={min} value={draft} onChange={(event) => { const nextDraft = event.currentTarget.value; setDraft(nextDraft); const number = Number(nextDraft); if (nextDraft !== "" && Number.isFinite(number) && (min === undefined || number >= min)) onChange(number); }} onBlur={() => { const number = Number(draft); if (draft === "" || !Number.isFinite(number) || min !== undefined && number < min) setDraft(String(value)); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} className="w-20 rounded border border-premium-beige px-1 py-1 text-right" /></label>;
 }
 
 function Dimension({ a, b, label, onClick }: { a: { x: number; y: number }; b: { x: number; y: number }; label: string; onClick?: (event: React.MouseEvent<SVGGElement>) => void }) {

@@ -285,7 +285,7 @@ test.describe("DLMNS Cart Drawer", () => {
     await page.getByRole("button", { name: "In den Warenkorb" }).click();
     const drawer = page.getByTestId("cart-drawer");
     await expect(drawer).toBeVisible();
-    await expect(drawer).toContainText("Filzgleiter für Rundrohr");
+    await expect(drawer).toContainText("Gleiter für Rundrohr");
     await drawer.getByRole("button", { name: /Menge .* erhöhen/ }).click();
     await expect(drawer.getByLabel(/Menge für/)).toHaveValue("40");
     await drawer.getByRole("button", { name: /entfernen/ }).click();

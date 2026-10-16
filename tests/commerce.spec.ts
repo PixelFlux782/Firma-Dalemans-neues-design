@@ -86,7 +86,7 @@ test("Collection-Seite zeigt Produkte, Breadcrumb und kanonische Metadaten", asy
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Gleiter & Bodenschutz");
   await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText("Produkte");
-  await expect(page.getByRole("link", { name: "Filzgleiter mit Stift ansehen" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Kunststoffstopfen weiß ansehen" })).toHaveAttribute(
     "href",
     "/produkte/artikel/filzgleiter-mit-stift",
   );
@@ -173,13 +173,13 @@ test("Buchablage zeigt Preis und SKU aus der aktuellen Preisliste", async ({ pag
   await expect(page.getByText("BU1021C", { exact: true }).first()).toBeVisible();
 });
 
-test("Filzgleiter-Artikel verwendet neues Haupt- und Maßbild", async ({ page }) => {
+test("Kunststoffstopfen verwendet Haupt- und Maßbild", async ({ page }) => {
   await page.goto("/produkte/artikel/filzgleiter-mit-stift");
 
   const mainImage = page.locator(".product-visual__product img").first();
-  await expect(mainImage).toHaveAttribute("alt", /Weißer gerippter Möbelgleiter mit schräger Auflagefläche/);
-  await page.getByRole("button", { name: /Bild 2: Weißer gerippter Möbelgleiter mit Maßangaben/ }).click();
-  await expect(mainImage).toHaveAttribute("alt", /Weißer gerippter Möbelgleiter mit Maßangaben/);
+  await expect(mainImage).toHaveAttribute("alt", /Weißer Kunststoffstopfen mit geripptem Steckschaft und schräger Auflagefläche/);
+  await page.getByRole("button", { name: /Bild 2: Weißer Kunststoffstopfen mit Maßangaben/ }).click();
+  await expect(mainImage).toHaveAttribute("alt", /Weißer Kunststoffstopfen mit Maßangaben/);
 });
 
 test("Galeriebild wird beim nächsten Stapelstuhl-Variantenwechsel wieder durch das Variantenbild ersetzt", async ({ page }) => {

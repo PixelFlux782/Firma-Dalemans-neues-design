@@ -76,14 +76,14 @@ const feltGliderImage = image(
   "Sortiment verschiedener Möbelgleiter und Gestellstopfen",
 );
 
-const feltGliderProductImage = image(
+const whitePlasticPlugImage = image(
   "/neue bilder/Zubehör/zubehoer_stopfen_weiß_a.png",
-  "Weißer gerippter Möbelgleiter mit schräger Auflagefläche",
+  "Weißer Kunststoffstopfen mit geripptem Steckschaft und schräger Auflagefläche",
 );
 
-const feltGliderProductDetailImage = image(
+const whitePlasticPlugDetailImage = image(
   "/neue bilder/Zubehör/zubehör-stopfen-weiß.png",
-  "Weißer gerippter Möbelgleiter mit Maßangaben",
+  "Weißer Kunststoffstopfen mit Maßangaben",
 );
 
 const frameGliderImage = image(
@@ -204,27 +204,18 @@ export const localProducts: CommerceProduct[] = [
   {
     id: "local-product-filzgleiter-mit-stift",
     handle: "filzgleiter-mit-stift",
-    title: "Filzgleiter mit Stift",
-    shortDescription: "Für Stuhlbeine aus Holz – passend nach Stiftmaß, Boden und Nutzung auswählen.",
+    title: "Kunststoffstopfen weiß",
+    shortDescription: "Weißer Kunststoffstopfen für Rundrohre – passend nach Rohrmaß und Einbausituation auswählen.",
     description:
-      "Der Filzgleiter wird über einen Stift am Stuhlbein befestigt und kann empfindliche, glatte Böden im täglichen Betrieb schützen. Vor der Auswahl müssen Stuhlbein, vorhandene Bohrung und Einsatzbereich geprüft werden.",
+      "Der weiße Kunststoffstopfen wird in ein geeignetes Rundrohr eingesetzt. Vor der Auswahl müssen Rohrmaß und Einbausituation geprüft werden.",
     descriptionHtml:
-      "<p>Der Filzgleiter wird über einen Stift am Stuhlbein befestigt und kann empfindliche, glatte Böden im täglichen Betrieb schützen.</p>",
+      "<p>Der weiße Kunststoffstopfen wird in ein geeignetes Rundrohr eingesetzt. Entscheidend sind das genaue Rohrmaß und die Einbausituation.</p>",
     availableForSale: false,
-    featuredImage: feltGliderProductImage,
-    images: [feltGliderProductImage, feltGliderProductDetailImage],
+    featuredImage: whitePlasticPlugImage,
+    images: [whitePlasticPlugImage, whitePlasticPlugDetailImage],
     variants: [
-      requestVariant("felt-3-grey", "3 mm · Filz grau", "DEV-FG-3-GR", [
-        { name: "Stiftmaß", value: "3 mm" },
-        { name: "Gleitfläche", value: "Filz grau" },
-      ]),
-      requestVariant("felt-4-grey", "4 mm · Filz grau", "DEV-FG-4-GR", [
-        { name: "Stiftmaß", value: "4 mm" },
-        { name: "Gleitfläche", value: "Filz grau" },
-      ]),
-      requestVariant("felt-5-grey", "5 mm · Filz grau", "DEV-FG-5-GR", [
-        { name: "Stiftmaß", value: "5 mm" },
-        { name: "Gleitfläche", value: "Filz grau" },
+      requestVariant("plastic-plug-white", "Weiß", "DEV-KS-WEISS", [
+        { name: "Farbe", value: "Weiß" },
       ]),
     ],
     priceRange: { min: null, max: null },
@@ -233,47 +224,47 @@ export const localProducts: CommerceProduct[] = [
     availabilityNote: "Diese Ausführungen sind derzeit nicht verfügbar.",
     collectionHandles: ["gleiter-bodenschutz"],
     specifications: [
-      { name: "Befestigung", value: "Stiftmontage" },
-      { name: "Gleitfläche", value: "Filz" },
+      { name: "Material", value: "Kunststoff" },
+      { name: "Farbe", value: "Weiß" },
+      { name: "Befestigung", value: "Steckmontage" },
       { name: "Mengeneinheit", value: "Pack" },
     ],
     compatibility: [
-      "Stuhlbeine aus Holz mit geeigneter Aufnahme",
-      "Zuordnung nach vorhandener Bohrung und Stiftmaß",
+      "Rundrohre mit passendem Innenmaß",
+      "Rohrmaß und Einbausituation müssen vorab geprüft werden",
     ],
-    suitableFor: ["Parkett", "Laminat", "andere glatte Hartböden nach Prüfung"],
+    suitableFor: ["Stahlrohrgestelle", "Bestandsbestuhlung", "Nachrüstung und Ersatz"],
     quantity: {
       unit: "pack",
       unitLabel: "Pack",
       minimum: 1,
       step: 1,
-      note: "In der Regel werden vier Gleiter pro Stuhl benötigt. Eine kleine Reserve kann bei größeren Beständen sinnvoll sein.",
+      note: "Die benötigte Anzahl richtet sich nach Gestell und Stuhlbestand.",
     },
     measureGuide: [
-      "Vorhandenen Gleiter vorsichtig entfernen.",
-      "Stiftdurchmesser beziehungsweise vorhandene Bohrung messen.",
-      "Bodenart und Stuhlbein fotografieren, wenn die Zuordnung unklar bleibt.",
+      "Vorhandenen Stopfen vorsichtig entfernen.",
+      "Innenmaß des Rundrohres möglichst mit einem Messschieber erfassen.",
+      "Rohr und Einbausituation fotografieren, wenn die Zuordnung unklar bleibt.",
     ],
     applicationNotes: [
-      "Gleiter regelmäßig auf Verschleiß und festen Sitz prüfen.",
-      "Verschmutzte Filzflächen können empfindliche Böden beeinträchtigen.",
+      "Stopfen regelmäßig auf Verschleiß und festen Sitz prüfen.",
     ],
     notes: ["Die Variantenbezeichnungen sind lokale Entwicklungsdaten und werden vor einem Verkaufsstart geprüft."],
     accessories: [
       { handle: "kunststoff-gestellgleiter", title: "Kunststoff-Gestellgleiter" },
     ],
     consultationNote:
-      "Ein Foto des Stuhlbeins, das genaue Maß und die Bodenart helfen bei der sicheren Zuordnung.",
+      "Ein Foto des Rundrohres und das genaue Innenmaß helfen bei der sicheren Zuordnung.",
     faq: [
       {
-        question: "Wie finde ich das passende Stiftmaß?",
+        question: "Wie finde ich das passende Rohrmaß?",
         answer:
-          "Messen Sie den vorhandenen Stift oder die Aufnahme möglichst mit einem Messschieber. Bei Unsicherheit prüfen wir Foto und Maß gemeinsam.",
+          "Messen Sie das Innenmaß des Rundrohres möglichst mit einem Messschieber. Bei Unsicherheit prüfen wir Foto und Maß gemeinsam.",
       },
     ],
     seo: {
-      title: "Filzgleiter mit Stift für Stühle",
-      description: "Filzgleiter nach Stiftmaß und Boden auswählen – mit persönlicher Hilfe bei unklarer Zuordnung.",
+      title: "Kunststoffstopfen weiß für Rundrohre",
+      description: "Weißen Kunststoffstopfen passend zum Rundrohr auswählen – mit persönlicher Hilfe bei unklarer Zuordnung.",
     },
     updatedAt,
   },
@@ -352,7 +343,7 @@ export const localProducts: CommerceProduct[] = [
     ],
     applicationNotes: ["Sitz des Gleiters nach der Montage prüfen."],
     notes: ["Maßvarianten und Artikelnummern sind lokale Entwicklungsdaten."],
-    accessories: [{ handle: "filzgleiter-mit-stift", title: "Filzgleiter mit Stift" }],
+    accessories: [{ handle: "filzgleiter-mit-stift", title: "Kunststoffstopfen weiß" }],
     consultationNote:
       "Bei bestehenden Bestuhlungen reicht die Modellbezeichnung häufig nicht aus – bitte Foto und Rohrmaß bereithalten.",
     faq: [],
@@ -626,7 +617,7 @@ export const localCollectionRecords: Array<Omit<CommerceCollection, "products">>
   {
     id: "local-collection-reihenverbinder-nachruestung",
     handle: "reihenverbinder-nachruestung",
-    title: "Reihenverbinder & Nachrüstung",
+    title: "Buchablage & Nachrüstung",
     shortDescription: "Bestehende Stühle sinnvoll ergänzen – von der Reihenbildung bis zur Buchablage.",
     description:
       "Zubehör für geordnete Bestuhlung und praktische Nachrüstung. Vor der Auswahl prüfen wir Stuhlmodell, Gestell und Einbausituation.",

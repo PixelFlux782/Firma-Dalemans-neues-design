@@ -152,7 +152,7 @@ function twoDimensionalVariant({
 export const developmentFinderFixtures: DevelopmentFinderProductFixture[] = [
   {
     handle: "filzgleiter-fuer-rundrohr",
-    title: "Filzgleiter für Rundrohr",
+    title: "Gleiter für Rundrohr",
     glidingSurfaceLabel: "Filz",
     variants: [
       roundVariant({ id: "rf-18", sku: "DEV-RF-18", nominal: 18, min: 17.5, max: 18.8, glidingSurface: "felt", floorSuitability: feltHardFloors, packSize: 20 }),

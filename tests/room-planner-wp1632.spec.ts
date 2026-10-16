@@ -51,6 +51,56 @@ test("WP16.3.2 wall labels edit one geometry step, reject invalid lengths and su
   await expect(point).toHaveAttribute("cx", before!);
 });
 
+test("Raum- und Gangmaße lassen sich direkt über die Maßlabels eingeben", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/raumplaner");
+  const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
+  const canvas = editor.getByRole("img", { name: "Grundriss Zeichenfläche" });
+  await canvas.click({ position: { x: 180, y: 140 } });
+  await canvas.click({ position: { x: 540, y: 140 } });
+  await canvas.click({ position: { x: 540, y: 440 } });
+  await canvas.click({ position: { x: 180, y: 440 } });
+  await canvas.locator("[data-point-id]").first().click();
+  await editor.getByRole("button", { name: "Gänge", exact: true }).click();
+  await canvas.click({ position: { x: 360, y: 190 } });
+  await canvas.click({ position: { x: 360, y: 390 } });
+
+  await canvas.getByRole("button", { name: /Ganglänge .* bearbeiten/ }).click();
+  await page.getByRole("textbox", { name: "Ganglänge in Metern" }).fill("3,00");
+  await page.getByRole("button", { name: "Übernehmen" }).click();
+  await expect(editor.getByLabel("Kontextbezogene Eigenschaften").getByLabel("Länge (m)")).toHaveValue("3");
+
+  await canvas.getByRole("button", { name: /Gangbreite .* bearbeiten/ }).click();
+  await page.getByRole("textbox", { name: "Gangbreite in Metern" }).fill("1,40");
+  await page.getByRole("button", { name: "Übernehmen" }).click();
+  await expect(editor.getByLabel("Kontextbezogene Eigenschaften").getByLabel("Breite (m)")).toHaveValue("1.4");
+});
+
+test("automatische Bestuhlung wird nach Geometrieänderungen wirklich neu berechnet", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/raumplaner");
+  const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
+  const canvas = editor.getByRole("img", { name: "Grundriss Zeichenfläche" });
+  await canvas.click({ position: { x: 180, y: 140 } });
+  await canvas.click({ position: { x: 630, y: 140 } });
+  await canvas.click({ position: { x: 630, y: 500 } });
+  await canvas.click({ position: { x: 180, y: 500 } });
+  await canvas.locator("[data-point-id]").first().click();
+
+  await editor.getByRole("button", { name: "Stühle", exact: true }).click();
+  await editor.getByLabel("Stühle Optionen").getByRole("button", { name: "Freie Raumfläche bestuhlen" }).click();
+  await expect(editor.getByRole("alert")).toContainText("Bestuhlung erstellt");
+
+  await editor.getByRole("button", { name: "Hindernisse", exact: true }).click();
+  await editor.getByLabel("Hindernisbreite am Werkzeug").fill("2");
+  await editor.getByLabel("Hindernistiefe am Werkzeug").fill("2");
+  await canvas.click({ position: { x: 405, y: 320 } });
+
+  await editor.getByRole("button", { name: "Stühle", exact: true }).click();
+  await editor.getByLabel("Stühle Optionen").getByRole("button", { name: "Bestuhlung neu berechnen" }).click();
+  await expect(editor.getByRole("alert")).toContainText("Bestuhlung erstellt");
+});
+
 test("WP16.3.2 tool groups expose persistent options and keyboard help", async ({ page }) => {
   await page.goto("/raumplaner");
   const tools = page.getByLabel("Werkzeuge", { exact: true });

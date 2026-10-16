@@ -14,7 +14,7 @@ function search(query: string) {
 
 test.describe("deterministische Search-Logik", () => {
   test("rankt einen exakten Produkttitel am höchsten", () => {
-    const result = search("Filzgleiter mit Stift").groups.products[0];
+    const result = search("Kunststoffstopfen weiß").groups.products[0];
     expect(result.document.id).toBe("local-product-filzgleiter-mit-stift");
     expect(result.matchKind).toBe("exact_title");
   });

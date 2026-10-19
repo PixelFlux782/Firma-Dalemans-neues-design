@@ -149,6 +149,21 @@ export interface CommerceProductReference {
   title: string;
 }
 
+export interface CommerceVariantAdvisory {
+  variantId: string;
+  title: string;
+  paragraphs: string[];
+  advantage: string;
+  disadvantage: string;
+}
+
+export interface CommerceOptionalAccessory {
+  title: string;
+  availabilityLabel: string;
+  description: string[];
+  compatibleVariantIds: string[];
+}
+
 export interface CommerceDownload {
   title: string;
   url: string;
@@ -185,6 +200,8 @@ export interface CommerceProduct {
   applicationNotes: string[];
   notes: string[];
   accessories: CommerceProductReference[];
+  variantAdvisories?: CommerceVariantAdvisory[];
+  optionalAccessories?: CommerceOptionalAccessory[];
   downloads?: CommerceDownload[];
   consultationNote: string | null;
   faq: CommerceFaqItem[];

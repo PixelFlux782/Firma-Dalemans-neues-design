@@ -77,7 +77,11 @@ export function commerceDetailData(product: CommerceProduct, category: string, c
     highlights: chair ? ["stapelbar", "Polsterarten wählbar", ...(product.variants.some(variant => variant.selectedOptions.some(option => option.name === "Reihenverbindung" && option.value === "Mit Reihenverbindung")) ? ["Reihenverbindung erhältlich"] : [])] : editorial ? editorial.highlights : developmentFinder ? [] : [...product.compatibility, ...product.suitableFor].slice(0, 3),
     compatibility: developmentFinder ? [] : product.compatibility,
     useCases: developmentFinder ? [] : [...new Set([...product.suitableFor, ...(editorial?.suitableFor ?? [])])], variants, specifications: developmentFinder ? [] : product.specifications,
-    editorialNotes: editorial ? [...(product.handle === "seminarklapptisch-210c" ? (editorial.details ?? []).slice(2) : editorial.details ?? []), ...(editorial.note ? [editorial.note] : [])] : undefined,
+    editorialNotes: editorial ? [
+      ...(product.handle === "seminarklapptisch-210c" ? (editorial.details ?? []).slice(2) : editorial.details ?? []),
+      ...(editorial.note ? [editorial.note] : []),
+      ...(product.handle === "tischtransportwagen" ? product.applicationNotes.slice(1) : []),
+    ] : undefined,
     help, downloads: product.downloads, faq: product.faq,
     consultation: { eyebrow: chair ? "Musterstuhl & Beratung" : "Persönliche Beratung",
       title: chair ? "Ausführung vor größerer Bestellung persönlich prüfen." : "Ausführung und Einsatz persönlich klären.",

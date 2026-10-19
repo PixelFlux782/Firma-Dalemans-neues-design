@@ -40,11 +40,28 @@ test("Tischtransportwagen wechselt Preis, Artikelnummer und Anfragevariante", as
   await expect(page.locator('[data-price-status="fixed"]')).toContainText("455,30");
   await expect(page.getByTestId("selected-variant")).toContainText("Zwei Lenkachsen");
   await expect(page.getByTestId("selected-sku")).toContainText("D710-008");
+  await expect(page.getByTestId("variant-advisory")).toContainText("besonders flexibel beim Rangieren");
+  await expect(page.getByTestId("variant-advisory")).toContainText("Vorteil");
+  await expect(page.getByTestId("variant-advisory")).toContainText("Nachteil");
+  const accessory = page.getByTestId("optional-accessory");
+  await expect(accessory).toContainText("Zweiter Schiebegriff");
+  await expect(accessory).toContainText("Auf Anfrage");
+  await accessory.getByRole("checkbox", { name: "Bei der Anfrage vormerken" }).check();
   await expect(page.getByRole("link", { name: "Angebot anfragen" })).toHaveAttribute("href", /artikelnummer=D710-008/);
+  await expect(page.getByRole("link", { name: "Angebot anfragen" })).toHaveAttribute("href", /nachricht=.*Zubeh%C3%B6rwunsch%3A\+Zweiter\+Schiebegriff/);
 
   await selector.getByRole("button", { name: /Eine Lenkachse/ }).click();
   await expect(page.locator('[data-price-status="fixed"]')).toContainText("435,00");
   await expect(page.getByTestId("selected-sku")).toContainText("D710-007");
+  await expect(page.getByTestId("variant-advisory")).toHaveCount(0);
+  await expect(page.getByTestId("optional-accessory")).toHaveCount(0);
+});
+
+test("Tischtransportwagen nennt die maximale Beladung", async ({ page }) => {
+  await page.goto("/produkte/artikel/tischtransportwagen");
+  await expect(page.getByText("Maximale Beladung", { exact: true })).toBeVisible();
+  await expect(page.getByText("10 Tische", { exact: true })).toBeVisible();
+  await expect(page.getByText(/maximal 10 passende Klapptische ausgelegt/)).toBeVisible();
 });
 
 test("Stuhltransportwagen zeigt Preis und Artikelnummer auf Desktop und bleibt mobil nutzbar", async ({ page }) => {

@@ -492,15 +492,43 @@ export const localProducts: CommerceProduct[] = [
     specifications: [
       { name: "Einsatz", value: "Transport und Lagerung von Klapptischen" },
       { name: "Zuordnung", value: "nach Tischmaß und Bestandsmenge" },
+      { name: "Maximale Beladung", value: "10 Tische" },
       { name: "Mengeneinheit", value: "Stück" },
     ],
     compatibility: ["Klapptische nach Maß- und Bestandsprüfung"],
     suitableFor: ["Saalumbauten", "Veranstaltungsräume", "Lagerung und interner Transport"],
     quantity: { unit: "piece", unitLabel: "Stück", minimum: 1, step: 1, note: null },
     measureGuide: ["Tischmaße und Stückzahl dokumentieren.", "Türbreiten, Schwellen und Transportwege berücksichtigen."],
-    applicationNotes: ["Auflagefläche, Haltebügel und Rollen stimmen wir auf die Tische und Wege ab."],
+    applicationNotes: [
+      "Auflagefläche, Haltebügel und Rollen stimmen wir auf die Tische und Wege ab.",
+      "Unsere Tischtransportwagen sind für maximal 10 passende Klapptische ausgelegt. Bitte überschreiten Sie diese Anzahl nicht.",
+    ],
     notes: [],
     accessories: [],
+    variantAdvisories: [
+      {
+        variantId: "local-variant-table-trolley-two-steering-axles",
+        title: "Zwei Lenkachsen – besonders flexibel beim Rangieren",
+        paragraphs: [
+          "Mit zwei Lenkachsen lässt sich der Tischtransportwagen auch seitlich bewegen und platzsparend in Nischen abstellen. Das ist besonders praktisch, wenn wenig Platz zur Verfügung steht.",
+          "Allerdings verhält sich der Wagen beim Schieben ähnlich wie ein Einkaufswagen: Alle vier Räder können einschwenken. Dadurch ist er besonders bei voller Beladung schwieriger geradeaus zu steuern.",
+          "Für längere Transportwege empfehlen wir Ihnen daher, auch die Alternative mit einer Lenkachse zu berücksichtigen.",
+        ],
+        advantage: "Seitliches Rangieren und platzsparendes Abstellen in Nischen möglich.",
+        disadvantage: "Bei voller Beladung schwieriger zu steuern, da beide Achsen lenkbar sind.",
+      },
+    ],
+    optionalAccessories: [
+      {
+        title: "Zweiter Schiebegriff",
+        availabilityLabel: "Auf Anfrage",
+        description: [
+          "Für unsere Tischtransportwagen mit zwei Lenkachsen bieten wir auf Anfrage einen zusätzlichen Schiebegriff an. Damit können Sie den Wagen von beiden Seiten aus führen und besser kontrollieren.",
+          "Bitte beachten Sie: Der zweite Griff erleichtert zwar das Führen des Wagens, kann das Be- und Entladen der Tische jedoch etwas umständlicher machen.",
+        ],
+        compatibleVariantIds: ["local-variant-table-trolley-two-steering-axles"],
+      },
+    ],
     consultationNote: "Für die Auswahl helfen Tischmaße, Bestandsmenge, Lagerort und Transportweg.",
     faq: [],
     seo: {

@@ -76,6 +76,7 @@ export default function ProductVariantSelector({
   const lowestPrice = useMemo(() => lowestProductUnitPrice(product), [product]);
   const selectedMinimumQuantity = selectedRules?.minimumQuantity;
   const [quantity, setQuantity] = useState(product.quantity.minimum);
+  const [requestedAccessories, setRequestedAccessories] = useState<string[]>([]);
 
   useEffect(() => {
     if (selectedMinimumQuantity) setQuantity(selectedMinimumQuantity);
@@ -97,11 +98,27 @@ export default function ProductVariantSelector({
   const availability = selectedVariant?.availability ?? product.availability;
   const availabilityNote = selectedVariant?.availabilityNote ?? product.availabilityNote;
   const cartable = canAddVariantToCart(selectedVariant);
+  const selectedAdvisory = product.variantAdvisories?.find((item) => item.variantId === selectedVariant?.id);
+  const compatibleAccessories = product.optionalAccessories?.filter((item) =>
+    selectedVariant ? item.compatibleVariantIds.includes(selectedVariant.id) : false,
+  ) ?? [];
+  const selectedAccessoryTitles = compatibleAccessories
+    .filter((item) => requestedAccessories.includes(item.title))
+    .map((item) => item.title);
+  const inquiryMessage = selectedVariant
+    ? [
+        `Produkt: ${product.title}`,
+        `Wagenvariante: ${selectedVariant.title}`,
+        ...(selectedVariant.erpArticleNumber ? [`Artikelnummer: ${selectedVariant.erpArticleNumber}`] : []),
+        ...(selectedAccessoryTitles.length ? [`Zubehörwunsch: ${selectedAccessoryTitles.join(", ")} (auf Anfrage)`] : []),
+      ].join("\n")
+    : "";
   const contactParameters = new URLSearchParams({
     anliegen: "Shop-Produktberatung",
     produkt: product.title,
     ...(selectedVariant ? { variante: selectedVariant.title } : {}),
     ...(selectedVariant?.erpArticleNumber ? { artikelnummer: selectedVariant.erpArticleNumber } : {}),
+    ...(selectedAccessoryTitles.length ? { nachricht: inquiryMessage } : {}),
   });
 
   return (
@@ -200,6 +217,53 @@ export default function ProductVariantSelector({
           ) : null}
         </div>
       ) : null}
+
+      {selectedAdvisory ? (
+        <section className="mt-6 rounded-2xl border border-premium-beige/80 bg-premium-warm/55 p-5" aria-labelledby="variant-advisory-title" data-testid="variant-advisory">
+          <h2 id="variant-advisory-title" className="font-display text-xl font-medium leading-7 text-premium-ink">
+            {selectedAdvisory.title}
+          </h2>
+          <div className="mt-3 space-y-3 text-sm leading-6 text-premium-muted">
+            {selectedAdvisory.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          </div>
+          <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl bg-white/80 p-4">
+              <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-premium-forest">Vorteil</dt>
+              <dd className="mt-2 text-sm leading-6 text-premium-charcoal">{selectedAdvisory.advantage}</dd>
+            </div>
+            <div className="rounded-xl bg-white/80 p-4">
+              <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-premium-bronze">Nachteil</dt>
+              <dd className="mt-2 text-sm leading-6 text-premium-charcoal">{selectedAdvisory.disadvantage}</dd>
+            </div>
+          </dl>
+        </section>
+      ) : null}
+
+      {compatibleAccessories.map((accessory) => {
+        const requested = requestedAccessories.includes(accessory.title);
+        return (
+          <section key={accessory.title} className="mt-6 rounded-2xl border border-premium-beige/80 p-5" aria-labelledby={`accessory-${accessory.title}`} data-testid="optional-accessory">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <h2 id={`accessory-${accessory.title}`} className="font-display text-xl font-medium text-premium-ink">{accessory.title}</h2>
+              <span className="rounded-full bg-premium-sand/25 px-3 py-1 text-xs font-semibold text-premium-ink">{accessory.availabilityLabel}</span>
+            </div>
+            <div className="mt-3 space-y-3 text-sm leading-6 text-premium-muted">
+              {accessory.description.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            </div>
+            <label className="mt-4 flex min-h-11 cursor-pointer items-center gap-3 rounded-xl bg-premium-warm/70 px-4 py-3 text-sm font-semibold text-premium-ink">
+              <input
+                type="checkbox"
+                checked={requested}
+                onChange={(event) => setRequestedAccessories((current) => event.target.checked
+                  ? [...current, accessory.title]
+                  : current.filter((title) => title !== accessory.title))}
+                className="h-4 w-4 accent-premium-forest"
+              />
+              Bei der Anfrage vormerken
+            </label>
+          </section>
+        );
+      })}
 
       <CommerceAvailability
         status={availability}

@@ -111,6 +111,19 @@ test.describe("provider-neutrale lokale Cart-Logik", () => {
     });
   });
 
+  test("übernimmt ein Griffloch nicht für eine vollgepolsterte Stuhlvariante", () => {
+    const chair = localProducts.find((product) => product.handle === "1021")!;
+    const variant = chair.variants.find((entry) => entry.id.endsWith("seat-back-g2-no-row"))!;
+    const line = cartLineFromProduct({
+      product: chair,
+      variant,
+      quantity: 1,
+      selectedAddonSkus: ["AP1021GRL"],
+    });
+    expect(line.selectedAddons).toBeUndefined();
+    expect(line.unitPrice).toEqual(variant.price);
+  });
+
   test("ordnet die verschobene Buche-310c-Zeile mit Staffelpreisen korrekt zu", () => {
     const table = localProducts.find((product) => product.handle === "klapptisch-310c")!;
     expect(table.variants.filter((entry) => entry.title.endsWith("Buche natur")).map((entry) => [

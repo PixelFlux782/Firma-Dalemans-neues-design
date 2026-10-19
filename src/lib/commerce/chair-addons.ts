@@ -3,6 +3,7 @@ import type {
   CommercePriceTier,
   CommerceProductVariant,
 } from "@/lib/commerce/types";
+import { chairConfigurationFromVariant } from "@/lib/commerce/stacking-chairs";
 
 export interface ChairAddon {
   sku: string;
@@ -74,25 +75,32 @@ export function chairAddonPriceForQuantity(addon: ChairAddon, quantity: number) 
 export function isChairAddonCompatible(
   addon: ChairAddon,
   modelCode: string | undefined,
-  variantId: string | undefined,
+  variant: CommerceProductVariant | null | undefined,
 ) {
+  const configuration = variant ? chairConfigurationFromVariant(variant) : null;
+  const upholsteryCompatible = addon.sku !== "AP1021GRL"
+    || configuration?.upholstery === "none"
+    || configuration?.upholstery === "seat";
+
   return (!addon.compatibleModels || Boolean(modelCode && addon.compatibleModels.includes(modelCode)))
-    && (!addon.compatibleVariants || Boolean(variantId && addon.compatibleVariants.includes(variantId)));
+    && (!addon.compatibleVariants || Boolean(variant && addon.compatibleVariants.includes(variant.id)))
+    && upholsteryCompatible;
 }
 
-export function compatibleChairAddons(modelCode: string | undefined, variantId: string | undefined) {
-  return CHAIR_ADDONS.filter((addon) => isChairAddonCompatible(addon, modelCode, variantId));
+export function compatibleChairAddons(modelCode: string | undefined, variant: CommerceProductVariant | null | undefined) {
+  return CHAIR_ADDONS.filter((addon) => isChairAddonCompatible(addon, modelCode, variant));
 }
 
 export function configuredChairPriceTiers(
   variant: CommerceProductVariant,
   selectedAddonSkus: string[],
+  modelCode?: string,
 ) {
   if (!variant.priceTiers?.length) return variant.priceTiers;
   const additionalAddons = selectedAddonSkus
     .filter((sku) => sku !== "APRV")
     .map(chairAddonBySku)
-    .filter((addon): addon is ChairAddon => addon !== null);
+    .filter((addon): addon is ChairAddon => addon !== null && isChairAddonCompatible(addon, modelCode, variant));
 
   return variant.priceTiers.map((tier) => {
     const quantity = tier.minimumQuantity ?? 1;

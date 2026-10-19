@@ -111,10 +111,14 @@ export default function ChairConfigurator({
   const basePrice = baseVariant ? priceForQuantity(baseVariant, quantity) : null;
   const lowestPrice = useMemo(() => lowestProductUnitPrice(product), [product]);
   const availableAddons = useMemo(
-    () => compatibleChairAddons(product.stackingChair?.modelCode, selectedVariant?.id),
-    [product.stackingChair?.modelCode, selectedVariant?.id],
+    () => compatibleChairAddons(product.stackingChair?.modelCode, selectedVariant),
+    [product.stackingChair?.modelCode, selectedVariant],
   );
-  const selectedAddons = selectedAddonSkus
+  const compatibleSelectedAddonSkus = selectedAddonSkus.filter((sku) => {
+    const addon = chairAddonBySku(sku);
+    return addon && isChairAddonCompatible(addon, product.stackingChair?.modelCode, selectedVariant);
+  });
+  const selectedAddons = compatibleSelectedAddonSkus
     .map(chairAddonBySku)
     .filter((addon) => addon !== null);
   const addonPrices = selectedAddons.map((addon) => ({
@@ -139,18 +143,18 @@ export default function ChairConfigurator({
       return addon && isChairAddonCompatible(
         addon,
         product.stackingChair?.modelCode,
-        selectedVariant?.id,
+        selectedVariant,
       );
     }));
     const rowConnectorAddon = chairAddonBySku("APRV");
     if (configuration.rowConnector && rowConnectorAddon && !isChairAddonCompatible(
       rowConnectorAddon,
       product.stackingChair?.modelCode,
-      selectedVariant?.id,
+      selectedVariant,
     )) {
       setConfiguration((current) => ({ ...current, rowConnector: false }));
     }
-  }, [configuration.rowConnector, product.stackingChair?.modelCode, selectedVariant?.id]);
+  }, [configuration.rowConnector, product.stackingChair?.modelCode, selectedVariant]);
 
   useEffect(() => {
     recordChairAction({ action: "chair_model_view", model: product.stackingChair?.modelCode });
@@ -406,29 +410,29 @@ export default function ChairConfigurator({
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <button
               type="button"
-              onClick={() => addLines([cartLineFromProduct({ product, variant: selectedVariant, quantity, selectedAddonSkus })])}
+              onClick={() => addLines([cartLineFromProduct({ product, variant: selectedVariant, quantity, selectedAddonSkus: compatibleSelectedAddonSkus })])}
               disabled={pending || requiresQuoteForFabric || !selectedVariant?.price || !selectedVariant.priceTiers?.length}
               className="btn-primary text-center disabled:cursor-not-allowed disabled:opacity-50"
             >
               {requiresQuoteForFabric ? "Mit Stoffauswahl bitte anfragen" : "In den Warenkorb"}
             </button>
             <Link
-              href={contactHref(product, configuration, quantity, "Angebot", selectedAddonSkus, fabricSelection)}
+              href={contactHref(product, configuration, quantity, "Angebot", compatibleSelectedAddonSkus, fabricSelection)}
               onClick={() => recordChairAction({ action: "chair_quote_request", model: product.stackingChair?.modelCode, variantId: selectedVariant.id, quantity })}
               className="btn-primary text-center"
             >
               Angebot anfragen
             </Link>
             <Link
-              href={contactHref(product, configuration, quantity, "Musterstuhl", selectedAddonSkus, fabricSelection)}
+              href={contactHref(product, configuration, quantity, "Musterstuhl", compatibleSelectedAddonSkus, fabricSelection)}
               onClick={() => recordChairAction({ action: "chair_sample_request", model: product.stackingChair?.modelCode, variantId: selectedVariant.id, quantity })}
               className="btn-secondary text-center"
             >
               Musterstuhl anfragen
             </Link>
           </div>
-          {configuration.upholstery !== "none" ? <Link href={contactHref(product, configuration, quantity, "Stoffmuster", selectedAddonSkus, fabricSelection)} className="mt-4 mr-6 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">Stoffmuster anfragen →</Link> : null}
-          <Link href={contactHref(product, configuration, quantity, "Beratung", selectedAddonSkus, fabricSelection)} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">
+          {configuration.upholstery !== "none" ? <Link href={contactHref(product, configuration, quantity, "Stoffmuster", compatibleSelectedAddonSkus, fabricSelection)} className="mt-4 mr-6 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">Stoffmuster anfragen →</Link> : null}
+          <Link href={contactHref(product, configuration, quantity, "Beratung", compatibleSelectedAddonSkus, fabricSelection)} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">
             Fragen zum Modell? Persönlich beraten lassen →
           </Link>
         </>

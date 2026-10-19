@@ -89,14 +89,28 @@ test.describe("provider-neutrales Stapelstuhlmodell", () => {
   });
 
   test("kann Erweiterungen zentral auf Modelle und Varianten beschränken", () => {
+    const product = localStackingChairProducts[0];
+    const variant = product.variants[0];
     const restricted = {
       ...CHAIR_ADDONS[0],
       compatibleModels: ["1021"],
-      compatibleVariants: ["variant-a"],
+      compatibleVariants: [variant.id],
     };
-    expect(isChairAddonCompatible(restricted, "1021", "variant-a")).toBe(true);
-    expect(isChairAddonCompatible(restricted, "Coburg", "variant-a")).toBe(false);
-    expect(isChairAddonCompatible(restricted, "1021", "variant-b")).toBe(false);
+    expect(isChairAddonCompatible(restricted, "1021", variant)).toBe(true);
+    expect(isChairAddonCompatible(restricted, "Coburg", variant)).toBe(false);
+    expect(isChairAddonCompatible(restricted, "1021", product.variants[1])).toBe(false);
+  });
+
+  test("erlaubt das Griffloch bei allen Modellen nur ungepolstert und mit Sitzpolster", () => {
+    const grip = chairAddonBySku("AP1021GRL")!;
+    for (const product of localStackingChairProducts) {
+      const none = resolveChairVariant(product, { upholstery: "none", rowConnector: false });
+      const seat = resolveChairVariant(product, { upholstery: "seat", fabricGroup: 2, rowConnector: false });
+      const full = resolveChairVariant(product, { upholstery: "seat-back", fabricGroup: 2, rowConnector: false });
+      expect(isChairAddonCompatible(grip, product.stackingChair?.modelCode, none), `${product.handle}: ungepolstert`).toBe(true);
+      expect(isChairAddonCompatible(grip, product.stackingChair?.modelCode, seat), `${product.handle}: Sitzpolster`).toBe(true);
+      expect(isChairAddonCompatible(grip, product.stackingChair?.modelCode, full), `${product.handle}: Vollpolster`).toBe(false);
+    }
   });
 
   test("ordnet Variantenbilder über die ERP-Artikelnummern aus Export_Flo zu", () => {
@@ -348,6 +362,22 @@ test.describe("Modell 1021 Konfigurator", () => {
       await expect(price).toContainText(expectedUnitPrice);
       await expect(total).toContainText(expectedTotal);
     }
+  });
+
+  test("entfernt ein gewähltes Griffloch beim Wechsel von Sitz- zu Vollpolster", async ({ page }) => {
+    await page.goto("/produkte/stapelstuehle/1021?polster=sitz&gruppe=2");
+    const grip = page.getByRole("checkbox", { name: /Griffloch im Rückenteil/ });
+    await expect(grip).toBeVisible();
+    await grip.check({ force: true });
+    await expect(grip).toBeChecked();
+
+    await page.locator('input[name="upholstery"][value="seat-back"]').check({ force: true });
+    await expect(grip).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Angebot anfragen" })).not.toHaveAttribute("href", /Griffloch/);
+
+    await page.locator('input[name="upholstery"][value="seat"]').check({ force: true });
+    await expect(grip).toBeVisible();
+    await expect(grip).not.toBeChecked();
   });
 
   test("validiert die Menge und übernimmt die Konfiguration in die Angebotsanfrage", async ({ page }) => {

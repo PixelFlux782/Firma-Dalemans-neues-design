@@ -444,7 +444,7 @@ export const localProducts: CommerceProduct[] = [
     ],
     compatibility: ["Geeignete Stahlrohrstühle nach Modell- und Gestellprüfung"],
     suitableFor: ["Kirchen", "Gemeinderäume", "Vortrags- und Seminarräume"],
-    quantity: { unit: "piece", unitLabel: "Stück", minimum: 1, step: 1, note: "Üblicherweise eine Ablage pro Stuhl." },
+    quantity: { unit: "piece", unitLabel: "Stück", minimum: 1, step: 1, note: "Üblicherweise eine Buchablage pro Stuhl.\n\nUnser Spartipp: Oft reicht es aus, nur jeden zweiten Stuhl mit einer Buchablage auszustatten. So sparen Sie Kosten, ohne auf praktische Ablagemöglichkeiten zu verzichten." },
     measureGuide: ["Stuhlmodell und Gestell fotografieren.", "Freiraum unter der Sitzfläche dokumentieren."],
     applicationNotes: ["Montage und Stapelfunktion müssen am konkreten Stuhl geprüft werden."],
     notes: [],

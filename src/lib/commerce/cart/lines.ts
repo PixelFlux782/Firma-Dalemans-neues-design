@@ -5,7 +5,7 @@ import type {
   CommerceProduct,
   CommerceProductVariant,
 } from "@/lib/commerce/types";
-import { configuredChairPriceTiers } from "@/lib/commerce/chair-addons";
+import { chairAddonBySku, configuredChairPriceTiers, isChairAddonCompatible } from "@/lib/commerce/chair-addons";
 
 export function canAddVariantToCart(variant: CommerceProductVariant | null) {
   return Boolean(
@@ -55,8 +55,14 @@ export function cartLineFromProduct({
   selectedAddonSkus?: string[];
 }): CartInputLine {
   const rules = cartQuantityRules(product, variant);
+  const compatibleAddonSkus = product.stackingChair
+    ? selectedAddonSkus.filter((sku) => {
+        const addon = chairAddonBySku(sku);
+        return addon !== null && isChairAddonCompatible(addon, product.stackingChair?.modelCode, variant);
+      })
+    : [];
   const priceTiers = product.stackingChair
-    ? configuredChairPriceTiers(variant, selectedAddonSkus)
+    ? configuredChairPriceTiers(variant, compatibleAddonSkus, product.stackingChair.modelCode)
     : variant.priceTiers;
   const unitPrice = priceTiers?.find((tier) =>
     (tier.minimumQuantity === null || quantity >= tier.minimumQuantity)
@@ -80,6 +86,6 @@ export function cartLineFromProduct({
     availability: variant.availability,
     source,
     finderContext,
-    ...(selectedAddonSkus.length > 0 ? { selectedAddons: selectedAddonSkus.slice().sort() } : {}),
+    ...(compatibleAddonSkus.length > 0 ? { selectedAddons: compatibleAddonSkus.slice().sort() } : {}),
   };
 }

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import CtaBanner from "@/components/ui/CtaBanner";
@@ -75,6 +76,27 @@ export default async function GuidePage({ article }: { article: GuideArticle }) 
               <div className="mt-5 space-y-4">
                 {section.paragraphs.map((paragraph) => <p key={paragraph} className="max-w-3xl text-base leading-8 text-premium-muted">{paragraph}</p>)}
               </div>
+              {section.images?.length ? (
+                <div className="mt-7 grid items-start gap-5 sm:grid-cols-2">
+                  {section.images.map((image) => (
+                    <figure key={image.src} className="overflow-hidden rounded-3xl border border-premium-beige/70 bg-premium-warm/45 p-3 shadow-[0_8px_28px_rgba(20,18,16,.04)]">
+                      <Image
+                        src={image.src}
+                        alt={image.alt}
+                        width={image.width ?? 1200}
+                        height={image.height ?? 900}
+                        sizes="(min-width: 1024px) 29vw, (min-width: 640px) 45vw, 100vw"
+                        className="h-auto w-full rounded-2xl object-contain"
+                      />
+                    </figure>
+                  ))}
+                </div>
+              ) : null}
+              {section.link ? (
+                <Link href={section.link.href} className="mt-6 inline-flex min-h-11 items-center font-semibold text-premium-forest underline decoration-premium-sand decoration-2 underline-offset-4 hover:text-premium-bronze">
+                  {section.link.label} <span className="ml-2" aria-hidden>→</span>
+                </Link>
+              ) : null}
               {section.list?.length ? (
                 <ul className="mt-6 grid gap-3 text-sm leading-7 text-premium-muted">
                   {section.list.map((item) => <li key={item} className="flex gap-3"><span className="mt-3 size-1.5 shrink-0 rounded-full bg-premium-leaf" aria-hidden />{item}</li>)}

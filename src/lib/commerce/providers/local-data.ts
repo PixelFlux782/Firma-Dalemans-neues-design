@@ -357,9 +357,9 @@ export const localProducts: CommerceProduct[] = [
     id: "local-product-reihenverbinder-kunststoff",
     handle: "reihenverbinder-kunststoff",
     title: "Reihenverbinder aus Kunststoff",
-    shortDescription: "Für eine geordnete Reihenbestuhlung – Eignung am vorhandenen Stahlrohrgestell prüfen.",
+    shortDescription: "Zum Nachrüsten: Sie haben Ihre Stapelstühle ursprünglich ohne Reihenverbindung bestellt? Für geeignete vorhandene Stühle bieten wir diese Kunststofflösung an. Bei neuen Stapelstühlen empfehlen wir grundsätzlich die fest montierte Reihenverbindung aus Metall.",
     description:
-      "Der Reihenverbinder verbindet benachbarte Stahlrohrstühle miteinander. Ob eine Ausführung passt, hängt von Gestellform, Rohrmaß und Abstand der Stuhlbeine ab.",
+      "Unsere Empfehlung: Planen Sie die Reihenverbindung möglichst bereits bei der Bestellung Ihrer Stapelstühle ein. Die fest montierte Metalllösung ist unsere bevorzugte Wahl für eine dauerhafte Reihenbestuhlung. Für die nachträgliche Ausstattung vorhandener Stühle bieten wir passende Reihenverbinder aus Kunststoff an. Ob eine Ausführung passt, hängt von Stuhlmodell, Gestellform, Rohrmaß und Abstand der Stuhlbeine ab.",
     descriptionHtml:
       "<p>Reihenverbinder für Stahlrohrstühle werden passend zu Gestellform, Rohrmaß und Stuhlabstand ausgewählt.</p>",
     availableForSale: false,

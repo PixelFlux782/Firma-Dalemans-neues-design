@@ -8,7 +8,7 @@ const article = getPublishedGuide("reihenverbinder-fuer-stapelstuehle");
 
 export const metadata: Metadata = buildMetadata({
   title: "Reihenverbinder für Stapelstühle einplanen",
-  description: "Vorteile von Reihenverbindern, Werksausführung, Nachrüstung und Anforderungen des genehmigten Bestuhlungsplans verständlich erklärt.",
+  description: "Metall-Reihenverbinder für neue Stapelstühle und Kunststoff-Reihenverbinder zur Nachrüstung klar unterscheiden und passend auswählen.",
   path: "/wissen/reihenverbinder-fuer-stapelstuehle",
   keywords: ["Reihenverbinder", "Reihenbestuhlung", "Stapelstuhl verbinden", "Bestuhlungsplan"],
 });

@@ -53,16 +53,24 @@ export const guideArticles = [
   {
     slug: "reihenverbinder-fuer-stapelstuehle",
     title: "Reihenverbinder für Stapelstühle richtig einplanen",
-    description: "Warum wir bei Reihenbestuhlung passende Reihenverbinder empfehlen und was bei Werksausführung, Nachrüstung und Bestuhlungsplan zählt.",
-    category: "Stapelstühle", updatedAt: "2026-10-09", status: "published",
+    description: "Fest montierte Metall-Reihenverbinder für neue Stapelstühle oder Kunststoff-Reihenverbinder zur Nachrüstung: Wir zeigen, welche Lösung wann passt.",
+    category: "Stapelstühle", updatedAt: "2026-10-19", status: "published",
     body: [
-      { id: "praxisnutzen", heading: "Ein ruhigeres Bild und klarere Reihen", paragraphs: [
-        "Für Reihenbestuhlungen empfehlen wir eine passende Reihenverbindung. Sie verbindet die Stühle innerhalb einer Reihe, sorgt für ein einheitliches Bild und hilft, die Reihen im Alltag an ihrem Platz zu halten.",
-        "Bei einer geeigneten Ausführung kann das Umstellen kompletter Reihen zum Reinigen einfacher werden. Welche Handhabung zulässig ist, hängt jedoch vom Stuhl, Verbinder und Boden ab.",
+      { id: "metall-reihenverbinder", heading: "Fest montierte Metall-Reihenverbinder – unsere erste Wahl", paragraphs: [
+        "Bei der Neubestellung von Stapelstühlen empfehlen wir die fest am Stuhl montierte Reihenverbindung aus Metall. Sie ist unsere bevorzugte Lösung für regelmäßig genutzte Reihenbestuhlungen.",
+        "Die Reihenverbindung wird direkt am Stuhl montiert. Wählen Sie diese Ausstattung deshalb möglichst bereits bei der Konfiguration Ihrer neuen Stapelstühle aus.",
+        "Die beiden Ansichten zeigen, wie unsere bevorzugte Metall-Reihenverbindung am Stapelstuhl aussieht.",
+      ], images: [
+        { src: encodeURI("/neue bilder/Stapelstühle/neu_beschriftet/Stapelstuhl_Reihenverbinder_l.png"), alt: "Fest montierte Metall-Reihenverbindung an einem Stapelstuhl, linke Ansicht", width: 1536, height: 1024 },
+        { src: encodeURI("/neue bilder/Stapelstühle/neu_beschriftet/Stapelstuhl_Reihenverbinder_r.png"), alt: "Fest montierte Metall-Reihenverbindung an einem Stapelstuhl, rechte Ansicht", width: 1023, height: 1537 },
       ] },
-      { id: "ab-werk-oder-nachruesten", heading: "Passende Ausführung möglichst ab Werk wählen", paragraphs: [
-        "Eine Reihenverbindung sollte möglichst bei der Auswahl des Stuhlmodells oder seiner Variante feststehen. Eine spätere Nachrüstung kann unpraktischer oder weniger wirtschaftlich sein und passt nicht automatisch zu jedem Gestell.",
-        "Im Zubehör gibt es einen schwarzen, nachrüstbaren Clip. Seine Eignung muss anhand des vorhandenen Stuhlmodells und Gestells geprüft werden; eine allgemeine Kompatibilitätsfreigabe liegt derzeit nicht vor.",
+      { id: "kunststoff-nachruestung", heading: "Kunststoff-Reihenverbinder – für die Nachrüstung", paragraphs: [
+        "Für bereits vorhandene Stapelstühle, die ursprünglich ohne Reihenverbindung bestellt wurden, bieten wir separat erhältliche Reihenverbinder aus Kunststoff zur Nachrüstung an.",
+        "Diese Lösung ist sinnvoll, wenn sich Ihre Anforderungen nach dem ursprünglichen Kauf geändert haben. Ob eine Nachrüstung möglich ist, hängt vom jeweiligen Stuhlmodell, der Gestellform, den Rohrmaßen und dem benötigten Stuhlabstand ab. Eine universelle Kompatibilität besteht nicht.",
+      ], link: { href: "/produkte/artikel/reihenverbinder-kunststoff", label: "Kunststoff-Reihenverbinder zur Nachrüstung ansehen", description: "Nachrüstlösung für geeignete vorhandene Stapelstühle." } },
+      { id: "unsere-empfehlung", heading: "Welche Lösung empfehlen wir?", paragraphs: [
+        "Neubestellung mit Reihenverbindung: Wählen Sie fest montierte Metall-Reihenverbinder möglichst direkt bei der Stuhlkonfiguration.",
+        "Vorhandene Stühle nachträglich verbinden: Nutzen Sie passende Kunststoff-Reihenverbinder zur Nachrüstung, nachdem wir die Kompatibilität mit Ihrem Stuhlmodell geprüft haben.",
       ] },
       { id: "anforderungen", heading: "Bestuhlungsplan und örtliche Anforderungen prüfen", paragraphs: [
         regulatory.rowConnectorRequirement,
@@ -71,11 +79,11 @@ export const guideArticles = [
     ],
     faq: [
       { question: "Sind Reihenverbinder in jeder Kirche vorgeschrieben?", answer: "Nein, nicht pauschal. Nutzung, rechtliche Einordnung, örtliche Vorschriften und der genehmigte Bestuhlungsplan sind entscheidend." },
-      { question: "Kann ich Reihenverbinder nachrüsten?", answer: "Für geeignete Bestände gibt es einen schwarzen Nachrüstclip. Die Passung muss am konkreten Stuhlmodell und Gestell geprüft werden." },
-      { question: "Warum gleich bei der Bestellung mitplanen?", answer: "Eine zum Modell passende Lösung ist meist praktischer als eine spätere Nachrüstung. Außerdem lassen sich Abstand, Gestell und Handhabung von Anfang an abstimmen." },
+      { question: "Kann ich Reihenverbinder nachrüsten?", answer: "Für geeignete vorhandene Stapelstühle bieten wir Kunststoff-Reihenverbinder zur Nachrüstung an. Die Passung muss am konkreten Stuhlmodell und Gestell geprüft werden." },
+      { question: "Warum gleich bei der Bestellung mitplanen?", answer: "Bei neuen Stapelstühlen empfehlen wir die fest montierte Metall-Reihenverbindung. Sie ist unsere bevorzugte Lösung für regelmäßig genutzte Reihenbestuhlungen und sollte direkt bei der Stuhlkonfiguration ausgewählt werden." },
     ],
     relatedLinks: [
-      { href: "/produkte/reihenverbinder", label: "Reihenverbinder im Zubehör", description: "Vorhandene Ausführungen und Beratungsmöglichkeiten ansehen." },
+      { href: "/produkte/artikel/reihenverbinder-kunststoff", label: "Kunststoff-Reihenverbinder zur Nachrüstung", description: "Nachrüstlösung für geeignete vorhandene Stapelstühle ansehen." },
       { href: "/produkte/stapelstuehle", label: "Stapelstühle", description: "Modelle mit ihren verfügbaren Ausstattungen vergleichen." },
       { href: "/raumplaner", label: "Raumplaner", description: "Eine mögliche Bestuhlung unverbindlich vorbereiten." },
     ],

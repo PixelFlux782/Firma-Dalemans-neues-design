@@ -22,42 +22,42 @@ export const guideArticles = [
     category: "Stapelstühle", updatedAt: "2026-10-09", status: "published",
     body: [
       { id: "raum-und-nutzung", heading: "Mit Raum und Nutzung beginnen", paragraphs: [
-        "Entscheidend ist nicht nur die Form eines Stuhls: Wie oft wird umgebaut, wie lange sitzen die Menschen, wie wird gelagert und braucht die Aufstellung regelmäßig Reihen? Die aktuellen Dalemans-Modelle sind nach Firmenauskunft für regelmäßiges Umstellen gedacht; Details wie Stapelung und Ausstattung bleiben modellabhängig.",
-        `Als überlieferte Orientierung können etwa ${estimatedValues.chairWidthCm.withoutRowConnector} cm ohne und etwa ${estimatedValues.chairWidthCm.withRowConnector} cm mit Reihenverbinder angesetzt werden. Das sind keine geprüften Breiten jedes Modells; besondere Ausführungen können abweichen.`,
+        "Entscheidend ist nicht nur die Form eines Stuhls: Wie oft bauen Sie um, wie lange sitzen die Menschen, wie lagern Sie die Stühle und stellen Sie regelmäßig Reihen? Unsere Stapelstühle sind für häufiges Umstellen ausgelegt. Stapelung und Ausstattung unterscheiden sich je nach Modell.",
+        `Aus unserer Erfahrung können Sie mit etwa ${estimatedValues.chairWidthCm.withoutRowConnector} cm ohne und etwa ${estimatedValues.chairWidthCm.withRowConnector} cm mit Reihenverbinder planen. Da die Breiten je nach Modell und Ausführung abweichen können, prüfen wir das genaue Maß für Ihre Auswahl.`,
       ] },
       { id: "sitzkomfort", heading: "Sitzkomfort persönlich prüfen", paragraphs: [
         "Für längere Veranstaltungen sind Sitz- und Rückenpolster häufig sinnvoll. Komfort ist dennoch individuell: Schalenform, Körpergröße, Sitzdauer und Bezug wirken zusammen.",
-        "Bei einer größeren Anschaffung empfiehlt Dalemans deshalb einen Musterstuhl. Er lässt sich im eigenen Raum, mit der geplanten Polsterung und von unterschiedlichen Personen erproben.",
+        "Vor einer größeren Anschaffung empfehlen wir deshalb einen Musterstuhl. So können Sie das Modell im eigenen Raum, mit der geplanten Polsterung und mit unterschiedlichen Personen erproben.",
       ] },
       { id: "starke-nutzung", heading: "Bei starker Nutzung Konstruktion und Schalenform ansehen", paragraphs: [
-        `Für stark beanspruchte Räume empfiehlt Dalemans häufig weniger stark taillierte Schalen, etwa die Modelle ${modelSpecific.heavyUseChairExamples.map((model) => model.label).join(" und ")}. Das ist eine Beratungsempfehlung, keine Aussage, dass andere Modelle ungeeignet wären.`,
-        "Bei Schichtholzschalen zählt eine sorgfältige Verleimung der Furnierlagen. Ebenso wichtig sind eine sauber verarbeitete Gestellkonstruktion sowie eine passende Beschichtung oder Verchromung. Mängel an diesen Stellen können Delamination, Brüche oder Korrosion begünstigen; pauschale Ausfall- oder Haltbarkeitsversprechen wären trotzdem unseriös.",
+        `Für stark beanspruchte Räume empfehlen wir häufig weniger stark taillierte Schalen, etwa die Modelle ${modelSpecific.heavyUseChairExamples.map((model) => model.label).join(" und ")}. Auch andere Modelle können je nach Nutzung gut passen.`,
+        "Bei Schichtholzschalen zählt die sorgfältige Verleimung der Furnierlagen. Ebenso wichtig sind ein sauber verarbeitetes Gestell und eine passende Beschichtung oder Verchromung. Welche Ausführung langfristig passt, hängt außerdem von Beanspruchung und Pflege ab.",
       ] },
       { id: "langfristig-planen", heading: "Reihenverbindung und Ersatzteile früh mitdenken", paragraphs: [
         "Bei Reihenbestuhlung sollte eine passende Reihenverbindung bereits bei der Modellauswahl berücksichtigt werden. Auch austauschbare Stuhlgleiter und nachrüstbare Buchablagen können helfen, eine vorhandene Bestuhlung weiter zu nutzen.",
-        "Dalemans begleitet Bestuhlungen, die über Jahrzehnte genutzt werden. Diese Erfahrung ist weder eine Lebensdauergarantie noch ein Mindestwert; Modell, Beanspruchung, Pflege und Reparaturen bestimmen den tatsächlichen Verlauf.",
+        "Viele unserer Kunden nutzen ihre Bestuhlung über Jahrzehnte. Wie lange sie hält, hängt von Modell, Beanspruchung, Pflege und möglichen Reparaturen ab.",
       ] },
     ],
     faq: [
       { question: "Sind gepolsterte Stühle immer bequemer?", answer: "Sitz- und Rückenpolster können bei längerem Sitzen sinnvoll sein. Das persönliche Sitzempfinden bleibt individuell; ein Musterstuhl hilft bei der Entscheidung." },
-      { question: "Wie breit ist ein Stapelstuhl mit Reihenverbinder?", answer: "Etwa 53 cm sind ein überlieferter Orientierungswert, keine geprüfte Breite aller Modelle. Ohne Reihenverbinder werden etwa 51 cm genannt. Das konkrete Modell muss geprüft werden." },
-      { question: "Sind Coburg und Nürnberg die einzigen Modelle für starke Nutzung?", answer: "Nein. Dalemans empfiehlt sie wegen ihrer weniger stark taillierten Schalen häufig für starke Nutzung. Auch andere aktuelle Modelle können für regelmäßiges Umstellen geeignet sein." },
+      { question: "Wie breit ist ein Stapelstuhl mit Reihenverbinder?", answer: "Planen Sie zunächst mit etwa 53 cm; ohne Reihenverbinder sind etwa 51 cm ein guter Orientierungswert. Da die Breite je nach Modell und Ausführung abweicht, prüfen wir das genaue Maß für Ihre Auswahl." },
+      { question: "Sind Coburg und Nürnberg die einzigen Modelle für starke Nutzung?", answer: "Nein. Wegen ihrer weniger stark taillierten Schalen empfehlen wir sie häufig für stark beanspruchte Räume. Auch andere aktuelle Modelle sind für regelmäßiges Umstellen ausgelegt." },
     ],
     relatedLinks: [
       { href: "/produkte/stapelstuehle", label: "Stapelstuhlmodelle", description: "Aktuelle Modelle und verfügbare Ausführungen vergleichen." },
       ...modelSpecific.heavyUseChairExamples.map((model) => ({ href: model.href, label: `Modell ${model.label}`, description: "Das aktuelle Modell und seine belegten Ausführungen ansehen." })),
-      { href: "/wissen/reihenverbinder-fuer-stapelstuehle", label: "Reihenverbinder planen", description: "Werksseitige und nachrüstbare Lösungen richtig einordnen." },
+      { href: "/wissen/reihenverbinder-fuer-stapelstuehle", label: "Reihenverbinder planen", description: "Werksseitige und nachrüstbare Lösungen direkt vergleichen." },
       { href: "/wissen/stoffe-und-bezuege", label: "Stoffe & Bezüge", description: "Polsterstoffe, Pflege und Nachweise auswählen." },
     ],
   },
   {
     slug: "reihenverbinder-fuer-stapelstuehle",
     title: "Reihenverbinder für Stapelstühle richtig einplanen",
-    description: "Warum Dalemans Reihenverbinder bei Reihenbestuhlung empfiehlt und was bei Werksausführung, Nachrüstung und Bestuhlungsplan zählt.",
+    description: "Warum wir bei Reihenbestuhlung passende Reihenverbinder empfehlen und was bei Werksausführung, Nachrüstung und Bestuhlungsplan zählt.",
     category: "Stapelstühle", updatedAt: "2026-10-09", status: "published",
     body: [
       { id: "praxisnutzen", heading: "Ein ruhigeres Bild und klarere Reihen", paragraphs: [
-        "Dalemans empfiehlt bei Reihenbestuhlung grundsätzlich eine passende Reihenverbindung. Sie führt Stühle innerhalb einer Reihe zusammen, unterstützt ein einheitliches Gesamtbild und hilft, die Lage der Reihen im Alltag beizubehalten.",
+        "Für Reihenbestuhlungen empfehlen wir eine passende Reihenverbindung. Sie verbindet die Stühle innerhalb einer Reihe, sorgt für ein einheitliches Bild und hilft, die Reihen im Alltag an ihrem Platz zu halten.",
         "Bei einer geeigneten Ausführung kann das Umstellen kompletter Reihen zum Reinigen einfacher werden. Welche Handhabung zulässig ist, hängt jedoch vom Stuhl, Verbinder und Boden ab.",
       ] },
       { id: "ab-werk-oder-nachruesten", heading: "Passende Ausführung möglichst ab Werk wählen", paragraphs: [
@@ -72,7 +72,7 @@ export const guideArticles = [
     faq: [
       { question: "Sind Reihenverbinder in jeder Kirche vorgeschrieben?", answer: "Nein, nicht pauschal. Nutzung, rechtliche Einordnung, örtliche Vorschriften und der genehmigte Bestuhlungsplan sind entscheidend." },
       { question: "Kann ich Reihenverbinder nachrüsten?", answer: "Für geeignete Bestände gibt es einen schwarzen Nachrüstclip. Die Passung muss am konkreten Stuhlmodell und Gestell geprüft werden." },
-      { question: "Warum gleich bei der Bestellung mitplanen?", answer: "Eine zum Modell passende Lösung ist meist einfacher einzuordnen als eine spätere Nachrüstung. Zudem können Abstand, Gestell und Handhabung von Anfang an abgestimmt werden." },
+      { question: "Warum gleich bei der Bestellung mitplanen?", answer: "Eine zum Modell passende Lösung ist meist praktischer als eine spätere Nachrüstung. Außerdem lassen sich Abstand, Gestell und Handhabung von Anfang an abstimmen." },
     ],
     relatedLinks: [
       { href: "/produkte/reihenverbinder", label: "Reihenverbinder im Zubehör", description: "Vorhandene Ausführungen und Beratungsmöglichkeiten ansehen." },
@@ -87,8 +87,8 @@ export const guideArticles = [
     category: "Pflege & Lagerung", updatedAt: "2026-10-09", status: "published",
     body: [
       { id: "stapeln-und-transportieren", heading: "Stapelzahlen sind Orientierungswerte, keine Wagenfreigabe", paragraphs: [
-        `Für übliche Stühle nennt Dalemans bis zu ca. ${estimatedValues.chairStackCount} Stück pro Stapel als Praxiswert. Bei Tischen gelten ca. ${estimatedValues.tableStackCount.storage} Stück im Lager und ca. ${estimatedValues.tableStackCount.suitableCart} Stück auf einem passenden Tischtransportwagen als Orientierung.`,
-        "Daraus folgt keine pauschal sichere fahrbare Last. Modell, Eigengewicht, Wagen-Tragfähigkeit, Kipprisiko und Sicherung müssen zusammen geprüft werden. Transportwege sollten frei sein; Möbel nach den jeweiligen Herstellerhinweisen bewegen.",
+        `Nach unserer Erfahrung sind bei üblichen Stühlen bis zu ca. ${estimatedValues.chairStackCount} Stück pro Stapel ein hilfreicher Orientierungswert. Bei Tischen dienen ca. ${estimatedValues.tableStackCount.storage} Stück im Lager und ca. ${estimatedValues.tableStackCount.suitableCart} Stück auf einem passenden Tischtransportwagen als Orientierung.`,
+        "Diese Werte sind keine pauschale Transportfreigabe. Prüfen Sie Modell, Eigengewicht, Tragfähigkeit des Wagens, Kipprisiko und Sicherung gemeinsam. Halten Sie Transportwege frei und beachten Sie die Hinweise für das jeweilige Produkt.",
       ], facts: [
         { label: "Stühle", value: `bis ca. ${estimatedValues.chairStackCount} je Stapel`, note: "Modell und Sicherung prüfen" },
         { label: "Tische im Lager", value: `ca. ${estimatedValues.tableStackCount.storage} je Stapel`, note: "flach liegend lagern" },
@@ -99,12 +99,12 @@ export const guideArticles = [
         "Zusammengeklappte Tische flach liegend aufbewahren. Längeres Anlehnen an eine Wand kann Verformung begünstigen und ist deshalb keine geeignete Dauerlagerung.",
       ] },
       { id: "reinigen", heading: "Materialgerecht und sparsam mit Feuchtigkeit reinigen", paragraphs: [
-        "Mit geeignetem Textil- oder Teppich-Trockenschaum erzielt Dalemans bei passenden Polsterstoffen gute Ergebnisse. Zuerst die Pflegehinweise prüfen, an einer unauffälligen Stelle testen und den Bezug nicht durchnässen.",
+        "Bei geeigneten Polsterstoffen haben wir mit Textil- oder Teppich-Trockenschaum gute Erfahrungen gemacht. Prüfen Sie zuerst die Pflegehinweise, testen Sie an einer unauffälligen Stelle und durchnässen Sie den Bezug nicht.",
         "Tischplatten feucht, nicht nass wischen. Flüssigkeit nicht an Kanten oder Fugen stehen lassen und keine aggressiven Mittel ohne produktspezifische Freigabe verwenden.",
       ] },
       { id: "erhalten", heading: "Ersatzteil und Reparatur vor Neukauf prüfen", paragraphs: [
         "Verschlissene Stuhlgleiter lassen sich häufig ersetzen. Abhängig vom Modell können Buchablagen oder Reihenverbinder ergänzt werden. So kann eine vorhandene Ausstattung länger sinnvoll genutzt werden.",
-        "Vor einer Nachrüstung sollten Modell, Montagebedingungen und die weitere Stapelbarkeit geprüft werden. Dalemans unterstützt bei der Zuordnung und bei Reparaturfragen.",
+        "Vor einer Nachrüstung prüfen wir Modell, Montagebedingungen und die weitere Stapelbarkeit. Auch bei der Zuordnung und bei Reparaturfragen helfen wir Ihnen gern.",
       ] },
     ],
     faq: [
@@ -125,8 +125,8 @@ export const guideArticles = [
     category: "Stoffe & Materialien", updatedAt: "2026-10-09", status: "published",
     body: [
       { id: "stoffgruppen", heading: "Stoffgruppen sind keine genormten Qualitätsklassen", paragraphs: [
-        "Die Gruppen ordnen die verfügbaren Bezüge im Dalemans-Sortiment. Eine höhere Nummer bedeutet nicht automatisch, dass ein Stoff in jeder Hinsicht robuster oder für jeden Raum besser geeignet ist.",
-        "Ab Gruppe 3 sind nach Dalemans-Erfahrung in der Regel Stoffoptionen mit passenden B1-Eigenschaften erhältlich. Das ist keine automatische Zertifizierung: Entscheidend sind Nachweis, Farbe und Variante des gewählten Stoffes.",
+        "Die Gruppen ordnen die verfügbaren Bezüge in unserem Sortiment. Eine höhere Nummer bedeutet nicht automatisch, dass ein Stoff robuster oder für jeden Raum besser geeignet ist.",
+        "Ab Gruppe 3 bieten wir in der Regel Stoffoptionen mit passenden B1-Eigenschaften an. Das ist keine automatische Zertifizierung: Entscheidend sind Nachweis, Farbe und Variante des gewählten Stoffes.",
       ] },
       { id: "material-und-abrieb", heading: "Material, Gewicht und Martindale zusammen betrachten", paragraphs: [
         "Im Sortiment kommen unter anderem Dralon, Trevira, Polyester und Polyamid vor. Typische Orientierungen sind etwa 400 bis 700 Gramm je Laufmeter bei meist rund 1,30 Meter Rollenbreite sowie etwa 40.000 bis 100.000 Martindale-Scheuertouren. Kein Einzelwert gilt automatisch für jede Variante.",
@@ -137,14 +137,14 @@ export const guideArticles = [
         "Die Stoffgruppe allein ist deshalb kein Zertifikat und erzeugt kein B1-Siegel für den vollständigen Stuhl.",
       ] },
       { id: "pflege-und-muster", heading: "Pflegehinweise beachten und echte Muster ansehen", paragraphs: [
-        "Bei geeigneten Stoffen hat Dalemans gute Erfahrungen mit Textil- oder Teppich-Trockenschaum. Herstellerhinweise gehen vor: zunächst unauffällig testen und den Bezug nicht durchnässen.",
+        "Bei geeigneten Stoffen haben wir gute Erfahrungen mit Textil- oder Teppich-Trockenschaum gemacht. Beachten Sie die Pflegehinweise, testen Sie zunächst an einer unauffälligen Stelle und durchnässen Sie den Bezug nicht.",
         "Farben am Bildschirm sind nicht farbverbindlich. Für Farbe, Haptik und das Zusammenspiel im Raum ist ein echtes Stoffmuster die bessere Grundlage.",
       ] },
     ],
     faq: [
-      { question: "Ist Stoffgruppe 3 automatisch B1?", answer: "Nein. In dieser Gruppe sind laut Dalemans in der Regel entsprechende Optionen erhältlich. Erforderlich ist der Nachweis für den konkreten Stoff; daraus folgt nicht automatisch ein Nachweis für den ganzen Stuhl." },
+      { question: "Ist Stoffgruppe 3 automatisch B1?", answer: "Nein. In dieser Gruppe bieten wir in der Regel entsprechende Optionen an. Entscheidend ist der Nachweis für den konkreten Stoff; daraus folgt nicht automatisch ein Nachweis für den ganzen Stuhl." },
       { question: "Was bedeutet Martindale?", answer: "Martindale ist ein Prüfverfahren für Scheuerbeständigkeit. Der Wert hilft beim Vergleich, garantiert aber keine bestimmte Nutzungsdauer." },
-      { question: "Kann ich Stoffmuster erhalten?", answer: "Ja. Dalemans stellt auf Anfrage Muster bereit. Sie zeigen Farbe und Haptik verlässlicher als ein unkalibrierter Bildschirm." },
+      { question: "Kann ich Stoffmuster erhalten?", answer: "Ja. Wir stellen Ihnen auf Anfrage Muster bereit. Damit beurteilen Sie Farbe und Haptik verlässlicher als am Bildschirm." },
     ],
     relatedLinks: [
       { href: "/wissen/stoffkarten", label: "Stoffkarten ansehen", description: "Status der Stoffgruppen 2, 3 und 4 prüfen." },
@@ -160,10 +160,10 @@ export const guideArticles = [
     body: [
       { id: "nutzung", heading: "Mit Nutzung, Transport und Lagerung beginnen", paragraphs: [
         "Ein Klapptisch sollte zu Reihen, Gruppen- oder Blockstellungen, zu Transportwegen und Lagerfläche passen. Erst aus diesem Zusammenspiel ergeben sich Format, Platte und Gestell.",
-        `Das Gewicht üblicher Ausführungen liegt nach Firmenangabe ungefähr zwischen ${estimatedValues.tableWeightKg.min} und ${estimatedValues.tableWeightKg.max} kg, abhängig von Größe und Material. Ein exakter Wert lässt sich nicht allein aus dem Maß ableiten.`,
+        `Unsere üblichen Ausführungen wiegen je nach Größe und Material ungefähr ${estimatedValues.tableWeightKg.min} bis ${estimatedValues.tableWeightKg.max} kg. Den genauen Wert prüfen wir für das gewählte Modell.`,
       ] },
       { id: "standardmasse", heading: "Zwölf Standardmaße, Sondermaße auf Anfrage", paragraphs: [
-        "Dalemans führt die folgenden Formate als Standardgrößen. Zwischen- und Sondermaße sowie Freiformen können je nach Modell und Konstruktion angefragt werden; sie sind keine automatisch verfügbare Standardvariante.",
+        "Die folgenden Formate führen wir als Standardgrößen. Zwischenmaße, Sondermaße und Freiformen prüfen wir passend zu Modell und Konstruktion.",
       ], facts: tableDimensionFacts },
       { id: "zwei-zu-eins", heading: "Das 2:1-Prinzip erleichtert rechtwinklige Tischblöcke", paragraphs: [
         "Bei einem 2:1-Maß entsprechen zwei Tischbreiten genau einer Tischlänge. So lassen sich gleich große Tische bündig und ohne Versatz zu rechtwinkligen Blöcken kombinieren. Das ist ein Planungsvorteil, keine bauordnungsrechtliche Regel.",
@@ -175,24 +175,24 @@ export const guideArticles = [
         { label: "kein 2:1-Maß", value: "160 × 70 cm", note: "70 + 70 = 140 cm, nicht 160 cm" },
       ] },
       { id: "gestelle", heading: "K1 für Reihen, K3 bei häufiger Stirnseitennutzung", paragraphs: [
-        `Für überwiegend in Reihen aufgestellte Tische empfiehlt Dalemans häufig ${recommendations.tableLegs.rows}. Wenn oft an den Stirnseiten gesessen wird, ist ${recommendations.tableLegs.frequentEndSeating} häufig günstiger.`,
-        "Die Empfehlung beschreibt die Nutzung, nicht eine automatisch verfügbare Produktvariante. Das tatsächlich angebotene Gestell muss am konkreten Tischmodell geprüft werden; Produktvarianten werden dadurch nicht verändert.",
+        `Für überwiegend in Reihen aufgestellte Tische empfehlen wir häufig ${recommendations.tableLegs.rows}. Wenn Sie die Stirnseiten regelmäßig als Sitzplätze nutzen, ist ${recommendations.tableLegs.frequentEndSeating} oft günstiger.`,
+        "Nicht jedes Gestell ist für jedes Tischmodell erhältlich. Wir prüfen deshalb, welche Variante zu Ihrem Modell und Ihrer Nutzung passt.",
       ] },
-      { id: "platten-und-modell-210", heading: "Plattenaufbau und Modell 210 getrennt betrachten", paragraphs: [
-        `Viele sonstige Tischplatten sind nach Firmenauskunft typischerweise etwa ${estimatedValues.typicalTopThicknessMm} mm stark; die übliche Tischhöhe liegt bei ca. ${estimatedValues.tableHeightMm} mm. Beides gilt nicht blind für jede Ausführung, Wunschhöhen sind auf Anfrage möglich.`,
-        `Das Modell 210 (Seminar) besitzt nach Konstruktionsangabe eine ${modelSpecific.table210.topThicknessMm}-mm-Platte ohne Kantenaufdopplung und wird nur bis ${modelSpecific.table210.largestAdvertisedFormatCm.length} × ${modelSpecific.table210.largestAdvertisedFormatCm.width} cm angeboten. Welche kleineren Zwischenmaße möglich sind, muss die aktuelle Variantenmatrix zeigen.`,
-        `Zusammengeklappt nennt Dalemans modellabhängig ca. ${estimatedValues.foldedTableHeightCm.lengthBelow160} cm Höhe bei Tischlängen unter 160 cm und ca. ${estimatedValues.foldedTableHeightCm.lengthFrom160} cm ab 160 cm. Die sichere Nutzung richtet sich nach den Herstellerhinweisen; eine pauschale Traglast wird nicht veröffentlicht.`,
+      { id: "platten-und-modell-210", heading: "Plattenaufbau und Modell 210 getrennt prüfen", paragraphs: [
+        `Viele unserer Tischplatten sind etwa ${estimatedValues.typicalTopThicknessMm} mm stark; die übliche Tischhöhe liegt bei ca. ${estimatedValues.tableHeightMm} mm. Die genauen Maße hängen von der Ausführung ab, Wunschhöhen sind auf Anfrage möglich.`,
+        `Das Modell 210 (Seminar) besitzt eine ${modelSpecific.table210.topThicknessMm}-mm-Platte ohne Kantenaufdopplung und ist bis ${modelSpecific.table210.largestAdvertisedFormatCm.length} × ${modelSpecific.table210.largestAdvertisedFormatCm.width} cm erhältlich. Welche kleineren Zwischenmaße möglich sind, prüfen wir anhand der aktuellen Varianten.`,
+        `Zusammengeklappt sind unsere Tische je nach Modell ca. ${estimatedValues.foldedTableHeightCm.lengthBelow160} cm hoch, wenn sie kürzer als 160 cm sind, und ca. ${estimatedValues.foldedTableHeightCm.lengthFrom160} cm ab 160 cm Tischlänge. Eine pauschale Traglast geben wir nicht an; dafür ist die konkrete Ausführung entscheidend.`,
       ] },
       { id: "sonderausfuehrungen", heading: "Freiformen, Kanten und Farben konkret anfragen", paragraphs: [
         "Sonderformen, besondere Oberflächen, Kantenbeizungen und Sonderfarben können projektbezogen angefragt werden. Die Machbarkeit hängt von Modell, Konstruktion und aktueller Fertigung ab.",
-        "Dekore und Produktbilder am Bildschirm sind nicht farbverbindlich. Für eine sichere Farbentscheidung stellt Dalemans auf Wunsch echte Muster bereit.",
+        "Dekore und Produktbilder am Bildschirm sind nicht farbverbindlich. Für eine sichere Farbentscheidung stellen wir Ihnen auf Wunsch echte Muster bereit.",
       ] },
     ],
     faq: [
       { question: "Welche Maße erfüllen das 2:1-Prinzip?", answer: "140 × 70, 150 × 75 und 160 × 80 cm erfüllen es exakt. 160 × 70 cm nicht. Das Verhältnis ist eine Planungshilfe, keine Norm." },
-      { question: "Welches Gestell passt für Tischreihen?", answer: "Dalemans empfiehlt häufig K1. Bei regelmäßiger Nutzung der Stirnseiten ist K3 oft günstiger. Verfügbarkeit und Eignung müssen am Modell geprüft werden." },
+      { question: "Welches Gestell passt für Tischreihen?", answer: "Für Tischreihen empfehlen wir häufig K1. Wenn Sie die Stirnseiten regelmäßig als Sitzplätze nutzen, ist K3 oft günstiger. Wir prüfen Verfügbarkeit und Eignung am gewählten Modell." },
       { question: "Wie schwer ist ein Klapptisch?", answer: "Übliche Ausführungen liegen als Orientierung bei ca. 23–32 kg, abhängig von Material, Modell und Größe. Den konkreten Wert bitte für die gewählte Ausführung prüfen." },
-      { question: "Sind Zwischen- und Sondermaße möglich?", answer: "Laut Firmenauskunft grundsätzlich auf Anfrage, aber abhängig von Modell und Konstruktion. Beim Modell 210 gilt die konstruktive Obergrenze 140 × 70 cm; kleinere Kombinationen müssen konkret geprüft werden." },
+      { question: "Sind Zwischen- und Sondermaße möglich?", answer: "Ja, abhängig von Modell und Konstruktion. Beim Modell 210 liegt die konstruktive Obergrenze bei 140 × 70 cm; kleinere Kombinationen prüfen wir für Ihre Anfrage." },
     ],
     relatedLinks: [
       { href: "/produkte/sortiment/klapptische", label: "Klapptische im Sortiment", description: "Aktuelle Modelle und verfügbare Ausführungen ansehen." },
@@ -215,7 +215,7 @@ export const guideArticles = [
         "Bei häufigem Auf- und Abbau zählen neben Oberfläche und Kante auch Plattengewicht, Gestell, Beschläge und Transportweg.",
       ] },
       { id: "muster", heading: "Bildschirmdekore sind nicht farbverbindlich", paragraphs: [
-        "Holz-, HPL- und Farbdarstellungen können je nach Display, Licht und Aufnahme abweichen. Für verbindliche Entscheidungen empfiehlt Dalemans ein echtes Muster.",
+        "Holz-, HPL- und Farbdarstellungen können je nach Display, Licht und Aufnahme abweichen. Für eine verlässliche Entscheidung empfehlen wir ein echtes Muster.",
         "Sonderoberflächen, Kantenbeizungen und Sonderfarben sind Anfrageoptionen und nicht automatisch sofort verfügbare Standardvarianten.",
       ] },
       { id: "reinigung-und-lagerung", heading: "Feucht, nicht nass reinigen und flach lagern", paragraphs: [
@@ -230,7 +230,7 @@ export const guideArticles = [
     ],
     relatedLinks: [
       { href: "/produkte/sortiment/klapptische", label: "Tische im Sortiment", description: "Aktuelle Modelle und nachgewiesene Ausführungen ansehen." },
-      { href: "/wissen/klapptische-richtig-waehlen", label: "Klapptische richtig wählen", description: "Maße, Gestelle und Sonderausführungen einordnen." },
+      { href: "/wissen/klapptische-richtig-waehlen", label: "Klapptische richtig wählen", description: "Maße, Gestelle und Sonderausführungen vergleichen." },
       { href: "/wissen/transport-lagerung-pflege", label: "Pflege & Lagerung", description: "Möbel materialgerecht reinigen und aufbewahren." },
     ],
   },

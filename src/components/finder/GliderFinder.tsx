@@ -297,7 +297,7 @@ function ResultView({ result, onEdit }: { result: FinderResult; onEdit: () => vo
       <p className="section-eyebrow">{uncertain ? "Noch nicht sicher" : "Keine eindeutige Shop-Lösung"}</p>
       <h2 className="mx-auto mt-4 font-display text-3xl font-medium leading-tight text-premium-ink sm:text-4xl">{result.message}</h2>
       <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-premium-muted">
-        {uncertain ? "Prüfen Sie das Maß noch einmal oder halten Sie ein Foto des Gestells bereit. Wir helfen gern bei der Zuordnung." : "Das Sortiment soll nicht zur Sackgasse werden. Mit Foto, Außenmaß und Bodenart können wir persönlich prüfen, ob eine andere Lösung möglich ist."}
+        {uncertain ? "Prüfen Sie das Maß noch einmal oder halten Sie ein Foto des Gestells bereit. Wir helfen gern bei der Zuordnung." : "Noch keinen passenden Gleiter gefunden? Senden Sie uns ein Foto sowie Außenmaß und Bodenart. Wir prüfen persönlich, welche andere Lösung infrage kommt."}
       </p>
       <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
         <button type="button" onClick={onEdit} className="btn-secondary">Maß noch einmal prüfen</button>

@@ -13,9 +13,9 @@ const modelPath = (slug: string) => `/produkte/stapelstuehle/${slug}`;
 const referenceFaq = [
   { question: "Was bedeuten Stoffgruppe 2, 3 und 4?", answer: "Die Gruppen ordnen die verfügbaren Bezugskollektionen und Preise. Sie sind keine genormten Qualitätsstufen: Material, Scheuerbeständigkeit, Pflege und Brandschutznachweise unterscheiden sich je Kollektion und können im Konfigurator verglichen werden." },
   { question: "Kann ich einen Musterstuhl erhalten?", answer: "Ja. Ein Musterstuhl kann persönlich angefragt und passend zum Projekt abgestimmt werden." },
-  { question: "Kann ich später Stühle nachbestellen?", answer: "Dalemans begleitet Nachbestellungen persönlich. Die konkrete Ausführung und Verfügbarkeit werden anhand des vorhandenen Bestands geprüft." },
-  { question: "Gibt es Ersatzteile?", answer: "Ersatzteile und Reparaturen sind Teil des Dalemans-Service. Die Zuordnung erfolgt produktbezogen anhand von Modell, Fotos und Maßen." },
-  { question: "Unterstützt DLMNS bei der Bestuhlungsplanung?", answer: "Ja. Dalemans unterstützt mit Bestuhlungs- und Stellplänen sowie 2D- und 3D-Raumplanung, auch bei schwierigen Geometrien, Lagerung und Transportwegen." },
+  { question: "Kann ich später Stühle nachbestellen?", answer: "Ja. Wir begleiten Ihre Nachbestellung persönlich und prüfen die passende Ausführung sowie die aktuelle Verfügbarkeit anhand Ihres Bestands." },
+  { question: "Gibt es Ersatzteile?", answer: "Ja. Ersatzteile und Reparaturen gehören zu unserem Service. Mit Modellangabe, Fotos und Maßen ordnen wir das passende Teil zu." },
+  { question: "Unterstützen Sie mich bei der Bestuhlungsplanung?", answer: "Ja. Wir erstellen Bestuhlungs- und Stellpläne sowie 2D- und 3D-Raumplanungen – auch für schwierige Geometrien, Lagerflächen und Transportwege." },
 ];
 export async function generateStaticParams() {
   return (await getProductsByCollection("stapelstuehle")).filter(isStackingChairProduct).map(product => ({ slug: product.handle }));

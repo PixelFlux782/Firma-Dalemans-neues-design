@@ -13,11 +13,11 @@ export const metadata: Metadata = buildMetadata({
 });
 
 const themes = [
-  { title: "Stapelstühle", description: "Auswahl, Polsterung und Ausstattung passend zur Nutzung einordnen.", href: "/wissen/stapelstuehle-richtig-auswaehlen", linkLabel: "Stapelstühle auswählen", number: "01" },
+  { title: "Stapelstühle", description: "Den passenden Stuhl, die Polsterung und die Ausstattung für Ihre Nutzung finden.", href: "/wissen/stapelstuehle-richtig-auswaehlen", linkLabel: "Stapelstühle auswählen", number: "01" },
   { title: "Klapptische", description: "Maße, Platzbedarf, Aufstellung und Gestelle aus der Praxis erklärt.", href: "/wissen/klapptische-richtig-waehlen", linkLabel: "Klapptische auswählen", number: "02" },
   { title: "Stoffe & Materialien", description: "Stoffgruppen, Martindale, Materialien und Nachweise verständlich prüfen.", href: "/wissen/stoffe-und-bezuege", linkLabel: "Stoffratgeber lesen", number: "03" },
   { title: "Raumplanung", description: "Bestuhlung, Wege und flexible Nutzungen von Anfang an zusammendenken.", href: "/raumplaner", linkLabel: "Zum Raumplaner", number: "04" },
-  { title: "Reihenbestuhlung", description: "Reihenverbinder, Nachrüstung und Bestuhlungsplan gemeinsam betrachten.", href: "/wissen/reihenverbinder-fuer-stapelstuehle", linkLabel: "Reihenverbinder einplanen", number: "05" },
+  { title: "Reihenbestuhlung", description: "Reihenverbinder, Nachrüstung und Bestuhlungsplan aufeinander abstimmen.", href: "/wissen/reihenverbinder-fuer-stapelstuehle", linkLabel: "Reihenverbinder einplanen", number: "05" },
   { title: "Transport & Lagerung", description: "Umbauwege, Stapelung und Lagerfläche sinnvoll in die Auswahl einbeziehen.", href: "/wissen/transport-lagerung-pflege", linkLabel: "Praxiswerte lesen", number: "06" },
   { title: "Pflege & Ersatzteile", description: "Oberflächen erhalten und vorhandene Ausstattung langfristig weiter nutzen.", href: "/wissen/transport-lagerung-pflege", linkLabel: "Pflegehinweise lesen", number: "07" },
 ] as const;
@@ -32,7 +32,7 @@ export default function WissenPage() {
           <Breadcrumbs currentPath="/wissen" items={[{ label: "Start", href: "/" }, { label: "Wissen" }]} className="text-white/65 [&_[aria-current=page]]:text-white" />
           <p className="section-eyebrow mt-10 text-premium-sand">Wissen aus der Beratungspraxis</p>
           <h1 className="mt-5 max-w-4xl font-display text-4xl font-medium leading-[1.05] tracking-[-0.03em] text-white sm:text-5xl lg:text-6xl">Gut entscheiden, bevor der Raum eingerichtet wird.</h1>
-          <p className="mt-6 max-w-3xl text-base leading-8 text-white/75 md:text-lg">Sachliche Orientierung zu Stühlen, Tischen, Materialien und Planung – verständlich aufbereitet und dort zurückhaltend, wo die konkrete Ausführung geprüft werden muss.</p>
+          <p className="mt-6 max-w-3xl text-base leading-8 text-white/75 md:text-lg">Hier teilen wir unsere Erfahrung zu Stühlen, Tischen, Materialien und Raumplanung. Wo es auf das konkrete Modell ankommt, sagen wir Ihnen genau, was wir noch prüfen müssen.</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap"><Link href="#ratgeber" className="btn-on-dark text-center">Ratgeber lesen</Link><Link href="/kontakt?anliegen=Beratung" className="btn-outline-dark text-center">Persönlich beraten lassen</Link></div>
         </div>
       </header>

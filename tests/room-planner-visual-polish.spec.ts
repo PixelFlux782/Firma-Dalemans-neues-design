@@ -21,10 +21,10 @@ test("Dalemans Branding bleibt in 2D, 3D und Druckausgabe sichtbar", async ({ pa
 
   const output = page.getByRole("region", { name: "Plan-Ausgabe" });
   await expect(output.getByLabel("Dalemans Raumplaner")).toBeVisible();
-  await expect(output.getByText("Plan erstellt mit dem DLMNS Raumplaner von Dalemans")).toBeVisible();
+  await expect(output.getByText("Plan erstellt mit unserem DLMNS Raumplaner")).toBeVisible();
   await page.emulateMedia({ media: "print" });
   await expect(output.getByLabel("Dalemans Raumplaner")).toBeVisible();
-  await expect(output.getByText("Plan erstellt mit dem DLMNS Raumplaner von Dalemans")).toBeVisible();
+  await expect(output.getByText("Plan erstellt mit unserem DLMNS Raumplaner")).toBeVisible();
 });
 
 test("kompaktes 2D-Branding überlagert die Ansichtssteuerung nicht", async ({ page }) => {

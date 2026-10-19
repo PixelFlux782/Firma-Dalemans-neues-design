@@ -86,7 +86,7 @@ test.describe("Premium-Navigation", () => {
     const mobileNav = page.getByRole("navigation", { name: "Mobile Hauptnavigation" });
     const mobilePanel = page.locator("#mobile-nav");
     await expect(mobileNav.getByRole("link")).toHaveCount(5);
-    await expect(page.getByText("Über Dalemans", { exact: true })).toBeVisible();
+    await expect(page.getByText("Über uns", { exact: true })).toBeVisible();
     await page.locator("summary").filter({ hasText: "Weitere Angebote" }).click();
     await expect(mobilePanel.getByRole("link", { name: "Sonderposten", exact: true })).toBeVisible();
     await expect(mobilePanel.getByRole("link", { name: "+49 9342 9153-53" })).toBeVisible();

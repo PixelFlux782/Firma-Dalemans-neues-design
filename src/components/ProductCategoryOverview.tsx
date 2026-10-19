@@ -27,7 +27,7 @@ const guidance: Record<ProductCategoryId, { suitable: string[]; decision: string
     decision: ["Maße passend zu Nutzung und Handling", "Oberfläche, Kante und Gestell", "Transportwagen, Lagerfläche und Laufwege"],
     faq: [
       { question: "Welche Klapptische sind für Gemeinden sinnvoll?", answer: "Sinnvoll sind stabile Tische mit widerstandsfähiger Oberfläche und einem Format, das sich gut bewegen, lagern und kombinieren lässt." },
-      { question: "Sind Klapptische im Sondermaß möglich?", answer: "Je nach Projekt sind Sondermaß und Sonderform möglich. Raummaß, Nutzung und Lagerweg helfen bei der Einordnung." },
+      { question: "Sind Klapptische im Sondermaß möglich?", answer: "Ja, je nach Modell und Konstruktion. Senden Sie uns Raummaß, gewünschte Nutzung und Angaben zum Lagerweg; wir prüfen die passende Ausführung." },
     ],
   },
   bistrotische: {
@@ -100,7 +100,7 @@ export default function ProductCategoryOverview({ categoryId }: Props) {
 
     <HomeSection variant="elevated">
       <div className="grid gap-8 lg:grid-cols-[.85fr_1.15fr]">
-        <div><p className="section-eyebrow">Auswahlhilfe</p><h2 className="section-title-functional mt-4">Vor der Anfrage kurz klären</h2><p className="mt-4 text-sm leading-7 text-premium-muted">Mit diesen Angaben können wir Ausführung und Eignung gezielter einordnen.</p></div>
+        <div><p className="section-eyebrow">Auswahlhilfe</p><h2 className="section-title-functional mt-4">Vor der Anfrage kurz klären</h2><p className="mt-4 text-sm leading-7 text-premium-muted">Mit diesen Angaben finden wir schneller die passende Ausführung für Sie.</p></div>
         <div className="grid gap-6 sm:grid-cols-2">
           <div><h3 className="font-medium text-premium-ink">Hilfreiche Angaben</h3><ul className="mt-3 space-y-2 text-sm leading-6 text-premium-muted">{info.decision.map((item) => <li key={item}>— {item}</li>)}</ul></div>
           <div><h3 className="font-medium text-premium-ink">Besonders geeignet für</h3><ul className="mt-3 space-y-2 text-sm leading-6 text-premium-muted">{info.suitable.map((item) => <li key={item}>— {item}</li>)}</ul></div>

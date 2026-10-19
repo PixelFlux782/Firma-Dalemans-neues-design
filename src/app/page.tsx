@@ -15,7 +15,7 @@ import { organizationStructuredData } from "@/lib/company";
 export const metadata: Metadata = buildMetadata({
   title: "Flexible Ausstattung für Gemeinderäume",
   description:
-    "Dalemans plant Stapelstühle, Klapptische, Raumaufteilung, Transport und langfristige Ausstattung für Gemeinden und flexible Räume – persönlich seit 1994.",
+    "Wir planen Stapelstühle, Klapptische, Raumaufteilung, Transport und langfristige Ausstattung für Gemeinden und flexible Räume – persönlich seit 1994.",
   path: "/",
   image: "/pictures/Über uns/Realisierte-11.jpg",
   keywords: ["Stapelstühle für Gemeinden", "Klapptische für Gemeinden", "Bestuhlungsplanung", "flexible Gemeinderäume"],
@@ -39,7 +39,7 @@ const challenges = [
 
 const process = [
   ["01", "Raum und Nutzung verstehen", "Welche Veranstaltungen, Wege und Umbauten prägen den Alltag?"],
-  ["02", "Produkte und Varianten auswählen", "Stühle, Tische, Zubehör und Materialien werden gemeinsam betrachtet."],
+  ["02", "Produkte und Varianten auswählen", "Gemeinsam wählen wir Stühle, Tische, Zubehör und Materialien aus."],
   ["03", "In 2D oder 3D planen", "Je nach Projekt prüfen wir Anordnungen, Geometrien und Nutzungsvarianten."],
   ["04", "Muster und Materialien prüfen", "Musterstuhl, Stoffe und Farben geben Entscheidungssicherheit."],
   ["05", "Lieferung und Betreuung", "Einweisung, Ersatzteile und Nachbestellungen bleiben mitgedacht."],
@@ -93,7 +93,7 @@ export default function HomePage() {
               Planung, Gemeindeverständnis und langfristige Betreuung gehören zusammen.
             </h2>
             <p className="mt-6 max-w-xl text-sm leading-7 text-premium-muted md:text-base md:leading-8">
-              Seit 1994 begleitet Dalemans Gemeinden, Kirchen und flexible Veranstaltungsräume bei Auswahl, Planung und langfristiger Nutzung ihrer Ausstattung. Wir betrachten nicht nur Stuhl oder Tisch, sondern den gesamten Raum – von Bestuhlung und Fluchtwegen bis zu Transport, Lagerung und Nachbestellung.
+              Seit 1994 begleiten wir Gemeinden, Kirchen und flexible Veranstaltungsräume bei Auswahl, Planung und langfristiger Nutzung ihrer Ausstattung. Dabei sehen wir den gesamten Raum – von Bestuhlung und Fluchtwegen bis zu Transport, Lagerung und Nachbestellung.
             </p>
             <p className="mt-5 max-w-xl border-l-2 border-premium-sand pl-5 text-sm font-medium leading-7 text-premium-charcoal">
               Gemeinde ist für uns nicht nur eine Zielgruppe, sondern Teil unserer eigenen Geschichte.
@@ -145,7 +145,7 @@ export default function HomePage() {
           <div className="flex flex-col justify-center p-7 sm:p-9 lg:p-12">
             <p className="section-eyebrow">Räume statt Einzelprodukte</p>
             <h2 className="section-title mt-5">Ein Raum muss im Alltag funktionieren.</h2>
-            <p className="section-lead mt-6">Gottesdienst, Gemeindecafé, Seminar, Kinderprogramm und Veranstaltung verlangen wechselnde Ordnungen. Deshalb betrachten wir Reihen, Tische, Wege, Lagerung und Transport zusammen.</p>
+            <p className="section-lead mt-6">Gottesdienst, Gemeindecafé, Seminar, Kinderprogramm und Veranstaltung verlangen wechselnde Ordnungen. Deshalb planen wir Reihen, Tische, Wege, Lagerung und Transport gemeinsam.</p>
             <Link href="/raeume-planung" className="btn-primary mt-8 inline-flex">Raumtypen und Planung ansehen</Link>
           </div>
           <div className="relative min-h-72 overflow-hidden border-t border-premium-beige/70 lg:min-h-[430px] lg:border-l lg:border-t-0">
@@ -183,7 +183,7 @@ export default function HomePage() {
             <div className="p-7">
               <p className="section-eyebrow">Raum- und Bestuhlungsplanung</p>
               <h3 className="section-title-functional mt-4">Vor der Bestellung sehen, ob die Lösung im Raum funktioniert.</h3>
-              <p className="mt-5 text-sm leading-7 text-premium-muted">2D- und 3D-Planung prüft je nach Projekt Stellpläne, Reihenabstände, Fluchtwege, Tischordnungen und schwierige Geometrien.</p>
+              <p className="mt-5 text-sm leading-7 text-premium-muted">Je nach Projekt prüfen wir Stellpläne, Reihenabstände, Fluchtwege, Tischordnungen und schwierige Geometrien in 2D oder 3D.</p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Link href="/raeume-planung/raumplanung" className="btn-primary">Raumplanung ansehen</Link>
                 <Link href="/raumplaner" className="btn-secondary">3D-Raumplaner ausprobieren</Link>
@@ -194,8 +194,8 @@ export default function HomePage() {
             <ProductVisual src="/neue bilder/Zubehör/Tischtransportwagen_03.png" alt="Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile" sizes="(min-width: 1024px) 33vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
             <div className="p-7">
               <p className="section-eyebrow">Transport & Lagerung</p>
-              <h3 className="mt-4 font-display text-2xl font-medium text-premium-ink">Flexibel wird Ausstattung erst mit guten Abläufen.</h3>
-              <p className="mt-4 text-sm leading-7 text-premium-muted">Wagen, Stapelung, Lagerflächen und Transportwege werden für die Menschen geplant, die später auf- und abbauen.</p>
+              <h3 className="mt-4 font-display text-2xl font-medium text-premium-ink">Gute Abläufe machen Ausstattung wirklich flexibel.</h3>
+              <p className="mt-4 text-sm leading-7 text-premium-muted">Wir planen Wagen, Stapelung, Lagerflächen und Transportwege für die Menschen, die später auf- und abbauen.</p>
               <Link href="/kontakt?anliegen=Lager%20und%20Transport" className="mt-6 inline-flex text-sm font-medium text-premium-bronze">Lager und Transport mitplanen →</Link>
             </div>
           </article>
@@ -250,13 +250,13 @@ export default function HomePage() {
           <div className="p-7 md:p-10 lg:p-12">
             <p className="section-eyebrow">Familie & Gemeinde</p>
             <h2 className="section-title mt-5">Gemeinde ist für uns nicht nur eine Zielgruppe, sondern Teil unserer eigenen Geschichte.</h2>
-            <p className="mt-6 text-sm leading-7 text-premium-muted md:text-base">1994 von Hubert Dalemans gegründet und heute von Stefan Dalemans geführt, verbindet Dalemans persönliche Ansprechpartner mit eigener Erfahrung aus Gemeinde und Gemeindebau.</p>
+            <p className="mt-6 text-sm leading-7 text-premium-muted md:text-base">1994 von Hubert Dalemans gegründet und heute von Stefan Dalemans geführt, verbinden wir persönliche Beratung mit unserer eigenen Erfahrung aus Gemeinde und Gemeindebau.</p>
             <div className="mt-6 border-t border-premium-sage pt-6">
               <h3 className="text-base font-semibold text-premium-ink">Betreuung, die nach der Lieferung weitergeht</h3>
               <p className="mt-3 text-sm leading-7 text-premium-muted">Ersatzteile, Reparaturen, Gleiter, Zubehör, Nachbestellungen und Ergänzungen bestehender Bestuhlung prüfen wir auch nach Jahren.</p>
             </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/firma" className="btn-secondary">Dalemans kennenlernen</Link>
+              <Link href="/firma" className="btn-secondary">Uns kennenlernen</Link>
               <Link href="/beratung-service#langfristig" className="btn-primary">Service für bestehenden Bestand</Link>
             </div>
           </div>

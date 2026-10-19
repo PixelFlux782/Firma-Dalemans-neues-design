@@ -12,17 +12,17 @@ import { absoluteUrl, buildMetadata } from "@/lib/seo";
 const steps = [
   {
     title: "Skizze",
-    text: "Anforderung, Raummaß, Bestand oder Sonderwunsch werden sauber erfasst.",
+    text: "Wir erfassen Ihre Anforderungen, Raummaße, den Bestand und besondere Wünsche.",
     image: "/pictures/Über uns/Skizze01.jpg",
   },
   {
     title: "Planung",
-    text: "Aus der Idee wird eine technische Lösung mit CAD, Maßlogik und Materialbezug.",
+    text: "Aus Ihrer Idee entwickeln wir mit CAD, passenden Maßen und Materialien eine technische Lösung.",
     image: "/pictures/Über uns/CAD-Entwicklung1zu1.png",
   },
   {
     title: "Umsetzung",
-    text: "Die Lösung wird praktisch gedacht: Nutzung, Lagerung, Transport und Alltagstauglichkeit.",
+    text: "Dabei denken wir Nutzung, Lagerung, Transport und Alltagstauglichkeit gemeinsam.",
     image: "/neue bilder/planung-schritt-3.png",
   },
 ] as const;
@@ -51,7 +51,7 @@ const structuredData = {
 export const metadata: Metadata = buildMetadata({
   title: "Sonderlösungen und CAD-Planung für Klapptische und Zubehör",
   description:
-    "Dalemans plant Sonderlösungen für Klapptische, Stapelstühle, Transportwagen, Zubehör und schwierige Raummaße von Skizze über CAD bis Umsetzung.",
+    "Wir planen Sonderlösungen für Klapptische, Stapelstühle, Transportwagen, Zubehör und schwierige Raummaße – von der Skizze über CAD bis zur Umsetzung.",
   path: "/sonderloesungen",
   image: "/pictures/Über uns/CAD-Entwicklung1zu1.png",
   keywords: [
@@ -85,7 +85,7 @@ export default function SonderloesungenPage() {
             <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Sonderlösungen" }]} currentPath="/sonderloesungen" />
             <p className="section-eyebrow mt-7">Sonderlösungen</p>
             <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Wenn Standard nicht reicht: Sondermaße, CAD und praktische Umsetzung.</h1>
-            <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Dalemans verbindet alte Sonderlösungs-Kompetenz mit heutiger Planung: von der Skizze über CAD bis zu Zubehör, Tischlösung oder Transportlogik.</p>
+            <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Seit vielen Jahren entwickeln wir Sonderlösungen: von der ersten Skizze über CAD bis zu passendem Zubehör, individuellen Tischen und durchdachten Transportwegen.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/kontakt" className="btn-primary px-6 py-3">Sonderlösung besprechen</Link>
               <Link href="/produkte/sortiment/klapptische" className="btn-secondary px-6 py-3">Klapptische ansehen</Link>
@@ -134,11 +134,11 @@ export default function SonderloesungenPage() {
         <div className="section-grid-top grid gap-6 lg:grid-cols-[1.15fr_.85fr]">
           <figure>
             <ProductVisual src="/images/curated/Sonderlösungen/Kleinst_Klapptisch_Entwicklung02.webp" alt="Entwicklung eines kompakten Klapptisches" sizes="(min-width: 1024px) 55vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
-            <figcaption className="px-6 py-5 text-sm leading-7 text-premium-muted">Eine konstruktive Idee wird mit Blick auf Nutzung, Handhabung und Lagerung geprüft.</figcaption>
+            <figcaption className="px-6 py-5 text-sm leading-7 text-premium-muted">Wir prüfen jede konstruktive Idee mit Blick auf Nutzung, Handhabung und Lagerung.</figcaption>
           </figure>
           <figure>
             <ProductVisual src="/images/curated/Gestelle/Gestell-hero.webp" alt="Metallgestell als Grundlage einer individuellen Möbelkonstruktion" sizes="(min-width: 1024px) 38vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
-            <figcaption className="px-6 py-5 text-sm leading-7 text-premium-muted">Bauteile und Gestelle werden passend zur konkreten Aufgabe betrachtet.</figcaption>
+            <figcaption className="px-6 py-5 text-sm leading-7 text-premium-muted">Bauteile und Gestelle wählen wir passend zur konkreten Aufgabe aus.</figcaption>
           </figure>
         </div>
       </HomeSection>

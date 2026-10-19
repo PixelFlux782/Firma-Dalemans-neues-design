@@ -5,7 +5,7 @@ import type { ProductDetailData } from "@/components/product-detail/ProductDetai
 const contact = (product: string, concern = "Produktberatung") => `/kontakt?anliegen=${encodeURIComponent(concern)}&produkt=${encodeURIComponent(product)}#anfrage`;
 const roomHelp = (name: string): ProductDetailData["help"] => ({
   eyebrow: "Raum- und Bestuhlungsplanung", title: "Das Produkt im ganzen Raum planen.",
-  text: "Stellpläne, Tischanordnungen, Wege sowie Lagerung und Transport gemeinsam betrachten.",
+  text: "Stellpläne, Tischanordnungen, Wege, Lagerung und Transport gemeinsam planen.",
   href: `/raeume-planung/raumplanung?produkt=${encodeURIComponent(name)}`, label: "Raumplanung ansehen",
   secondaryHref: "/raumplaner", secondaryLabel: "3D-Raumplaner ausprobieren",
 });

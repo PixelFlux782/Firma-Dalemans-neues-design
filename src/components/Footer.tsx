@@ -10,7 +10,7 @@ const pageLinks = [
   ["/beratung-service", "Beratung & Service"],
   ["/sonderloesungen", "Sonderlösungen"],
   ["/sonderposten", "Sonderposten"],
-  ["/firma", "Über Dalemans"],
+  ["/firma", "Über uns"],
   ["/kontakt", "Kontakt"],
 ] as const;
 

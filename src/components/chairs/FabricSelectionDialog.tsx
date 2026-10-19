@@ -173,7 +173,7 @@ export default function FabricSelectionDialog({
 
                 <div className="mt-6">
                   <p className="text-sm font-semibold text-premium-ink">Verfügbare Farben</p>
-                  <p className="mt-1 text-xs leading-5 text-premium-muted">Direkt auswählbar sind ausschließlich bestätigte Dalemans-Farbcodes.</p>
+                  <p className="mt-1 text-xs leading-5 text-premium-muted">Direkt auswählbar sind ausschließlich bestätigte Farbcodes aus unserem Sortiment.</p>
                   {active.colors.length > 0 ? (
                     <div className="mt-3 grid gap-2 sm:grid-cols-2" data-testid="fabric-colors">
                       {active.colors.map((color) => {
@@ -188,7 +188,7 @@ export default function FabricSelectionDialog({
                     </div>
                   ) : (
                     <div className="mt-3 rounded-2xl border border-premium-beige/70 bg-premium-warm/55 p-4">
-                      <p className="text-sm leading-6 text-premium-muted">Für diese Kollektion sind noch keine einzelnen Dalemans-Farbcodes hinterlegt. Wir stellen eine passende Musterauswahl persönlich zusammen.</p>
+                      <p className="text-sm leading-6 text-premium-muted">Für diese Kollektion sind noch keine einzelnen Farbcodes aus unserem Sortiment hinterlegt. Wir stellen Ihnen persönlich eine passende Musterauswahl zusammen.</p>
                       <Link href={inquiryHref} className="mt-2 inline-flex min-h-10 items-center text-sm font-semibold text-premium-forest underline underline-offset-4">Farben und Stoffmuster anfragen →</Link>
                     </div>
                   )}

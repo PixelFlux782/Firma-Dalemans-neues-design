@@ -25,7 +25,7 @@ const primaryLinks: readonly NavigationLink[] = [
 
 const moreGroups = [
   {
-    title: "Über Dalemans",
+    title: "Über uns",
     links: [{ href: "/firma", label: "Unternehmen & Geschichte" }],
   },
   {

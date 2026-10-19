@@ -129,8 +129,8 @@ function developmentFinderProduct(
     handle: fixture.handle,
     title: fixture.title,
     shortDescription: `Simulierte Finder-Ausführungen für ${itemLabel} – Auswahl nach Rohrform, Außenmaß und Boden.`,
-    description: `${fixture.title} werden im Gleiter-Finder anhand von Gestellform, gemessenem Außenmaß und hauptsächlichem Boden zugeordnet. Alle technischen Werte dieses lokalen Sortiments sind noch nicht fachlich verifiziert.`,
-    descriptionHtml: `<p>${fixture.title} werden anhand von Gestellform, Außenmaß und Boden zugeordnet.</p>`,
+    description: `Mit Gestellform, gemessenem Außenmaß und hauptsächlich genutztem Boden ordnen wir ${fixture.title} im Gleiter-Finder zu. Die technischen Werte dieses lokalen Sortiments sind noch nicht fachlich verifiziert.`,
+    descriptionHtml: `<p>Mit Gestellform, Außenmaß und Boden ordnen wir ${fixture.title} zu.</p>`,
     availableForSale: true,
     featuredImage: productImage,
     images: [productImage],
@@ -276,7 +276,7 @@ export const localProducts: CommerceProduct[] = [
     description:
       "Kunststoffgleiter können vorhandene Stahlrohrstühle funktional ergänzen oder verschlissene Bauteile ersetzen. Entscheidend sind Rohrform, exaktes Maß und die Konstruktion des Gestells.",
     descriptionHtml:
-      "<p>Kunststoffgleiter für vorhandene Stahlrohrstühle werden anhand von Rohrform, Maß und Einbausituation zugeordnet.</p>",
+      "<p>Wir ordnen Kunststoffgleiter für vorhandene Stahlrohrstühle anhand von Rohrform, Maß und Einbausituation zu.</p>",
     availableForSale: false,
     featuredImage: frameGliderImage,
     images: [frameGliderImage],
@@ -349,7 +349,7 @@ export const localProducts: CommerceProduct[] = [
     faq: [],
     seo: {
       title: "Kunststoff-Gestellgleiter für Stahlrohrstühle",
-      description: "Gestellgleiter nach Rohrform und Maß auswählen. Dalemans unterstützt bei der Zuordnung zum vorhandenen Stuhl.",
+      description: "Gestellgleiter nach Rohrform und Maß auswählen. Wir helfen Ihnen bei der Zuordnung zum vorhandenen Stuhl.",
     },
     updatedAt,
   },
@@ -468,7 +468,7 @@ export const localProducts: CommerceProduct[] = [
     handle: "tischtransportwagen",
     title: "Tischtransportwagen",
     shortDescription: "Transportwagen für Klapptische, abgestimmt auf Tischmaß, Stückzahl und Transportwege.",
-    description: "Der Tischtransportwagen erleichtert Lagerung und Saalumbauten. Auflagefläche, Haltebügel und Rollen werden passend zu den vorhandenen Tischen und Wegen geklärt.",
+    description: "Der Tischtransportwagen erleichtert Lagerung und Saalumbauten. Auflagefläche, Haltebügel und Rollen stimmen wir auf Ihre Tische und Wege ab.",
     descriptionHtml: "<p>Transportwagen für die geordnete Lagerung und den internen Transport von Klapptischen.</p>",
     availableForSale: false,
     featuredImage: tableTrolleyImage,
@@ -487,7 +487,7 @@ export const localProducts: CommerceProduct[] = [
     },
     priceStatus: "fixed",
     availability: "on_request",
-    availabilityNote: "Ausführung und Lieferzeit werden projektbezogen geklärt.",
+    availabilityNote: "Ausführung und Lieferzeit klären wir passend zu Ihrem Projekt.",
     collectionHandles: ["transport-lagerung"],
     specifications: [
       { name: "Einsatz", value: "Transport und Lagerung von Klapptischen" },
@@ -498,7 +498,7 @@ export const localProducts: CommerceProduct[] = [
     suitableFor: ["Saalumbauten", "Veranstaltungsräume", "Lagerung und interner Transport"],
     quantity: { unit: "piece", unitLabel: "Stück", minimum: 1, step: 1, note: null },
     measureGuide: ["Tischmaße und Stückzahl dokumentieren.", "Türbreiten, Schwellen und Transportwege berücksichtigen."],
-    applicationNotes: ["Auflagefläche, Haltebügel und Rollen werden anhand der Tische und Wege abgestimmt."],
+    applicationNotes: ["Auflagefläche, Haltebügel und Rollen stimmen wir auf die Tische und Wege ab."],
     notes: [],
     accessories: [],
     consultationNote: "Für die Auswahl helfen Tischmaße, Bestandsmenge, Lagerort und Transportweg.",
@@ -528,7 +528,7 @@ export const localProducts: CommerceProduct[] = [
     },
     priceStatus: "fixed",
     availability: "on_request",
-    availabilityNote: "Ausführung und Lieferzeit werden projektbezogen geklärt.",
+    availabilityNote: "Ausführung und Lieferzeit klären wir passend zu Ihrem Projekt.",
     collectionHandles: ["transport-lagerung"],
     specifications: [
       { name: "Einsatz", value: "Transport gestapelter Stühle" },
@@ -588,7 +588,7 @@ export const localCollectionRecords: Array<Omit<CommerceCollection, "products">>
     handle: "klappstuehle",
     title: "Klappstühle",
     shortDescription: "Vier kompakte Klappstuhlmodelle, jeweils im Viererpack.",
-    description: "Klappstühle aus der aktuellen Preisliste; Preise und Lieferzeit werden persönlich geklärt.",
+    description: "Unsere Klappstuhlmodelle für flexible Zusatzbestuhlung. Preise und Lieferzeit klären wir persönlich mit Ihnen.",
     image: null,
     seo: { title: "Klappstühle", description: "Klappstuhlmodelle für flexible Räume anfragen." },
   },
@@ -607,7 +607,7 @@ export const localCollectionRecords: Array<Omit<CommerceCollection, "products">>
     title: "Gleiter & Bodenschutz",
     shortDescription: "Kleine Bauteile, die Stuhl, Boden und tägliche Abläufe langfristig unterstützen.",
     description:
-      "Filz- und Gestellgleiter für vorhandene Bestuhlungen. Die sichere Auswahl erfolgt anhand von Befestigung, Rohrform, Maß, Boden und Nutzung.",
+      "Filz- und Gestellgleiter für vorhandene Bestuhlungen. Wir wählen die passende Ausführung anhand von Befestigung, Rohrform, Maß, Boden und Nutzung aus.",
     image: feltGliderImage,
     seo: {
       title: "Gleiter & Bodenschutz für Stühle",
@@ -633,7 +633,7 @@ export const localCollectionRecords: Array<Omit<CommerceCollection, "products">>
     title: "Transport & Lagerung",
     shortDescription: "Ausstattung sicher bewegen, aufbauen und nach der Nutzung wieder geordnet lagern.",
     description:
-      "Transportlösungen werden auf Möbeltyp, Bestandsmenge, Stapelmaß und räumliche Wege abgestimmt.",
+      "Wir stimmen Transportlösungen auf Möbeltyp, Bestandsmenge, Stapelmaß und räumliche Wege ab.",
     image: trolleyImage,
     seo: {
       title: "Transport & Lagerung für Bestuhlungen",

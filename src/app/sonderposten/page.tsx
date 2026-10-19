@@ -9,7 +9,7 @@ import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
   title: "Sonderposten: künftige Angebote im Überblick",
-  description: "Vorschau auf mögliche Lagerware, Einzelstücke und Restbestände. Konkrete Angebote werden erst nach Prüfung veröffentlicht.",
+  description: "Hier finden Sie künftig geprüfte Lagerware, Einzelstücke und Restbestände aus unserem Sortiment.",
   path: "/sonderposten",
   image: "/images/curated/Sonderposten/kunstoffschalenstuhl-restposten.webp",
   keywords: ["Sonderposten Stühle", "Lagerware Möbel", "B-Ware Stühle", "Restbestände Tische"],
@@ -66,6 +66,6 @@ export default function SonderpostenPage() {
       )}
     </HomeSection>
 
-    <HomeSection variant="elevated"><div className="grid gap-8 md:grid-cols-3">{[["Begrenzte Bestände", "Lagerware und Einzelstücke sind nur in vorhandener Menge verfügbar."], ["Transparent beschrieben", "Zustand und mögliche optische Besonderheiten werden vor dem Kauf ehrlich geklärt."], ["Persönlich abgestimmt", "Wir prüfen gemeinsam, ob Modell, Ausführung und Stückzahl zu Ihrem Raum passen."]].map(([title,text]) => <article key={title}><h2 className="font-display text-2xl text-premium-ink">{title}</h2><p className="mt-3 text-sm leading-7 text-premium-muted">{text}</p></article>)}</div></HomeSection>
+    <HomeSection variant="elevated"><div className="grid gap-8 md:grid-cols-3">{[["Begrenzte Bestände", "Lagerware und Einzelstücke sind nur in vorhandener Menge verfügbar."], ["Transparent beschrieben", "Vor dem Kauf informieren wir Sie ehrlich über Zustand und mögliche optische Besonderheiten."], ["Persönlich abgestimmt", "Wir prüfen gemeinsam, ob Modell, Ausführung und Stückzahl zu Ihrem Raum passen."]].map(([title,text]) => <article key={title}><h2 className="font-display text-2xl text-premium-ink">{title}</h2><p className="mt-3 text-sm leading-7 text-premium-muted">{text}</p></article>)}</div></HomeSection>
   </div>;
 }

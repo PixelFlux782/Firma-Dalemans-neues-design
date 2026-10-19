@@ -17,13 +17,13 @@ const contactPoints = [
 
 const quickLinks = [
   { href: "/produkte", label: "Zur Produktübersicht" },
-  { href: "/firma", label: "Mehr über Dalemans" },
+  { href: "/firma", label: "Mehr über uns" },
 ] as const;
 
 export const metadata: Metadata = buildMetadata({
   title: "Kontakt und Beratung",
   description:
-    "Kontaktieren Sie Dalemans für Stapelstühle, Klapptische, Gemeindestühle, Zubehör und individuelle Lösungen für Ihre Räume und Veranstaltungen.",
+    "Sprechen Sie mit uns über Stapelstühle, Klapptische, Gemeindestühle, Zubehör und individuelle Lösungen für Ihre Räume und Veranstaltungen.",
   path: "/kontakt",
   image: "/neue bilder/kontakt-hero.png",
   keywords: [
@@ -55,7 +55,7 @@ export default function KontaktPage() {
             <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Kontakt" }]} currentPath="/kontakt" />
             <p className="section-eyebrow mt-7">Beratung</p>
             <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Persönlich anfragen — wir hören zu</h1>
-            <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Fragen zu Produkten, Kategorien oder einer individuellen Raumlösung? Der direkte Kontakt ist der schnellste Weg zu einer durchdachten Empfehlung — ruhig, konkret und mit Blick auf Ihren Raum.</p>
+            <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Sie haben Fragen zu unseren Produkten oder zu einer individuellen Raumlösung? Sprechen Sie direkt mit uns. Gemeinsam klären wir, was zu Ihrem Raum und Ihrer Nutzung passt.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <a href="#anfrage" className="btn-primary px-6 py-3">Anfrage starten</a>
             </div>

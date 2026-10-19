@@ -16,23 +16,23 @@ export const stackingChairCategoryFaq = [
   },
   {
     question: "Sind die Modelle mit Reihenverbindung erhältlich?",
-    answer: "Ja. Für alle fünf Modelle führt die aktuelle Preisliste jede Grundausführung mit und ohne Reihenverbindung.",
+    answer: "Ja. Wir bieten alle fünf Modelle in jeder Grundausführung mit oder ohne Reihenverbindung an.",
   },
   {
     question: "Kann ich einen Musterstuhl erhalten?",
-    answer: "Musterstühle sind möglich. Dalemans stimmt Modell, Ausführung und Ablauf persönlich mit Ihnen ab.",
+    answer: "Gern stellen wir Ihnen einen Musterstuhl zur Verfügung und stimmen Modell, Ausführung und Ablauf persönlich mit Ihnen ab.",
   },
   {
     question: "Gibt es Mengenpreise?",
-    answer: "Je Ausführung sind drei Preise hinterlegt. Da die zugehörigen Mengenbereiche noch nicht dokumentiert sind, werden sie im Frontend nicht benannt und im Angebot verbindlich geklärt.",
+    answer: "Ja. Den passenden Mengenpreis nennen wir Ihnen verbindlich im persönlichen Angebot.",
   },
   {
-    question: "Kann Dalemans bei der Bestuhlungsplanung helfen?",
-    answer: "Ja. Dalemans unterstützt bei Raum- und Bestuhlungsplanung einschließlich 2D- und 3D-Planung, Stellplänen, Lagerung und Transportwegen.",
+    question: "Unterstützen Sie mich bei der Bestuhlungsplanung?",
+    answer: "Ja. Wir planen mit Ihnen Bestuhlung und Raum – auf Wunsch mit 2D- und 3D-Ansichten, Stellplänen sowie Überlegungen zu Lagerung und Transportwegen.",
   },
   {
     question: "Können Stühle später nachbestellt werden?",
-    answer: "Dalemans begleitet Nachbestellungen und Ersatzteilfragen persönlich. Die konkrete Verfügbarkeit wird für Modell und Bestand geprüft.",
+    answer: "Wir kümmern uns persönlich um Nachbestellungen und Ersatzteilfragen. Dafür prüfen wir das vorhandene Modell und die aktuelle Verfügbarkeit.",
   },
 ] as const;
 
@@ -59,7 +59,7 @@ function ChairVisual({ product }: { product: CommerceProduct }) {
           {product.stackingChair?.modelCode}
         </p>
         <p className="mt-3 max-w-xs text-sm leading-6 text-premium-muted">
-          Preis- und Variantendaten sind bereits vollständig hinterlegt.
+          Ausführungen und Preise finden Sie direkt in der Modellkonfiguration.
         </p>
       </div>
     </div>
@@ -128,7 +128,7 @@ export default function StackingChairHub({ products }: { products: CommerceProdu
                       Modell ansehen
                     </Link>
                     <span className="text-xs leading-5 text-premium-subtle">
-                      Preis mengenabhängig; Staffelgrenzen in Klärung
+                      Mengenpreise nennen wir im persönlichen Angebot
                     </span>
                   </div>
                 </div>
@@ -199,7 +199,7 @@ export default function StackingChairHub({ products }: { products: CommerceProdu
           <p className="section-eyebrow">Raumkompetenz</p>
           <h2 id="room-planning-heading" className="section-title mt-4">Nicht nur den Stuhl planen – den ganzen Raum.</h2>
           <p className="mt-5 max-w-2xl text-base leading-8 text-premium-muted">
-            Bestuhlungspläne, schwierige Geometrien, Säulen, Tischanordnungen, Lagerflächen und Transportwege gehören zusammen. Dalemans unterstützt mit 2D- und 3D-Planung für Räume, die sich im Alltag schnell verändern müssen.
+            Bestuhlungspläne, schwierige Geometrien, Säulen, Tischanordnungen, Lagerflächen und Transportwege gehören zusammen. Wir planen in 2D und 3D, damit Ihr Raum auch bei häufigen Veränderungen im Alltag funktioniert.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link href="/raeume-planung/raumplanung" className="btn-primary">Raumplanung ansehen</Link>

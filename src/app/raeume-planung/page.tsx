@@ -28,7 +28,7 @@ const rooms = [
 
 const challenges = [
   ["Schwierige Geometrie oder Säulen", "/raeume-planung/raumplanung#geometrie", "Geometrie und Nutzungsvarianten im Plan prüfen."],
-  ["Fluchtwege und Reihen", "/raeume-planung/raumplanung#stellplaene", "Stellpläne und Wege projektbezogen betrachten."],
+  ["Fluchtwege und Reihen", "/raeume-planung/raumplanung#stellplaene", "Stellpläne und Wege passend zum Projekt prüfen."],
   ["Wenig Lagerfläche", "#transport", "Stapelung, Wagen und verfügbare Flächen zusammendenken."],
   ["Häufiger Auf- und Abbau", "/beratung-service#ablauf", "Handgriffe und Transportwege für Helfer vereinfachen."],
   ["Vorhandene Bestuhlung ergänzen", "/beratung-service#langfristig", "Modell, Ausführung und passende Ergänzung klären."],
@@ -56,7 +56,7 @@ export default function RaeumePlanungPage() {
             <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Räume & Planung" }]} currentPath="/raeume-planung" />
             <p className="section-eyebrow mt-7">Räume & Planung</p>
             <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Ausstattung entsteht aus Raum, Nutzung und Alltag.</h1>
-            <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Wir betrachten nicht nur einzelne Stühle und Tische, sondern auch Reihen, Wege, Umbau, Transport, Lagerung und die Menschen, die den Raum täglich nutzen.</p>
+            <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">Wir planen nicht nur einzelne Stühle und Tische. Reihen, Wege, Umbau, Transport, Lagerung und die Menschen, die den Raum täglich nutzen, gehören für uns zusammen.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/kontakt?raum=Raumplanung" className="btn-primary px-6 py-3">Raum besprechen</Link>
               <Link href="/raeume-planung/raumplanung" className="btn-secondary px-6 py-3">Planungsleistungen</Link>
@@ -85,7 +85,7 @@ export default function RaeumePlanungPage() {
         <div className="grid gap-8 lg:grid-cols-2">
           <article className="premium-card overflow-hidden">
             <Image src={encodeURI("/neue bilder/planung-schritt-3.png")} alt="CAD-Planung für eine individuelle Raumlösung" width={760} height={440} sizes="(min-width: 1024px) 50vw, 100vw" className="h-64 w-full object-cover" />
-            <div className="p-7"><p className="section-eyebrow">Raum- & Bestuhlungsplanung</p><h2 className="mt-4 font-display text-3xl font-medium text-premium-ink">Nutzungsvarianten vor der Bestellung prüfen.</h2><p className="mt-4 text-sm leading-7 text-premium-muted">Je nach Projekt helfen 2D- oder 3D-Darstellungen, Stellpläne, Tischanordnungen und die Prüfung schwieriger Geometrien.</p><div className="mt-7 flex flex-wrap gap-3"><Link href="/raeume-planung/raumplanung" className="btn-primary">Raumplanung im Detail</Link><Link href="/raumplaner" className="btn-secondary">3D-Raumplaner ausprobieren</Link></div></div>
+            <div className="p-7"><p className="section-eyebrow">Raum- & Bestuhlungsplanung</p><h2 className="mt-4 font-display text-3xl font-medium text-premium-ink">Nutzungsvarianten vor der Bestellung prüfen.</h2><p className="mt-4 text-sm leading-7 text-premium-muted">Je nach Projekt zeigen wir Stellpläne, Tischanordnungen und schwierige Geometrien in 2D oder 3D.</p><div className="mt-7 flex flex-wrap gap-3"><Link href="/raeume-planung/raumplanung" className="btn-primary">Raumplanung im Detail</Link><Link href="/raumplaner" className="btn-secondary">3D-Raumplaner ausprobieren</Link></div></div>
           </article>
           <article id="transport">
             <ProductVisual src="/neue bilder/Zubehör/Tischtransportwagen_02.png" alt="Tischtransportwagen für Lagerung und Saalumbau" sizes="(min-width: 1024px) 50vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />

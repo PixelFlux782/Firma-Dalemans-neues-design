@@ -7,14 +7,14 @@ import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
   title: "Stoffkarten für Stapelstühle",
-  description: "Stoffgruppen 2, 3 und 4 im Überblick. Stoffkarten, Muster und persönliche Stoffberatung bei Dalemans.",
+  description: "Unsere Stoffgruppen 2, 3 und 4 im Überblick – mit Stoffkarten, Mustern und persönlicher Beratung.",
   path: "/wissen/stoffkarten",
   keywords: ["Stoffkarten", "Stoffmuster", "Stoffgruppe 2", "Stoffgruppe 3", "Stoffgruppe 4"],
 });
 
 const groupNotes = {
-  2: "Eine Auswahl für unterschiedliche Raumkonzepte. Eigenschaften und Eignung werden immer an der konkreten Stoffvariante geprüft.",
-  3: "In dieser Gruppe sind laut Dalemans in der Regel Varianten mit B1-Eigenschaften erhältlich. Entscheidend bleibt der Einzelnachweis.",
+  2: "Eine Auswahl für unterschiedliche Raumkonzepte. Eigenschaften und Eignung prüfen wir immer an der konkreten Stoffvariante.",
+  3: "In dieser Gruppe bieten wir in der Regel Varianten mit B1-Eigenschaften an. Entscheidend ist immer der Nachweis für den gewählten Stoff.",
   4: "Weitere Farben und Materialien für eine differenzierte Gestaltung. Die Gruppennummer allein ist kein Qualitätsversprechen.",
 } as const;
 
@@ -25,7 +25,7 @@ export default function FabricCardsPage() {
         <Breadcrumbs currentPath="/wissen/stoffkarten" items={[{ label: "Start", href: "/" }, { label: "Wissen", href: "/wissen" }, { label: "Stoffkarten" }]} />
         <p className="section-eyebrow mt-10">Stoffbibliothek</p>
         <h1 className="mt-5 max-w-4xl font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl lg:text-6xl">Stoffgruppen in Ruhe vergleichen.</h1>
-        <p className="mt-6 max-w-3xl text-base leading-8 text-premium-muted md:text-lg">Hier finden Sie die Dalemans-Stoffgruppen 2, 3 und 4. Eine Gruppe ist eine Sortimentszuordnung – keine genormte Qualitäts- oder Brandschutzklasse.</p>
+        <p className="mt-6 max-w-3xl text-base leading-8 text-premium-muted md:text-lg">Hier finden Sie unsere Stoffgruppen 2, 3 und 4. Die Gruppen ordnen unser Sortiment; sie sind keine genormten Qualitäts- oder Brandschutzklassen.</p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap"><Link href="/wissen/stoffe-und-bezuege" className="btn-primary text-center">Stoffratgeber lesen</Link><Link href="/kontakt?anliegen=Stoffmuster" className="btn-secondary text-center">Stoffmuster anfragen</Link></div>
       </header>
 
@@ -49,7 +49,7 @@ export default function FabricCardsPage() {
       </section>
 
       <section className="grid gap-6 rounded-4xl border border-premium-beige/70 bg-premium-warm/60 p-7 md:grid-cols-[1fr_auto] md:items-center md:p-10" aria-labelledby="fabric-advice">
-        <div><p className="section-eyebrow">Gut zu wissen</p><h2 id="fabric-advice" className="mt-4 font-display text-2xl font-medium text-premium-ink">Technische Werte gehören immer zur einzelnen Variante.</h2><p className="mt-4 max-w-3xl text-sm leading-7 text-premium-muted">Material, Scheuertouren, Pflege und Brandschutznachweise können innerhalb einer Gruppe variieren. Im Stoffratgeber erfahren Sie, wie diese Angaben sinnvoll eingeordnet werden.</p></div>
+        <div><p className="section-eyebrow">Gut zu wissen</p><h2 id="fabric-advice" className="mt-4 font-display text-2xl font-medium text-premium-ink">Technische Werte gehören immer zur einzelnen Variante.</h2><p className="mt-4 max-w-3xl text-sm leading-7 text-premium-muted">Material, Scheuertouren, Pflege und Brandschutznachweise können innerhalb einer Gruppe variieren. Unser Stoffratgeber zeigt Ihnen, worauf Sie bei diesen Angaben achten sollten.</p></div>
         <Link href="/wissen/stoffe-und-bezuege" className="btn-secondary shrink-0 text-center">Zum Stoffratgeber</Link>
       </section>
 

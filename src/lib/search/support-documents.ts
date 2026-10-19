@@ -39,7 +39,7 @@ export const supportSearchEntries: SupportSearchEntry[] = [
     id: "personal-consultation",
     title: "Persönliche Beratung",
     url: "/kontakt?anliegen=Shop-Beratung",
-    description: "Foto und Maße senden – Dalemans hilft bei einer unsicheren Zuordnung persönlich weiter.",
+    description: "Senden Sie uns ein Foto und die Maße – wir helfen Ihnen persönlich bei der Zuordnung.",
     keywords: ["Hilfe", "Beratung", "Kontakt", "Foto senden", "unsicher"],
     aliases: ["persönlich fragen", "Hilfe bei Auswahl"],
     featuredWhenEmpty: true,

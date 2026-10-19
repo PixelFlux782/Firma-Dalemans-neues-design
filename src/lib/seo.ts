@@ -6,7 +6,7 @@ export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL;
 export const siteName = "Dalemans Stapelstühle & Klapptische";
 export const defaultTitle = "Dalemans Stapelstühle & Klapptische | Ausstattung für Gemeinden und Säle";
 export const defaultDescription =
-  "Dalemans Stapelstühle & Klapptische bietet robuste Stapelstühle, Klapptische, Gemeindestühle, Transportwagen, Zubehör und Beratung für Gemeinden, Säle und flexible Räume.";
+  "Wir bieten robuste Stapelstühle, Klapptische, Gemeindestühle, Transportwagen, Zubehör und persönliche Beratung für Gemeinden, Säle und flexible Räume.";
 export const defaultOgImage = "/images/curated/Stapelstühle/1021c.webp";
 
 export function absoluteUrl(path = "/") {

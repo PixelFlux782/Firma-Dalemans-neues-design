@@ -37,7 +37,7 @@ export default function ChairComparison({ models }: { models: ChairComparisonIte
       <div className="grid gap-8 lg:grid-cols-[.72fr_1.28fr] lg:gap-14">
         <div>
           <p className="section-eyebrow">Modellvergleich</p>
-          <h2 id="comparison-heading" className="section-title-functional mt-4">Modelle nebeneinander einordnen.</h2>
+          <h2 id="comparison-heading" className="section-title-functional mt-4">Modelle direkt vergleichen.</h2>
           <p className="mt-4 text-sm leading-7 text-premium-muted">
             Wählen Sie bis zu drei Modelle. Weitere technische Vergleichswerte erscheinen erst, wenn sie verlässlich vorliegen.
           </p>

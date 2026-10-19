@@ -7,7 +7,7 @@ import type { ProductCategory } from "@/lib/product-categories";
 
 export const foldingTableFaq = [
   { question: "Welche Klapptische sind für Gemeinden sinnvoll?", answer: "Stabile Tische mit widerstandsfähiger Oberfläche und einem Format, das sich gut bewegen, lagern und kombinieren lässt." },
-  { question: "Sind Klapptische im Sondermaß möglich?", answer: "Je nach Projekt sind Sondermaß und Sonderform möglich. Raummaß, Nutzung und Lagerweg helfen bei der Einordnung." },
+  { question: "Sind Klapptische im Sondermaß möglich?", answer: "Ja, je nach Modell und Konstruktion. Senden Sie uns Raummaß, gewünschte Nutzung und Angaben zum Lagerweg; wir prüfen die passende Ausführung." },
 ] as const;
 
 export default function FoldingTablesHub({ collection, category }: { collection: CommerceCollection; category: ProductCategory }) {

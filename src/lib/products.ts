@@ -37,10 +37,10 @@ const productCatalog: Product[] = [
     shortDescription:
       "Bewährter Stapelstuhl für Gemeinden, Säle und Veranstaltungsräume mit hoher Beanspruchung.",
     description:
-      "Der Stapelstuhl Mod. 1021c steht bei Dalemans für eine langlebige und praxiserprobte Lösung im täglichen Einsatz. Das Modell ist auf häufiges Stellen, Stapeln und Umräumen ausgelegt und eignet sich für Räume, in denen Zuverlässigkeit, Ordnung und ein gepflegtes Erscheinungsbild gleichermaßen wichtig sind.",
+      "Unser Stapelstuhl Mod. 1021c ist eine langlebige und praxiserprobte Lösung für den täglichen Einsatz. Er ist auf häufiges Stellen, Stapeln und Umräumen ausgelegt und eignet sich für Räume, in denen Zuverlässigkeit, Ordnung und ein gepflegtes Erscheinungsbild gleichermaßen wichtig sind.",
     highlights: [
       "robuste Stahlrohrkonstruktion für den dauerhaften Einsatz",
-      "platzsparend stapelbar und leicht im Handling",
+      "platzsparend stapelbar und leicht zu handhaben",
       "solide Lösung für stark genutzte Gemeinderäume und Säle",
     ],
     suitableFor: [
@@ -104,7 +104,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Wirtschaftlicher Stapelstuhl für hohe Stückzahlen und schnelle Saalumbauten.",
     description:
-      "Der Stapelstuhl 1010i ist auf effiziente Bestuhlung in flexibel genutzten Räumen ausgelegt. Das Modell eignet sich besonders für Einrichtungen, die große Stückzahlen zuverlässig vorhalten und bei Bedarf schnell auf- und abbauen möchten.",
+      "Unser Stapelstuhl 1010i ist für größere Bestuhlungen in flexibel genutzten Räumen ausgelegt. Er lässt sich platzsparend lagern und bei Bedarf schnell auf- und abbauen.",
     highlights: [
       "solide Lösung für größere Bestuhlungen",
       "platzsparende Lagerung durch gute Stapelbarkeit",
@@ -131,7 +131,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Klassischer Stapelstuhl für Räume, in denen Funktionalität und Verfügbarkeit im Vordergrund stehen.",
     description:
-      "Der Stapelstuhl 1010a ist eine klare, verlässliche Lösung für den täglichen Einsatz. Er unterstützt Einrichtungen, die eine unkomplizierte Bestuhlung für wiederkehrende Veranstaltungen, Schulungen oder Gemeindearbeit suchen.",
+      "Unser Stapelstuhl 1010a ist eine unkomplizierte, verlässliche Lösung für wiederkehrende Veranstaltungen, Schulungen und Gemeindearbeit.",
     highlights: [
       "solide Basisausstattung für flexible Raumkonzepte",
       "leicht in bestehende Bestuhlungen integrierbar",
@@ -158,7 +158,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Robuste Bestuhlung für Veranstaltungsräume mit häufig wechselnden Nutzungsformen.",
     description:
-      "Das Modell 1010b ist auf einen verlässlichen Veranstaltungsalltag ausgelegt. Es unterstützt Räume, in denen Bestuhlung regelmäßig aufgebaut, umgestellt, gelagert und erneut eingesetzt wird.",
+      "Unser Modell 1010b ist für Räume gedacht, in denen die Bestuhlung regelmäßig aufgebaut, umgestellt und wieder eingelagert wird.",
     highlights: [
       "stapelbar und schnell wieder einsatzbereit",
       "robuste Bauweise für häufigen Gebrauch",
@@ -185,7 +185,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Freundliche Sitzlösung für Cafébereiche, Foyers und kommunikative Aufenthaltszonen.",
     description:
-      "Der Bistrostuhl G4101 ergänzt klassische Saal- und Reihenbestuhlung um eine leichtere, offenere Sitzlösung. Er eignet sich besonders für Bereiche, in denen Gespräche, Begegnung und eine einladende Atmosphäre im Vordergrund stehen.",
+      "Mit dem Bistrostuhl G4101 ergänzen Sie klassische Saal- und Reihenbestuhlung um eine leichtere Sitzlösung für Gespräche und Begegnung.",
     highlights: [
       "freundliche Wirkung in Aufenthalts- und Bistrobereichen",
       "gut kombinierbar mit Bistrotischen und Nebenflächen",
@@ -212,7 +212,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Zweckmäßiges Modell für belastbare Reihen- und Flächenbestuhlung im Alltag.",
     description:
-      "Der Stapelstuhl E1000 richtet sich an Einrichtungen, die eine verlässliche und unkomplizierte Lösung für regelmäßige Bestuhlung suchen. Das Modell passt in unterschiedliche Raumkonzepte und lässt sich gut organisieren und lagern.",
+      "Unser Stapelstuhl E1000 ist eine verlässliche, unkomplizierte Lösung für regelmäßige Reihen- und Flächenbestuhlung. Er passt in unterschiedliche Raumkonzepte und lässt sich geordnet lagern.",
     highlights: [
       "verlässliche Lösung für größere Stückzahlen",
       "einfach im Handling und in der Lagerung",
@@ -241,7 +241,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Praktischer Stuhl für Essbereiche, Gruppenräume und Mehrzwecknutzung.",
     description:
-      "Der Kantinenstuhl E1089 eignet sich für Räume, in denen gegessen, gesprochen, gearbeitet oder betreut wird. Das Modell verbindet nutzerfreundlichen Sitzkomfort mit einer robusten Konstruktion für den laufenden Betrieb.",
+      "Unser Kantinenstuhl E1089 passt in Räume, in denen Menschen essen, sprechen oder arbeiten. Er verbindet angenehmes Sitzen mit einer robusten Konstruktion für den regelmäßigen Einsatz.",
     highlights: [
       "angenehm bei längeren Sitzzeiten",
       "pflegeleicht und robust im Betrieb",
@@ -268,7 +268,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Klappstuhl für flexible Zusatzbestuhlung und schnelle Raumwechsel.",
     description:
-      "Der Klappstuhl LS193 ist eine praktische Lösung, wenn kurzfristig zusätzliche Sitzplätze benötigt werden. Er lässt sich platzsparend lagern und bei Bedarf schnell bereitstellen.",
+      "Unser Klappstuhl LS193 schafft schnell zusätzliche Sitzplätze und lässt sich bei Nichtgebrauch platzsparend lagern.",
     highlights: [
       "platzsparend klappbar",
       "als Ergänzungsbestuhlung einsetzbar",
@@ -295,7 +295,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Verlässlicher Klappstuhl für Veranstaltungen mit wechselnder Teilnehmerzahl.",
     description:
-      "Der Klappstuhl LS190 unterstützt Räume, in denen mal kompakte Lagerung und mal schnelle Vollbestuhlung gefragt ist. Gerade bei Sonderveranstaltungen und Projektformaten spielt das Modell seine Stärken aus.",
+      "Unser Klappstuhl LS190 eignet sich als Zusatzbestuhlung für Sonderveranstaltungen und wechselnde Teilnehmerzahlen. Er lässt sich kompakt lagern und schnell bereitstellen.",
     highlights: [
       "gut für temporäre Bestuhlungen",
       "effizient im Auf- und Abbau",
@@ -322,7 +322,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Kompakte Bestuhlungslösung für temporäre oder mobile Einsätze.",
     description:
-      "Der Klappstuhl LS189 eignet sich überall dort, wo Sitzplätze regelmäßig ergänzt, zurückgebaut oder mobil eingesetzt werden. Er ergänzt feste Bestuhlungen besonders sinnvoll in multifunktionalen Räumen.",
+      "Unser Klappstuhl LS189 ergänzt feste Bestuhlungen in multifunktionalen Räumen. Er ist schnell einsatzbereit und lässt sich bei Nichtgebrauch platzsparend lagern.",
     highlights: [
       "schnell einsatzbereit",
       "platzsparend bei Nichtgebrauch",
@@ -349,7 +349,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Schlichte Klappstuhl-Variante für wirtschaftliche Zusatzbestuhlung.",
     description:
-      "Das Modell LS bas 1 ist eine praktische Wahl, wenn eine unkomplizierte und wirtschaftliche Reservebestuhlung gesucht wird. Es lässt sich einfach lagern, vorhalten und bei Bedarf schnell einsetzen.",
+      "Unser Modell LS bas 1 ist eine unkomplizierte Reservebestuhlung, die sich einfach lagern und bei Bedarf schnell einsetzen lässt.",
     highlights: [
       "wirtschaftlich für ergänzende Sitzplätze",
       "einfach zu lagern und bereitzustellen",
@@ -377,7 +377,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Rechteckiger Klapptisch für flexible Aufstellungen in Mehrzweckräumen.",
     description:
-      "Der Klapptisch 310c ist für wechselnde Nutzungen in Vereinsheimen, Seminarräumen, Kirchen, Gemeinden sowie Sport- und Stadthallen vorgesehen.",
+      "Unser Klapptisch 310c ist für wechselnde Nutzungen in Vereinsheimen, Seminarräumen, Kirchen sowie Sport- und Stadthallen ausgelegt.",
     highlights: [
       "klappbar für Räume mit wechselnder Nutzung",
       "Oberflächen passend zur geplanten Alltagsnutzung",
@@ -390,13 +390,13 @@ const productCatalog: Product[] = [
       "Sport- und Stadthallen",
     ],
     details: [
-      "Ausführung und Komponenten werden projektbezogen abgestimmt",
-      "Oberflächen und Kanten werden passend zur Beanspruchung ausgewählt",
-      "Kantenausführung wird passend zur geplanten Nutzung abgestimmt",
+      "Ausführung und Komponenten stimmen wir auf Ihr Projekt ab",
+      "Oberflächen und Kanten wählen wir passend zur Beanspruchung aus",
+      "die Kantenausführung stimmen wir auf die geplante Nutzung ab",
     ],
     variants: [
       "in verschiedenen Tischmaßen planbar",
-      "Gestellvarianten werden je nach Aufstellungsart beraten",
+      "Gestellvarianten wählen wir passend zur Aufstellungsart aus",
       "für Reihenaufstellungen und Einzelaufstellungen passend auswählbar",
     ],
     note:
@@ -414,7 +414,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Variable Tischform für Halbkreise, Gruppeninseln und kommunikative Raumlayouts.",
     description:
-      "Der Trapezklapptisch 310c basiert in Ausführung und Plattenkonstruktion weitgehend auf dem Modell 310c und erweitert dessen Möglichkeiten um eine besonders variable Stellform. Die Trapezvariante eröffnet eine große Vielfalt an Aufstellungen für Unterricht, Gruppenarbeit oder Veranstaltungen.",
+      "Unser Trapezklapptisch 310c basiert bei Ausführung und Plattenkonstruktion weitgehend auf dem Modell 310c. Seine Form ermöglicht viele Aufstellungen für Unterricht, Gruppenarbeit und Veranstaltungen.",
     highlights: [
       "sehr vielseitige Stellmöglichkeiten",
       "gut für kommunikative und flexible Raumkonzepte",
@@ -429,7 +429,7 @@ const productCatalog: Product[] = [
     details: [
       "Plattenkonstruktion weitgehend wie beim Modell 310c",
       "ermöglicht Halbkreise, Inseln und offene Gruppenformen",
-      "Gestellausführung wird projektbezogen abgestimmt",
+      "die Gestellausführung stimmen wir auf Ihr Projekt ab",
     ],
     variants: [
       "mit unterschiedlichen Aufstellungsbildern planbar",
@@ -446,7 +446,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Funktionaler Seminartisch für Unterricht, Besprechung und Schulung.",
     description:
-      "Der Seminar-Klapptisch ist eine bewusst reduzierte Lösung für Seminar- und Besprechungsräume. Ausführung und Eignung werden passend zur geplanten Nutzung beraten.",
+      "Unser Seminar-Klapptisch ist eine bewusst reduzierte Lösung für Seminar- und Besprechungsräume. Ausführung und Eignung stimmen wir auf Ihre Nutzung ab.",
     highlights: [
       "klappbare Lösung für Seminarbereiche",
       "für flexible Aufstellungen planbar",
@@ -459,7 +459,7 @@ const productCatalog: Product[] = [
       "Besprechungen",
     ],
     details: [
-      "Kanten- und Plattenausführung werden projektbezogen abgestimmt",
+      "Kanten- und Plattenausführung stimmen wir auf Ihr Projekt ab",
       "Klappgestell passend zur geplanten Nutzung",
       "für geordnete Reihen, U-Formen und Blockstellungen geeignet",
     ],
@@ -478,7 +478,7 @@ const productCatalog: Product[] = [
     highlights: [
       "kompakte Lösung für offene Begegnungsbereiche",
       "Säulengestell mit rundem Standfuß",
-      "Ausführung und Oberfläche werden projektbezogen abgestimmt",
+      "Ausführung und Oberfläche stimmen wir auf Ihr Projekt ab",
     ],
     suitableFor: [
       "Foyers",
@@ -508,7 +508,7 @@ const productCatalog: Product[] = [
     shortDescription:
       "Robuste Transporthilfe für Tische, passend auf das jeweilige Tischmaß abgestimmt.",
     description:
-      "Der Tischtransportwagen unterstützt geordnete Abläufe bei Lagerung und Saalumbauten. Passende Abmessungen werden anhand der verwendeten Tische und Transportwege geplant.",
+      "Unser Tischtransportwagen erleichtert Lagerung und Saalumbauten. Seine Abmessungen planen wir passend zu Ihren Tischen und Transportwegen.",
     highlights: [
       "Ausführung passend zu Tischmaß und Transportweg planbar",
       "für geordnete Lager- und Transportabläufe",
@@ -542,9 +542,9 @@ const productCatalog: Product[] = [
     shortDescription:
       "Durchdachte Transportlösung für Stühle verschiedener Bauarten und Gestellbreiten.",
     description:
-      "Der Stuhltransportwagen erleichtert das Bewegen größerer Bestandsmengen. Die Eignung wird anhand von Stuhltyp, Gestell und Transportweg geprüft.",
+      "Unser Stuhltransportwagen erleichtert das Bewegen größerer Stuhlmengen. Ob er passt, prüfen wir anhand von Stuhltyp, Gestell und Transportweg.",
     highlights: [
-      "Eignung wird anhand des vorhandenen Stuhltyps geprüft",
+      "Eignung prüfen wir anhand des vorhandenen Stuhltyps",
       "erleichtert Auf- und Abbauprozesse spürbar",
       "robust für wiederholte Nutzung im Alltag",
     ],
@@ -586,7 +586,7 @@ const productCatalog: Product[] = [
     details: [
       "passende Ausführung abhängig von Rohrform und Maßen",
       "Standfuß passend zum Gestell",
-      "Form und Schaftlänge werden am Bestand geprüft",
+      "Form und Schaftlänge prüfen wir an Ihrem Bestand",
     ],
     variants: [
       "weitere Größen und Typen auf Anfrage",
@@ -617,8 +617,8 @@ const productCatalog: Product[] = [
     ],
     details: [
       "Eignung abhängig von Gestellform und Durchmesser",
-      "Anzahl und Position werden anhand der Bestuhlung geklärt",
-      "gewünschter Stuhlabstand wird bei der Auswahl berücksichtigt",
+      "Anzahl und Position klären wir anhand Ihrer Bestuhlung",
+      "den gewünschten Stuhlabstand berücksichtigen wir bei der Auswahl",
     ],
     note:
       "Die Lösung kann für vorhandene Bestände ohne serienmäßige Reihenverbindung geprüft werden.",
@@ -692,7 +692,7 @@ const productCatalog: Product[] = [
     imageAlt: "Runde und vierkantige Tischfüße als Gestellteile",
     overviewGroup: "table-accessories",
     shortDescription: "Tischfüße, Gestellteile und passende Kleinteile für vorhandene Ausstattung.",
-    description: "Für Tischgestelle lassen sich Füße, Stopfen und weitere Bauteile häufig gezielt anfragen. Die Zuordnung erfolgt anhand des vollständigen Tisches, des Einbauorts und der vorhandenen Maße.",
+    description: "Für Tischgestelle können Sie Füße, Stopfen und weitere Bauteile gezielt anfragen. Wir ordnen sie anhand des vollständigen Tisches, des Einbauorts und der vorhandenen Maße zu.",
     highlights: ["Gestellbereich im Zusammenhang sichtbar", "Zuordnung anhand von Form, Fotos und Maßen"],
     suitableFor: ["Klapptische", "Bestandspflege", "Instandsetzung"],
     details: ["Gestellform und Einbauort dokumentieren", "Maße und vorhandene Produktangaben mitsenden"],

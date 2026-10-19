@@ -36,12 +36,12 @@ const milestones = [
   {
     title: "Gegründet von Hubert Dalemans",
     text:
-      "Aus handwerklich geprägter Arbeit entstand ein spezialisierter Anbieter für Stapelstühle, Klapptische und Gemeindemobiliar.",
+      "Aus handwerklich geprägter Arbeit entwickelte sich unser Familienunternehmen für Stapelstühle, Klapptische und Gemeindemobiliar.",
   },
   {
     title: "Heute geführt von Stefan Dalemans",
     text:
-      "Die nächste Generation führt das Unternehmen weiter — nahbar, verbindlich und lösungsorientiert.",
+      "Heute führt Stefan Dalemans unser Familienunternehmen in zweiter Generation weiter — nahbar, verbindlich und lösungsorientiert.",
   },
   {
     title: "Verwurzelung im Gemeindebereich",
@@ -61,7 +61,7 @@ const clientBenefits = [
 export const metadata: Metadata = buildMetadata({
   title: "Dalemans – Familienunternehmen seit 1994",
   description:
-    "Erfahren Sie mehr über Dalemans als Familienunternehmen mit langjähriger Erfahrung, persönlicher Beratung und Sonderlösungen für Gemeinden und Veranstaltungsräume.",
+    "Lernen Sie unser Familienunternehmen kennen: Seit 1994 beraten und planen wir persönlich für Gemeinden und flexible Veranstaltungsräume.",
   path: "/firma",
   keywords: [
     "Dalemans",
@@ -132,8 +132,8 @@ export default function FirmaPage() {
         <div className="products-hero-shade pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative z-20 flex min-h-[650px] items-end px-5 pb-14 pt-20 sm:px-8 md:min-h-[560px] md:items-center md:px-12 md:py-16 lg:px-16">
           <div className="max-w-[42rem] md:w-[61%]">
-            <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Über Dalemans" }]} currentPath="/firma" />
-            <p className="section-eyebrow mt-7">Über Dalemans</p>
+            <Breadcrumbs items={[{ label: "Start", href: "/" }, { label: "Über uns" }]} currentPath="/firma" />
+            <p className="section-eyebrow mt-7">Über uns</p>
             <h1 className="mt-3 max-w-[17ch] font-display text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-premium-ink sm:text-5xl">Ein Familienunternehmen für langlebige Räume und ehrliche Beratung</h1>
             <p className="mt-4 max-w-[38rem] text-base leading-7 text-premium-muted">1994 von Hubert Dalemans gegründet und heute von Stefan Dalemans geführt: persönliche Beratung, praktische Planung und verlässliche Lösungen für flexible Räume.</p>
             <div className="mt-6 flex flex-wrap gap-3">
@@ -185,10 +185,10 @@ export default function FirmaPage() {
               Nicht nur Handel — Entwicklung und Planung
             </h2>
             <p className="mt-6 max-w-lg text-sm leading-[1.8] text-white/72 md:text-base">
-              Wir entwickeln, planen und vertreiben unsere Modelle. Die Fertigung
-              erfolgt in unserem Auftrag gemeinsam mit langjährigen spezialisierten
-              Partnerbetrieben. In der eigenen Werkstatt entstehen außerdem
-              Anpassungen, Reparaturen und Sonderlösungen.
+              Wir entwickeln, planen und vertreiben unsere Modelle. Langjährige,
+              spezialisierte Partnerbetriebe fertigen sie in unserem Auftrag. In
+              unserer eigenen Werkstatt setzen wir außerdem Anpassungen,
+              Reparaturen und Sonderlösungen um.
             </p>
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               <div className="image-depth overflow-hidden rounded-4xl shadow-premium">
@@ -239,7 +239,7 @@ export default function FirmaPage() {
         <SectionHeader
           eyebrow="Werkstatt und Partnerfertigung"
           title="Qualität entsteht im Zusammenspiel"
-          lead="Wir entwickeln, planen und vertreiben unsere Modelle. Die Fertigung erfolgt in unserem Auftrag gemeinsam mit spezialisierten Partnerbetrieben. Anpassungen, Reparaturen und viele Sonderlösungen begleiten wir über unsere eigene Werkstatt."
+          lead="Wir entwickeln, planen und vertreiben unsere Modelle. Spezialisierte Partnerbetriebe fertigen sie in unserem Auftrag. Anpassungen, Reparaturen und viele Sonderlösungen begleiten wir in unserer eigenen Werkstatt."
           align="editorial"
         />
         <div className="section-grid-top grid gap-5 md:grid-cols-3">
@@ -301,10 +301,10 @@ export default function FirmaPage() {
                   Geschäftsführer
                 </p>
                 <p className="mt-7 max-w-xl text-base leading-8 text-white/76">
-                  Stefan Dalemans führt das Familienunternehmen heute in zweiter Generation weiter. Als direkter Ansprechpartner verbindet er die Erfahrung aus mehr als 30 Jahren mit einem klaren Blick für die Anforderungen moderner, flexibel genutzter Räume.
+                  Stefan Dalemans führt unser Familienunternehmen heute in zweiter Generation. Als direkter Ansprechpartner verbindet er mehr als 30 Jahre Erfahrung mit einem klaren Blick für moderne, flexibel genutzte Räume.
                 </p>
                 <p className="mt-5 max-w-xl text-base leading-8 text-white/76">
-                  Dabei bleibt erhalten, was Dalemans seit 1994 auszeichnet: persönliche Beratung, verbindliche Absprachen und Lösungen, die im Alltag dauerhaft funktionieren.
+                  Dabei bleibt erhalten, was uns seit 1994 auszeichnet: persönliche Beratung, verbindliche Absprachen und Lösungen, die im Alltag dauerhaft funktionieren.
                 </p>
                 <Link href="/kontakt" className="btn-on-dark mt-8 inline-flex self-start">
                   Persönlich Kontakt aufnehmen

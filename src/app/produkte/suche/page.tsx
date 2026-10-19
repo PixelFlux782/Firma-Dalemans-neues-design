@@ -6,7 +6,7 @@ import { searchCommerce } from "@/lib/search/service";
 
 export const metadata: Metadata = {
   title: "Produkte durchsuchen",
-  description: "Produkte, Kategorien und passende Hilfe bei Dalemans finden.",
+  description: "Finden Sie unsere Produkte, Kategorien und die passende persönliche Hilfe für Ihr Vorhaben.",
   robots: { index: false, follow: true },
   alternates: { canonical: "/produkte/suche" },
 };

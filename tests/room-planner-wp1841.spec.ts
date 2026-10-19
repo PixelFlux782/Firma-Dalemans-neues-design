@@ -18,7 +18,7 @@ async function openEditor(page: Page) {
   return { editor, canvas };
 }
 
-async function createFilledTableZone(page: Page) {
+async function createFilledTableZone(page: Page, zone = { left: 190, top: 135, right: 625, bottom: 425 }) {
   const { editor, canvas } = await openEditor(page);
   for (const position of [{ x: 55, y: 55 }, { x: 690, y: 55 }, { x: 690, y: 515 }, { x: 55, y: 515 }]) {
     await canvas.click({ position });
@@ -27,7 +27,6 @@ async function createFilledTableZone(page: Page) {
 
   await editor.getByRole("button", { name: "Tische", exact: true }).click();
   await editor.getByLabel("Tischwerkzeug").selectOption("tables");
-  const zone = { left: 190, top: 135, right: 625, bottom: 425 };
   for (const position of [
     { x: zone.left, y: zone.top },
     { x: zone.right, y: zone.top },
@@ -137,8 +136,8 @@ test("A – Rahmen-, Klick- und Shift-Auswahl funktionieren im befüllten Tischb
   await dragMarquee(
     page,
     canvas,
-    { x: (zone.left + zone.right) / 2, y: (zone.top + zone.bottom) / 2 + 40 },
     { x: zone.left + 8, y: zone.top + 8 },
+    { x: (zone.left + zone.right) / 2, y: (zone.top + zone.bottom) / 2 + 40 },
     { during: () => screenshot(page, testInfo, "02-waehrend-rahmen") },
   );
 
@@ -192,7 +191,7 @@ test("B – ausgewählte Möbel bewegen sich gemeinsam; Bereich, Kontur sowie Un
 });
 
 test("C – Strg+D erzeugt unabhängige Möbel mit eindeutigen IDs", async ({ page }, testInfo) => {
-  const { canvas, zone } = await createFilledTableZone(page);
+  const { canvas, zone } = await createFilledTableZone(page, { left: 120, top: 175, right: 340, bottom: 355 });
   const sourceIds = await selectAllFurniture(page, canvas, zone);
   const before = await exportPlan(page);
   await page.keyboard.press("Control+d");
@@ -209,14 +208,14 @@ test("C – Strg+D erzeugt unabhängige Möbel mit eindeutigen IDs", async ({ pa
   const selectedTable = canvas.locator("[data-table-id][aria-selected='true']").first();
   const box = await selectedTable.boundingBox();
   if (!box) throw new Error("Keine ausgewählte Tischkopie zum Ziehen gefunden.");
-  await drag(page, { x: box.x + box.width / 2, y: box.y + box.height / 2 }, { x: box.x + box.width / 2 - 100, y: box.y + box.height / 2 });
+  await drag(page, { x: box.x + box.width / 2, y: box.y + box.height / 2 }, { x: box.x + box.width / 2 + 230, y: box.y + box.height / 2 });
   const copyMoved = await exportPlan(page);
   const copyMovedById = furnitureMap(copyMoved);
   for (const source of furniture(before)) expect(copyMovedById.get(source.id)).toEqual(source);
   expect(copyIds.some((id) => copyMovedById.get(id)?.x !== duplicatedById.get(id)?.x)).toBe(true);
 });
 
-test("D – der gemeinsame Rotationsgriff dreht Positionen und Winkel und bleibt in 3D konsistent", async ({ page }, testInfo) => {
+test("D – der gemeinsame Rotationsgriff dreht Positionen und Winkel und bleibt in 3D konsistent", async ({ page }) => {
   const { editor, canvas, zone } = await createFilledTableZone(page);
   const ids = await selectAllFurniture(page, canvas, zone);
   const before = await exportPlan(page);
@@ -246,7 +245,6 @@ test("D – der gemeinsame Rotationsgriff dreht Positionen und Winkel und bleibt
 
   await editor.getByRole("button", { name: "3D", exact: true }).click();
   await expect(editor.getByLabel("3D-Raumansicht").locator("canvas")).toBeVisible();
-  await screenshot(page, testInfo, "06-rotation-in-3d");
   await editor.getByRole("button", { name: "2D", exact: true }).click();
   const afterViewSwitch = await exportPlan(page);
   expect(afterViewSwitch.tables).toEqual(rotated.tables);
@@ -308,4 +306,22 @@ test("F – Rahmenauswahl funktioniert bei 50 %, 100 %, 150 % und verschobenem C
   await drag(page, { x: canvasBox.x + canvasBox.width / 2, y: canvasBox.y + canvasBox.height / 2 }, { x: canvasBox.x + canvasBox.width / 2 + 70, y: canvasBox.y + canvasBox.height / 2 + 35 });
   await page.keyboard.up("Space");
   await selectVisibleZone();
+});
+
+test("G – Escape verwirft eine laufende Gruppentransformation vollständig", async ({ page }) => {
+  const { canvas, zone } = await createFilledTableZone(page);
+  await selectAllFurniture(page, canvas, zone);
+  const before = await exportPlan(page);
+  const selectedTable = canvas.locator("[data-table-id][aria-selected='true']").first();
+  const box = await selectedTable.boundingBox();
+  if (!box) throw new Error("Kein ausgewählter Tisch zum Abbruchtest gefunden.");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 + 30, box.y + box.height / 2 + 20, { steps: 6 });
+  await page.keyboard.press("Escape");
+  await page.mouse.up();
+  const after = await exportPlan(page);
+  expect(after.tables).toEqual(before.tables);
+  expect(after.chairs).toEqual(before.chairs);
+  await expect(canvas.getByLabel("Auswahlrahmen")).toHaveCount(0);
 });

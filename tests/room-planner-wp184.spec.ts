@@ -69,6 +69,30 @@ test("WP18.4 dupliziert nur explizit gewählte Möbel und verdrahtet Beziehungen
   expect(deleted.chairs?.[0].tableId).toBeUndefined();
 });
 
+test("WP18.4 verarbeitet 100+ Möbel ohne quadratische Auswahlkopien", () => {
+  const densePlan: RoomPlan = {
+    ...planFixture(),
+    tables: [],
+    tableGroups: [],
+    seating: undefined,
+    chairs: Array.from({ length: 144 }, (_, index) => ({
+      id: `dense-chair-${index}`,
+      x: -6.6 + index % 12 * 1.1,
+      y: -4.8 + Math.floor(index / 12) * .85,
+      rotation: index % 4 * 15,
+      width: .5,
+      depth: .55,
+      source: "manual" as const,
+    })),
+  };
+  const started = performance.now();
+  const selected = selectFurnitureInMarquee(densePlan, { x: -8, y: -6 }, { x: 8, y: 6 });
+  const moved = transformFurnitureSelection(densePlan, selected, { dx: .1, dy: .1 });
+  expect(selected).toHaveLength(144);
+  expect(moved.chairs?.every((chair, index) => chair.x === Number((densePlan.chairs![index].x + .1).toFixed(3)))).toBe(true);
+  expect(performance.now() - started).toBeLessThan(1_000);
+});
+
 async function openEditor(page: Page) {
   await page.addInitScript(([key]) => localStorage.setItem(key, JSON.stringify({ onboardingSeen: true, dismissed: [] })), [HELP_KEY]);
   await page.setViewportSize({ width: 1600, height: 1000 });

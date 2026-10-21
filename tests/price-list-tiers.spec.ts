@@ -32,3 +32,24 @@ test("Netto-/Brutto-Umschaltung gilt auf Produktseite für Preis und Mengenstaff
   await expect(tiers).toContainText("410,85");
   await expect(tiers).toContainText("brutto inkl. 19 % MwSt.");
 });
+
+test("Seminarklapptisch 210c nutzt Stückpreis, Staffel, Preisübersicht und gemeinsame Mengensteuerung", async ({ page }) => {
+  await page.goto("/produkte/artikel/seminarklapptisch-210c");
+
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Seminarklapptisch Modell 210c");
+  await expect(page.getByText("Aktueller Stückpreis", { exact: true })).toBeVisible();
+  const summary = page.getByTestId("price-breakdown");
+  await expect(summary).toContainText("Basispreis");
+  await expect(summary).toContainText("Konfigurierter Stückpreis");
+  await expect(summary).toContainText("Gesamtpreis");
+
+  const quantity = page.getByLabel("Bestellmenge", { exact: true });
+  await quantity.fill("15");
+  await expect(page.locator('[data-price-status="fixed"]')).toContainText("245,17");
+  await expect(page.getByTestId("price-tiers").locator('[data-active="true"]')).toContainText("15–20 Stück");
+  await expect(page.getByTestId("total-price")).toContainText("3.677,55");
+
+  await page.getByRole("button", { name: "Privatkunden · brutto" }).click();
+  await expect(page.locator('[data-price-status="fixed"]')).toContainText("291,75");
+  await expect(page.getByTestId("total-price")).toContainText("4.376,28");
+});

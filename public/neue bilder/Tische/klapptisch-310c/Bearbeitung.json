@@ -1,0 +1,29 @@
+{
+  "mode": "Built-in image_gen",
+  "prompts": [
+    {
+      "image": 1,
+      "prompt": "Edit the provided product photograph for a premium German furniture ecommerce gallery. Preserve the exact actual product, its geometry, number and shape of legs, materials, fittings, camera angle and all mechanical details. Do not redesign or substitute a different table. Refine exposure, white balance, clarity and realistic material texture. Warm restrained cream/beige styling, soft diffused studio daylight, premium understated photography, no text, no watermark. Remove warehouse background and tiled floor; seamless warm ivory studio with soft contact shadows. Keep complete actual table, perspective, four individual chrome legs, light gray top and beech edge. Landscape 4:3."
+    },
+    {
+      "image": 2,
+      "prompt": "Edit the provided product photograph for a premium German furniture ecommerce gallery. Preserve the exact actual product, its geometry, number and shape of legs, materials, fittings, camera angle and all mechanical details. Do not redesign or substitute a different table. Refine exposure, white balance, clarity and realistic material texture. Warm restrained cream/beige styling, soft diffused studio daylight, premium understated photography, no text, no watermark. Remove cluttered warehouse and tiled floor, replace with seamless warm ivory studio background and floor, subtle contact shadows. Keep exact original perspective and four separate straight round chrome legs, light gray top and beech edge. Entire product in frame with margins, landscape 4:3."
+    },
+    {
+      "image": 3,
+      "prompt": "Edit the provided product photograph for a premium German furniture ecommerce gallery. Preserve the exact actual product, its geometry, number and shape of legs, materials, fittings, camera angle and all mechanical details. Do not redesign or substitute a different table. Refine exposure, white balance, clarity and realistic material texture. Warm restrained cream/beige styling, soft diffused studio daylight, premium understated photography, no text, no watermark. Remove cluttered warehouse and tiled floor, replace with seamless warm ivory studio background and floor, subtle contact shadows. Keep exact original perspective and four separate straight round chrome legs, light gray top and beech edge. Entire product in frame with margins, landscape 4:3."
+    },
+    {
+      "image": 4,
+      "prompt": "Edit the provided product photograph for a premium German furniture ecommerce gallery. Preserve the exact actual product, its geometry, number and shape of legs, materials, fittings, camera angle and all mechanical details. Do not redesign or substitute a different table. Refine exposure, white balance, clarity and realistic material texture. Warm restrained cream/beige styling, soft diffused studio daylight, premium understated photography, no text, no watermark. Technical detail photograph. Keep exact original framing, fasteners, tubes, brackets, clips, knobs, felt pads and wood/laminate underside faithfully in their original positions and count. Retouch distracting background outside the product to warm ivory where visible; brighten and neutralize lighting without erasing texture or altering hardware. Crisp realistic catalog detail, no invented parts."
+    },
+    {
+      "image": 5,
+      "prompt": "Edit the provided product photograph for a premium German furniture ecommerce gallery. Preserve the exact actual product, its geometry, number and shape of legs, materials, fittings, camera angle and all mechanical details. Do not redesign or substitute a different table. Refine exposure, white balance, clarity and realistic material texture. Warm restrained cream/beige styling, soft diffused studio daylight, premium understated photography, no text, no watermark. Technical detail photograph. Keep exact original framing, fasteners, tubes, brackets, clips, knobs, felt pads and wood/laminate underside faithfully in their original positions and count. Retouch distracting background outside the product to warm ivory where visible; brighten and neutralize lighting without erasing texture or altering hardware. Crisp realistic catalog detail, no invented parts."
+    },
+    {
+      "image": 6,
+      "prompt": "Edit the provided product photograph for a premium German furniture ecommerce gallery. Preserve the exact actual product, its geometry, number and shape of legs, materials, fittings, camera angle and all mechanical details. Do not redesign or substitute a different table. Refine exposure, white balance, clarity and realistic material texture. Warm restrained cream/beige styling, soft diffused studio daylight, premium understated photography, no text, no watermark. Technical detail photograph. Keep exact original framing, fasteners, tubes, brackets, clips, knobs, felt pads and wood/laminate underside faithfully in their original positions and count. Retouch distracting background outside the product to warm ivory where visible; brighten and neutralize lighting without erasing texture or altering hardware. Crisp realistic catalog detail, no invented parts."
+    }
+  ]
+}

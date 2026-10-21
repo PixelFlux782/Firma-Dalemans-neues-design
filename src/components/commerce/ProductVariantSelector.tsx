@@ -3,8 +3,13 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import CommerceAvailability from "@/components/commerce/CommerceAvailability";
-import CommercePrice from "@/components/commerce/CommercePrice";
-import { lowestProductUnitPrice } from "@/lib/commerce/money";
+import {
+  ConfiguratorPriceSummary,
+  CurrentUnitPrice,
+  PriceTierCards,
+  QuantityControl,
+} from "@/components/commerce/ConfiguratorPricing";
+import { lowestProductUnitPrice, multiplyCommerceMoney } from "@/lib/commerce/money";
 import { usePriceDisplay } from "@/components/commerce/PriceDisplayProvider";
 import { useCart } from "@/components/commerce/cart/CartProvider";
 import {
@@ -33,7 +38,7 @@ export default function ProductVariantSelector({
   initialVariantId?: string;
 }) {
   const { addLines, pending } = useCart();
-  const { formatPrice, priceLabel } = usePriceDisplay();
+  const { formatPrice } = usePriceDisplay();
   const isTableConfigurator = [
     "klapptisch-310c",
     "seminarklapptisch-210c",
@@ -97,6 +102,23 @@ export default function ProductVariantSelector({
 
   const priceStatus = selectedVariant?.priceStatus ?? product.priceStatus;
   const price = selectedVariant ? priceForQuantity(selectedVariant, quantity) : product.priceRange.min;
+  const pricedVariants = selectableVariants.flatMap((variant) => {
+    if (variant.priceStatus !== "fixed") return [];
+    const variantPrice = priceForQuantity(variant, quantity);
+    return variantPrice ? [{ variant, price: variantPrice }] : [];
+  });
+  const basePriceEntry = pricedVariants.reduce<(typeof pricedVariants)[number] | null>(
+    (lowest, entry) => !lowest || Number(entry.price.amount) < Number(lowest.price.amount) ? entry : lowest,
+    null,
+  );
+  const basePrice = basePriceEntry?.price ?? price;
+  const totalPrice = multiplyCommerceMoney(price ?? null, quantity);
+  const configurationSurcharge = price && basePrice && price.currencyCode === basePrice.currencyCode
+    ? {
+        amount: Math.max(0, Number(price.amount) - Number(basePrice.amount)).toFixed(2),
+        currencyCode: price.currencyCode,
+      }
+    : null;
   const availability = selectedVariant?.availability ?? product.availability;
   const availabilityNote = selectedVariant?.availabilityNote ?? product.availabilityNote;
   const cartable = canAddVariantToCart(selectedVariant);
@@ -118,20 +140,29 @@ export default function ProductVariantSelector({
   const contactParameters = new URLSearchParams({
     anliegen: "Shop-Produktberatung",
     produkt: product.title,
+    menge: String(quantity),
     ...(selectedVariant ? { variante: selectedVariant.title } : {}),
     ...(selectedVariant?.erpArticleNumber ? { artikelnummer: selectedVariant.erpArticleNumber } : {}),
-    ...(selectedAccessoryTitles.length ? { nachricht: inquiryMessage } : {}),
+    ...(selectedVariant ? { nachricht: `${inquiryMessage}\nMenge: ${quantity}` } : {}),
   });
 
   return (
     <div className="rounded-[2rem] border border-premium-beige/80 bg-white/65 p-6 shadow-premium sm:p-8">
-      <CommercePrice
-        status={priceStatus}
-        price={price}
-        compareAtPrice={selectedVariant?.compareAtPrice}
-      />
+      <div className="flex items-end justify-between gap-5">
+        <div>
+          <p className="section-eyebrow">Ihre Ausführung</p>
+          <p className="mt-2 text-sm leading-6 text-premium-muted">
+            {optionGroups.length ? "Optionen auswählen und Preis direkt vergleichen." : "Stückzahl wählen und Gesamtpreis prüfen."}
+          </p>
+        </div>
+        <CurrentUnitPrice
+          status={priceStatus}
+          price={price ?? null}
+          compareAtPrice={selectedVariant?.compareAtPrice}
+        />
+      </div>
       {lowestPrice?.priceTierId && lowestPrice.minimumQuantity > 1 ? (
-        <div className="mt-2" data-testid="lowest-tier-price">
+        <div className="mt-3 text-right" data-testid="lowest-tier-price">
           <p className="text-sm font-semibold tabular-nums text-premium-forest">ab {formatPrice(lowestPrice.price)} / Stück</p>
           <p className="mt-1 text-xs leading-5 text-premium-muted">Bei Abnahme von mindestens {lowestPrice.minimumQuantity} Stück</p>
         </div>
@@ -162,11 +193,12 @@ export default function ProductVariantSelector({
                 : "mt-3 flex flex-wrap gap-2"}>
                 {group.values.map((value) => {
                   const active = selection[group.name] === value;
-                  const optionVariant = selectableVariants.find((variant) =>
-                    variant.selectedOptions.some((option) => option.name === group.name && option.value === value),
-                  );
-                  const optionPrice = product.handle === "tischtransportwagen" && optionVariant
-                    ? priceForQuantity(optionVariant, quantity)
+                  const optionSelection = { ...selection, [group.name]: value };
+                  const optionVariant = selectableVariants.find((variant) => matchesSelection(variant, optionSelection))
+                    ?? selectableVariants.find((variant) => variant.selectedOptions.some((option) => option.name === group.name && option.value === value));
+                  const optionPrice = optionVariant?.priceStatus === "fixed" ? priceForQuantity(optionVariant, quantity) : null;
+                  const optionSurcharge = optionPrice && basePrice && optionPrice.currencyCode === basePrice.currencyCode
+                    ? Math.max(0, Number(optionPrice.amount) - Number(basePrice.amount))
                     : null;
                   return (
                     <div key={value} className="flex items-center gap-1.5">
@@ -181,9 +213,11 @@ export default function ProductVariantSelector({
                         }`}
                       >
                         <span className="block">{value}</span>
-                        {optionPrice ? (
+                        {optionSurcharge !== null ? (
                           <span className={`mt-1 block text-xs ${active ? "text-white/75" : "text-premium-muted"}`}>
-                            {formatPrice(optionPrice)}
+                            {optionSurcharge > 0
+                              ? `+ ${formatPrice({ amount: optionSurcharge.toFixed(2), currencyCode: basePrice!.currencyCode })} / ${product.quantity.unitLabel}`
+                              : "ohne Aufpreis"}
                           </span>
                         ) : null}
                       </button>
@@ -220,25 +254,26 @@ export default function ProductVariantSelector({
         </div>
       ) : null}
 
-      {selectedVariant?.priceTiers?.length ? (
-        <section className="mt-6" aria-labelledby="price-tiers-title" data-testid="price-tiers">
-          <div className="flex items-end justify-between gap-3">
-            <h2 id="price-tiers-title" className="text-sm font-semibold text-premium-ink">Mengenstaffeln</h2>
-            <span className="text-xs text-premium-muted">{priceLabel}</span>
-          </div>
-          <div className="mt-3 grid gap-2 sm:grid-cols-3">
-            {selectedVariant.priceTiers.map((tier) => {
-              const active = quantity >= (tier.minimumQuantity ?? 0) && (tier.maximumQuantity === null || quantity <= tier.maximumQuantity);
-              return (
-                <div key={tier.id} data-active={active ? "true" : "false"} className={`rounded-xl border px-3 py-3 text-sm ${active ? "border-premium-forest bg-premium-forest text-white" : "border-premium-beige bg-white/60 text-premium-muted"}`}>
-                  <p className="font-semibold">{tier.label}</p>
-                  <p className={`mt-1 tabular-nums ${active ? "text-white" : "text-premium-ink"}`}>{formatPrice(tier.price)} / Stück</p>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      ) : null}
+      {selectedVariant?.priceTiers?.length ? <PriceTierCards
+        tiers={selectedVariant.priceTiers}
+        quantity={quantity}
+        unitLabel={product.quantity.unitLabel}
+        className="mt-6"
+      /> : null}
+
+      {priceStatus === "fixed" && price && basePrice && totalPrice ? <ConfiguratorPriceSummary
+        basePrice={optionGroups.length ? basePrice : price}
+        configuredPrice={price}
+        totalPrice={totalPrice}
+        quantity={quantity}
+        unitLabel={product.quantity.unitLabel}
+        simple={!optionGroups.length}
+        adjustments={configurationSurcharge && Number(configurationSurcharge.amount) > 0 && selectedVariant ? [{
+          id: selectedVariant.id,
+          label: selectedVariant.title,
+          price: configurationSurcharge,
+        }] : []}
+      /> : null}
 
       {selectedAdvisory ? (
         <section className="mt-6 rounded-2xl border border-premium-beige/80 bg-premium-warm/55 p-5" aria-labelledby="variant-advisory-title" data-testid="variant-advisory">
@@ -304,53 +339,22 @@ export default function ProductVariantSelector({
         ) : null}
       </div> : null}
 
-      {cartable && selectedVariant && selectedRules ? (
+      {selectedVariant && selectedRules ? (
+        <div className="mt-6 flex flex-wrap items-start justify-end gap-4 border-t border-premium-beige/70 pt-6">
+          <QuantityControl
+            id="product-quantity"
+            quantity={quantity}
+            onChange={setQuantity}
+            minimum={selectedRules.minimumQuantity}
+            step={selectedRules.quantityStep}
+            label={isTableConfigurator ? "Anzahl" : "Bestellmenge"}
+            inputLabel="Bestellmenge"
+          />
+        </div>
+      ) : null}
+
+      {cartable && selectedVariant ? (
         <>
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-premium-beige/70 pt-6">
-            <div>
-              <p className="text-sm font-semibold text-premium-ink">{isTableConfigurator ? "Anzahl" : "Bestellmenge"}</p>
-              {!isTableConfigurator ? <p className="mt-1 text-xs text-premium-muted">
-                Schrittweite {selectedRules.quantityStep} {product.quantity.unitLabel}
-              </p> : null}
-            </div>
-            <div className="inline-grid grid-cols-[2.75rem_4.5rem_2.75rem] overflow-hidden rounded-full border border-premium-beige bg-white">
-              <button
-                type="button"
-                onClick={() => setQuantity((value) => Math.max(selectedRules.minimumQuantity, value - selectedRules.quantityStep))}
-                disabled={quantity <= selectedRules.minimumQuantity}
-                className="min-h-11 text-lg hover:bg-premium-warm disabled:opacity-35"
-                aria-label="Menge verringern"
-              >
-                −
-              </button>
-              <input
-                aria-label="Bestellmenge"
-                type="number"
-                inputMode="numeric"
-                min={selectedRules.minimumQuantity}
-                max={100000}
-                step={selectedRules.quantityStep}
-                value={quantity}
-                onChange={(event) => {
-                  const next = Number(event.target.value);
-                  if (Number.isInteger(next) && next > 0) {
-                    const steps = Math.ceil((Math.max(next, selectedRules.minimumQuantity) - selectedRules.minimumQuantity) / selectedRules.quantityStep);
-                    setQuantity(selectedRules.minimumQuantity + Math.max(0, steps) * selectedRules.quantityStep);
-                  }
-                }}
-                className="min-h-11 w-full border-x border-premium-beige bg-transparent text-center text-sm font-semibold tabular-nums outline-none focus:bg-premium-warm/60"
-              />
-              <button
-                type="button"
-                onClick={() => setQuantity((value) => Math.min(100000, value + selectedRules.quantityStep))}
-                disabled={quantity + selectedRules.quantityStep > 100000}
-                className="min-h-11 text-lg hover:bg-premium-warm disabled:opacity-35"
-                aria-label="Menge erhöhen"
-              >
-                +
-              </button>
-            </div>
-          </div>
           <button
             type="button"
             disabled={pending}

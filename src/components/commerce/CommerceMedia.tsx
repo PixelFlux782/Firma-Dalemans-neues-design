@@ -56,7 +56,7 @@ export default function CommerceMedia({
                 aria-pressed={index === activeIndex}
                 className={`relative h-20 w-20 overflow-hidden rounded-xl border ${index === activeIndex ? "border-premium-ink" : "border-premium-beige"}`}
               >
-                <Image src={galleryImage.url} alt="" fill sizes="80px" className="object-cover" />
+                <Image src={galleryImage.url} alt="" fill sizes="80px" className="bg-premium-warm object-contain p-1" />
               </button>
             ))}
           </div>

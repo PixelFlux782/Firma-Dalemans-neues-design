@@ -77,7 +77,7 @@ export default async function GuidePage({ article }: { article: GuideArticle }) 
                 {section.paragraphs.map((paragraph) => <p key={paragraph} className="max-w-3xl text-base leading-8 text-premium-muted">{paragraph}</p>)}
               </div>
               {section.images?.length ? (
-                <div className="mt-7 grid items-start gap-5 sm:grid-cols-2">
+                <div className={`mt-7 grid items-start gap-5 sm:grid-cols-2 ${section.images.length > 2 ? "lg:grid-cols-3" : ""}`}>
                   {section.images.map((image) => (
                     <figure key={image.src} className="overflow-hidden rounded-3xl border border-premium-beige/70 bg-premium-warm/45 p-3 shadow-[0_8px_28px_rgba(20,18,16,.04)]">
                       <Image
@@ -88,6 +88,7 @@ export default async function GuidePage({ article }: { article: GuideArticle }) 
                         sizes="(min-width: 1024px) 29vw, (min-width: 640px) 45vw, 100vw"
                         className="h-auto w-full rounded-2xl object-contain"
                       />
+                      <figcaption className="px-2 pb-2 pt-4 text-sm leading-6 text-premium-muted">{image.alt}</figcaption>
                     </figure>
                   ))}
                 </div>

@@ -2,7 +2,6 @@ import {
   dimensionLabel,
   estimatedValues,
   modelSpecific,
-  recommendations,
   regulatory,
   standardTableDimensions,
 } from "@/lib/knowledge/advisory-facts";
@@ -177,11 +176,17 @@ export const guideArticles = [
         { label: "passt exakt", value: "160 × 80 cm", note: "80 + 80 = 160 cm" },
         { label: "kein 2:1-Maß", value: "160 × 70 cm", note: "70 + 70 = 140 cm, nicht 160 cm" },
       ] },
-      { id: "gestelle", heading: "Gestelltyp K1 für Reihen, Gestelltyp K3 bei häufiger Stirnseitennutzung", paragraphs: [
-        `Für überwiegend in Reihen aufgestellte Tische empfehlen wir häufig den Gestelltyp ${recommendations.tableLegs.rows}. Wenn Sie die Stirnseiten regelmäßig als Sitzplätze nutzen, ist der Gestelltyp ${recommendations.tableLegs.frequentEndSeating} oft günstiger.`,
-        "Nicht jedes Gestell ist für jedes Tischmodell erhältlich. Wir prüfen deshalb, welche Variante zu Ihrem Modell und Ihrer Nutzung passt.",
+      { id: "gestelle", heading: "Das passende Gestell für Ihren Tisch", paragraphs: [
+        "Neben den Maßen spielt auch das Tischgestell eine wichtige Rolle. Welches Gestell wir empfehlen, richtet sich vor allem nach der geplanten Nutzung und Aufstellung.",
+        "Für lange Reihenaufstellungen empfehlen wir in der Regel unsere Modelle K1 oder K2. Ihre vertikalen Rohre sind leicht zurückgesetzt. Dadurch werden Personen an den Tischstößen möglichst wenig gestört. Diese Gestelle eignen sich besonders für Konferenzen, Seminare und Veranstaltungen mit vielen Teilnehmern.",
+        "Wenn Tische überwiegend einzeln genutzt werden oder regelmäßig Sitzplätze an den Stirnseiten vorgesehen sind, empfehlen wir die Modelle K3 oder K4. Diese Gestellformen bieten an den Stirnseiten mehr Beinfreiheit.",
+        "K3 und K4 sind ohne Aufpreis erhältlich. Die gewünschte Ausführung kann bei der Bestellung angegeben werden. Wir prüfen zusätzlich, welches Gestell für das gewählte Tischmodell und die geplante Nutzung verfügbar und geeignet ist.",
+      ], images: [
+        { src: encodeURI("/neue bilder/Gestelle/Gestelltypen/Klapptisch_Gestell_K1-optimiert.webp"), alt: "Klapptisch-Gestell K1 mit zurückgesetzten vertikalen Rundrohren für Reihenaufstellungen", width: 2000, height: 2000 },
+        { src: encodeURI("/neue bilder/Gestelle/Gestelltypen/Klapptisch_Gestell_K2-optimiert.webp"), alt: "Klapptisch-Gestell K2 mit zurückgesetzten vertikalen Vierkantrohren für Reihenaufstellungen", width: 2000, height: 2000 },
+        { src: encodeURI("/neue bilder/Gestelle/Gestelltypen/T_Klapptisch_Gestell_K3_Standard-optimiert.webp"), alt: "Klapptisch-Gestell K3 mit außenliegenden Beinen für mehr Beinfreiheit an den Stirnseiten", width: 2000, height: 2000 },
       ], links: [
-        { href: "/produkte/tischfuesse-gestellteile", label: "Tischgestelle K1 und K3 ansehen", description: "Gestellformen und Bauteile für Klapptische ansehen." },
+        { href: "/produkte/tischfuesse-gestellteile", label: "Tischgestelle K1 bis K4 ansehen", description: "Gestellformen für Reihen-, Einzel- und Stirnseitenaufstellungen vergleichen." },
         { href: "/produkte/artikel/klapptisch-310c", label: "Klapptisch Modell 310c ansehen", description: "Klapptisch mit den passenden Gestelltypen auswählen." },
       ] },
       { id: "platten-und-modell-210", heading: "Plattenaufbau und Modell 210 getrennt prüfen", paragraphs: [
@@ -196,7 +201,7 @@ export const guideArticles = [
     ],
     faq: [
       { question: "Welche Maße erfüllen das 2:1-Prinzip?", answer: "140 × 70, 150 × 75 und 160 × 80 cm erfüllen es exakt. 160 × 70 cm nicht. Das Verhältnis ist eine Planungshilfe, keine Norm." },
-      { question: "Welches Gestell passt für Tischreihen?", answer: "Für Tischreihen empfehlen wir häufig den Gestelltyp K1. Wenn Sie die Stirnseiten regelmäßig als Sitzplätze nutzen, ist der Gestelltyp K3 oft günstiger. Wir prüfen Verfügbarkeit und Eignung am gewählten Modell." },
+      { question: "Welches Gestell passt für Tischreihen?", answer: "Für lange Tischreihen empfehlen wir in der Regel K1 oder K2, weil ihre vertikalen Rohre leicht zurückgesetzt sind. Für überwiegend einzeln genutzte Tische oder regelmäßig genutzte Stirnseiten empfehlen wir K3 oder K4. Wir prüfen Verfügbarkeit und Eignung am gewählten Modell." },
       { question: "Wie schwer ist ein Klapptisch?", answer: "Übliche Ausführungen liegen als Orientierung bei ca. 23–32 kg, abhängig von Material, Modell und Größe. Den konkreten Wert bitte für die gewählte Ausführung prüfen." },
       { question: "Sind Zwischen- und Sondermaße möglich?", answer: "Ja, abhängig von Modell und Konstruktion. Beim Modell 210 liegt die konstruktive Obergrenze bei 140 × 70 cm; kleinere Kombinationen prüfen wir für Ihre Anfrage." },
     ],

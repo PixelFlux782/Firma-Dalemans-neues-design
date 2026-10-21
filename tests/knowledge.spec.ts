@@ -74,8 +74,10 @@ test.describe("Wissensbereich", () => {
     await expect(page.getByText("Viele unserer zufriedenen Kunden nutzen ihre Dalemans-Stühle seit Jahrzehnten.")).toBeVisible();
 
     await page.goto("/wissen/klapptische-richtig-waehlen#gestelle");
-    await expect(page.getByRole("heading", { name: "Gestelltyp K1 für Reihen, Gestelltyp K3 bei häufiger Stirnseitennutzung" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Tischgestelle K1 und K3 ansehen" })).toHaveAttribute("href", "/produkte/tischfuesse-gestellteile");
+    await expect(page.getByRole("heading", { name: "Das passende Gestell für Ihren Tisch" })).toBeVisible();
+    await expect(page.getByText(/lange Reihenaufstellungen empfehlen wir in der Regel unsere Modelle K1 oder K2/)).toBeVisible();
+    await expect(page.getByText(/überwiegend einzeln genutzt werden.*K3 oder K4/)).toBeVisible();
+    await expect(page.getByRole("link", { name: "Tischgestelle K1 bis K4 ansehen" })).toHaveAttribute("href", "/produkte/tischfuesse-gestellteile");
     await expect(page.getByRole("link", { name: "Klapptisch Modell 310c ansehen", exact: true }).first()).toHaveAttribute("href", "/produkte/artikel/klapptisch-310c");
     await expect(page.getByRole("heading", { name: "Tischaufstellung im Raum ausprobieren" })).toBeVisible();
     await expect(page.getByText(/pauschale Traglast/)).toHaveCount(0);

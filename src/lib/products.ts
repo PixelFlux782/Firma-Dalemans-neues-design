@@ -391,7 +391,7 @@ const productCatalog: Product[] = [
     ],
     details: [
       "Prinzipiell kann jede Zwischengröße gefertigt werden. Es gilt dann der Preis der nächst höheren Größe.",
-      "Gestelltyp K1 eignet sich besonders für Tischreihen; Gestelltyp K3 bietet mehr Beinfreiheit an regelmäßig genutzten Stirnseiten.",
+      "Für Reihenaufstellungen empfehlen wir in der Regel K1 oder K2; für Einzelaufstellungen und regelmäßig genutzte Stirnseiten K3 oder K4.",
       "Oberflächen und Kanten wählen wir passend zur Beanspruchung aus.",
     ],
     variants: [
@@ -688,14 +688,22 @@ const productCatalog: Product[] = [
     slug: "tischfuesse-gestellteile",
     categoryId: "transportwagen-zubehoer",
     categoryName: "Transportwagen & Zubehör",
-    image: asset("/images/curated/Tische/Stapeltischgestelle-rund-und-vierkant.webp"),
-    imageAlt: "Runde und vierkantige Tischfüße als Gestellteile",
+    image: asset("/neue bilder/Gestelle/Gestelltypen/Klapptisch_Gestell_K1-optimiert.webp"),
+    imageAlt: "Klapptisch-Gestell K1 mit zurückgesetzten vertikalen Rundrohren für Reihenaufstellungen",
+    additionalImages: [
+      { image: asset("/neue bilder/Gestelle/Gestelltypen/Klapptisch_Gestell_K2-optimiert.webp"), imageAlt: "Klapptisch-Gestell K2 mit zurückgesetzten vertikalen Vierkantrohren für Reihenaufstellungen" },
+      { image: asset("/neue bilder/Gestelle/Gestelltypen/T_Klapptisch_Gestell_K3_Standard-optimiert.webp"), imageAlt: "Klapptisch-Gestell K3 mit außenliegenden Beinen für mehr Beinfreiheit an den Stirnseiten" },
+      { image: asset("/neue bilder/Gestelle/Gestelltypen/Klapptisch_Gestell_K5-optimiert.webp"), imageAlt: "Klapptisch-Gestell K5 als weitere Gestellvariante" },
+      { image: asset("/neue bilder/Gestelle/Gestelltypen/Klapptisch_Gestell_K9-optimiert.webp"), imageAlt: "Klapptisch-Gestell K9 als weitere Gestellvariante" },
+      { image: asset("/neue bilder/Gestelle/Gestelltypen/Klapptisch_Gestell_K10-optimiert.webp"), imageAlt: "Klapptisch-Gestell K10 als weitere Gestellvariante" },
+    ],
     overviewGroup: "table-accessories",
-    shortDescription: "Tischfüße, Gestellteile und passende Kleinteile für vorhandene Ausstattung.",
-    description: "Für Tischgestelle können Sie Füße, Stopfen und weitere Bauteile gezielt anfragen. Wir ordnen sie anhand des vollständigen Tisches, des Einbauorts und der vorhandenen Maße zu.",
-    highlights: ["Gestellbereich im Zusammenhang sichtbar", "Zuordnung anhand von Form, Fotos und Maßen"],
-    suitableFor: ["Klapptische", "Bestandspflege", "Instandsetzung"],
-    details: ["Gestellform und Einbauort dokumentieren", "Maße und vorhandene Produktangaben mitsenden"],
+    shortDescription: "Gestelltypen für Reihenaufstellungen, Einzelaufstellungen und regelmäßig genutzte Stirnseiten.",
+    description: "Welches Tischgestell wir empfehlen, richtet sich vor allem nach der geplanten Nutzung, der Aufstellung und dem gewählten Tischmodell. Wir prüfen die passende und verfügbare Ausführung für Ihr Projekt.",
+    highlights: ["K1 oder K2 für lange Reihen", "K3 oder K4 für häufig genutzte Stirnseiten", "modellbezogene Prüfung durch uns"],
+    suitableFor: ["Klapptische", "Konferenzen und Seminare", "Veranstaltungsräume"],
+    details: ["Aufstellungsart und Stirnseitennutzung angeben", "Tischmodell und gewünschte Gestellform gemeinsam prüfen"],
+    note: "K3 und K4 sind ohne Aufpreis erhältlich. Die gewünschte Ausführung kann bei der Bestellung angegeben werden.",
   },
 ];
 

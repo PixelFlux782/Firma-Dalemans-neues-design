@@ -10,6 +10,7 @@ import { isCommerceLegacyProduct } from "@/lib/product-routes";
 import { legacyDetailData } from "@/lib/product-detail-data";
 import { getRelatedGuidesForProduct } from "@/lib/knowledge/advisory-integration";
 import { absoluteUrl, buildMetadata, siteName } from "@/lib/seo";
+import TableFrameGuide from "@/components/products/TableFrameGuide";
 
 interface Props { params: Promise<{ slug: string }> }
 export function generateStaticParams() { return products.filter(product => product.slug !== "reihenverbinder" && !isCommerceLegacyProduct(product.slug)).map(product => ({ slug: product.slug })); }
@@ -34,9 +35,9 @@ export default async function LegacyProductPage({ params }: Props) {
     category: product.categoryName, brand: { "@type": "Brand", name: siteName }, url: absoluteUrl(data.path),
     additionalProperty: product.highlights.map(item => ({ "@type": "PropertyValue", name: "Produktmerkmal", value: item })) };
   return <><StructuredData data={structuredData} /><ProductDetailPage data={data} relatedGuides={relatedGuides}
-    media={product.additionalImages?.length
+    media={product.additionalImages?.length && product.slug !== "tischfuesse-gestellteile"
       ? <CommerceMedia image={productImages[0]} images={productImages} fallbackLabel={product.title} priority sizes="(min-width: 1024px) 52vw, 100vw" aspectRatio={product.categoryId === "klapptische" ? "5 / 4" : "4 / 3"} imageInset="7%" className="min-h-[330px] rounded-[2rem] sm:min-h-[500px] lg:min-h-[620px]" />
       : <ProductVisual src={product.image} alt={product.imageAlt ?? product.title} priority sizes="(min-width: 1024px) 52vw, 100vw" aspectRatio={product.categoryId === "klapptische" ? "5 / 4" : "4 / 3"} imageInset="7%" backgroundTone="canvas" className="min-h-[330px] rounded-[2rem] sm:min-h-[500px] lg:min-h-[620px]" />}
     purchase={<InquiryPurchase name={product.title} />}
-  /></>;
+  >{product.slug === "tischfuesse-gestellteile" ? <TableFrameGuide /> : null}</ProductDetailPage></>;
 }

@@ -163,6 +163,15 @@ test.describe("provider-neutrales Stapelstuhlmodell", () => {
       );
     }
   });
+
+  test("ergänzt das zentral zugeordnete Bogengestell-Bild bei jedem Modell am Galerieende", () => {
+    const bowFrameUrl = encodeURI("/neue bilder/Stapelstühle/reihenverbinder/Bogengestell_22_mm-optimiert.webp");
+    for (const product of localStackingChairProducts) {
+      expect(product.images.at(-1)?.url, product.handle).toBe(bowFrameUrl);
+      expect(product.images.filter((image) => image.url === bowFrameUrl), product.handle).toHaveLength(1);
+      expect(product.featuredImage?.url, product.handle).not.toBe(bowFrameUrl);
+    }
+  });
 });
 
 test.describe("Stapelstuhl-Hub", () => {
@@ -188,6 +197,33 @@ test.describe("Stapelstuhl-Hub", () => {
 });
 
 test.describe("Modell 1021 Konfigurator", () => {
+  test("schaltet das Bogengestell-Bild bei allen Modellen automatisch und manuell ohne Reload", async ({ page }) => {
+    for (const [index, handle] of ["1021", "buende", "coburg", "nuernberg", "erfurt"].entries()) {
+      await page.setViewportSize(index === 4 ? { width: 360, height: 800 } : { width: 1280, height: 900 });
+      await page.goto(`/produkte/stapelstuehle/${handle}`);
+      const gallery = page.getByTestId("chair-gallery");
+      const mainImage = gallery.locator(".product-visual__product img");
+      const standardImageUrl = await mainImage.getAttribute("src");
+      const standardImageAlt = await mainImage.getAttribute("alt");
+      const bowFrame = page.getByRole("checkbox", { name: /Bogengestell, 22 mm/ });
+      const bowFrameThumbnail = gallery.getByRole("button", { name: /Stapelstuhl mit Bogengestell aus 22-mm-Rohr/ });
+
+      await expect(bowFrameThumbnail).toBeVisible();
+      await bowFrame.check({ force: true });
+      await expect(mainImage).toHaveAttribute("alt", "Stapelstuhl mit Bogengestell aus 22-mm-Rohr");
+      await expect(bowFrameThumbnail).toHaveAttribute("aria-pressed", "true");
+
+      await bowFrame.uncheck({ force: true });
+      await expect(mainImage).toHaveAttribute("src", standardImageUrl ?? "");
+      await expect(mainImage).toHaveAttribute("alt", standardImageAlt ?? "");
+
+      await bowFrameThumbnail.click();
+      await expect(mainImage).toHaveAttribute("alt", "Stapelstuhl mit Bogengestell aus 22-mm-Rohr");
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), handle).toBeLessThanOrEqual(1);
+      await expect(page).toHaveURL(new RegExp(`/produkte/stapelstuehle/${handle}`));
+    }
+  });
+
   test("zeigt Stoffgruppen nur bei Polsterung und aktualisiert Variante und Preis", async ({ page }) => {
     await page.goto("/produkte/stapelstuehle/1021");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Modell 1021");

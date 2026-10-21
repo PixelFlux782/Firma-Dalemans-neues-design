@@ -10,6 +10,9 @@ export default function ChairGallery({ images, modelCode }: { images: CommerceIm
   const [activeIndex, setActiveIndex] = useState(0);
   const variantImageContext = useChairVariantImage();
   const activeImage = variantImageContext?.image ?? images[activeIndex] ?? null;
+  const displayedImageIndex = activeImage
+    ? images.findIndex((image) => image.url === activeImage.url)
+    : -1;
 
   const showGalleryImage = (index: number) => {
     setActiveIndex(index);
@@ -48,10 +51,10 @@ export default function ChairGallery({ images, modelCode }: { images: CommerceIm
             <button
               key={image.url}
               type="button"
-              aria-pressed={index === activeIndex}
+              aria-pressed={index === displayedImageIndex}
               aria-label={`Ansicht ${index + 1}: ${image.altText ?? modelCode}`}
               onClick={() => showGalleryImage(index)}
-              className={`relative min-h-16 overflow-hidden rounded-xl border bg-premium-warm/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-2 sm:min-h-20 ${index === activeIndex ? "border-premium-forest ring-1 ring-premium-forest" : "border-premium-beige/80 hover:border-premium-leaf"}`}
+              className={`relative min-h-16 overflow-hidden rounded-xl border bg-premium-warm/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-2 sm:min-h-20 ${index === displayedImageIndex ? "border-premium-forest ring-1 ring-premium-forest" : "border-premium-beige/80 hover:border-premium-leaf"}`}
             >
               <Image
                 src={image.url}

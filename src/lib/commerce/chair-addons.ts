@@ -1,4 +1,5 @@
 import type {
+  CommerceImage,
   CommerceMoney,
   CommercePriceTier,
   CommerceProductVariant,
@@ -13,6 +14,7 @@ export interface ChairAddon {
   compatibleModels?: string[];
   compatibleVariants?: string[];
   pricingSource: "documented-tiers" | "base-price-only";
+  image?: CommerceImage;
 }
 
 function money(amount: number): CommerceMoney {
@@ -24,6 +26,7 @@ function fixedAddon(
   name: string,
   description: string,
   amount: number,
+  image?: CommerceImage,
 ): ChairAddon {
   return {
     sku,
@@ -37,13 +40,25 @@ function fixedAddon(
       label: "Basis-Aufpreis",
     }],
     pricingSource: "base-price-only",
+    image,
   };
 }
 
 /** Aufpreispositionen aus Export_Flo, Zeilen 36–42. */
 export const CHAIR_ADDONS: ChairAddon[] = [
   fixedAddon("APRV", "Reihenverbindung", "Für geordnete Reihenbestuhlung", 3.63),
-  fixedAddon("APGSTR22", "Bogengestell, 22 mm", "Alternative Gestellausführung", 3.38),
+  fixedAddon(
+    "APGSTR22",
+    "Bogengestell, 22 mm",
+    "Alternative Gestellausführung",
+    3.38,
+    {
+      url: encodeURI("/neue bilder/Stapelstühle/reihenverbinder/Bogengestell_22_mm-optimiert.webp"),
+      altText: "Stapelstuhl mit Bogengestell aus 22-mm-Rohr",
+      width: null,
+      height: null,
+    },
+  ),
   fixedAddon("A1021FG", "Filzgelenkgleiter", "Für empfindliche Hartböden", 6.90),
   fixedAddon("A1021TG", "Teppichboden-Gelenkgleiter", "Für textile Bodenbeläge", 6.59),
   fixedAddon("A1021BEI", "Gebeizte Schale", "Holzschale in gebeizter Ausführung", 4.16),
@@ -89,6 +104,10 @@ export function isChairAddonCompatible(
 
 export function compatibleChairAddons(modelCode: string | undefined, variant: CommerceProductVariant | null | undefined) {
   return CHAIR_ADDONS.filter((addon) => isChairAddonCompatible(addon, modelCode, variant));
+}
+
+export function chairAddonGalleryImages() {
+  return CHAIR_ADDONS.flatMap((addon) => addon.image ? [addon.image] : []);
 }
 
 export function configuredChairPriceTiers(

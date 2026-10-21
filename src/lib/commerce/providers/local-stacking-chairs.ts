@@ -11,6 +11,7 @@ import {
   type ChairConfiguration,
   type ChairFabricGroup,
 } from "@/lib/commerce/stacking-chairs";
+import { chairAddonGalleryImages } from "@/lib/commerce/chair-addons";
 
 const updatedAt = "2026-08-27T00:00:00.000Z";
 
@@ -306,7 +307,7 @@ function buildChairProduct(record: LocalChairRecord): CommerceProduct {
     descriptionHtml: `<p>${record.description}</p>`,
     availableForSale: false,
     featuredImage: record.featuredImage,
-    images: record.images,
+    images: [...record.images, ...chairAddonGalleryImages()],
     variants: variants.map((variant) => {
       const configuration = chairConfigurationFromVariant(variant);
       return {

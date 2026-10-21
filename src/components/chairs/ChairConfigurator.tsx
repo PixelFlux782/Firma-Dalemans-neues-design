@@ -101,9 +101,12 @@ export default function ChairConfigurator({
     () => resolveChairVariant(product, configuration),
     [configuration, product],
   );
+  const selectedAddonImage = selectedAddonSkus
+    .map((sku) => chairAddonBySku(sku)?.image)
+    .find((image): image is CommerceImage => Boolean(image)) ?? null;
   useEffect(() => {
-    onVariantImageChange?.(selectedVariant?.image ?? null);
-  }, [onVariantImageChange, selectedVariant?.id, selectedVariant?.image]);
+    onVariantImageChange?.(selectedAddonImage ?? selectedVariant?.image ?? null);
+  }, [onVariantImageChange, selectedAddonImage, selectedVariant?.id, selectedVariant?.image]);
   const baseVariant = useMemo(
     () => resolveChairVariant(product, { ...configuration, rowConnector: false }),
     [configuration, product],

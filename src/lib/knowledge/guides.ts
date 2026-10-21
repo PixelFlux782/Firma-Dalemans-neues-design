@@ -60,8 +60,8 @@ export const guideArticles = [
         "Die Reihenverbindung wird direkt am Stuhl montiert. Wählen Sie diese Ausstattung deshalb möglichst bereits bei der Konfiguration Ihrer neuen Stapelstühle aus.",
         "Die beiden Ansichten zeigen, wie unsere bevorzugte Metall-Reihenverbindung am Stapelstuhl aussieht.",
       ], images: [
-        { src: encodeURI("/neue bilder/Stapelstühle/neu_beschriftet/Stapelstuhl_Reihenverbinder_l.png"), alt: "Fest montierte Metall-Reihenverbindung an einem Stapelstuhl, linke Ansicht", width: 1536, height: 1024 },
-        { src: encodeURI("/neue bilder/Stapelstühle/neu_beschriftet/Stapelstuhl_Reihenverbinder_r.png"), alt: "Fest montierte Metall-Reihenverbindung an einem Stapelstuhl, rechte Ansicht", width: 1023, height: 1537 },
+        { src: encodeURI("/neue bilder/Stapelstühle/reihenverbinder/1010dd1-optimiert.webp"), alt: "Fest montierte Metall-Reihenverbinder zweier miteinander verbundener Stapelstühle", width: 2000, height: 2000 },
+        { src: encodeURI("/neue bilder/Stapelstühle/reihenverbinder/1010dd2-optimiert.webp"), alt: "Geöffnete Metall-Reihenverbinder an zwei Stapelstühlen vor dem Einhaken", width: 2000, height: 2000 },
       ] },
       { id: "kunststoff-nachruestung", heading: "Kunststoff-Reihenverbinder – für die Nachrüstung", paragraphs: [
         "Für bereits vorhandene Stapelstühle, die ursprünglich ohne Reihenverbindung bestellt wurden, bieten wir separat erhältliche Reihenverbinder aus Kunststoff zur Nachrüstung an.",

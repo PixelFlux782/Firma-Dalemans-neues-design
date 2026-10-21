@@ -55,7 +55,7 @@ test.describe("provider-neutrales Stapelstuhlmodell", () => {
     for (const product of localStackingChairProducts) {
       for (const variant of product.variants) {
         expect(variant.priceTiers).toHaveLength(3);
-        expect(variant.priceTiers?.map((tier) => [tier.minimumQuantity, tier.maximumQuantity])).toEqual([[1, 100], [101, 250], [251, null]]);
+        expect(variant.priceTiers?.map((tier) => [tier.minimumQuantity, tier.maximumQuantity])).toEqual([[1, 99], [100, 249], [250, null]]);
         expect(variant.erpArticleNumber).toBeTruthy();
       }
     }
@@ -81,9 +81,9 @@ test.describe("provider-neutrales Stapelstuhlmodell", () => {
     expect(CHAIR_ADDONS.map((addon) => addon.sku)).toEqual([
       "APRV", "APGSTR22", "A1021FG", "A1021TG", "A1021BEI", "AP1021GRL", "BU1021C",
     ]);
-    expect(chairAddonPriceForQuantity(chairAddonBySku("A1021FG")!, 251)?.amount).toBe("6.90");
+    expect(chairAddonPriceForQuantity(chairAddonBySku("A1021FG")!, 250)?.amount).toBe("6.90");
     const bookTray = chairAddonBySku("BU1021C")!;
-    expect([100, 101, 250, 251].map((quantity) =>
+    expect([99, 100, 249, 250].map((quantity) =>
       chairAddonPriceForQuantity(bookTray, quantity)?.amount,
     )).toEqual(["27.50", "26.87", "26.87", "26.45"]);
   });
@@ -389,10 +389,10 @@ test.describe("Modell 1021 Konfigurator", () => {
     await bookTray.check({ force: true });
 
     for (const [amount, expectedUnitPrice, expectedTotal] of [
-      [100, "94,63", "9.463,00"],
-      [101, "92,92", "9.384,92"],
-      [250, "92,92", "23.230,00"],
-      [251, "90,89", "22.813,39"],
+      [99, "94,63", "9.368,37"],
+      [100, "92,92", "9.292,00"],
+      [249, "92,92", "23.137,08"],
+      [250, "90,89", "22.722,50"],
     ] as const) {
       await quantity.fill(String(amount));
       await expect(price).toContainText(expectedUnitPrice);

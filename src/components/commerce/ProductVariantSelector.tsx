@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import CommerceAvailability from "@/components/commerce/CommerceAvailability";
 import CommercePrice from "@/components/commerce/CommercePrice";
-import { formatCommerceMoney, lowestProductUnitPrice } from "@/lib/commerce/money";
+import { lowestProductUnitPrice } from "@/lib/commerce/money";
+import { usePriceDisplay } from "@/components/commerce/PriceDisplayProvider";
 import { useCart } from "@/components/commerce/cart/CartProvider";
 import {
   canAddVariantToCart,
@@ -32,6 +33,7 @@ export default function ProductVariantSelector({
   initialVariantId?: string;
 }) {
   const { addLines, pending } = useCart();
+  const { formatPrice, priceLabel } = usePriceDisplay();
   const isTableConfigurator = [
     "klapptisch-310c",
     "seminarklapptisch-210c",
@@ -130,7 +132,7 @@ export default function ProductVariantSelector({
       />
       {lowestPrice?.priceTierId && lowestPrice.minimumQuantity > 1 ? (
         <div className="mt-2" data-testid="lowest-tier-price">
-          <p className="text-sm font-semibold tabular-nums text-premium-forest">ab {formatCommerceMoney(lowestPrice.price)} / Stück</p>
+          <p className="text-sm font-semibold tabular-nums text-premium-forest">ab {formatPrice(lowestPrice.price)} / Stück</p>
           <p className="mt-1 text-xs leading-5 text-premium-muted">Bei Abnahme von mindestens {lowestPrice.minimumQuantity} Stück</p>
         </div>
       ) : null}
@@ -181,7 +183,7 @@ export default function ProductVariantSelector({
                         <span className="block">{value}</span>
                         {optionPrice ? (
                           <span className={`mt-1 block text-xs ${active ? "text-white/75" : "text-premium-muted"}`}>
-                            {formatCommerceMoney(optionPrice)}
+                            {formatPrice(optionPrice)}
                           </span>
                         ) : null}
                       </button>
@@ -216,6 +218,26 @@ export default function ProductVariantSelector({
             </p>
           ) : null}
         </div>
+      ) : null}
+
+      {selectedVariant?.priceTiers?.length ? (
+        <section className="mt-6" aria-labelledby="price-tiers-title" data-testid="price-tiers">
+          <div className="flex items-end justify-between gap-3">
+            <h2 id="price-tiers-title" className="text-sm font-semibold text-premium-ink">Mengenstaffeln</h2>
+            <span className="text-xs text-premium-muted">{priceLabel}</span>
+          </div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+            {selectedVariant.priceTiers.map((tier) => {
+              const active = quantity >= (tier.minimumQuantity ?? 0) && (tier.maximumQuantity === null || quantity <= tier.maximumQuantity);
+              return (
+                <div key={tier.id} data-active={active ? "true" : "false"} className={`rounded-xl border px-3 py-3 text-sm ${active ? "border-premium-forest bg-premium-forest text-white" : "border-premium-beige bg-white/60 text-premium-muted"}`}>
+                  <p className="font-semibold">{tier.label}</p>
+                  <p className={`mt-1 tabular-nums ${active ? "text-white" : "text-premium-ink"}`}>{formatPrice(tier.price)} / Stück</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       ) : null}
 
       {selectedAdvisory ? (

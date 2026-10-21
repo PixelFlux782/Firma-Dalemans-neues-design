@@ -1,5 +1,7 @@
+"use client";
+
 import type { CommerceMoney, CommercePriceStatus } from "@/lib/commerce/types";
-import { formatCommerceMoney } from "@/lib/commerce/money";
+import { usePriceDisplay } from "@/components/commerce/PriceDisplayProvider";
 
 interface CommercePriceProps {
   status: CommercePriceStatus;
@@ -15,8 +17,9 @@ export default function CommercePrice({
   compareAtPrice,
   className = "",
 }: CommercePriceProps) {
-  const formattedPrice = price ? formatCommerceMoney(price) : null;
-  const formattedCompareAt = compareAtPrice ? formatCommerceMoney(compareAtPrice) : null;
+  const { formatPrice, priceLabel } = usePriceDisplay();
+  const formattedPrice = price ? formatPrice(price) : null;
+  const formattedCompareAt = compareAtPrice ? formatPrice(compareAtPrice) : null;
 
   let label: string;
   if (status === "on_request") {
@@ -42,6 +45,7 @@ export default function CommercePrice({
           {formattedCompareAt}
         </span>
       ) : null}
+      {formattedPrice ? <span className="basis-full text-xs font-normal text-premium-muted">{priceLabel}</span> : null}
     </div>
   );
 }

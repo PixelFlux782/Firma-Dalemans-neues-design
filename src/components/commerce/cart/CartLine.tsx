@@ -3,14 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/components/commerce/cart/CartProvider";
-import { formatCommerceMoney } from "@/lib/commerce/money";
+import { usePriceDisplay } from "@/components/commerce/PriceDisplayProvider";
 import { chairAddonBySku } from "@/lib/commerce/chair-addons";
 import type { CommerceCartLine as CommerceCartLineModel } from "@/lib/commerce/types";
 
 export default function CartLine({ line }: { line: CommerceCartLineModel }) {
   const { pending, updateLine, removeLine, closeCart } = useCart();
-  const unitPrice = line.unitPrice ? formatCommerceMoney(line.unitPrice) : null;
-  const lineTotal = line.lineTotal ? formatCommerceMoney(line.lineTotal) : null;
+  const { formatPrice } = usePriceDisplay();
+  const unitPrice = line.unitPrice ? formatPrice(line.unitPrice) : null;
+  const lineTotal = line.lineTotal ? formatPrice(line.lineTotal) : null;
   const packCount = line.packSize ? line.quantity / line.packSize : null;
 
   return (

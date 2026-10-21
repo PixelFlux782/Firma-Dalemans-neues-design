@@ -13,7 +13,7 @@ import {
 } from "@/lib/commerce/stacking-chairs";
 import { chairAddonGalleryImages } from "@/lib/commerce/chair-addons";
 
-const updatedAt = "2026-08-27T00:00:00.000Z";
+const updatedAt = "2026-10-21T00:00:00.000Z";
 
 const configurations: ChairConfiguration[] = [
   { upholstery: "none", rowConnector: false },
@@ -80,9 +80,9 @@ function buildVariant(
   const tiers = prices.map((amount, index) => ({
     id: `source-tier-${index + 1}`,
     price: money(amount),
-    minimumQuantity: index === 0 ? 1 : index === 1 ? 101 : 251,
-    maximumQuantity: index === 0 ? 100 : index === 1 ? 250 : null,
-    label: index === 0 ? "1–100 Stück" : index === 1 ? "101–250 Stück" : "ab 251 Stück",
+    minimumQuantity: index === 0 ? 1 : index === 1 ? 100 : 250,
+    maximumQuantity: index === 0 ? 99 : index === 1 ? 249 : null,
+    label: index === 0 ? "1–99 Stück" : index === 1 ? "100–249 Stück" : "ab 250 Stück",
   }));
   return {
     id: `local-chair-${handle}-${variantIdPart(configuration)}`,
@@ -333,7 +333,7 @@ function buildChairProduct(record: LocalChairRecord): CommerceProduct {
       unitLabel: "Stück",
       minimum: 1,
       step: 1,
-      note: "Preisstaffel: 1–100, 101–250 und ab 251 Stück.",
+      note: "Preisstaffel: 1–99, 100–249 und ab 250 Stück.",
     },
     measureGuide: [],
     applicationNotes: [],
@@ -353,7 +353,7 @@ function buildChairProduct(record: LocalChairRecord): CommerceProduct {
       },
       {
         question: "Gibt es Mengenpreise?",
-        answer: "Ja. Die Staffelbereiche sind 1–100, 101–250 und ab 251 Stück.",
+        answer: "Ja. Die Staffelbereiche sind 1–99, 100–249 und ab 250 Stück.",
       },
     ] : [],
     seo: {

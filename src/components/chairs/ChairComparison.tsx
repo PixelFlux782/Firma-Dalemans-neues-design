@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { recordChairAction } from "@/lib/analytics";
-import { formatCommerceMoney } from "@/lib/commerce/money";
+import { usePriceDisplay } from "@/components/commerce/PriceDisplayProvider";
 import type { CommerceMoney } from "@/lib/commerce/types";
 
 export interface ChairComparisonItem {
@@ -13,6 +13,7 @@ export interface ChairComparisonItem {
 }
 
 export default function ChairComparison({ models }: { models: ChairComparisonItem[] }) {
+  const { formatPrice } = usePriceDisplay();
   const [selected, setSelected] = useState(() => models.slice(0, 2).map((model) => model.handle));
   const compared = useMemo(
     () => models.filter((model) => selected.includes(model.handle)),
@@ -77,7 +78,7 @@ export default function ChairComparison({ models }: { models: ChairComparisonIte
                   <div className="py-3">
                     <dt className="text-xs uppercase tracking-[.14em] text-premium-subtle">Preis ab</dt>
                     <dd className="mt-1 font-semibold tabular-nums text-premium-forest">
-                      {model.fromPrice ? formatCommerceMoney(model.fromPrice) : "Auf Anfrage"}
+                      {model.fromPrice ? formatPrice(model.fromPrice) : "Auf Anfrage"}
                     </dd>
                   </div>
                   <div className="py-3">

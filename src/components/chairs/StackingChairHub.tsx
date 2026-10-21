@@ -2,7 +2,8 @@ import Link from "next/link";
 import ProductVisual from "@/components/ProductVisual";
 import ChairComparison from "@/components/chairs/ChairComparison";
 import CategoryHero from "@/components/products/CategoryHero";
-import { formatCommerceMoney, lowestProductUnitPrice } from "@/lib/commerce/money";
+import { lowestProductUnitPrice } from "@/lib/commerce/money";
+import DisplayedMoney from "@/components/commerce/DisplayedMoney";
 import type { CommerceProduct } from "@/lib/commerce/types";
 
 export const stackingChairCategoryFaq = [
@@ -97,7 +98,7 @@ export default function StackingChairHub({ products }: { products: CommerceProdu
         <div className="grid gap-x-8 gap-y-14 pt-10 md:grid-cols-2">
           {products.map((product) => {
             const lowestPrice = lowestProductUnitPrice(product);
-            const fromPrice = lowestPrice ? formatCommerceMoney(lowestPrice.price) : null;
+            const fromPrice = lowestPrice?.price ?? null;
             const href = `/produkte/stapelstuehle/${product.handle}`;
 
             return (
@@ -109,7 +110,7 @@ export default function StackingChairHub({ products }: { products: CommerceProdu
                   <div className="flex flex-wrap items-baseline justify-between gap-3">
                     <h3 className="font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink sm:text-3xl"><Link href={href} className="cursor-pointer rounded-sm transition hover:text-premium-bronze focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">Modell {product.stackingChair?.modelCode}</Link></h3>
                     {fromPrice ? (
-                      <p className="text-base font-semibold tabular-nums text-premium-forest">ab {fromPrice}</p>
+                      <p className="text-base font-semibold tabular-nums text-premium-forest">ab <DisplayedMoney money={fromPrice} /></p>
                     ) : null}
                   </div>
                   <p className="mt-4 max-w-xl text-sm leading-7 text-premium-muted">{product.shortDescription}</p>

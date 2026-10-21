@@ -83,9 +83,9 @@ test.describe("provider-neutrale lokale Cart-Logik", () => {
     const table = localProducts.find((product) => product.handle === "klapptisch-310c")!;
     const variant = table.variants.find((entry) => entry.erpArticleNumber === "T310C127")!;
     const { cart } = provider();
-    const added = cart.addLines([cartLineFromProduct({ product: table, variant, quantity: 15 })]);
+    const added = cart.addLines([cartLineFromProduct({ product: table, variant, quantity: 14 })]);
     expect(added.lines[0]).toMatchObject({ erpArticleNumber: "T310C127", unitPrice: { amount: "355.93" } });
-    const updated = cart.updateLines([{ lineId: added.lines[0].id, quantity: 16 }]);
+    const updated = cart.updateLines([{ lineId: added.lines[0].id, quantity: 15 }]);
     expect(updated.lines[0]).toMatchObject({ erpArticleNumber: "T310C127", unitPrice: { amount: "345.25" } });
   });
 
@@ -96,18 +96,18 @@ test.describe("provider-neutrale lokale Cart-Logik", () => {
     const added = cart.addLines([cartLineFromProduct({
       product: chair,
       variant,
-      quantity: 100,
+      quantity: 99,
       selectedAddonSkus: ["BU1021C"],
     })]);
     expect(added.lines[0]).toMatchObject({
       selectedAddons: ["BU1021C"],
       unitPrice: { amount: "94.63" },
-      lineTotal: { amount: "9463.00" },
+      lineTotal: { amount: "9368.37" },
     });
-    const updated = cart.updateLines([{ lineId: added.lines[0].id, quantity: 101 }]);
+    const updated = cart.updateLines([{ lineId: added.lines[0].id, quantity: 100 }]);
     expect(updated.lines[0]).toMatchObject({
       unitPrice: { amount: "92.92" },
-      lineTotal: { amount: "9384.92" },
+      lineTotal: { amount: "9292.00" },
     });
   });
 

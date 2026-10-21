@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import CartLine from "@/components/commerce/cart/CartLine";
 import { useCart } from "@/components/commerce/cart/CartProvider";
-import { formatCommerceMoney } from "@/lib/commerce/money";
+import { usePriceDisplay } from "@/components/commerce/PriceDisplayProvider";
 
 const focusableSelector = [
   "a[href]",
@@ -18,6 +18,7 @@ const focusableSelector = [
 
 export default function CartDrawer() {
   const { cart, drawerOpen, closeCart, clearCart, pending } = useCart();
+  const { formatPrice, priceLabel } = usePriceDisplay();
   const [mounted, setMounted] = useState(false);
   const drawerRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -77,7 +78,7 @@ export default function CartDrawer() {
   if (!mounted || !drawerOpen) return null;
 
   const subtotal = cart.totals.subtotalAmount
-    ? formatCommerceMoney(cart.totals.subtotalAmount)
+    ? formatPrice(cart.totals.subtotalAmount)
     : null;
 
   return createPortal(
@@ -141,6 +142,10 @@ export default function CartDrawer() {
                 <div className="flex justify-between gap-5 text-xs text-premium-muted">
                   <dt>Gesamtstückzahl</dt>
                   <dd>{cart.totalQuantity}</dd>
+                </div>
+                <div className="flex justify-between gap-5 text-xs text-premium-muted">
+                  <dt>Preisdarstellung</dt>
+                  <dd>{priceLabel}</dd>
                 </div>
               </dl>
               {cart.lines.some((line) => line.priceDataStatus === "development") ? (

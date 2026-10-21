@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import CartProvider from "@/components/commerce/cart/CartProvider";
+import PriceDisplayProvider, { PriceDisplayToggle } from "@/components/commerce/PriceDisplayProvider";
 import {
   absoluteUrl,
   defaultDescription,
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="de">
       <body>
+        <PriceDisplayProvider>
         <CartProvider>
           <div id="site-shell">
             <a
@@ -79,6 +81,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             >
               Zum Hauptinhalt
             </a>
+            <PriceDisplayToggle />
             <Header />
             <main id="main-content" className="min-h-screen pb-24 pt-6 md:py-10 lg:py-12">
               <div className="container-premium">{children}</div>
@@ -96,6 +99,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Footer />
           </div>
         </CartProvider>
+        </PriceDisplayProvider>
       </body>
     </html>
   );

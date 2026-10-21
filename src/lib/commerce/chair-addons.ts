@@ -68,9 +68,9 @@ export const CHAIR_ADDONS: ChairAddon[] = [
     name: "Buchablage aus Stahlblech",
     description: "Ablage unter der Sitzfläche",
     priceTiers: [
-      { id: "BU1021C-1-100", price: money(27.50), minimumQuantity: 1, maximumQuantity: 100, label: "bis 100 Stück" },
-      { id: "BU1021C-101-250", price: money(26.87), minimumQuantity: 101, maximumQuantity: 250, label: "101–250 Stück" },
-      { id: "BU1021C-251", price: money(26.45), minimumQuantity: 251, maximumQuantity: null, label: "ab 251 Stück" },
+      { id: "BU1021C-1-99", price: money(27.50), minimumQuantity: 1, maximumQuantity: 99, label: "1–99 Stück" },
+      { id: "BU1021C-100-249", price: money(26.87), minimumQuantity: 100, maximumQuantity: 249, label: "100–249 Stück" },
+      { id: "BU1021C-250", price: money(26.45), minimumQuantity: 250, maximumQuantity: null, label: "ab 250 Stück" },
     ],
     pricingSource: "documented-tiers",
   },

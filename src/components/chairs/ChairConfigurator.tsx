@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { recordChairAction } from "@/lib/analytics";
 import { useCart } from "@/components/commerce/cart/CartProvider";
-import { formatCommerceMoney, lowestProductUnitPrice } from "@/lib/commerce/money";
+import { lowestProductUnitPrice } from "@/lib/commerce/money";
+import { usePriceDisplay } from "@/components/commerce/PriceDisplayProvider";
 import { cartLineFromProduct, priceForQuantity } from "@/lib/commerce/cart/lines";
 import {
   chairAddonBySku,
@@ -86,6 +87,7 @@ export default function ChairConfigurator({
   initialQuantity?: number;
   onVariantImageChange?: (image: CommerceImage | null) => void;
 }) {
+  const { formatPrice, priceLabel } = usePriceDisplay();
   const [configuration, setConfiguration] = useState(initialConfiguration);
   const [fabricSelection, setFabricSelection] = useState<FabricSelection | null>(null);
   const [fabricDialogOpen, setFabricDialogOpen] = useState(false);
@@ -238,7 +240,7 @@ export default function ChairConfigurator({
     }
   }
 
-  const price = configuredPrice ? formatCommerceMoney(configuredPrice) : null;
+  const price = configuredPrice ? formatPrice(configuredPrice) : null;
   const selectedFabric = fabricById(fabricSelection?.collectionId);
   const selectedFabricColor = selectedFabric?.colors.find((color) => color.code === fabricSelection?.colorCode);
   const configurationSummary = selectedVariant
@@ -260,9 +262,23 @@ export default function ChairConfigurator({
       </div>
       {lowestPrice?.priceTierId && lowestPrice.minimumQuantity > 1 ? (
         <div className="mt-3 text-right" data-testid="lowest-tier-price">
-          <p className="text-sm font-semibold tabular-nums text-premium-forest">ab {formatCommerceMoney(lowestPrice.price)} / Stück</p>
+          <p className="text-sm font-semibold tabular-nums text-premium-forest">ab {formatPrice(lowestPrice.price)} / Stück</p>
           <p className="mt-1 text-xs leading-5 text-premium-muted">Bei Abnahme von mindestens {lowestPrice.minimumQuantity} Stück</p>
         </div>
+      ) : null}
+      {selectedVariant?.priceTiers?.length ? (
+        <section className="mt-5" aria-labelledby="chair-price-tiers-title" data-testid="price-tiers">
+          <div className="flex items-end justify-between gap-3">
+            <h2 id="chair-price-tiers-title" className="text-sm font-semibold text-premium-ink">Mengenstaffeln</h2>
+            <span className="text-xs text-premium-muted">{priceLabel}</span>
+          </div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+            {selectedVariant.priceTiers.map((tier) => {
+              const active = quantity >= (tier.minimumQuantity ?? 0) && (tier.maximumQuantity === null || quantity <= tier.maximumQuantity);
+              return <div key={tier.id} data-active={active ? "true" : "false"} className={`rounded-xl border px-3 py-3 text-sm ${active ? "border-premium-forest bg-premium-forest text-white" : "border-premium-beige bg-white/60 text-premium-muted"}`}><p className="font-semibold">{tier.label}</p><p className={`mt-1 tabular-nums ${active ? "text-white" : "text-premium-ink"}`}>{formatPrice(tier.price)} / Stuhl</p></div>;
+            })}
+          </div>
+        </section>
       ) : null}
 
       <div className="mt-7 space-y-7">
@@ -347,7 +363,7 @@ export default function ChairConfigurator({
                     <span className="text-sm font-semibold">{addon.name}</span>
                     <span className="mt-1 text-xs opacity-70">{addon.description}</span>
                     <span className="mt-2 text-xs font-semibold">
-                      + {addonPrice ? formatCommerceMoney(addonPrice) : "Preis auf Anfrage"} / Stuhl
+                      + {addonPrice ? formatPrice(addonPrice) : "Preis auf Anfrage"} / Stuhl
                     </span>
                   </span>
                 </label>
@@ -361,21 +377,21 @@ export default function ChairConfigurator({
         <div className="mt-7 rounded-2xl border border-premium-beige/80 bg-white/55 p-5" data-testid="chair-price-breakdown">
           <div className="flex items-center justify-between gap-4 text-sm">
             <span className="text-premium-muted">Basispreis</span>
-            <span className="font-semibold tabular-nums text-premium-ink">{formatCommerceMoney(basePrice)} / Stuhl</span>
+            <span className="font-semibold tabular-nums text-premium-ink">{formatPrice(basePrice)} / Stuhl</span>
           </div>
           {addonPrices.map(({ addon, price: addonPrice }) => (
             <div key={addon.sku} className="mt-2 flex items-center justify-between gap-4 text-sm">
               <span className="text-premium-muted">+ {addon.name}</span>
-              <span className="font-semibold tabular-nums text-premium-ink">{addonPrice ? formatCommerceMoney(addonPrice) : "Preis auf Anfrage"}</span>
+              <span className="font-semibold tabular-nums text-premium-ink">{addonPrice ? formatPrice(addonPrice) : "Preis auf Anfrage"}</span>
             </div>
           ))}
           <div className="mt-4 flex items-center justify-between gap-4 border-t border-premium-beige/80 pt-4">
             <span className="font-semibold text-premium-ink">Konfiguriert</span>
-            <span className="font-semibold tabular-nums text-premium-forest">{formatCommerceMoney(configuredPrice)} / Stuhl</span>
+            <span className="font-semibold tabular-nums text-premium-forest">{formatPrice(configuredPrice)} / Stuhl</span>
           </div>
           <div className="mt-2 flex items-center justify-between gap-4 text-sm" data-testid="chair-total-price">
             <span className="text-premium-muted">Gesamt für {quantity} Stück</span>
-            <span className="font-semibold tabular-nums text-premium-ink">{totalPrice ? formatCommerceMoney(totalPrice) : "–"}</span>
+            <span className="font-semibold tabular-nums text-premium-ink">{totalPrice ? formatPrice(totalPrice) : "–"}</span>
           </div>
         </div>
       ) : null}

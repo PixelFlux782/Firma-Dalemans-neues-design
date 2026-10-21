@@ -33,15 +33,15 @@ const moreGroups = [
     links: [
       { href: "/beratung/stapelstuehle-kaufen", label: "Kaufberatung Stapelstühle" },
       { href: "/produkte/gleiter-finder", label: "Gleiter-Finder & Messhilfe" },
+      { href: "/wissen/reihenverbinder-fuer-stapelstuehle", label: "Reihenverbinder richtig auswählen" },
+      { href: "/raeume-planung/raumplanung", label: "Bestuhlung & Raumplanung" },
+      { href: "/wissen/transport-lagerung-pflege", label: "Stapeln, Lagern & Transportieren" },
     ],
+    overviewLink: { href: "/wissen", label: "Alle Ratgeber entdecken →" },
   },
   {
     title: "Service",
-    links: [
-      { href: "/beratung-service", label: "Beratung & Service" },
-      { href: "/raeume-planung/raumplanung", label: "Raumplanung" },
-      { href: "/kontakt", label: "Kontakt" },
-    ],
+    links: [{ href: "/kontakt", label: "Kontakt" }],
   },
   {
     title: "Weitere Angebote",
@@ -313,7 +313,7 @@ export function Header() {
 
       {moreOpen ? (
         <div id="desktop-mega-menu" className="mega-menu-panel absolute inset-x-0 top-full hidden border-y border-premium-beige/80 bg-premium-canvas shadow-premium-lg xl:block">
-          <nav aria-label="Weitere Navigation" onKeyDown={handleMegaMenuKeyDown} className="container-premium grid grid-cols-[.85fr_1.15fr_1fr_1.05fr_1.35fr] gap-6 py-8">
+          <nav aria-label="Weitere Navigation" onKeyDown={handleMegaMenuKeyDown} className="container-premium grid grid-cols-[.75fr_1.45fr_.9fr_1.1fr_1.2fr] gap-5 py-8">
             {moreGroups.map((group) => (
               <div key={group.title} className="min-w-0">
                 <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-premium-bronze">{group.title}</p>
@@ -333,6 +333,15 @@ export function Header() {
                     );
                   })}
                 </div>
+                {"overviewLink" in group ? (
+                  <Link
+                    href={group.overviewLink.href}
+                    onClick={() => setMoreOpen(false)}
+                    className="mt-3 inline-flex rounded-lg px-2 py-2 text-[0.78rem] font-semibold text-premium-forest underline decoration-premium-stone/60 underline-offset-4 transition-colors hover:text-premium-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand"
+                  >
+                    {group.overviewLink.label}
+                  </Link>
+                ) : null}
               </div>
             ))}
 
@@ -391,6 +400,11 @@ export function Header() {
                         {link.label}
                       </Link>
                     ))}
+                    {"overviewLink" in group ? (
+                      <Link href={group.overviewLink.href} onClick={() => setMobileMenuOpen(false)} className="min-h-11 rounded-lg border-t border-premium-beige/70 px-3 py-3 text-sm font-semibold text-premium-forest hover:bg-white/70 hover:text-premium-ink">
+                        {group.overviewLink.label}
+                      </Link>
+                    ) : null}
                   </div>
                 </details>
               ))}

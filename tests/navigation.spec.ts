@@ -1,13 +1,13 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Premium-Navigation", () => {
-  test("Desktop priorisiert fünf Kernziele und das Mega-Menü", async ({ page }) => {
+  test("Desktop priorisiert die Kernziele und das Mega-Menü", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/");
 
     const primary = page.getByRole("navigation", { name: "Hauptnavigation", exact: true });
-    await expect(primary.getByRole("link")).toHaveCount(5);
-    for (const label of ["Produkte", "Räume & Planung", "Raumplaner", "Beratung & Service", "Sonderlösungen"]) {
+    await expect(primary.getByRole("link")).toHaveCount(6);
+    for (const label of ["Produkte", "Räume & Planung", "Raumplaner", "Beratung & Service", "Sonderlösungen", "Wissen"]) {
       await expect(primary.getByRole("link", { name: label, exact: true })).toBeVisible();
     }
 
@@ -17,6 +17,13 @@ test.describe("Premium-Navigation", () => {
     const megaMenu = page.getByRole("navigation", { name: "Weitere Navigation" });
     await expect(megaMenu).toBeVisible();
     await expect(megaMenu.getByRole("link", { name: "Unternehmen & Geschichte" })).toHaveAttribute("href", "/firma");
+    await expect(megaMenu.getByRole("link", { name: "Kaufberatung Stapelstühle" })).toHaveAttribute("href", "/beratung/stapelstuehle-kaufen");
+    await expect(megaMenu.getByRole("link", { name: "Gleiter-Finder & Messhilfe" })).toHaveAttribute("href", "/produkte/gleiter-finder");
+    await expect(megaMenu.getByRole("link", { name: "Reihenverbinder richtig auswählen" })).toHaveAttribute("href", "/wissen/reihenverbinder-fuer-stapelstuehle");
+    await expect(megaMenu.getByRole("link", { name: "Bestuhlung & Raumplanung" })).toHaveAttribute("href", "/raeume-planung/raumplanung");
+    await expect(megaMenu.getByRole("link", { name: "Stapeln, Lagern & Transportieren" })).toHaveAttribute("href", "/wissen/transport-lagerung-pflege");
+    await expect(megaMenu.getByRole("link", { name: "Alle Ratgeber entdecken →" })).toHaveAttribute("href", "/wissen");
+    await expect(megaMenu.getByRole("link", { name: "Beratung & Service", exact: true })).toHaveCount(0);
     await expect(megaMenu.getByRole("link", { name: "Sonderposten" })).toHaveAttribute("href", "/sonderposten");
     await expect(megaMenu.getByRole("link", { name: "Kontakt", exact: true })).toHaveAttribute("href", "/kontakt");
     await expect(megaMenu.getByRole("link", { name: "+49 9342 9153-53" })).toHaveAttribute("href", "tel:+499342915353");
@@ -85,7 +92,7 @@ test.describe("Premium-Navigation", () => {
 
     const mobileNav = page.getByRole("navigation", { name: "Mobile Hauptnavigation" });
     const mobilePanel = page.locator("#mobile-nav");
-    await expect(mobileNav.getByRole("link")).toHaveCount(5);
+    await expect(mobileNav.getByRole("link")).toHaveCount(6);
     await expect(page.getByText("Über uns", { exact: true })).toBeVisible();
     await page.locator("summary").filter({ hasText: "Weitere Angebote" }).click();
     await expect(mobilePanel.getByRole("link", { name: "Sonderposten", exact: true })).toBeVisible();

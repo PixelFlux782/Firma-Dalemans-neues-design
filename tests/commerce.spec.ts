@@ -86,7 +86,7 @@ test("Collection-Seite zeigt Produkte, Breadcrumb und kanonische Metadaten", asy
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Gleiter & Bodenschutz");
   await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText("Produkte");
-  await expect(page.getByRole("link", { name: "Kunststoffstopfen weiß ansehen" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Filz-Nagelgleiter ansehen" })).toHaveAttribute(
     "href",
     "/produkte/artikel/filzgleiter-mit-stift",
   );
@@ -100,11 +100,11 @@ test("Collection-Seite zeigt Produkte, Breadcrumb und kanonische Metadaten", asy
 test("Produktdetailseite wird vollständig aus dem Commerce-Modell gerendert", async ({ page }) => {
   await page.goto("/produkte/artikel/kunststoff-gestellgleiter");
 
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Kunststoff-Gestellgleiter");
-  await expect(page.getByText("Diese Gleiter sind für Klapptische.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Kunststoffgleiter Standard");
+  await expect(page.getByText(/Kunststoff-Stuhlgleiter für 20-mm-Stahlrohr/).first()).toBeVisible();
   await expect(page.getByText("Technische Daten")).toBeVisible();
-  await expect(page.getByText("Kompatibilität", { exact: true }).first()).toBeVisible();
-  await expect(page.locator('[data-price-status="on_request"]')).toContainText("Preis auf Anfrage");
+  await expect(page.getByText("Artikelnummer", { exact: true }).first()).toBeVisible();
+  await expect(page.locator('[data-price-status="fixed"]')).toContainText("1,36 €");
   await expect(page.locator('[data-availability="on_request"]')).toContainText("Verfügbarkeit auf Anfrage");
   const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
   expect(jsonLd.some((entry) => entry.includes('"@type":"Product"'))).toBe(true);
@@ -123,10 +123,11 @@ test("Klappstühle ohne numerischen Preis werden als nicht verfügbar behandelt"
   await expect(page.getByTestId("unavailable-product")).toBeVisible();
 });
 
-test("Kunststoffstopfen wird als kurzfristig lieferbar angeboten", async ({ page }) => {
+test("Filz-Nagelgleiter zeigt Tabellenpreis und Freigabehinweis", async ({ page }) => {
   await page.goto("/produkte/artikel/filzgleiter-mit-stift");
-  await expect(page.locator('[data-price-status="on_request"]')).toContainText("Preis auf Anfrage");
-  await expect(page.locator('[data-availability="in_stock"]')).toContainText("Kurzfristig lieferbar.");
+  await expect(page.locator('[data-price-status="fixed"]')).toContainText("8,00 €");
+  await expect(page.getByText("VK aus der Datentabelle · nicht als Verkaufspreis freigegeben.")).toBeVisible();
+  await expect(page.getByText("A1021NG", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: "Angebot anfragen" })).toBeVisible();
   await expect(page.getByTestId("unavailable-product")).toHaveCount(0);
 });
@@ -185,13 +186,13 @@ test("Buchablage zeigt Preis und SKU aus der aktuellen Preisliste", async ({ pag
   await expect(page.getByText("BU1021C", { exact: true }).first()).toBeVisible();
 });
 
-test("Kunststoffstopfen verwendet Haupt- und Maßbild", async ({ page }) => {
-  await page.goto("/produkte/artikel/filzgleiter-mit-stift");
+test("Kunststoffgleiter Standard verwendet Haupt- und Detailbild", async ({ page }) => {
+  await page.goto("/produkte/artikel/kunststoff-gestellgleiter");
 
   const mainImage = page.locator(".product-visual__product img").first();
-  await expect(mainImage).toHaveAttribute("alt", /Weißer Kunststoffstopfen mit geripptem Steckschaft und schräger Auflagefläche/);
-  await page.getByRole("button", { name: /Bild 2: Weißer Kunststoffstopfen mit Maßangaben/ }).click();
-  await expect(mainImage).toHaveAttribute("alt", /Weißer Kunststoffstopfen mit Maßangaben/);
+  await expect(mainImage).toHaveAttribute("alt", /Transparenter Kunststoffgleiter für 20-mm-Stahlrohr/);
+  await page.getByRole("button", { name: /Bild 2: Kunststoffgleiter Standard in zweiter Ansicht/ }).click();
+  await expect(mainImage).toHaveAttribute("alt", /Kunststoffgleiter Standard in zweiter Ansicht/);
 });
 
 test("Galeriebild wird beim nächsten Stapelstuhl-Variantenwechsel wieder durch das Variantenbild ersetzt", async ({ page }) => {
@@ -219,21 +220,11 @@ test("Galeriebild wird beim nächsten Stapelstuhl-Variantenwechsel wieder durch 
   await expect(mainImage).toHaveAttribute("alt", /Sitz- und Rückenpolster, Stoffgruppe 3/);
 });
 
-test("Variantenwahl hält nur existierende Kombinationen aktiv", async ({ page }) => {
+test("Kunststoffgleiter Standard zeigt die tabellengetreue Mengeneinheit", async ({ page }) => {
   await page.goto("/shop/produkt/kunststoff-gestellgleiter");
-
-  await expect(page.getByTestId("selected-variant")).toContainText("Rund · Ø 18 mm");
-  await page.getByRole("button", { name: "Ø 22 mm" }).click();
-  await expect(page.getByTestId("selected-variant")).toContainText("Rund · Ø 22 mm");
-  await expect(page.getByRole("button", { name: "Ø 22 mm" })).toHaveAttribute("aria-pressed", "true");
-
-  await page.getByRole("button", { name: "Vierkant" }).click();
-  await expect(page.getByTestId("selected-variant")).toContainText("Vierkant · 20 × 20 mm");
-  await expect(page.getByRole("button", { name: "20 × 20 mm" })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("link", { name: "Angebot anfragen" })).toHaveAttribute(
-    "href",
-    /variante=Vierkant(?:\+|%20)%C2%B7(?:\+|%20)20(?:\+|%20)%C3%97(?:\+|%20)20(?:\+|%20)mm/,
-  );
+  await expect(page.getByTestId("selected-variant")).toContainText("Garnitur (4 Stück)");
+  await expect(page.getByText("Garnitur (4 Stück)", { exact: true }).last()).toBeVisible();
+  await expect(page.getByText("GSTGL", { exact: true }).first()).toBeVisible();
 });
 
 test("leere Collection führt mit einem echten Empty State zur Beratung", async ({ page }) => {

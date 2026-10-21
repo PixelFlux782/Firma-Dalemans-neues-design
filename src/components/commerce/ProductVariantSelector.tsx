@@ -342,6 +342,11 @@ export default function ProductVariantSelector({
               Unverbindlicher Development-Preis für den technischen Warenkorb-Test.
             </p>
           ) : null}
+          {selectedVariant.priceDataStatus === "source_unreleased" ? (
+            <p className="mt-3 text-center text-xs leading-5 text-premium-bronze">
+              VK aus der Datentabelle · nicht als Verkaufspreis freigegeben.
+            </p>
+          ) : null}
         </>
       ) : priceStatus === "unavailable" || availability === "out_of_stock" ? (
         <p className="mt-7 rounded-2xl bg-premium-warm/80 p-4 text-center text-sm font-medium text-premium-charcoal" data-testid="unavailable-product">
@@ -356,6 +361,11 @@ export default function ProductVariantSelector({
             Angebot anfragen
           </Link>
           <p className="mt-3 text-center text-xs leading-5 text-premium-muted">Wir klären Ausführung, Preis und Verfügbarkeit persönlich.</p>
+          {selectedVariant.priceDataStatus === "source_unreleased" ? (
+            <p className="mt-2 text-center text-xs leading-5 text-premium-bronze">
+              VK aus der Datentabelle · nicht als Verkaufspreis freigegeben.
+            </p>
+          ) : null}
         </>
       )}
     </div>

@@ -5,6 +5,7 @@ import { StructuredData } from "@/components/StructuredData";
 import { getProductByHandle, getProductsByCollection } from "@/lib/commerce/service";
 import { chairConfigurationFromSearchParams, isStackingChairProduct } from "@/lib/commerce/stacking-chairs";
 import { commerceDetailData } from "@/lib/product-detail-data";
+import { chairGliderCompatibility } from "@/lib/commerce/providers/local-glider-products";
 import { getRelatedGuidesForProduct } from "@/lib/knowledge/advisory-integration";
 import { absoluteUrl, buildMetadata } from "@/lib/seo";
 
@@ -31,6 +32,9 @@ export default async function StackingChairModelPage({ params, searchParams }: P
   const [{ slug }, query] = await Promise.all([params, searchParams]);
   const product = await getProductByHandle(slug);
   if (!product?.stackingChair) notFound();
+  const compatibleGliders = (await Promise.all(
+    (chairGliderCompatibility[product.handle] ?? []).map((handle) => getProductByHandle(handle)),
+  )).filter((entry): entry is NonNullable<typeof entry> => entry !== null);
   const path = modelPath(product.handle);
   const data = commerceDetailData(product, "Stapelstuhl", "/produkte/stapelstuehle", path);
   const relatedGuides = getRelatedGuidesForProduct({ handle: product.handle, collectionHandles: product.collectionHandles });
@@ -50,5 +54,5 @@ export default async function StackingChairModelPage({ params, searchParams }: P
     ...(data.faq?.length ? [{ "@type": "FAQPage", mainEntity: data.faq.map(item => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) }] : []),
   ] };
   return <><StructuredData data={structuredData} /><ChairDetail product={product} data={data} relatedGuides={relatedGuides}
-    configuration={chairConfigurationFromSearchParams(query)} quantity={Number(Array.isArray(query.menge) ? query.menge[0] : query.menge) || 1} /></>;
+    compatibleGliders={compatibleGliders} configuration={chairConfigurationFromSearchParams(query)} quantity={Number(Array.isArray(query.menge) ? query.menge[0] : query.menge) || 1} /></>;
 }

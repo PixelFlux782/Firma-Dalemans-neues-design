@@ -11,6 +11,7 @@ import {
 } from "@/lib/finder/development-fixtures";
 import { localStackingChairProducts } from "@/lib/commerce/providers/local-stacking-chairs";
 import { localBistrotischProduct, localPriceListProducts } from "@/lib/commerce/providers/local-price-list-products";
+import { localGliderProducts } from "@/lib/commerce/providers/local-glider-products";
 
 // Local development fixtures only. Finder products carry explicitly marked
 // test prices so cart totals can be exercised; none are final sales prices.
@@ -196,7 +197,7 @@ const developmentFinderProducts = developmentFinderFixtures.map(
   developmentFinderProduct,
 );
 
-export const localProducts: CommerceProduct[] = [
+const localProductsBase: CommerceProduct[] = [
   ...localStackingChairProducts,
   ...localPriceListProducts,
   localBistrotischProduct,
@@ -582,6 +583,17 @@ export const localProducts: CommerceProduct[] = [
     },
     updatedAt,
   },
+];
+
+const replacedGliderHandles = new Set(["filzgleiter-mit-stift", "kunststoff-gestellgleiter"]);
+
+export const localProducts: CommerceProduct[] = [
+  ...localProductsBase
+    .filter((product) => !replacedGliderHandles.has(product.handle))
+    .map((product) => product.variants.some((variant) => variant.priceDataStatus === "development")
+      ? { ...product, collectionHandles: product.collectionHandles.filter((handle) => handle !== "gleiter-bodenschutz") }
+      : product),
+  ...localGliderProducts,
 ];
 
 export const localCollectionRecords: Array<Omit<CommerceCollection, "products">> = [

@@ -3,7 +3,7 @@ export interface CommerceMoney {
   currencyCode: string;
 }
 
-export type CommerceDataStatus = "verified" | "development";
+export type CommerceDataStatus = "verified" | "development" | "source_unreleased";
 
 export type CommercePriceStatus =
   | "fixed"

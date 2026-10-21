@@ -15,6 +15,10 @@ export default function CommerceProductCard({
   const hasDevelopmentPrice = product.variants.some(
     (variant) => variant.priceDataStatus === "development",
   );
+  const hasUnreleasedSourcePrice = product.variants.some(
+    (variant) => variant.priceDataStatus === "source_unreleased",
+  );
+  const articleNumbers = [...new Set(product.variants.map((variant) => variant.erpArticleNumber).filter(Boolean))];
   const lowestPrice = lowestProductUnitPrice(product);
   const href = commerceProductPath(product);
 
@@ -35,13 +39,18 @@ export default function CommerceProductCard({
       </Link>
       <div className="px-1 pb-2 pt-6">
         <CommercePrice
-          status={lowestPrice ? "from" : product.priceStatus}
+          status={lowestPrice ? (hasUnreleasedSourcePrice ? "fixed" : "from") : product.priceStatus}
           price={lowestPrice?.price ?? null}
           className="mb-3"
         />
         {hasDevelopmentPrice ? (
           <p className="mb-3 text-[.68rem] font-semibold uppercase tracking-[0.12em] text-premium-bronze">
             Development-Preis · unverbindlich
+          </p>
+        ) : null}
+        {hasUnreleasedSourcePrice ? (
+          <p className="mb-3 text-[.68rem] font-semibold uppercase tracking-[0.12em] text-premium-bronze">
+            Tabellenpreis · nicht als Verkaufspreis freigegeben
           </p>
         ) : null}
         <h2 className="font-display text-2xl font-medium leading-tight tracking-[-0.02em] text-premium-ink">
@@ -52,6 +61,7 @@ export default function CommerceProductCard({
             {product.title}
           </Link>
         </h2>
+        {articleNumbers.length ? <p className="mt-2 text-xs font-medium text-premium-charcoal">Art.-Nr. {articleNumbers.join(" / ")} · je {product.quantity.unitLabel}</p> : null}
         <p className="mt-3 max-w-xl text-sm leading-7 text-premium-muted">
           {product.shortDescription}
         </p>

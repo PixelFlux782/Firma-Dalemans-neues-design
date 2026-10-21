@@ -87,8 +87,8 @@ const shopItems: readonly ShopItem[] = [
       {
         title: "Gleiter & Bodenschutz",
         links: [
-          { label: "Kunststoffstopfen weiß", href: product("filzgleiter-mit-stift") },
-          { label: "Kunststoffgleiter", href: product("kunststoff-gestellgleiter") },
+          { label: "Filz-Nagelgleiter", href: product("filzgleiter-mit-stift") },
+          { label: "Kunststoffgleiter Standard", href: product("kunststoff-gestellgleiter") },
           { label: "Gleiter-Finder", href: "/produkte/gleiter-finder" },
         ],
       },

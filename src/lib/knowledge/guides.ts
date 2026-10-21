@@ -19,7 +19,7 @@ export const guideArticles = [
     slug: "stapelstuehle-richtig-auswaehlen",
     title: "Stapelstühle passend zu Raum und Nutzung auswählen",
     description: "Praxisnahe Auswahlhilfe zu Sitzkomfort, Polsterung, Reihenverbindung, häufigem Umstellen und langlebiger Verarbeitung.",
-    category: "Stapelstühle", updatedAt: "2026-10-09", status: "published",
+    category: "Stapelstühle", updatedAt: "2026-10-21", status: "published",
     body: [
       { id: "raum-und-nutzung", heading: "Mit Raum und Nutzung beginnen", paragraphs: [
         "Entscheidend ist nicht nur die Form eines Stuhls: Wie oft bauen Sie um, wie lange sitzen die Menschen, wie lagern Sie die Stühle und stellen Sie regelmäßig Reihen? Unsere Stapelstühle sind für häufiges Umstellen ausgelegt. Stapelung und Ausstattung unterscheiden sich je nach Modell.",
@@ -29,19 +29,19 @@ export const guideArticles = [
         "Für längere Veranstaltungen sind Sitz- und Rückenpolster häufig sinnvoll. Komfort ist dennoch individuell: Schalenform, Körpergröße, Sitzdauer und Bezug wirken zusammen.",
         "Vor einer größeren Anschaffung empfehlen wir deshalb einen Musterstuhl. So können Sie das Modell im eigenen Raum, mit der geplanten Polsterung und mit unterschiedlichen Personen erproben.",
       ] },
-      { id: "starke-nutzung", heading: "Bei starker Nutzung Konstruktion und Schalenform ansehen", paragraphs: [
-        `Für stark beanspruchte Räume empfehlen wir häufig weniger stark taillierte Schalen, etwa die Modelle ${modelSpecific.heavyUseChairExamples.map((model) => model.label).join(" und ")}. Auch andere Modelle können je nach Nutzung gut passen.`,
-        "Bei Schichtholzschalen zählt die sorgfältige Verleimung der Furnierlagen. Ebenso wichtig sind ein sauber verarbeitetes Gestell und eine passende Beschichtung oder Verchromung. Welche Ausführung langfristig passt, hängt außerdem von Beanspruchung und Pflege ab.",
+      { id: "starke-nutzung", heading: "Robuste Schalen und saubere Verarbeitung", paragraphs: [
+        `Wir, die Firma Dalemans, empfehlen für stark beanspruchte Räume weniger stark taillierte Schalen wie die Modelle ${modelSpecific.heavyUseChairExamples.map((model) => model.label).join(" und ")}. Auch weitere Modelle wählen wir passend zur Nutzung aus.`,
+        "Unsere Schichtholzschalen sind sorgfältig verleimt, die Gestelle sauber verarbeitet und je nach Ausführung hochwertig beschichtet oder verchromt. Diese robuste Konstruktion ist für langjährige Nutzung ausgelegt. Signifikante Mängel an Verleimung, Gestell oder Oberfläche sind bei unseren ausgelieferten Bestuhlungen bislang nicht aufgetreten.",
       ] },
-      { id: "langfristig-planen", heading: "Reihenverbindung und Ersatzteile früh mitdenken", paragraphs: [
-        "Bei Reihenbestuhlung sollte eine passende Reihenverbindung bereits bei der Modellauswahl berücksichtigt werden. Auch austauschbare Stuhlgleiter und nachrüstbare Buchablagen können helfen, eine vorhandene Bestuhlung weiter zu nutzen.",
-        "Viele unserer Kunden nutzen ihre Bestuhlung über Jahrzehnte. Wie lange sie hält, hängt von Modell, Beanspruchung, Pflege und möglichen Reparaturen ab.",
+      { id: "langfristig-planen", heading: "Von Anfang an an Reihenverbinder denken", paragraphs: [
+        "Wenn Sie eine Reihenbestuhlung planen, empfehlen wir die passende Reihenverbindung direkt bei der Modellauswahl. Ersatzteile wie Stuhlgleiter sowie nachrüstbare Buchablagen können Sie später bei uns beziehen.",
+        "Viele unserer zufriedenen Kunden nutzen ihre Dalemans-Stühle seit Jahrzehnten.",
       ] },
     ],
     faq: [
       { question: "Sind gepolsterte Stühle immer bequemer?", answer: "Sitz- und Rückenpolster können bei längerem Sitzen sinnvoll sein. Das persönliche Sitzempfinden bleibt individuell; ein Musterstuhl hilft bei der Entscheidung." },
-      { question: "Wie breit ist ein Stapelstuhl mit Reihenverbinder?", answer: "Planen Sie zunächst mit etwa 53 cm; ohne Reihenverbinder sind etwa 51 cm ein guter Orientierungswert. Da die Breite je nach Modell und Ausführung abweicht, prüfen wir das genaue Maß für Ihre Auswahl." },
-      { question: "Sind Coburg und Nürnberg die einzigen Modelle für starke Nutzung?", answer: "Nein. Wegen ihrer weniger stark taillierten Schalen empfehlen wir sie häufig für stark beanspruchte Räume. Auch andere aktuelle Modelle sind für regelmäßiges Umstellen ausgelegt." },
+      { question: "Wie breit ist ein Stapelstuhl mit Reihenverbinder?", answer: "Mit Reihenverbinder beträgt die Stuhlbreite ca. 53 cm, ohne Reihenverbinder ca. 51 cm. Das genaue Maß hängt vom Modell und der Ausführung ab." },
+      { question: "Sind Coburg und Nürnberg die einzigen Modelle für starke Nutzung?", answer: "Nein. Wir empfehlen Coburg und Nürnberg wegen ihrer weniger stark taillierten Schalen besonders für stark beanspruchte Räume. Auch unsere weiteren aktuellen Modelle sind für regelmäßiges Umstellen ausgelegt." },
     ],
     relatedLinks: [
       { href: "/produkte/stapelstuehle", label: "Stapelstuhlmodelle", description: "Aktuelle Modelle und verfügbare Ausführungen vergleichen." },
@@ -130,7 +130,7 @@ export const guideArticles = [
     slug: "stoffe-und-bezuege",
     title: "Bezugsstoffe für Stapelstühle: Worauf es wirklich ankommt",
     description: "Orientierung zu Stoffgruppen, Materialien, Martindale, Pflege und Brandschutznachweisen bei gepolsterten Stapelstühlen.",
-    category: "Stoffe & Materialien", updatedAt: "2026-10-09", status: "published",
+    category: "Stoffe & Materialien", updatedAt: "2026-10-21", status: "published",
     body: [
       { id: "stoffgruppen", heading: "Stoffgruppen sind keine genormten Qualitätsklassen", paragraphs: [
         "Die Gruppen ordnen die verfügbaren Bezüge in unserem Sortiment. Eine höhere Nummer bedeutet nicht automatisch, dass ein Stoff robuster oder für jeden Raum besser geeignet ist.",
@@ -140,17 +140,12 @@ export const guideArticles = [
         "Im Sortiment kommen unter anderem Dralon, Trevira, Polyester und Polyamid vor. Typische Orientierungen sind etwa 400 bis 700 Gramm je Laufmeter bei meist rund 1,30 Meter Rollenbreite sowie etwa 40.000 bis 100.000 Martindale-Scheuertouren. Kein Einzelwert gilt automatisch für jede Variante.",
         "Gewicht und Scheuertouren sind Vergleichswerte, aber keine Lebensdauergarantie. Faser, Webart, Verarbeitung, Licht, Pflege und die gesamte Polsterkonstruktion wirken zusammen.",
       ] },
-      { id: "brandschutz", heading: "Stoffnachweis und kompletter Polsterstuhl sind nicht dasselbe", paragraphs: [
-        "Ein B1-Nachweis für einen Bezugsstoff belegt nicht automatisch das Brandverhalten aus Bezug, Polsterung und Trägermaterial. Bei Brandschutzanforderungen muss die konkrete Stoffvariante und, soweit erforderlich, der Polsterverbund dokumentiert werden.",
-        "Die Stoffgruppe allein ist deshalb kein Zertifikat und erzeugt kein B1-Siegel für den vollständigen Stuhl.",
-      ] },
       { id: "pflege-und-muster", heading: "Pflegehinweise beachten und echte Muster ansehen", paragraphs: [
         "Bei geeigneten Stoffen haben wir gute Erfahrungen mit Textil- oder Teppich-Trockenschaum gemacht. Beachten Sie die Pflegehinweise, testen Sie zunächst an einer unauffälligen Stelle und durchnässen Sie den Bezug nicht.",
         "Farben am Bildschirm sind nicht farbverbindlich. Für Farbe, Haptik und das Zusammenspiel im Raum ist ein echtes Stoffmuster die bessere Grundlage.",
       ] },
     ],
     faq: [
-      { question: "Ist Stoffgruppe 3 automatisch B1?", answer: "Nein. In dieser Gruppe bieten wir in der Regel entsprechende Optionen an. Entscheidend ist der Nachweis für den konkreten Stoff; daraus folgt nicht automatisch ein Nachweis für den ganzen Stuhl." },
       { question: "Was bedeutet Martindale?", answer: "Martindale ist ein Prüfverfahren für Scheuerbeständigkeit. Der Wert hilft beim Vergleich, garantiert aber keine bestimmte Nutzungsdauer." },
       { question: "Kann ich Stoffmuster erhalten?", answer: "Ja. Wir stellen Ihnen auf Anfrage Muster bereit. Damit beurteilen Sie Farbe und Haptik verlässlicher als am Bildschirm." },
     ],
@@ -164,7 +159,7 @@ export const guideArticles = [
     slug: "klapptische-richtig-waehlen",
     title: "Klapptische richtig wählen und im Raum planen",
     description: "Praxisnahe Orientierung zu zwölf Standardmaßen, 2:1-Prinzip, Gestellen, Platten und Sonderausführungen.",
-    category: "Klapptische", updatedAt: "2026-10-09", status: "published",
+    category: "Klapptische", updatedAt: "2026-10-21", status: "published",
     body: [
       { id: "nutzung", heading: "Mit Nutzung, Transport und Lagerung beginnen", paragraphs: [
         "Ein Klapptisch sollte zu Reihen, Gruppen- oder Blockstellungen, zu Transportwegen und Lagerfläche passen. Erst aus diesem Zusammenspiel ergeben sich Format, Platte und Gestell.",
@@ -182,14 +177,17 @@ export const guideArticles = [
         { label: "passt exakt", value: "160 × 80 cm", note: "80 + 80 = 160 cm" },
         { label: "kein 2:1-Maß", value: "160 × 70 cm", note: "70 + 70 = 140 cm, nicht 160 cm" },
       ] },
-      { id: "gestelle", heading: "K1 für Reihen, K3 bei häufiger Stirnseitennutzung", paragraphs: [
-        `Für überwiegend in Reihen aufgestellte Tische empfehlen wir häufig ${recommendations.tableLegs.rows}. Wenn Sie die Stirnseiten regelmäßig als Sitzplätze nutzen, ist ${recommendations.tableLegs.frequentEndSeating} oft günstiger.`,
+      { id: "gestelle", heading: "Gestelltyp K1 für Reihen, Gestelltyp K3 bei häufiger Stirnseitennutzung", paragraphs: [
+        `Für überwiegend in Reihen aufgestellte Tische empfehlen wir häufig den Gestelltyp ${recommendations.tableLegs.rows}. Wenn Sie die Stirnseiten regelmäßig als Sitzplätze nutzen, ist der Gestelltyp ${recommendations.tableLegs.frequentEndSeating} oft günstiger.`,
         "Nicht jedes Gestell ist für jedes Tischmodell erhältlich. Wir prüfen deshalb, welche Variante zu Ihrem Modell und Ihrer Nutzung passt.",
+      ], links: [
+        { href: "/produkte/tischfuesse-gestellteile", label: "Tischgestelle K1 und K3 ansehen", description: "Gestellformen und Bauteile für Klapptische ansehen." },
+        { href: "/produkte/artikel/klapptisch-310c", label: "Klapptisch Modell 310c ansehen", description: "Klapptisch mit den passenden Gestelltypen auswählen." },
       ] },
       { id: "platten-und-modell-210", heading: "Plattenaufbau und Modell 210 getrennt prüfen", paragraphs: [
         `Viele unserer Tischplatten sind etwa ${estimatedValues.typicalTopThicknessMm} mm stark; die übliche Tischhöhe liegt bei ca. ${estimatedValues.tableHeightMm} mm. Die genauen Maße hängen von der Ausführung ab, Wunschhöhen sind auf Anfrage möglich.`,
         `Das Modell 210 (Seminar) besitzt eine ${modelSpecific.table210.topThicknessMm}-mm-Platte ohne Kantenaufdopplung und ist bis ${modelSpecific.table210.largestAdvertisedFormatCm.length} × ${modelSpecific.table210.largestAdvertisedFormatCm.width} cm erhältlich. Welche kleineren Zwischenmaße möglich sind, prüfen wir anhand der aktuellen Varianten.`,
-        `Zusammengeklappt sind unsere Tische je nach Modell ca. ${estimatedValues.foldedTableHeightCm.lengthBelow160} cm hoch, wenn sie kürzer als 160 cm sind, und ca. ${estimatedValues.foldedTableHeightCm.lengthFrom160} cm ab 160 cm Tischlänge. Eine pauschale Traglast geben wir nicht an; dafür ist die konkrete Ausführung entscheidend.`,
+        `Zusammengeklappt sind unsere Tische je nach Modell ca. ${estimatedValues.foldedTableHeightCm.lengthBelow160} cm hoch, wenn sie kürzer als 160 cm sind, und ca. ${estimatedValues.foldedTableHeightCm.lengthFrom160} cm ab 160 cm Tischlänge.`,
       ] },
       { id: "sonderausfuehrungen", heading: "Freiformen, Kanten und Farben konkret anfragen", paragraphs: [
         "Sonderformen, besondere Oberflächen, Kantenbeizungen und Sonderfarben können projektbezogen angefragt werden. Die Machbarkeit hängt von Modell, Konstruktion und aktueller Fertigung ab.",
@@ -198,7 +196,7 @@ export const guideArticles = [
     ],
     faq: [
       { question: "Welche Maße erfüllen das 2:1-Prinzip?", answer: "140 × 70, 150 × 75 und 160 × 80 cm erfüllen es exakt. 160 × 70 cm nicht. Das Verhältnis ist eine Planungshilfe, keine Norm." },
-      { question: "Welches Gestell passt für Tischreihen?", answer: "Für Tischreihen empfehlen wir häufig K1. Wenn Sie die Stirnseiten regelmäßig als Sitzplätze nutzen, ist K3 oft günstiger. Wir prüfen Verfügbarkeit und Eignung am gewählten Modell." },
+      { question: "Welches Gestell passt für Tischreihen?", answer: "Für Tischreihen empfehlen wir häufig den Gestelltyp K1. Wenn Sie die Stirnseiten regelmäßig als Sitzplätze nutzen, ist der Gestelltyp K3 oft günstiger. Wir prüfen Verfügbarkeit und Eignung am gewählten Modell." },
       { question: "Wie schwer ist ein Klapptisch?", answer: "Übliche Ausführungen liegen als Orientierung bei ca. 23–32 kg, abhängig von Material, Modell und Größe. Den konkreten Wert bitte für die gewählte Ausführung prüfen." },
       { question: "Sind Zwischen- und Sondermaße möglich?", answer: "Ja, abhängig von Modell und Konstruktion. Beim Modell 210 liegt die konstruktive Obergrenze bei 140 × 70 cm; kleinere Kombinationen prüfen wir für Ihre Anfrage." },
     ],
@@ -211,12 +209,11 @@ export const guideArticles = [
   {
     slug: "tischplatten-und-kanten",
     title: "Tischplatten und Kanten sachlich auswählen",
-    description: "HPL, Melamin, Tischkanten, Muster und Pflege im praktischen Vergleich – ohne pauschale Haltbarkeitsversprechen.",
-    category: "Klapptische", updatedAt: "2026-10-09", status: "published",
+    description: "HPL, Melamin, Tischkanten, Muster und Pflege im praktischen Vergleich.",
+    category: "Klapptische", updatedAt: "2026-10-21", status: "published",
     body: [
-      { id: "oberflaechen", heading: "HPL und Melamin sind unterschiedliche Oberflächen", paragraphs: [
-        "HPL ist ein separat gefertigtes Schichtmaterial, das auf eine Trägerplatte aufgebracht wird. Bei einer Melaminoberfläche wird dekoriertes Papier mit Harz direkt mit der Platte verpresst.",
-        "Aus der Bezeichnung folgt keine allgemeine Kratz-, Chemikalien-, Hitze- oder Lebensdauergarantie. Maßgeblich sind der konkrete Produktaufbau, die Nutzung und die Pflegehinweise.",
+      { id: "oberflaechen", heading: "HPL ist deutlich robuster als Melamin", paragraphs: [
+        "HPL ist mindestens dreimal so belastbar und mindestens zehnmal härter als eine melamindirektbeschichtete Platte. Außerdem weist HPL eine hohe Widerstandsdauer gegen Zigarettenglut auf.",
       ] },
       { id: "kanten", heading: "Die Kante schützt und prägt die Haptik", paragraphs: [
         "Je nach Produkt kommen beispielsweise Kunststoff- oder Holzkanten infrage. Material, Radius und Verarbeitung müssen zur konkreten Ausführung passen; keine Kantenart ist automatisch in jeder Situation überlegen.",
@@ -232,7 +229,7 @@ export const guideArticles = [
       ] },
     ],
     faq: [
-      { question: "Ist HPL grundsätzlich besser als Melamin?", answer: "Nein. Es sind unterschiedliche Oberflächen. Welche passt, hängt von Produktaufbau, Nutzung, gewünschtem Dekor und Budget ab." },
+      { question: "Ist HPL grundsätzlich besser als Melamin?", answer: "Ja, immer. HPL ist mindestens dreimal so belastbar, mindestens zehnmal härter und weist eine hohe Widerstandsdauer gegen Zigarettenglut auf." },
       { question: "Sind Dekore am Bildschirm farbverbindlich?", answer: "Nein. Display und Licht verändern die Darstellung. Auf Wunsch können echte Muster angefragt werden." },
       { question: "Wie reinige und lagere ich Tischplatten?", answer: "Feucht, nicht nass reinigen und Flüssigkeit an Kanten vermeiden. Klapptische trocken und flach lagern, nicht dauerhaft an eine Wand lehnen." },
     ],

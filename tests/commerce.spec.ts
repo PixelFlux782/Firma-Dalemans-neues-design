@@ -101,6 +101,7 @@ test("Produktdetailseite wird vollständig aus dem Commerce-Modell gerendert", a
   await page.goto("/produkte/artikel/kunststoff-gestellgleiter");
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Kunststoff-Gestellgleiter");
+  await expect(page.getByText("Diese Gleiter sind für Klapptische.", { exact: true })).toBeVisible();
   await expect(page.getByText("Technische Daten")).toBeVisible();
   await expect(page.getByText("Kompatibilität", { exact: true }).first()).toBeVisible();
   await expect(page.locator('[data-price-status="on_request"]')).toContainText("Preis auf Anfrage");
@@ -113,18 +114,21 @@ test("Produktdetailseite wird vollständig aus dem Commerce-Modell gerendert", a
   );
 });
 
-test("Varianten ohne numerischen Preis werden als nicht verfügbar behandelt", async ({ page }) => {
-  for (const path of [
-    "/produkte/artikel/klappstuehle",
-    "/produkte/artikel/filzgleiter-mit-stift",
-  ]) {
-    await page.goto(path);
-    await expect(page.locator('[data-price-status="unavailable"]')).toContainText("Nicht verfügbar");
-    await expect(page.locator('[data-availability="out_of_stock"]')).toContainText("nicht verfügbar");
-    await expect(page.getByTestId("variant-selector")).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "Angebot anfragen" })).toHaveCount(0);
-    await expect(page.getByTestId("unavailable-product")).toBeVisible();
-  }
+test("Klappstühle ohne numerischen Preis werden als nicht verfügbar behandelt", async ({ page }) => {
+  await page.goto("/produkte/artikel/klappstuehle");
+  await expect(page.locator('[data-price-status="unavailable"]')).toContainText("Nicht verfügbar");
+  await expect(page.locator('[data-availability="out_of_stock"]')).toContainText("nicht verfügbar");
+  await expect(page.getByTestId("variant-selector")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Angebot anfragen" })).toHaveCount(0);
+  await expect(page.getByTestId("unavailable-product")).toBeVisible();
+});
+
+test("Kunststoffstopfen wird als kurzfristig lieferbar angeboten", async ({ page }) => {
+  await page.goto("/produkte/artikel/filzgleiter-mit-stift");
+  await expect(page.locator('[data-price-status="on_request"]')).toContainText("Preis auf Anfrage");
+  await expect(page.locator('[data-availability="in_stock"]')).toContainText("Kurzfristig lieferbar.");
+  await expect(page.getByRole("link", { name: "Angebot anfragen" })).toBeVisible();
+  await expect(page.getByTestId("unavailable-product")).toHaveCount(0);
 });
 
 test("Tischvarianten werden verständlich und ohne technische Hinweise dargestellt", async ({ page }) => {
@@ -143,6 +147,14 @@ test("Tischvarianten werden verständlich und ohne technische Hinweise dargestel
     await expect(page.getByText("Schrittweite 1 Stück")).toHaveCount(0);
     await expect(page.getByText("Anzahl", { exact: true })).toBeVisible();
   }
+
+  await page.goto("/produkte/artikel/trapez-klapptisch-310c");
+  await expect(page.getByText(/Mechanismus klappt die Füße parallel zur Längsrichtung ein/).first()).toBeVisible();
+  await expect(page.getByText(/keine Gestellteile aus dem Tisch heraus/).first()).toBeVisible();
+
+  await page.goto("/produkte/artikel/klapptisch-310c");
+  await expect(page.getByText("Prinzipiell kann jede Zwischengröße gefertigt werden. Es gilt dann der Preis der nächst höheren Größe.", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Bei einem 2:1-Maß entsprechen zwei Tischbreiten genau einer Tischlänge/)).toBeVisible();
 });
 
 test("Alternativbilder tauschen auf Artikelseiten das große Produktbild", async ({ page }) => {

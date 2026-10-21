@@ -88,7 +88,7 @@ const whitePlasticPlugDetailImage = image(
 
 const frameGliderImage = image(
   "/images/curated/Zubehör/zubehör-stopfen.webp",
-  "Schwarze Kunststoffgleiter für ein Stuhlgestell",
+  "Schwarze Kunststoffgleiter für ein Klapptischgestell",
 );
 
 const rowConnectorImage = image(
@@ -214,14 +214,18 @@ export const localProducts: CommerceProduct[] = [
     featuredImage: whitePlasticPlugImage,
     images: [whitePlasticPlugImage, whitePlasticPlugDetailImage],
     variants: [
-      requestVariant("plastic-plug-white", "Weiß", "DEV-KS-WEISS", [
-        { name: "Farbe", value: "Weiß" },
-      ]),
+      {
+        ...requestVariant("plastic-plug-white", "Weiß", "DEV-KS-WEISS", [
+          { name: "Farbe", value: "Weiß" },
+        ]),
+        availability: "in_stock",
+        availabilityNote: "Kurzfristig lieferbar.",
+      },
     ],
     priceRange: { min: null, max: null },
-    priceStatus: "unavailable",
-    availability: "out_of_stock",
-    availabilityNote: "Diese Ausführungen sind derzeit nicht verfügbar.",
+    priceStatus: "on_request",
+    availability: "in_stock",
+    availabilityNote: "Kurzfristig lieferbar.",
     collectionHandles: ["gleiter-bodenschutz"],
     specifications: [
       { name: "Material", value: "Kunststoff" },
@@ -272,11 +276,11 @@ export const localProducts: CommerceProduct[] = [
     id: "local-product-kunststoff-gestellgleiter",
     handle: "kunststoff-gestellgleiter",
     title: "Kunststoff-Gestellgleiter",
-    shortDescription: "Gleiter für Stahlrohrgestelle – Auswahl anhand von Rohrform, Außenmaß und Einbausituation.",
+    shortDescription: "Diese Gleiter sind für Klapptische.",
     description:
-      "Kunststoffgleiter können vorhandene Stahlrohrstühle funktional ergänzen oder verschlissene Bauteile ersetzen. Entscheidend sind Rohrform, exaktes Maß und die Konstruktion des Gestells.",
+      "Kunststoffgleiter für Klapptische ersetzen verschlissene Bauteile am Gestell. Entscheidend sind Rohrform, exaktes Maß und die Konstruktion des Tischgestells.",
     descriptionHtml:
-      "<p>Wir ordnen Kunststoffgleiter für vorhandene Stahlrohrstühle anhand von Rohrform, Maß und Einbausituation zu.</p>",
+      "<p>Wir ordnen Kunststoffgleiter für Klapptische anhand von Rohrform, Maß und Einbausituation zu.</p>",
     availableForSale: false,
     featuredImage: frameGliderImage,
     images: [frameGliderImage],
@@ -327,8 +331,8 @@ export const localProducts: CommerceProduct[] = [
       { name: "Zuordnung", value: "nach Rohrform und Rohrmaß" },
       { name: "Mengeneinheit", value: "Pack" },
     ],
-    compatibility: ["Stahlrohrgestelle mit passender Rohrgeometrie", "Bestehende Aufnahme muss vorab geprüft werden"],
-    suitableFor: ["Gemeinde- und Veranstaltungssäle", "Bestandsbestuhlung", "Nachrüstung und Ersatz"],
+    compatibility: ["Klapptischgestelle mit passender Rohrgeometrie", "Bestehende Aufnahme muss vorab geprüft werden"],
+    suitableFor: ["Klapptische", "Gemeinde- und Veranstaltungssäle", "Nachrüstung und Ersatz"],
     quantity: {
       unit: "pack",
       unitLabel: "Pack",
@@ -345,11 +349,11 @@ export const localProducts: CommerceProduct[] = [
     notes: ["Maßvarianten und Artikelnummern sind lokale Entwicklungsdaten."],
     accessories: [{ handle: "filzgleiter-mit-stift", title: "Kunststoffstopfen weiß" }],
     consultationNote:
-      "Bei bestehenden Bestuhlungen reicht die Modellbezeichnung häufig nicht aus – bitte Foto und Rohrmaß bereithalten.",
+      "Bei bestehenden Klapptischen reicht die Modellbezeichnung häufig nicht aus – bitte Foto und Rohrmaß bereithalten.",
     faq: [],
     seo: {
-      title: "Kunststoff-Gestellgleiter für Stahlrohrstühle",
-      description: "Gestellgleiter nach Rohrform und Maß auswählen. Wir helfen Ihnen bei der Zuordnung zum vorhandenen Stuhl.",
+      title: "Kunststoff-Gestellgleiter für Klapptische",
+      description: "Gestellgleiter nach Rohrform und Maß auswählen. Wir helfen Ihnen bei der Zuordnung zum vorhandenen Klapptisch.",
     },
     updatedAt,
   },

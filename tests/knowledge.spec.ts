@@ -7,6 +7,7 @@ import {
   standardTableDimensions,
   verificationNeeded,
 } from "../src/lib/knowledge";
+import type { GuideArticle } from "../src/lib/knowledge/types";
 import { buildSearchIndex } from "../src/lib/search/index";
 
 test.describe("Wissensbereich", () => {
@@ -30,6 +31,32 @@ test.describe("Wissensbereich", () => {
     expect(knowledgeDocuments.map((document) => document.url)).toContain("/wissen/stoffe-und-bezuege");
   });
 
+  test("hält die Stoffberatung knapp und beschreibt HPL eindeutig", () => {
+    const guides = getPublishedGuides();
+    const fabricGuide = guides.find((guide) => guide.slug === "stoffe-und-bezuege");
+    const surfaceGuide = guides.find((guide) => guide.slug === "tischplatten-und-kanten");
+    const fabricCopy = JSON.stringify(fabricGuide);
+    const surfaceCopy = JSON.stringify(surfaceGuide);
+
+    expect(fabricCopy).not.toContain("Stoffnachweis und kompletter Polsterstuhl");
+    expect(fabricCopy).not.toContain("Ist Stoffgruppe 3 automatisch B1?");
+    expect(surfaceCopy).toContain("HPL ist mindestens dreimal so belastbar");
+    expect(surfaceCopy).toContain("mindestens zehnmal härter");
+    expect(surfaceCopy).toContain("hohe Widerstandsdauer gegen Zigarettenglut");
+    expect(surfaceCopy).toContain("Ja, immer.");
+  });
+
+  test("spricht in der Stapelstuhlberatung aus Unternehmenssicht", () => {
+    const chairGuide = getPublishedGuides().find((guide) => guide.slug === "stapelstuehle-richtig-auswaehlen");
+    const chairCopy = JSON.stringify(chairGuide);
+
+    expect(chairCopy).toContain("Wir, die Firma Dalemans");
+    expect(chairCopy).toContain("zufriedenen Kunden");
+    expect(chairCopy).toContain("Von Anfang an an Reihenverbinder denken");
+    expect(chairCopy).toContain("Mit Reihenverbinder beträgt die Stuhlbreite ca. 53 cm");
+    expect(chairCopy).not.toMatch(/wird genannt|werden genannt|Lebensdauergarantie|unseriös/);
+  });
+
   test("ist in Desktop- und Mobilnavigation erreichbar", async ({ page }) => {
     await page.goto("/wissen");
     await expect(page.getByRole("heading", { level: 1, name: "Gut entscheiden, bevor der Raum eingerichtet wird." })).toBeVisible();
@@ -38,6 +65,24 @@ test.describe("Wissensbereich", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.getByRole("button", { name: "Menü", exact: true }).click();
     await expect(page.getByRole("navigation", { name: "Mobile Hauptnavigation" }).getByRole("link", { name: "Wissen", exact: true })).toBeVisible();
+  });
+
+  test("zeigt die überarbeitete Unternehmenssprache und Tischhinweise im Browser", async ({ page }) => {
+    await page.goto("/wissen/stapelstuehle-richtig-auswaehlen");
+    await expect(page.getByRole("heading", { name: "Robuste Schalen und saubere Verarbeitung" })).toBeVisible();
+    await expect(page.getByText(/Wir, die Firma Dalemans, empfehlen/)).toBeVisible();
+    await expect(page.getByText("Viele unserer zufriedenen Kunden nutzen ihre Dalemans-Stühle seit Jahrzehnten.")).toBeVisible();
+
+    await page.goto("/wissen/klapptische-richtig-waehlen#gestelle");
+    await expect(page.getByRole("heading", { name: "Gestelltyp K1 für Reihen, Gestelltyp K3 bei häufiger Stirnseitennutzung" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Tischgestelle K1 und K3 ansehen" })).toHaveAttribute("href", "/produkte/tischfuesse-gestellteile");
+    await expect(page.getByRole("link", { name: "Klapptisch Modell 310c ansehen", exact: true }).first()).toHaveAttribute("href", "/produkte/artikel/klapptisch-310c");
+    await expect(page.getByRole("heading", { name: "Tischaufstellung im Raum ausprobieren" })).toBeVisible();
+    await expect(page.getByText(/pauschale Traglast/)).toHaveCount(0);
+
+    await page.goto("/wissen/tischplatten-und-kanten");
+    await page.getByText("Ist HPL grundsätzlich besser als Melamin?").click();
+    await expect(page.getByText(/Ja, immer\. HPL ist mindestens dreimal so belastbar/)).toBeVisible();
   });
 
   test("rendert alle Ratgeber über ihre internen Routen mit SEO und Breadcrumbs", async ({ page }) => {
@@ -90,7 +135,14 @@ test.describe("Wissensbereich", () => {
   });
 
   test("verweist nur auf erreichbare interne Ziele", async ({ request }) => {
-    const hrefs = new Set(getPublishedGuides().flatMap((guide) => guide.relatedLinks.map((link) => link.href)));
+    const guides: readonly GuideArticle[] = getPublishedGuides();
+    const hrefs = new Set(guides.flatMap((guide) => [
+      ...guide.relatedLinks.map((link) => link.href),
+      ...guide.body.flatMap((section) => [
+        ...(section.link ? [section.link.href] : []),
+        ...(section.links?.map((link) => link.href) ?? []),
+      ]),
+    ]));
     for (const href of hrefs) {
       const response = await request.get(href);
       expect(response.status(), href).toBeLessThan(400);

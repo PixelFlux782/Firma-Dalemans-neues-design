@@ -390,9 +390,9 @@ const productCatalog: Product[] = [
       "Sport- und Stadthallen",
     ],
     details: [
-      "Ausführung und Komponenten stimmen wir auf Ihr Projekt ab",
-      "Oberflächen und Kanten wählen wir passend zur Beanspruchung aus",
-      "die Kantenausführung stimmen wir auf die geplante Nutzung ab",
+      "Prinzipiell kann jede Zwischengröße gefertigt werden. Es gilt dann der Preis der nächst höheren Größe.",
+      "Gestelltyp K1 eignet sich besonders für Tischreihen; Gestelltyp K3 bietet mehr Beinfreiheit an regelmäßig genutzten Stirnseiten.",
+      "Oberflächen und Kanten wählen wir passend zur Beanspruchung aus.",
     ],
     variants: [
       "in verschiedenen Tischmaßen planbar",
@@ -400,7 +400,7 @@ const productCatalog: Product[] = [
       "für Reihenaufstellungen und Einzelaufstellungen passend auswählbar",
     ],
     note:
-      "Kompakte Tischformate lassen sich komfortabel handhaben und in Blockstellungen gut kombinieren. Konkrete Maße stimmen wir mit Raum und Nutzung ab.",
+      "Bei einem 2:1-Maß entsprechen zwei Tischbreiten genau einer Tischlänge. Dadurch lassen sich Tische bündig und ohne Versatz zu rechtwinkligen Blöcken kombinieren.",
   },
   {
     title: "Trapezklapptisch 310c",

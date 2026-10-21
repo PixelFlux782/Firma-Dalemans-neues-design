@@ -144,12 +144,12 @@ const table310Rows: PricedRow[] = [
 ];
 
 export const localPriceListProducts: CommerceProduct[] = [
-  product({ handle: "klapptisch-310c", title: "Klapptisch Modell 310c", description: "Rechteckiger Klapptisch in zwölf Tischmaßen mit ABS- oder Buchekante.", collection: "klapptische", featuredImage: table310Image, variants: table310Rows.map((row) => pricedVariant("310c", row)) }),
+  product({ handle: "klapptisch-310c", title: "Klapptisch Modell 310c", description: "Rechteckiger Klapptisch in zwölf Tischmaßen mit ABS- oder Buchekante. Prinzipiell kann jede Zwischengröße gefertigt werden. Es gilt dann der Preis der nächst höheren Größe. Besonders praktisch sind die 2:1-Maße: Zwei Tischbreiten entsprechen einer Tischlänge und lassen sich bündig zu Tischblöcken kombinieren.", collection: "klapptische", featuredImage: table310Image, variants: table310Rows.map((row) => pricedVariant("310c", row)) }),
   product({ handle: "seminarklapptisch-210c", title: "Seminarklapptisch Modell 210c", description: "Seminarklapptisch mit 25-mm-Platte, lichtgrauer Oberfläche und ABS-Kante.", collection: "klapptische", featuredImage: seminarImage, variants: [
     pricedVariant("210c", ["T210C126", "120 × 60 cm · ABS", 252.75, 245.1675, 240.1125]),
     pricedVariant("210c", ["T210C147", "140 × 70 cm · ABS", 280, 271.6, 266]),
   ] }),
-  product({ handle: "trapez-klapptisch-310c", title: "Trapez-Klapptisch Modell 310c", description: "Eigenständige Trapeztisch-Familie mit ABS- oder Buchekante.", collection: "klapptische", featuredImage: trapezoidImage, variants: [
+  product({ handle: "trapez-klapptisch-310c", title: "Trapez-Klapptisch Modell 310c", description: "Nur bei uns: Ein durchdachter und sinnvoller Mechanismus klappt die Füße parallel zur Längsrichtung ein. Dadurch stehen im zusammengeklappten Zustand keine Gestellteile aus dem Tisch heraus.", collection: "klapptische", featuredImage: trapezoidImage, variants: [
     pricedVariant("310ct", ["T310CT147", "140 × 70 cm · ABS", 432.16, 419.1952, 410.552]),
     pricedVariant("310ct", ["T310CT168", "160 × 80 cm · ABS", 448.92, 435.4524, 426.474]),
     pricedVariant("310ct", ["T310CT147N", "140 × 70 cm · Buche natur", 493.12, 478.3264, 468.464]),

@@ -97,6 +97,15 @@ export default async function GuidePage({ article }: { article: GuideArticle }) 
                   {section.link.label} <span className="ml-2" aria-hidden>→</span>
                 </Link>
               ) : null}
+              {section.links?.length ? (
+                <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
+                  {section.links.map((link) => (
+                    <Link key={link.href} href={link.href} className="inline-flex min-h-11 items-center font-semibold text-premium-forest underline decoration-premium-sand decoration-2 underline-offset-4 hover:text-premium-bronze">
+                      {link.label} <span className="ml-2" aria-hidden>→</span>
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
               {section.list?.length ? (
                 <ul className="mt-6 grid gap-3 text-sm leading-7 text-premium-muted">
                   {section.list.map((item) => <li key={item} className="flex gap-3"><span className="mt-3 size-1.5 shrink-0 rounded-full bg-premium-leaf" aria-hidden />{item}</li>)}

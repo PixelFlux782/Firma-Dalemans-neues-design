@@ -16,6 +16,7 @@ export interface GuideSection {
   paragraphs: readonly string[];
   images?: readonly KnowledgeImage[];
   link?: GuideRelatedLink;
+  links?: readonly GuideRelatedLink[];
   list?: readonly string[];
   facts?: readonly {
     label: string;

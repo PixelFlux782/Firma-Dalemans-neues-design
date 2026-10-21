@@ -85,7 +85,7 @@ export const guideProductIntegrations: readonly GuideProductIntegration[] = [
     legacyCategoryIds: ["klapptische"],
     productContext: "Auswahlhilfe zu Tischmaßen, Aufstellungen, Gestellen und Lagerung.",
     roomPlanner: {
-      title: "Tischaufstellung im Raum erproben",
+      title: "Tischaufstellung im Raum ausprobieren",
       description: "Tischgruppen und Bestuhlung als unverbindlichen Entwurf im Raumplaner zusammenstellen.",
     },
     consultation: {

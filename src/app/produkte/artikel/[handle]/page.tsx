@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import CommerceMedia from "@/components/commerce/CommerceMedia";
 import ProductVariantSelector from "@/components/commerce/ProductVariantSelector";
 import ProductDetailPage from "@/components/product-detail/ProductDetailPage";
+import Table310FrameAdvice from "@/components/products/Table310FrameAdvice";
 import { StructuredData } from "@/components/StructuredData";
 import { getCollectionByHandle, getProductByHandle, getProducts } from "@/lib/commerce/service";
 import { commerceDetailData } from "@/lib/product-detail-data";
@@ -38,5 +39,5 @@ export default async function ProductPage({ params, searchParams }: Props) {
   return <><StructuredData data={structuredData} /><ProductDetailPage data={data} relatedGuides={relatedGuides}
     media={<CommerceMedia image={product.featuredImage} images={product.images} fallbackLabel={product.title} priority sizes="(min-width: 1024px) 54vw, 100vw" aspectRatio="5 / 4" imageInset={product.handle === "stuhltransportwagen" ? "2%" : "6%"} className="min-h-[330px] rounded-[2.25rem] sm:min-h-[500px] lg:min-h-[620px]" />}
     purchase={<ProductVariantSelector product={product} initialVariantId={Array.isArray(query.variant) ? query.variant[0] : query.variant} />}
-  /></>;
+  >{product.handle === "klapptisch-310c" ? <Table310FrameAdvice /> : null}</ProductDetailPage></>;
 }

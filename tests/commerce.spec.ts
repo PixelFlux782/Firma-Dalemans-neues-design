@@ -186,6 +186,16 @@ test("Buchablage zeigt Preis und SKU aus der aktuellen Preisliste", async ({ pag
   await expect(page.getByText("BU1021C", { exact: true }).first()).toBeVisible();
 });
 
+test("Buchablage hebt den Spartipp unmittelbar vor der Mengensteuerung hervor", async ({ page }) => {
+  await page.goto("/produkte/artikel/buchablage-nachruesten");
+  const tip = page.getByTestId("book-rack-saving-tip");
+  await expect(tip.getByText("Unser Spartipp", { exact: true })).toBeVisible();
+  await expect(tip.getByRole("heading", { name: "Jeder zweite Stuhl reicht oft aus." })).toBeVisible();
+  await expect(tip).toContainText("Bei 100 Stühlen benötigen Sie häufig nur 50 Buchablagen.");
+  await expect(page.getByText("Oft reicht es aus, nur jeden zweiten Stuhl", { exact: false })).toHaveCount(0);
+  await expect(tip.evaluate((element) => element.nextElementSibling?.querySelector("#product-quantity") !== null)).resolves.toBe(true);
+});
+
 test("Kunststoffgleiter Standard verwendet Haupt- und Detailbild", async ({ page }) => {
   await page.goto("/produkte/artikel/kunststoff-gestellgleiter");
 

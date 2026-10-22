@@ -111,11 +111,12 @@ function product(input: {
   };
 }
 
-const table310Image = image("/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", "Klapptisch Modell 310c");
+const table310Image = image("/neue bilder/Tische/klapptisch-310c/310c-01-hauptansicht.webp", "Klapptisch Modell 310c mit Gestell K3 in der Hauptansicht");
 const table310Images = [
   table310Image,
-  image("/neue bilder/Gestelle/Gestelltypen/Klapptisch_Gestell_K1-optimiert.webp", "Klapptisch-Gestell K1 für Reihenaufstellungen beim Klapptisch Modell 310c"),
-  image("/neue bilder/Gestelle/Gestelltypen/T_Klapptisch_Gestell_K3_Standard-optimiert.webp", "Klapptisch-Gestell K3 für mehr Beinfreiheit an den Stirnseiten beim Klapptisch Modell 310c"),
+  image("/neue bilder/Tische/klapptisch-310c/310c-02-perspektive.webp", "Klapptisch Modell 310c mit Gestell K3 aus erhöhter Perspektive"),
+  image("/neue bilder/Tische/klapptisch-310c/310c-03-seitenansicht.webp", "Klapptisch Modell 310c mit Gestell K3 in seitlicher Perspektive"),
+  image("/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", "Klapptisch Modell 310c in einer weiteren Produktausführung"),
 ];
 const seminarImage = image("/images/curated/Tische/T210cdetail.webp", "Seminarklapptisch Modell 210c");
 const trapezoidImage = image("/images/curated/Tische/Trapezklapptisch_Klapptische_trapez_klappbar.webp", "Trapez-Klapptisch Modell 310c");

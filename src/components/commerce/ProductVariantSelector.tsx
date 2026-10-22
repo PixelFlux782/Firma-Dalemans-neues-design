@@ -177,6 +177,14 @@ export default function ProductVariantSelector({
         </div>
       ) : null}
 
+      {product.handle === "klapptisch-310c" ? (
+        <div className="mt-5 rounded-2xl border border-premium-beige/80 bg-premium-warm/60 px-5 py-4" data-testid="table-frame-order-note">
+          <p className="text-sm font-semibold text-premium-ink">Gestell passend zur Aufstellung wählen</p>
+          <p className="mt-1 text-sm leading-6 text-premium-muted">K1 und K2 eignen sich für Tischreihen, K3 und K4 für einzeln aufgestellte Tische und genutzte Stirnseiten. Wir stimmen die gewünschte Ausführung bei der Bestellung mit Ihnen ab.</p>
+          <Link href="#gestellberatung" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline underline-offset-4">Gestelle vergleichen</Link>
+        </div>
+      ) : null}
+
       {optionGroups.length ? (
         <div className={`${isTableConfigurator ? "mt-6 space-y-7" : "mt-7 space-y-6"}`} data-testid="variant-selector">
           {optionGroups.map((group) => (
@@ -338,6 +346,24 @@ export default function ProductVariantSelector({
           <p className="mt-1 text-sm leading-6 text-premium-muted">{product.quantity.note}</p>
         ) : null}
       </div> : null}
+
+      {product.handle === "buchablage-nachruesten" ? (
+        <aside className="mt-5 rounded-2xl border border-premium-sage/70 bg-premium-sage/25 p-5 sm:p-6" aria-labelledby="book-rack-saving-tip-title" data-testid="book-rack-saving-tip">
+          <div className="flex items-start gap-4">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/80 text-premium-forest shadow-sm" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-5 w-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 18h6m-5 3h4m3.1-8.8A6 6 0 1 0 6.9 12.2c.8.8 1.4 1.6 1.6 2.8h7c.2-1.2.8-2 1.6-2.8Z" />
+              </svg>
+            </span>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-premium-forest">Unser Spartipp</p>
+              <h2 id="book-rack-saving-tip-title" className="mt-2 font-display text-2xl font-medium leading-tight text-premium-ink">Jeder zweite Stuhl reicht oft aus.</h2>
+              <p className="mt-3 text-sm leading-6 text-premium-muted">So können Sie die benötigte Menge und damit die Kosten reduzieren, ohne auf praktische Ablagemöglichkeiten im Raum zu verzichten.</p>
+              <p className="mt-3 rounded-xl bg-white/70 px-4 py-3 text-sm font-semibold leading-6 text-premium-charcoal">Bei 100 Stühlen benötigen Sie häufig nur 50 Buchablagen.</p>
+            </div>
+          </div>
+        </aside>
+      ) : null}
 
       {selectedVariant && selectedRules ? (
         <div className="mt-6 flex flex-wrap items-start justify-end gap-4 border-t border-premium-beige/70 pt-6">

@@ -7,10 +7,10 @@ import { buildMetadata } from "@/lib/seo";
 const article = getPublishedGuide("transport-lagerung-pflege");
 
 export const metadata: Metadata = buildMetadata({
-  title: "Stapelstühle & Klapptische lagern und pflegen",
-  description: "Orientierung zu Stapelhöhen, Transportwagen, flacher Tischlagerung, Polsterpflege, Ersatzteilen und Reparatur.",
+  title: "Zubehör, Ersatzteile & Möbelpflege",
+  description: "Orientierung zu Gleitern, Bodenschutz, Buchablagen, Ersatzteilen, Transport, Lagerung, Pflege und Reparatur.",
   path: "/wissen/transport-lagerung-pflege",
-  keywords: ["Stapelstühle lagern", "Klapptische lagern", "Polster reinigen", "Möbel Ersatzteile"],
+  keywords: ["Stuhlgleiter", "Bodenschutz", "Buchablage", "Stapelstühle lagern", "Klapptische lagern", "Möbel Ersatzteile"],
 });
 
 export default function TransportStorageCareGuidePage() {

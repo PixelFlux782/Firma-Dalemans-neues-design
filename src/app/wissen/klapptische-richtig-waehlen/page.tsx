@@ -8,9 +8,9 @@ const article = getPublishedGuide("klapptische-richtig-waehlen");
 
 export const metadata: Metadata = buildMetadata({
   title: "Klapptische richtig wählen und planen",
-  description: "Orientierung zu zwölf Tischmaßen, dem 2:1-Prinzip, Gestellen K1 und K3, Modell 210 und Sonderausführungen.",
+  description: "Orientierung zu Tischmaßen, Sitzplatzbedarf, 2:1-Blockstellungen, Gestellen K1 bis K4, Modell 210 und Sonderausführungen.",
   path: "/wissen/klapptische-richtig-waehlen",
-  keywords: ["Klapptische", "Tischgröße", "2:1 Tischmaß", "Raumplanung", "K1", "K3"],
+  keywords: ["Klapptische", "Tischgröße", "Sitzplatzbedarf", "2:1 Tischmaß", "Blockstellung", "K1", "K2", "K3", "K4"],
 });
 
 export default function FoldingTablesGuidePage() {

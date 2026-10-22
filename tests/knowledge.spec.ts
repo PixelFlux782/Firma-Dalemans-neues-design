@@ -31,19 +31,20 @@ test.describe("Wissensbereich", () => {
     expect(knowledgeDocuments.map((document) => document.url)).toContain("/wissen/stoffe-und-bezuege");
   });
 
-  test("hält die Stoffberatung knapp und beschreibt HPL eindeutig", () => {
+  test("integriert die Fachinhalte und markiert pauschale HPL-Altangaben zur Prüfung", () => {
     const guides = getPublishedGuides();
     const fabricGuide = guides.find((guide) => guide.slug === "stoffe-und-bezuege");
     const surfaceGuide = guides.find((guide) => guide.slug === "tischplatten-und-kanten");
     const fabricCopy = JSON.stringify(fabricGuide);
     const surfaceCopy = JSON.stringify(surfaceGuide);
 
-    expect(fabricCopy).not.toContain("Stoffnachweis und kompletter Polsterstuhl");
-    expect(fabricCopy).not.toContain("Ist Stoffgruppe 3 automatisch B1?");
-    expect(surfaceCopy).toContain("HPL ist mindestens dreimal so belastbar");
-    expect(surfaceCopy).toContain("mindestens zehnmal härter");
-    expect(surfaceCopy).toContain("hohe Widerstandsdauer gegen Zigarettenglut");
-    expect(surfaceCopy).toContain("Ja, immer.");
+    expect(fabricCopy).toContain("Industriestoffe für häufig genutzte Sitzmöbel");
+    expect(fabricCopy).toContain("Einfarbige Stoffe bleiben gestalterisch flexibel");
+    expect(fabricCopy).toContain("Nachbestellung und Reparatur von Anfang an mitdenken");
+    expect(surfaceCopy).toContain("HPL und Melamin unterscheiden sich im Aufbau");
+    expect(surfaceCopy).toContain("Prüfhinweis zu pauschalen Altangaben");
+    expect(surfaceCopy).toContain("nicht als allgemeingültige technische Zusage");
+    expect(surfaceCopy).not.toContain("Ja, immer.");
   });
 
   test("spricht in der Stapelstuhlberatung aus Unternehmenssicht", () => {
@@ -52,7 +53,8 @@ test.describe("Wissensbereich", () => {
 
     expect(chairCopy).toContain("Wir, die Firma Dalemans");
     expect(chairCopy).toContain("zufriedenen Kunden");
-    expect(chairCopy).toContain("Von Anfang an an Reihenverbinder denken");
+    expect(chairCopy).toContain("Bestuhlung, Reihenverbinder und Wege zusammen planen");
+    expect(chairCopy).toContain("Qualitätsunterschiede an Verarbeitung und Details erkennen");
     expect(chairCopy).toContain("Mit Reihenverbinder beträgt die Stuhlbreite ca. 53 cm");
     expect(chairCopy).not.toMatch(/wird genannt|werden genannt|Lebensdauergarantie|unseriös/);
   });
@@ -69,7 +71,7 @@ test.describe("Wissensbereich", () => {
 
   test("zeigt die überarbeitete Unternehmenssprache und Tischhinweise im Browser", async ({ page }) => {
     await page.goto("/wissen/stapelstuehle-richtig-auswaehlen");
-    await expect(page.getByRole("heading", { name: "Robuste Schalen und saubere Verarbeitung" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Schichtholzschale und Gestell als Einheit beurteilen" })).toBeVisible();
     await expect(page.getByText(/Wir, die Firma Dalemans, empfehlen/)).toBeVisible();
     await expect(page.getByText("Viele unserer zufriedenen Kunden nutzen ihre Dalemans-Stühle seit Jahrzehnten.")).toBeVisible();
 
@@ -83,8 +85,9 @@ test.describe("Wissensbereich", () => {
     await expect(page.getByText(/pauschale Traglast/)).toHaveCount(0);
 
     await page.goto("/wissen/tischplatten-und-kanten");
+    await expect(page.getByRole("heading", { name: "Prüfhinweis zu pauschalen Altangaben" })).toBeVisible();
     await page.getByText("Ist HPL grundsätzlich besser als Melamin?").click();
-    await expect(page.getByText(/Ja, immer\. HPL ist mindestens dreimal so belastbar/)).toBeVisible();
+    await expect(page.getByText(/für häufig und intensiv genutzte Klapptische empfehlen wir in der Regel HPL/)).toBeVisible();
   });
 
   test("rendert alle Ratgeber über ihre internen Routen mit SEO und Breadcrumbs", async ({ page }) => {
@@ -106,12 +109,16 @@ test.describe("Wissensbereich", () => {
     await expect(page.getByRole("link", { name: /Muster zu Stoffgruppe/ })).toHaveCount(3);
   });
 
-  test("verlinkt alle Themenkarten auf veröffentlichte Inhalte", async ({ page }) => {
+  test("verlinkt vier Themenkarten auf vollständige Themenbereiche", async ({ page }) => {
     await page.goto("/wissen");
-    for (const name of ["Stapelstühle", "Reihenbestuhlung", "Transport & Lagerung", "Pflege & Ersatzteile"]) {
+    for (const name of ["Stapelstühle", "Klapptische", "Stoffe & Polsterung", "Zubehör & Pflege"]) {
       const card = page.getByRole("article").filter({ has: page.getByRole("heading", { name, exact: true }) });
       await expect(card.getByRole("link")).toHaveCount(1);
+      await expect(card.getByRole("link")).toHaveAttribute("href", /^#/);
     }
+    const tableSection = page.locator("#klapptische");
+    await expect(tableSection.getByRole("link", { name: /HPL, Melamin und Tischkanten/ })).toHaveAttribute("href", "/wissen/tischplatten-und-kanten");
+    await expect(page.getByRole("link", { name: "Vollständigen Ratgeber lesen" })).toHaveCount(6);
   });
 
   test("hält Maße und Modell-210-Grenze in der zentralen Datenquelle korrekt", () => {

@@ -8,6 +8,8 @@ interface CommercePriceProps {
   price?: CommerceMoney | null;
   maxPrice?: CommerceMoney | null;
   compareAtPrice?: CommerceMoney | null;
+  minimumQuantity?: number;
+  unitLabel?: string;
   className?: string;
 }
 
@@ -15,6 +17,8 @@ export default function CommercePrice({
   status,
   price,
   compareAtPrice,
+  minimumQuantity,
+  unitLabel,
   className = "",
 }: CommercePriceProps) {
   const { formatPrice, priceLabel } = usePriceDisplay();
@@ -27,7 +31,9 @@ export default function CommercePrice({
   } else if (status === "unavailable" || !formattedPrice) {
     label = "Nicht verfügbar";
   } else if (status === "from") {
-    label = `ab ${formattedPrice}`;
+    label = minimumQuantity && minimumQuantity > 1
+      ? `ab ${formattedPrice} / ${unitLabel ?? "Stück"} bei ${minimumQuantity} ${unitLabel ?? "Stück"}`
+      : `ab ${formattedPrice}`;
   } else {
     label = formattedPrice;
   }
@@ -37,7 +43,7 @@ export default function CommercePrice({
       className={`flex flex-wrap items-baseline gap-x-3 gap-y-1 ${className}`}
       data-price-status={status}
     >
-      <span className="font-display text-xl font-medium tracking-[-0.02em] text-premium-ink">
+      <span className="max-w-full font-display text-xl font-medium tracking-[-0.02em] text-premium-ink">
         {label}
       </span>
       {formattedCompareAt && formattedPrice ? (

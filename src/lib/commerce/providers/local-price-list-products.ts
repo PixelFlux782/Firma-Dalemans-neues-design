@@ -111,14 +111,18 @@ function product(input: {
   };
 }
 
-const table310Image = image("/neue bilder/Tische/klapptisch-310c/310c-01-hauptansicht.webp", "Klapptisch Modell 310c mit Gestell K3 in der Hauptansicht");
+const table310Image = image("/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", "Klapptisch Modell 310c");
 const table310Images = [
   table310Image,
+  image("/neue bilder/Tische/klapptisch-310c/310c-01-hauptansicht.webp", "Klapptisch Modell 310c mit Gestell K3 in der Hauptansicht"),
   image("/neue bilder/Tische/klapptisch-310c/310c-02-perspektive.webp", "Klapptisch Modell 310c mit Gestell K3 aus erhöhter Perspektive"),
   image("/neue bilder/Tische/klapptisch-310c/310c-03-seitenansicht.webp", "Klapptisch Modell 310c mit Gestell K3 in seitlicher Perspektive"),
-  image("/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp", "Klapptisch Modell 310c in einer weiteren Produktausführung"),
 ];
 const seminarImage = image("/images/curated/Tische/T210cdetail.webp", "Seminarklapptisch Modell 210c");
+const seminarImages = [
+  seminarImage,
+  image("/neue bilder/Tische/t210.png", "Seminarklapptisch Modell 210c in einer weiteren Ansicht"),
+];
 const trapezoidImage = image("/images/curated/Tische/Trapezklapptisch_Klapptische_trapez_klappbar.webp", "Trapez-Klapptisch Modell 310c");
 
 const lecternAImages = [
@@ -151,7 +155,7 @@ const table310Rows: PricedRow[] = [
 
 export const localPriceListProducts: CommerceProduct[] = [
   product({ handle: "klapptisch-310c", title: "Klapptisch Modell 310c", description: "Rechteckiger Klapptisch in zwölf Tischmaßen mit ABS- oder Buchekante. Prinzipiell kann jede Zwischengröße gefertigt werden. Es gilt dann der Preis der nächst höheren Größe. Besonders praktisch sind die 2:1-Maße: Zwei Tischbreiten entsprechen einer Tischlänge und lassen sich bündig zu Tischblöcken kombinieren.", collection: "klapptische", featuredImage: table310Image, images: table310Images, consultationNote: "Wir wählen das Gestell anhand der geplanten Aufstellung und der Nutzung der Stirnseiten aus und prüfen die passende Ausführung für Ihr Tischmaß.", variants: table310Rows.map((row) => pricedVariant("310c", row)) }),
-  product({ handle: "seminarklapptisch-210c", title: "Seminarklapptisch Modell 210c", description: "Seminarklapptisch mit 25-mm-Platte, lichtgrauer Oberfläche und ABS-Kante.", collection: "klapptische", featuredImage: seminarImage, variants: [
+  product({ handle: "seminarklapptisch-210c", title: "Seminarklapptisch Modell 210c", description: "Seminarklapptisch mit 25-mm-Platte, lichtgrauer Oberfläche und ABS-Kante.", collection: "klapptische", featuredImage: seminarImage, images: seminarImages, variants: [
     pricedVariant("210c", ["T210C126", "120 × 60 cm · ABS", 252.75, 245.17, 240.11]),
     pricedVariant("210c", ["T210C147", "140 × 70 cm · ABS", 280, 271.6, 266]),
   ] }),

@@ -3,7 +3,7 @@ import ProductVisual from "@/components/ProductVisual";
 import ChairComparison from "@/components/chairs/ChairComparison";
 import CategoryHero from "@/components/products/CategoryHero";
 import { lowestProductUnitPrice } from "@/lib/commerce/money";
-import DisplayedMoney from "@/components/commerce/DisplayedMoney";
+import CommerceProductCard from "@/components/commerce/CommerceProductCard";
 import type { CommerceProduct } from "@/lib/commerce/types";
 
 export const stackingChairCategoryFaq = [
@@ -37,36 +37,6 @@ export const stackingChairCategoryFaq = [
   },
 ] as const;
 
-function ChairVisual({ product }: { product: CommerceProduct }) {
-  if (product.featuredImage) {
-    return (
-      <ProductVisual
-        src={product.featuredImage.url}
-        alt={product.featuredImage.altText ?? product.title}
-        sizes="(min-width: 1024px) 36vw, (min-width: 640px) 50vw, 100vw"
-        aspectRatio="5 / 4"
-        imageInset="5%"
-        backgroundTone="canvas"
-        className="min-h-[310px] sm:min-h-[380px]"
-      />
-    );
-  }
-
-  return (
-    <div className="flex min-h-[310px] aspect-[5/4] items-end bg-gradient-to-br from-premium-warm via-premium-canvas to-premium-sage/55 p-7 sm:min-h-[380px] sm:p-9">
-      <div>
-        <p className="section-eyebrow">Produktbild folgt</p>
-        <p className="mt-3 font-display text-4xl font-medium tracking-[-0.03em] text-premium-ink">
-          {product.stackingChair?.modelCode}
-        </p>
-        <p className="mt-3 max-w-xs text-sm leading-6 text-premium-muted">
-          Ausführungen und Preise finden Sie direkt in der Modellkonfiguration.
-        </p>
-      </div>
-    </div>
-  );
-}
-
 export default function StackingChairHub({ products }: { products: CommerceProduct[] }) {
   return (
     <div className="flex min-w-0 flex-col gap-16 md:gap-20 lg:gap-24">
@@ -96,46 +66,7 @@ export default function StackingChairHub({ products }: { products: CommerceProdu
         </div>
 
         <div className="grid gap-x-8 gap-y-14 pt-10 md:grid-cols-2">
-          {products.map((product) => {
-            const lowestPrice = lowestProductUnitPrice(product);
-            const fromPrice = lowestPrice?.price ?? null;
-            const href = `/produkte/stapelstuehle/${product.handle}`;
-
-            return (
-              <article key={product.id} className="group min-w-0 border-b border-premium-beige/70 pb-12">
-                <Link href={href} aria-label={`${product.title} ansehen`} className="block cursor-pointer overflow-hidden rounded-[1.75rem] transition duration-500 group-hover:scale-[1.015] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand focus-visible:ring-offset-4">
-                  <ChairVisual product={product} />
-                </Link>
-                <div className="pt-6">
-                  <div className="flex flex-wrap items-baseline justify-between gap-3">
-                    <h3 className="font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink sm:text-3xl"><Link href={href} className="cursor-pointer rounded-sm transition hover:text-premium-bronze focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">Modell {product.stackingChair?.modelCode}</Link></h3>
-                    {fromPrice ? (
-                      <p className="text-base font-semibold tabular-nums text-premium-forest">ab <DisplayedMoney money={fromPrice} /></p>
-                    ) : null}
-                  </div>
-                  <p className="mt-4 max-w-xl text-sm leading-7 text-premium-muted">{product.shortDescription}</p>
-                  <dl className="mt-5 grid gap-3 border-y border-premium-beige/65 py-5 text-sm sm:grid-cols-2">
-                    <div>
-                      <dt className="font-semibold text-premium-ink">Polsterung</dt>
-                      <dd className="mt-1 text-premium-muted">drei Ausführungen</dd>
-                    </div>
-                    <div>
-                      <dt className="font-semibold text-premium-ink">Reihenverbindung</dt>
-                      <dd className="mt-1 text-premium-muted">mit oder ohne</dd>
-                    </div>
-                  </dl>
-                  <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
-                    <Link href={href} className="btn-primary px-6 py-2.5 text-sm">
-                      Modell ansehen
-                    </Link>
-                    <span className="text-xs leading-5 text-premium-subtle">
-                      Mengenpreise nennen wir im persönlichen Angebot
-                    </span>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+          {products.map((product, index) => <CommerceProductCard key={product.id} product={product} priority={index < 2} href={`/produkte/stapelstuehle/${product.handle}`} title={`Modell ${product.stackingChair?.modelCode ?? product.title}`} />)}
         </div>
       </section>
 

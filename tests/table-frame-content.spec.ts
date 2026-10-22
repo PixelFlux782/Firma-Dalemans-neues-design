@@ -28,13 +28,18 @@ test("Klapptisch 310c verwendet eindeutige K3-Produktbilder, andere Tische bleib
   const seminar210 = localPriceListProducts.find((product) => product.handle === "seminarklapptisch-210c")!;
   const trapezoid310 = localPriceListProducts.find((product) => product.handle === "trapez-klapptisch-310c")!;
   expect(table310.images.map((item) => item.url)).toEqual([
+    "/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp",
     "/neue%20bilder/Tische/klapptisch-310c/310c-01-hauptansicht.webp",
     "/neue%20bilder/Tische/klapptisch-310c/310c-02-perspektive.webp",
     "/neue%20bilder/Tische/klapptisch-310c/310c-03-seitenansicht.webp",
-    "/images/curated/Tische/Klapptisch_Stapeltisch_t310ccolor_02.webp",
   ]);
+  expect(table310.featuredImage).toEqual(table310.images[0]);
   expect(new Set(table310.images.map((item) => item.url)).size).toBe(table310.images.length);
-  expect(seminar210.images).toHaveLength(1);
+  expect(seminar210.images.map((item) => item.url)).toEqual([
+    "/images/curated/Tische/T210cdetail.webp",
+    "/neue%20bilder/Tische/t210.png",
+  ]);
+  expect(seminar210.featuredImage).toEqual(seminar210.images[0]);
   expect(trapezoid310.images).toHaveLength(1);
 });
 
@@ -69,9 +74,10 @@ test("Ratgeberanker und 310c-Galerie zeigen die korrekten Gestellinhalte", async
 
   await page.goto("/produkte/artikel/klapptisch-310c");
   const gallery = page.getByLabel("Weitere Produktbilder");
-  await expect(gallery.getByRole("button", { name: /Bild 1: Klapptisch Modell 310c mit Gestell K3 in der Hauptansicht/ })).toBeVisible();
-  await expect(gallery.getByRole("button", { name: /Bild 2: Klapptisch Modell 310c mit Gestell K3 aus erhöhter Perspektive/ })).toBeVisible();
-  await expect(gallery.getByRole("button", { name: /Bild 3: Klapptisch Modell 310c mit Gestell K3 in seitlicher Perspektive/ })).toBeVisible();
+  await expect(gallery.getByRole("button", { name: /Bild 1: Klapptisch Modell 310c$/ })).toBeVisible();
+  await expect(gallery.getByRole("button", { name: /Bild 2: Klapptisch Modell 310c mit Gestell K3 in der Hauptansicht/ })).toBeVisible();
+  await expect(gallery.getByRole("button", { name: /Bild 3: Klapptisch Modell 310c mit Gestell K3 aus erhöhter Perspektive/ })).toBeVisible();
+  await expect(gallery.getByRole("button", { name: /Bild 4: Klapptisch Modell 310c mit Gestell K3 in seitlicher Perspektive/ })).toBeVisible();
   await expect(page.getByTestId("table-frame-order-note")).toContainText("K1 und K2 eignen sich für Tischreihen");
   await expect(page.getByRole("link", { name: "Gestelle vergleichen" })).toHaveAttribute("href", "#gestellberatung");
   const advice = page.locator("#gestellberatung");
@@ -86,8 +92,11 @@ test("Ratgeberanker und 310c-Galerie zeigen die korrekten Gestellinhalte", async
     expect((await request.get(`/neue%20bilder/Tische/klapptisch-310c/${file}`)).status(), file).toBe(200);
   }
 
-  for (const handle of ["seminarklapptisch-210c", "trapez-klapptisch-310c"]) {
-    await page.goto(`/produkte/artikel/${handle}`);
-    await expect(page.getByLabel("Weitere Produktbilder")).toHaveCount(0);
-  }
+  await page.goto("/produkte/artikel/seminarklapptisch-210c");
+  const seminarGallery = page.getByLabel("Weitere Produktbilder");
+  await expect(seminarGallery.getByRole("button", { name: /Bild 2: Seminarklapptisch Modell 210c in einer weiteren Ansicht/ })).toBeVisible();
+  expect((await request.get("/neue%20bilder/Tische/t210.png")).status()).toBe(200);
+
+  await page.goto("/produkte/artikel/trapez-klapptisch-310c");
+  await expect(page.getByLabel("Weitere Produktbilder")).toHaveCount(0);
 });

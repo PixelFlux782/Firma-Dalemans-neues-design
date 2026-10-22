@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { isInquiryMode } from "@/lib/commerce/config";
 import { useEffect, useMemo, useState } from "react";
 import CommerceAvailability from "@/components/commerce/CommerceAvailability";
 import {
@@ -387,7 +388,7 @@ export default function ProductVariantSelector({
             onClick={() => addLines([cartLineFromProduct({ product, variant: selectedVariant, quantity })])}
             className="btn-primary mt-7 w-full text-center disabled:cursor-wait disabled:opacity-60"
           >
-            {pending ? "Wird hinzugefügt …" : "In den Warenkorb"}
+            {pending ? "Wird hinzugefügt …" : isInquiryMode ? "Zur Auswahl hinzufügen" : "In den Warenkorb"}
           </button>
           {selectedVariant.priceDataStatus === "development" ? (
             <p className="mt-3 text-center text-xs leading-5 text-premium-bronze">

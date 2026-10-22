@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
+import { isInquiryMode } from "@/lib/commerce/config";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { recordChairAction } from "@/lib/analytics";
 import { useCart } from "@/components/commerce/cart/CartProvider";
@@ -402,7 +403,7 @@ export default function ChairConfigurator({
               disabled={pending || requiresQuoteForFabric || !selectedVariant?.price || !selectedVariant.priceTiers?.length}
               className="btn-primary text-center disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {requiresQuoteForFabric ? "Mit Stoffauswahl bitte anfragen" : "In den Warenkorb"}
+              {requiresQuoteForFabric ? "Mit Stoffauswahl bitte anfragen" : isInquiryMode ? "Zur Auswahl hinzufügen" : "In den Warenkorb"}
             </button>
             <Link
               href={contactHref(product, configuration, quantity, "Angebot", compatibleSelectedAddonSkus, fabricSelection)}

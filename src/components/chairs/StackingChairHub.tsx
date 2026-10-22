@@ -49,7 +49,14 @@ export default function StackingChairHub({ products }: { products: CommerceProdu
         primaryCta: { label: "Modelle ansehen", href: "#modelle" },
         secondaryCta: { label: "Beratung erhalten", href: "/kontakt?kategorie=Stapelst%C3%BChle" },
         metaLine: "Seit 1994 persönlich beraten · Musterstühle möglich · Raum- und Bestuhlungsplanung",
-        image: { src: "/images/curated/Stapelstühle/1021c.webp", alt: "Stapelstuhl für flexible Gemeinde- und Veranstaltungsräume", inset: "4%", backgroundTone: "#f1ece1" },
+        image: {
+          src: "/neue bilder/Stapelstühle/hero-bestuhlung.png",
+          alt: "Bestuhlungsbeispiele für flexible Gemeinde- und Veranstaltungsräume",
+          objectPosition: "50% 50%",
+          fit: "cover",
+          inset: "0%",
+          backgroundTone: "#24150d",
+        },
       }} />
 
       <section id="modelle" aria-labelledby="chair-models-heading" className="scroll-mt-28">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { isInquiryMode } from "@/lib/commerce/config";
 import { useEffect, useMemo, useRef, useState } from "react";
 import CommerceMedia from "@/components/commerce/CommerceMedia";
 import { useCart } from "@/components/commerce/cart/CartProvider";
@@ -256,7 +257,7 @@ function ProductMatch({ match, prominent = false }: { match: FinderMatch; promin
               })])}
               className="btn-primary w-full text-center disabled:cursor-wait disabled:opacity-60"
             >
-              {pending ? "Wird hinzugefügt …" : "In den Warenkorb"}
+              {pending ? "Wird hinzugefügt …" : isInquiryMode ? "Zur Auswahl hinzufügen" : "In den Warenkorb"}
             </button>
           ) : null}
         </div>

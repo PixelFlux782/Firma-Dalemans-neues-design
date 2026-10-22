@@ -18,6 +18,7 @@ export interface ProductCategoryHeroData {
     alt: string;
     focalPoint?: ProductCategoryHeroFocalPoint;
     objectPosition?: string;
+    fit?: "contain" | "cover";
     inset?: string;
     backgroundTone?: string;
   };
@@ -60,6 +61,7 @@ function HeroImage({ image }: Pick<ProductCategoryHeroData, "image">) {
       aspectRatio="4 / 3"
       objectPosition={image.objectPosition ?? focalPositions[image.focalPoint ?? "center"]}
       imageInset={image.inset ?? "4%"}
+      imageClassName={image.fit === "cover" ? "!object-cover ![mask-image:none]" : undefined}
       fadeStrength="soft"
       backgroundTone={image.backgroundTone ?? "#f1ece1"}
       surface={image.backgroundTone ?? "#f1ece1"}

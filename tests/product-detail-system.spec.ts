@@ -116,7 +116,7 @@ test("alle vorhandenen Produktdetailrouten laden mit derselben Grundstruktur", a
     if (purchaseState === "unavailable") {
       await expect(page.getByTestId("unavailable-product"), path).toBeVisible();
     } else if (purchaseState === "cart") {
-      await expect(page.getByRole("button", { name: "In den Warenkorb", exact: true }), path).toBeVisible();
+      await expect(page.getByRole("button", { name: "Zur Auswahl hinzufügen", exact: true }), path).toBeVisible();
     } else if (purchaseState === "inquiry") {
       await expect(page.getByRole("link", { name: "Angebot anfragen", exact: true }), path).toBeVisible();
     }

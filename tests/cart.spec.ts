@@ -274,7 +274,7 @@ test.describe("DLMNS Cart Drawer", () => {
     await expect(page.getByTestId("chair-price")).toContainText("109,88");
 
     await page.getByRole("button", { name: /Ansicht 3:/ }).click();
-    await page.getByRole("button", { name: "In den Warenkorb" }).click();
+    await page.getByRole("button", { name: "Zur Auswahl hinzufügen" }).click();
 
     const drawer = page.getByTestId("cart-drawer");
     await expect(drawer).toBeVisible();
@@ -295,7 +295,7 @@ test.describe("DLMNS Cart Drawer", () => {
 
   test("Produktvariante hinzufügen, Menge ändern und entfernen", async ({ page }) => {
     await page.goto("/shop/produkt/filzgleiter-fuer-rundrohr?variant=local-variant-rf-20");
-    await page.getByRole("button", { name: "In den Warenkorb" }).click();
+    await page.getByRole("button", { name: "Zur Auswahl hinzufügen" }).click();
     const drawer = page.getByTestId("cart-drawer");
     await expect(drawer).toBeVisible();
     await expect(drawer).toContainText("Gleiter für Rundrohr");
@@ -305,12 +305,32 @@ test.describe("DLMNS Cart Drawer", () => {
     await expect(drawer).toContainText("Noch nichts ausgewählt.");
   });
 
+  test("Anfrage-Modus übernimmt die Auswahl und bietet keinen Kaufabschluss an", async ({ page }) => {
+    await page.goto("/shop/produkt/filzgleiter-fuer-rundrohr?variant=local-variant-rf-20");
+    await page.getByRole("button", { name: "Zur Auswahl hinzufügen" }).click();
+    const drawer = page.getByTestId("cart-drawer");
+    await expect(drawer).toContainText("Ihre Produktauswahl ist noch keine Bestellung");
+    await drawer.getByRole("link", { name: "Angebot anfragen →" }).click();
+    await expect(page).toHaveURL(/\/anfrage$/);
+    await expect(page.getByRole("heading", { name: "Persönliches Angebot anfragen" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Gleiter für Rundrohr" })).toBeVisible();
+    await expect(page.getByText("Artikelnummer:")).toBeVisible();
+    await expect(page.getByText("Keine verbindliche Bestellung", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: /kaufen|bestellung|kasse/i })).toHaveCount(0);
+  });
+
+  test("Anfrage-Route behandelt eine leere Produktauswahl", async ({ page }) => {
+    await page.goto("/anfrage");
+    await expect(page.getByRole("heading", { name: "Ihre Produktauswahl ist leer." })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Produkte entdecken" })).toBeVisible();
+  });
+
   test("Tischvariante nutzt bei 16 Stück die zweite Staffel und persistiert die ERP-Nummer", async ({ page }) => {
     await page.goto("/shop/produkt/klapptisch-310c");
     await page.getByRole("button", { name: "140 × 70 cm" }).click();
     await expect(page.getByTestId("selected-variant")).toContainText("140 × 70 cm · ABS");
     await page.getByLabel("Bestellmenge").fill("16");
-    await page.getByRole("button", { name: "In den Warenkorb" }).click();
+    await page.getByRole("button", { name: "Zur Auswahl hinzufügen" }).click();
     await expect(page.getByTestId("cart-drawer")).toContainText("372,50");
     const persisted = await page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? "null"), LOCAL_CART_STORAGE_KEY);
     expect(persisted.lines[0]).toMatchObject({ erpArticleNumber: "T310C147", quantity: 16, unitPrice: { amount: "372.50" } });
@@ -322,7 +342,7 @@ test.describe("DLMNS Cart Drawer", () => {
     await page.getByRole("button", { name: "Buche natur" }).click();
     await expect(page.getByTestId("selected-variant")).toContainText("120 × 70 cm · Buche natur");
     await page.getByLabel("Bestellmenge").fill("21");
-    await page.getByRole("button", { name: "In den Warenkorb" }).click();
+    await page.getByRole("button", { name: "Zur Auswahl hinzufügen" }).click();
     await expect(page.getByTestId("cart-drawer")).toContainText("367,32");
     const persisted = await page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? "null"), LOCAL_CART_STORAGE_KEY);
     expect(persisted.lines[0]).toMatchObject({ erpArticleNumber: "T310C127N", quantity: 21, unitPrice: { amount: "367.32" } });
@@ -338,7 +358,7 @@ test.describe("DLMNS Cart Drawer", () => {
 
   test("Cart bleibt über Navigation und Reload erhalten", async ({ page }) => {
     await page.goto("/shop/produkt/filzgleiter-fuer-rundrohr?variant=local-variant-rf-20");
-    await page.getByRole("button", { name: "In den Warenkorb" }).click();
+    await page.getByRole("button", { name: "Zur Auswahl hinzufügen" }).click();
     await page.getByRole("button", { name: "Warenkorb schließen" }).click();
     await page.goto("/firma");
     await expect(page.getByTestId("cart-trigger").first()).toContainText("20");

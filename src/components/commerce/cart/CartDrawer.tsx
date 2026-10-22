@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import CartLine from "@/components/commerce/cart/CartLine";
 import { useCart } from "@/components/commerce/cart/CartProvider";
 import { usePriceDisplay } from "@/components/commerce/PriceDisplayProvider";
+import { isInquiryMode } from "@/lib/commerce/config";
 
 const focusableSelector = [
   "a[href]",
@@ -148,12 +149,23 @@ export default function CartDrawer() {
                   <dd>{priceLabel}</dd>
                 </div>
               </dl>
+              {isInquiryMode ? (
+                <p className="mt-4 rounded-2xl bg-white/65 px-4 py-3 text-xs leading-5 text-premium-muted">
+                  Ihre Produktauswahl ist noch keine Bestellung. Sie können daraus unverbindlich ein persönliches Angebot bei Dalemans anfragen.
+                </p>
+              ) : null}
               {cart.lines.some((line) => line.priceDataStatus === "development") ? (
                 <p className="mt-3 text-xs leading-5 text-premium-bronze">Die angezeigten Summen beruhen auf unverbindlichen Development-Preisen.</p>
               ) : null}
-              <button type="button" disabled className="mt-5 min-h-12 w-full cursor-not-allowed rounded-full bg-premium-ink/45 px-6 py-3 text-sm font-semibold text-white">
-                Bestellung noch nicht verfügbar
-              </button>
+              {isInquiryMode ? (
+                <Link href="/anfrage" onClick={closeCart} className="btn-primary mt-5 w-full text-center">
+                  Angebot anfragen →
+                </Link>
+              ) : (
+                <button type="button" disabled className="mt-5 min-h-12 w-full cursor-not-allowed rounded-full bg-premium-ink/45 px-6 py-3 text-sm font-semibold text-white">
+                  Bestellung noch nicht verfügbar
+                </button>
+              )}
               <p className="mt-3 text-center text-xs leading-5 text-premium-muted">
                 Sie möchten diese Zusammenstellung bereits anfragen?{" "}
                 <Link href="/kontakt?anliegen=Warenkorb-Beratung" onClick={closeCart} className="font-semibold text-premium-ink underline underline-offset-4">

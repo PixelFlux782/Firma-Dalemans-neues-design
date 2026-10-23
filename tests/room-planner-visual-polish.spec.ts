@@ -17,10 +17,15 @@ test("Dalemans Branding bleibt in 2D, 3D und Druckausgabe sichtbar", async ({ pa
   const canvas = editor.getByRole("img", { name: "Grundriss Zeichenfläche" });
   for (const position of [{ x: 190, y: 150 }, { x: 520, y: 150 }, { x: 520, y: 410 }, { x: 190, y: 410 }]) await canvas.click({ position });
   await canvas.locator("[data-point-id]").first().click();
+  const watermark = canvas.locator('[data-planner-watermark="true"]');
+  await expect(watermark).toHaveCount(1);
+  await expect(watermark).toHaveAttribute("opacity", "0.08");
+  await expect(watermark).toHaveCSS("pointer-events", "none");
   await editor.getByRole("button", { name: "Plan ausgeben" }).click();
 
   const output = page.getByRole("region", { name: "Plan-Ausgabe" });
   await expect(output.getByLabel("Dalemans Raumplaner")).toBeVisible();
+  await expect(output.getByRole("img", { name: /Grundriss/ }).locator('[data-planner-watermark="true"]')).toHaveCount(1);
   await expect(output.getByText("Plan erstellt mit unserem DLMNS Raumplaner")).toBeVisible();
   await page.emulateMedia({ media: "print" });
   await expect(output.getByLabel("Dalemans Raumplaner")).toBeVisible();

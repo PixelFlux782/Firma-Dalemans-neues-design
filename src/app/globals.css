@@ -618,21 +618,30 @@
 .planner-brand-print img{width:62px;height:38px}
 .planner-brand-print strong{font-size:18px}
 .planner-brand-print small{font-size:9px}
+.planner-watermark-editor,.planner-watermark-print{pointer-events:none}
 @media(max-width:750px){.plan-output-sheet{grid-template-columns:1fr}}
 @media(max-width:520px){.planner-brand-overlay span{display:none}.planner-brand-overlay{padding:4px 6px}.planner-brand-overlay img{width:38px;height:23px}}
 @media print{
-  @page{size:A4 landscape;margin:10mm}
-  body{background:#fff!important}
-  #site-shell>a,#site-shell>header,#site-shell>footer,#site-shell>.fixed,.page-stack>header,.page-stack>div>div>div.mb-5{display:none!important}
-  #main-content{padding:0!important;min-height:0!important}
-  #main-content .container-premium{max-width:none!important;padding:0!important}
-  .plan-output{max-width:none;padding:0;color:#111}
+  @page{size:A4 landscape;margin:8mm}
+  html,body{width:281mm;height:194mm;margin:0!important;background:#fff!important;overflow:hidden!important}
+  #site-shell>:not(#main-content){display:none!important}
+  #site-shell,#main-content,#main-content>.container-premium,.page-stack,.planner-page{display:block!important;width:auto!important;min-height:0!important;height:auto!important;margin:0!important;padding:0!important}
+  .plan-output{position:absolute;inset:0;width:281mm;height:194mm;box-sizing:border-box;max-width:none;margin:0;padding:0;color:#111;background:#fff;overflow:hidden;break-before:avoid;break-after:avoid;page-break-before:avoid;page-break-after:avoid}
   .plan-output-actions{display:none!important}
-  .plan-output-sheet{grid-template-columns:minmax(0,2fr) minmax(240px,1fr)}
-  .plan-output-drawing svg{max-height:165mm;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .plan-output header{height:22mm;box-sizing:border-box;margin:0 0 3mm;padding:0 0 3mm}
+  .plan-output h1{font-size:18px}
+  .plan-output h2{font-size:12px;margin:7px 0 3px}
+  .plan-output-sheet{height:158mm;grid-template-columns:minmax(0,2.35fr) minmax(58mm,.85fr);gap:4mm;break-inside:avoid;page-break-inside:avoid}
+  .plan-output-drawing{display:flex;min-width:0;min-height:0;flex-direction:column}
+  .plan-output-drawing svg{width:100%;height:151mm;max-height:151mm;min-height:0;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .plan-output-drawing p{margin:1.5mm 0 0;font-size:8px}
+  .plan-output-details{font-size:8px;line-height:1.2;overflow:hidden}
+  .plan-output-details dl>div{padding:1px 0}
+  .plan-output-details p{margin:2px 0}
   .plan-output-details ul{max-height:none;overflow:visible}
-  .plan-output-details,.plan-output-drawing{break-inside:avoid}
-  .planner-brand-print img,.plan-output-footer{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .plan-output-details,.plan-output-drawing{break-inside:avoid;page-break-inside:avoid}
+  .plan-output-footer{height:5mm;margin-top:2mm;padding-top:1.5mm}
+  .planner-brand-print img,.planner-watermark-print,.plan-output-footer{print-color-adjust:exact;-webkit-print-color-adjust:exact}
 }
 /* Room planner workspace */
 .planner-page { max-width: none; }

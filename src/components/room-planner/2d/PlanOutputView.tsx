@@ -8,6 +8,7 @@ import type { analyzeCurrentPlan } from "@/lib/room-planner/currentPlanAnalysis"
 import MeasurementLayer from "./MeasurementLayer";
 import { calculateTableDemand, planCapacity, tableModel, tablePolygon, zoneCenter, zonePolygon } from "@/lib/room-planner/tables";
 import PlannerBrand from "../PlannerBrand";
+import PlannerWatermark from "../PlannerWatermark";
 
 type ReturnTypeAnalysis = ReturnType<typeof analyzeCurrentPlan>;
 type Props = { plan: RoomPlan; name: string; issuedAt: Date; profileName: string; analysis: ReturnTypeAnalysis | null; reservePercent: number; inquiryHref: string; shopHref?: string; onClose: () => void };
@@ -31,12 +32,19 @@ export default function PlanOutputView({ plan, name, issuedAt, profileName, anal
   const important = checks.filter((check) => check.status === "fail" || check.status === "warning");
   const capacity = planCapacity(plan);
   const legend = [["Sitz", "#405b49"], ["Tisch / Sperrfläche für Stühle", "#d9c49a"], ["Gang", "#5596a0"], ["Tür", "#347b7a"], ["Ausgang", "#13714a"], ["Hindernis", "#bb7558"], ["Bühne", "#aa7854"], ["Sperrfläche", "#957bb4"], ["Front", "#235e89"], ...(routes?.some((r) => r.valid && r.path?.length > 1) ? [["Rettungsweg", "#d97706"]] : [])];
+  const printPlan = async () => {
+    await document.fonts?.ready;
+    await Promise.all(Array.from(document.images).map((image) => image.complete ? image.decode?.().catch(() => undefined) : new Promise<void>((resolve) => { image.addEventListener("load", () => resolve(), { once: true }); image.addEventListener("error", () => resolve(), { once: true }); })));
+    window.print();
+  };
   return <section className="plan-output" aria-label="Plan-Ausgabe">
-    <div className="plan-output-actions"><button type="button" onClick={onClose}>Zurück zum Editor</button><button type="button" onClick={() => window.print()}>Drucken / als PDF speichern</button><a href={inquiryHref}>Angebot für Stühle und Tische anfordern</a>{shopHref && <a href={shopHref}>Stuhl konfigurieren</a>}</div>
-    <header><PlannerBrand variant="print" /><div><p>Raumplan · Gesamtplanung</p><h1>{name}</h1><p>Ausgabe: {issuedAt.toLocaleString("de-DE")} · {capacity.total} Plätze ({capacity.rowSeats} Reihe / {capacity.tableSeats} Tisch) · {(plan.tables ?? []).length} Tische</p></div></header>
+    <div className="plan-output-actions"><button type="button" onClick={onClose}>Zurück zum Editor</button><button type="button" onClick={printPlan}>Drucken / als PDF speichern</button><a href={inquiryHref}>Angebot für Stühle und Tische anfordern</a>{shopHref && <a href={shopHref}>Stuhl konfigurieren</a>}</div>
+    <header><PlannerBrand variant="print" /><div><p>Raum- und Bestuhlungsplan</p><h1>{name}</h1><p>Planausgabe vom {issuedAt.toLocaleDateString("de-DE")} · {capacity.total} Sitzplätze · {(plan.tables ?? []).length} Tische</p></div></header>
     <div className="plan-output-sheet"><div className="plan-output-drawing">
       <svg role="img" aria-label="Grundriss mit Sitzen, Gängen, Objekten und Ausgängen" viewBox={`${minX - margin} ${minY - margin} ${width + 2 * margin} ${height + 2 * margin}`} preserveAspectRatio="xMidYMid meet">
-        {plan.contour.closed && <polygon points={polygon(plan.contour.points)} fill="#edf2e9" stroke="#314c3a" strokeWidth=".05" />}
+        {plan.contour.closed && <polygon points={polygon(plan.contour.points)} fill="#edf2e9" />}
+        <PlannerWatermark x={minX + width * .28} y={minY + height * .28} width={Math.max(width * .44, 1)} height={Math.max(height * .44, 1)} className="planner-watermark-print" />
+        {plan.contour.closed && <polygon points={polygon(plan.contour.points)} fill="none" stroke="#314c3a" strokeWidth=".05" />}
         {plan.objects.filter((o) => o.type === "aisle").map((o) => o.type === "aisle" && <polygon key={o.id} points={polygon(aislePolygon(o))} fill="#a9d2d8" stroke="#357682" strokeWidth=".025" />)}
         {(plan.zones ?? []).map((zone) => { const center = zoneCenter(zone); return <g key={zone.id} data-output-zone-id={zone.id}><polygon points={polygon(zonePolygon(zone))} fill="#e8d8ad" fillOpacity=".55" stroke="#8a6a2f" strokeWidth=".035" strokeDasharray=".12 .08" /><text x={center.x} y={center.y} textAnchor="middle" dominantBaseline="middle" fontSize=".22" fill="#684d20">{zone.type === "tables" ? "Tischbereich" : "Bereich"}</text></g>; })}
         {plan.objects.filter(isBlockingObject).map((o) => <g key={o.id}><polygon points={polygon(obstaclePolygon(o))} fill={o.type === "stage" || o.type === "obstacle" && o.obstacleType === "stage" ? "#aa7854" : o.type === "reservedArea" || o.type === "obstacle" && o.obstacleType === "restricted" ? "#957bb4" : "#bb7558"} stroke="#694d43" strokeWidth=".025" /><text x={o.x} y={o.y} textAnchor="middle" dominantBaseline="middle" fontSize=".24" fill="white">{o.type === "stage" || o.type === "obstacle" && o.obstacleType === "stage" ? "Bühne" : o.type === "reservedArea" || o.type === "obstacle" && o.obstacleType === "restricted" ? "Sperrfläche" : "Hindernis"}</text></g>)}

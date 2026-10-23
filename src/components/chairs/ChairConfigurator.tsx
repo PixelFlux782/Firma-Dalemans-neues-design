@@ -248,8 +248,6 @@ export default function ChairConfigurator({
   const configurationSummary = selectedVariant
     ? [selectedVariant.title, selectedFabric?.name, selectedFabricColor ? `${selectedFabricColor.name} ${selectedFabricColor.code}` : null].filter(Boolean).join(" · ")
     : "Keine gültige Ausführung";
-  const requiresQuoteForFabric = configuration.upholstery !== "none" && Boolean(selectedFabric);
-
   return (
     <div className="border-t border-premium-beige/80 pt-7" data-testid="chair-configurator">
       <div className="flex items-end justify-between gap-5">
@@ -396,22 +394,15 @@ export default function ChairConfigurator({
         <p role="alert" className="mt-5 rounded-xl border border-red-700/30 bg-red-50 px-4 py-3 text-sm text-red-900">Diese Kombination ist nicht verfügbar. Bitte wählen Sie eine andere Ausführung.</p>
       ) : (
         <>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="mt-6 grid gap-3">
             <button
               type="button"
-              onClick={() => addLines([cartLineFromProduct({ product, variant: selectedVariant, quantity, selectedAddonSkus: compatibleSelectedAddonSkus })])}
-              disabled={pending || requiresQuoteForFabric || !selectedVariant?.price || !selectedVariant.priceTiers?.length}
+              onClick={() => addLines([cartLineFromProduct({ product, variant: selectedVariant, quantity, selectedAddonSkus: compatibleSelectedAddonSkus, variantTitle: configurationSummary })])}
+              disabled={pending || !selectedVariant?.price || !selectedVariant.priceTiers?.length}
               className="btn-primary text-center disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {requiresQuoteForFabric ? "Mit Stoffauswahl bitte anfragen" : isInquiryMode ? "Zur Auswahl hinzufügen" : "In den Warenkorb"}
+              {isInquiryMode ? "Zur Auswahl hinzufügen" : "In den Warenkorb"}
             </button>
-            <Link
-              href={contactHref(product, configuration, quantity, "Angebot", compatibleSelectedAddonSkus, fabricSelection)}
-              onClick={() => recordChairAction({ action: "chair_quote_request", model: product.stackingChair?.modelCode, variantId: selectedVariant.id, quantity })}
-              className="btn-primary text-center"
-            >
-              Angebot anfragen
-            </Link>
             <Link
               href={contactHref(product, configuration, quantity, "Musterstuhl", compatibleSelectedAddonSkus, fabricSelection)}
               onClick={() => recordChairAction({ action: "chair_sample_request", model: product.stackingChair?.modelCode, variantId: selectedVariant.id, quantity })}
@@ -420,9 +411,10 @@ export default function ChairConfigurator({
               Musterstuhl anfragen
             </Link>
           </div>
+          {isInquiryMode ? <p className="mt-3 text-center text-xs leading-5 text-premium-muted">Unverbindlich zusammenstellen · Angebot im Warenkorb anfragen</p> : null}
           {configuration.upholstery !== "none" ? <Link href={contactHref(product, configuration, quantity, "Stoffmuster", compatibleSelectedAddonSkus, fabricSelection)} className="mt-4 mr-6 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">Stoffmuster anfragen →</Link> : null}
           <Link href={contactHref(product, configuration, quantity, "Beratung", compatibleSelectedAddonSkus, fabricSelection)} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">
-            Fragen zum Modell? Persönlich beraten lassen →
+            Fragen zu diesem Modell? Persönlich beraten lassen →
           </Link>
         </>
       )}

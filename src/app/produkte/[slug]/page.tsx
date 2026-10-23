@@ -38,6 +38,6 @@ export default async function LegacyProductPage({ params }: Props) {
     media={product.additionalImages?.length && product.slug !== "tischfuesse-gestellteile"
       ? <CommerceMedia image={productImages[0]} images={productImages} fallbackLabel={product.title} priority sizes="(min-width: 1024px) 52vw, 100vw" aspectRatio={product.categoryId === "klapptische" ? "5 / 4" : "4 / 3"} imageInset="7%" className="min-h-[330px] rounded-[2rem] sm:min-h-[500px] lg:min-h-[620px]" />
       : <ProductVisual src={product.image} alt={product.imageAlt ?? product.title} priority sizes="(min-width: 1024px) 52vw, 100vw" aspectRatio={product.categoryId === "klapptische" ? "5 / 4" : "4 / 3"} imageInset="7%" backgroundTone="canvas" className="min-h-[330px] rounded-[2rem] sm:min-h-[500px] lg:min-h-[620px]" />}
-    purchase={<InquiryPurchase name={product.title} />}
+    purchase={<InquiryPurchase name={product.title} handle={product.slug} />}
   >{product.slug === "tischfuesse-gestellteile" ? <TableFrameGuide /> : null}</ProductDetailPage></>;
 }

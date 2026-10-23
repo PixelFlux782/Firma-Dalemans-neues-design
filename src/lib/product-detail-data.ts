@@ -30,8 +30,6 @@ export function legacyDetailData(product: Product): ProductDetailData {
       text: product.details?.join(" ") ?? product.shortDescription,
       href: contact(product.title, "Kompatibilität"), label: "Kompatibilität prüfen",
     } : undefined,
-    consultation: { eyebrow: "Persönliche Beratung", title: `${product.title} passend auswählen.`,
-      text: product.note ?? product.shortDescription, href: contact(product.title, "Angebot"), label: "Angebot anfragen" },
     continuation: { title: product.categoryName, text: "Weitere Produkte und passende Ausführungen entdecken.", href: categoryHref, label: "Zur Kategorie" },
   };
 }
@@ -83,11 +81,6 @@ export function commerceDetailData(product: CommerceProduct, category: string, c
       ...(product.handle === "tischtransportwagen" ? product.applicationNotes.slice(1) : []),
     ] : undefined,
     help, downloads: product.downloads, faq: product.faq,
-    consultation: { eyebrow: chair ? "Musterstuhl & Beratung" : "Persönliche Beratung",
-      title: chair ? "Ausführung vor größerer Bestellung persönlich prüfen." : "Ausführung und Einsatz persönlich klären.",
-      text: product.consultationNote ?? product.shortDescription,
-      href: contact(product.title, chair ? "Musterstuhl" : "Produktberatung"),
-      label: chair ? "Musterstuhl anfragen" : "Persönlich beraten lassen" },
     continuation: { title: category, text: "Weitere Modelle und Ergänzungen ansehen.", href: categoryHref, label: "Zur Übersicht" },
   };
 }

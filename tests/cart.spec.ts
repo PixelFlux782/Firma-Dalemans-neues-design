@@ -196,9 +196,10 @@ test.describe("provider-neutrale lokale Cart-Logik", () => {
     expect(result.lines.every((line) => line.priceDataStatus === "development")).toBe(true);
   });
 
-  test("führt Anfrage- und ab-Preise nicht irreführend als Kaufposition", () => {
+  test("führt Anfragepositionen ohne Preis, aber keine unvollständigen ab-Preise", () => {
     const { cart } = provider();
-    expect(cart.addLines([fixedLine({ priceStatus: "on_request", unitPrice: null, availability: "on_request" })]).lines).toEqual([]);
+    expect(cart.addLines([fixedLine({ priceStatus: "on_request", unitPrice: null, availability: "on_request" })]).lines).toHaveLength(1);
+    cart.clearCart();
     expect(cart.addLines([fixedLine({ priceStatus: "from" })]).lines).toEqual([]);
   });
 

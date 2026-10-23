@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test";
 import { localProducts } from "../src/lib/commerce/providers/local-data";
-import { canAddVariantToCart } from "../src/lib/commerce/cart/lines";
 import { products } from "../src/lib/products";
 import { productPath } from "../src/lib/product-routes";
 
@@ -47,8 +46,9 @@ test("Tischtransportwagen wechselt Preis, Artikelnummer und Anfragevariante", as
   await expect(accessory).toContainText("Zweiter Schiebegriff");
   await expect(accessory).toContainText("Auf Anfrage");
   await accessory.getByRole("checkbox", { name: "Bei der Anfrage vormerken" }).check();
-  await expect(page.getByRole("link", { name: "Angebot anfragen" })).toHaveAttribute("href", /artikelnummer=D710-008/);
-  await expect(page.getByRole("link", { name: "Angebot anfragen" })).toHaveAttribute("href", /nachricht=.*Zubeh%C3%B6rwunsch%3A\+Zweiter\+Schiebegriff/);
+  const advice = page.getByRole("link", { name: "Fragen zu diesem Modell? Persönlich beraten lassen →" });
+  await expect(advice).toHaveAttribute("href", /artikelnummer=D710-008/);
+  await expect(advice).toHaveAttribute("href", /nachricht=.*Zubeh%C3%B6rwunsch%3A\+Zweiter\+Schiebegriff/);
 
   await selector.getByRole("button", { name: /Eine Lenkachse/ }).click();
   await expect(page.locator('[data-price-status="fixed"]')).toContainText("435,00");
@@ -93,16 +93,13 @@ test("alle vorhandenen Produktdetailrouten laden mit derselben Grundstruktur", a
       path: product.stackingChair
         ? `/produkte/stapelstuehle/${product.handle}`
         : `/produkte/artikel/${product.handle}`,
-      purchaseState: !selectedVariant
-        ? "unavailable" as const
-        : canAddVariantToCart(selectedVariant)
-          ? "cart" as const
-          : "inquiry" as const,
+      purchaseState: !selectedVariant ? "unavailable" as const : "cart" as const,
     };
   });
   const commercePaths = new Set(commerceRoutes.map(route => route.path));
   const routes = [
     ...products
+      .filter(product => product.slug !== "reihenverbinder")
       .map(product => productPath(product.slug))
       .filter(path => !commercePaths.has(path))
       .map(path => ({ path, purchaseState: "legacy" as const })),
@@ -117,8 +114,11 @@ test("alle vorhandenen Produktdetailrouten laden mit derselben Grundstruktur", a
       await expect(page.getByTestId("unavailable-product"), path).toBeVisible();
     } else if (purchaseState === "cart") {
       await expect(page.getByRole("button", { name: "Zur Auswahl hinzufügen", exact: true }), path).toBeVisible();
-    } else if (purchaseState === "inquiry") {
-      await expect(page.getByRole("link", { name: "Angebot anfragen", exact: true }), path).toBeVisible();
+      await expect(page.getByRole("link", { name: "Angebot anfragen", exact: true }), path).toHaveCount(0);
+      await expect(page.getByRole("link", { name: "Fragen zu diesem Modell? Persönlich beraten lassen →" }), path).toBeVisible();
+    } else if (purchaseState === "legacy") {
+      await expect(page.getByRole("button", { name: "Zur Auswahl hinzufügen", exact: true }), path).toBeVisible();
+      await expect(page.getByRole("link", { name: "Angebot anfragen", exact: true }), path).toHaveCount(0);
     }
   }
   expect(failedImages).toEqual([]);
@@ -130,6 +130,18 @@ test("kanonische Buchablage bleibt auf schmalem Mobilgerät bedienbar", async ({
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Buchablage zum Nachrüsten");
   await expect(page.getByRole("link", { name: "Persönlich beraten lassen" }).first()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
+test("ältere Produktdetails übernehmen Menge und Produktkontext in Auswahl und Beratung", async ({ page }) => {
+  await page.goto("/produkte/stuhlgleiter");
+  await page.getByLabel("Menge", { exact: true }).fill("12");
+  const advice = page.getByRole("link", { name: "Fragen zu diesem Modell? Persönlich beraten lassen →" });
+  await expect(advice).toHaveAttribute("href", /produkt=Stuhlgleiter/);
+  await expect(advice).toHaveAttribute("href", /menge=12/);
+  await page.getByRole("button", { name: "Zur Auswahl hinzufügen" }).click();
+  const drawer = page.getByTestId("cart-drawer");
+  await expect(drawer).toContainText("Stuhlgleiter");
+  await expect(drawer.getByRole("spinbutton", { name: /Menge für Stuhlgleiter/ })).toHaveValue("12");
 });
 
 test("alte Produktadressen liefern 301 und die Reihenverbinder-Beratung bleibt eigenständig", async ({ request, page }) => {

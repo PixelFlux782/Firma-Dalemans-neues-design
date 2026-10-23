@@ -275,7 +275,7 @@ test.describe("Modell 1021 Konfigurator", () => {
     await dialog.getByRole("button", { name: /^Xtreme/ }).click();
     await dialog.getByRole("button", { name: /Ocean.*Farbcode 3100/ }).click();
     await expect(page.getByTestId("selected-fabric")).toContainText("Xtreme · Ocean · 3100");
-    await expect(page.getByRole("button", { name: "Mit Stoffauswahl bitte anfragen" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Zur Auswahl hinzufügen" })).toBeEnabled();
     await expect.poll(() => {
       const params = new URL(page.url()).searchParams;
       return [params.get("stoff"), params.get("farbe")];
@@ -409,7 +409,7 @@ test.describe("Modell 1021 Konfigurator", () => {
 
     await page.locator('input[name="upholstery"][value="seat-back"]').check({ force: true });
     await expect(grip).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "Angebot anfragen" })).not.toHaveAttribute("href", /Griffloch/);
+    await expect(page.getByRole("link", { name: "Fragen zu diesem Modell? Persönlich beraten lassen →" })).not.toHaveAttribute("href", /Griffloch/);
 
     await page.locator('input[name="upholstery"][value="seat"]').check({ force: true });
     await expect(grip).toBeVisible();
@@ -422,7 +422,7 @@ test.describe("Modell 1021 Konfigurator", () => {
     await quantity.fill("80");
     await expect(quantity).toHaveValue("80");
 
-    const quote = page.getByRole("link", { name: "Angebot anfragen" });
+    const quote = page.getByRole("link", { name: "Fragen zu diesem Modell? Persönlich beraten lassen →" });
     await expect(quote).toHaveAttribute("href", /nachricht=.*Menge%3A\+80/);
     await quote.click();
     await expect(page).toHaveURL(/\/kontakt\?.*#anfrage$/);

@@ -144,7 +144,7 @@ test("Rednerpulte sind einzeln mit Preis, Artikelnummer und Bildzuweisung erreic
     await expect(page.locator('[data-price-status="fixed"]')).toContainText(product.price);
     await expect(page.locator(`img[src*="${product.image}"]`).first()).toBeVisible();
     await expect(page.getByLabel("Breadcrumb").getByRole("link", { name: "Rednerpulte" })).toHaveAttribute("href", "/produkte/sortiment/rednerpulte");
-    const inquiry = page.getByRole("link", { name: "Angebot anfragen" }).first();
+    const inquiry = page.getByRole("link", { name: "Fragen zu diesem Modell? Persönlich beraten lassen →" }).first();
     await expect(inquiry).toHaveAttribute("href", new RegExp(`artikelnummer=${product.sku}`));
   }
 

@@ -8,6 +8,7 @@ import type {
 } from "@/lib/commerce/types";
 import { multiplyCommerceMoney } from "@/lib/commerce/money";
 import type { CommercePriceTier } from "@/lib/commerce/types";
+import { isInquiryMode } from "@/lib/commerce/config";
 
 export const LOCAL_CART_STORAGE_KEY = "dlmns-commerce-cart";
 export const LOCAL_CART_VERSION = 1;
@@ -49,7 +50,8 @@ function isMoney(value: unknown): value is CommerceMoney {
 }
 
 function hasCartPrice(line: Partial<CartInputLine>) {
-  return isMoney(line.unitPrice)
+  return (isInquiryMode && line.priceStatus === "on_request" && line.unitPrice === null)
+    || isMoney(line.unitPrice)
     && (line.priceStatus === "fixed"
       || (line.priceStatus === "from" && Array.isArray(line.priceTiers) && line.priceTiers.length > 0));
 }
@@ -230,7 +232,9 @@ export function createLocalCartProvider({
       for (const input of inputs) {
         if (!canAddLine(input)) continue;
         const existingIndex = lines.findIndex((line) =>
-          line.variantId === input.variantId && sameAddons(line.selectedAddons, input.selectedAddons),
+          line.variantId === input.variantId
+            && line.variantTitle === input.variantTitle
+            && sameAddons(line.selectedAddons, input.selectedAddons),
         );
         if (existingIndex >= 0) {
           const existing = lines[existingIndex];

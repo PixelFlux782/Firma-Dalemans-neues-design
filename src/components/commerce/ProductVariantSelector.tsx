@@ -385,11 +385,17 @@ export default function ProductVariantSelector({
           <button
             type="button"
             disabled={pending}
-            onClick={() => addLines([cartLineFromProduct({ product, variant: selectedVariant, quantity })])}
+            onClick={() => addLines([cartLineFromProduct({
+              product,
+              variant: selectedVariant,
+              quantity,
+              variantTitle: [selectedVariant.title, ...selectedAccessoryTitles.map((title) => `Zubehörwunsch: ${title}`)].join(" · "),
+            })])}
             className="btn-primary mt-7 w-full text-center disabled:cursor-wait disabled:opacity-60"
           >
             {pending ? "Wird hinzugefügt …" : isInquiryMode ? "Zur Auswahl hinzufügen" : "In den Warenkorb"}
           </button>
+          {isInquiryMode ? <p className="mt-3 text-center text-xs leading-5 text-premium-muted">Unverbindlich zusammenstellen · Angebot im Warenkorb anfragen</p> : null}
           {selectedVariant.priceDataStatus === "development" ? (
             <p className="mt-3 text-center text-xs leading-5 text-premium-bronze">
               Unverbindlicher Development-Preis für den technischen Warenkorb-Test.
@@ -405,7 +411,7 @@ export default function ProductVariantSelector({
         <p className="mt-7 rounded-2xl bg-premium-warm/80 p-4 text-center text-sm font-medium text-premium-charcoal" data-testid="unavailable-product">
           Diese Ausführung ist derzeit nicht verfügbar.
         </p>
-      ) : (
+      ) : !isInquiryMode ? (
         <>
           <Link
             href={`/kontakt?${contactParameters.toString()}`}
@@ -420,7 +426,12 @@ export default function ProductVariantSelector({
             </p>
           ) : null}
         </>
-      )}
+      ) : null}
+      {selectedVariant ? (
+        <Link href={`/kontakt?${contactParameters.toString()}#anfrage`} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">
+          Fragen zu diesem Modell? Persönlich beraten lassen →
+        </Link>
+      ) : null}
     </div>
   );
 }

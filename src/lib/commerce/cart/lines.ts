@@ -6,14 +6,19 @@ import type {
   CommerceProductVariant,
 } from "@/lib/commerce/types";
 import { chairAddonBySku, configuredChairPriceTiers, isChairAddonCompatible } from "@/lib/commerce/chair-addons";
+import { isInquiryMode } from "@/lib/commerce/config";
 
 export function canAddVariantToCart(variant: CommerceProductVariant | null) {
   return Boolean(
     variant
-      && variant.availableForSale
-      && variant.availability === "in_stock"
-      && variant.priceStatus === "fixed"
-      && variant.price,
+      && variant.availability !== "out_of_stock"
+      && variant.priceStatus !== "unavailable"
+      && (isInquiryMode
+        ? variant.availability === "in_stock" || variant.availability === "on_request"
+        : variant.availableForSale
+          && variant.availability === "in_stock"
+          && variant.priceStatus === "fixed"
+          && variant.price),
   );
 }
 
@@ -46,6 +51,7 @@ export function cartLineFromProduct({
   source = "product",
   finderContext,
   selectedAddonSkus = [],
+  variantTitle,
 }: {
   product: CommerceProduct;
   variant: CommerceProductVariant;
@@ -53,6 +59,7 @@ export function cartLineFromProduct({
   source?: CommerceCartLineSource;
   finderContext?: CommerceFinderCartContext;
   selectedAddonSkus?: string[];
+  variantTitle?: string;
 }): CartInputLine {
   const rules = cartQuantityRules(product, variant);
   const compatibleAddonSkus = product.stackingChair
@@ -73,7 +80,7 @@ export function cartLineFromProduct({
     productHandle: product.handle,
     productTitle: product.title,
     variantId: variant.id,
-    variantTitle: variant.title,
+    variantTitle: variantTitle ?? variant.title,
     image: variant.image ?? product.featuredImage,
     quantity,
     erpArticleNumber: variant.erpArticleNumber ?? null,

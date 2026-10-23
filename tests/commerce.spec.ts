@@ -128,7 +128,8 @@ test("Filz-Nagelgleiter zeigt Tabellenpreis und Freigabehinweis", async ({ page 
   await expect(page.locator('[data-price-status="fixed"]')).toContainText("8,00 €");
   await expect(page.getByText("VK aus der Datentabelle · nicht als Verkaufspreis freigegeben.")).toBeVisible();
   await expect(page.getByText("A1021NG", { exact: true }).first()).toBeVisible();
-  await expect(page.getByRole("link", { name: "Angebot anfragen" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Zur Auswahl hinzufügen" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Angebot anfragen" })).toHaveCount(0);
   await expect(page.getByTestId("unavailable-product")).toHaveCount(0);
 });
 

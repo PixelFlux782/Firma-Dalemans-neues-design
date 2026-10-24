@@ -23,7 +23,7 @@ const steps = [
   {
     title: "Umsetzung",
     text: "Dabei denken wir Nutzung, Lagerung, Transport und Alltagstauglichkeit gemeinsam.",
-    image: "/neue bilder/planung-schritt-3.png",
+    image: "/images/raumplaner/planung-cad.webp",
   },
 ] as const;
 

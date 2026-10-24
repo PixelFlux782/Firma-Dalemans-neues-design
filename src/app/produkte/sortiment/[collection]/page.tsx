@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
     title: collection.seo.title ?? collection.title,
     description: collection.seo.description ?? collection.description,
     path: `/produkte/sortiment/${collection.handle}`,
-    image: handle === "klapptische" ? "/neue bilder/Tische/Klapptisch-collage-detail.png" : collection.image?.url ?? null,
+    image: handle === "klapptische" ? "/images/kategorien/klapptische-collage.webp" : collection.image?.url ?? null,
     keywords: [collection.title, "Dalemans Zubehör", "Nachrüstung"],
   });
 }

@@ -18,15 +18,6 @@ export const supportSearchEntries: SupportSearchEntry[] = [
     aliases: ["Zubehör-Hauptkategorie", "Ersatzteile finden"],
   },
   {
-    id: "glider-finder",
-    title: "Gleiter-Finder",
-    url: "/produkte/gleiter-finder",
-    description: "Passende Gleiter anhand von Gestellform, Außenmaß und Boden eingrenzen.",
-    keywords: ["Stuhl messen", "Rohrmaß", "Außenmaß", "passender Gleiter"],
-    aliases: ["welcher Gleiter", "Gleiter finden", "passender Gleiter", "Stuhl messen"],
-    featuredWhenEmpty: true,
-  },
-  {
     id: "shop-overview",
     title: "Produkte entdecken",
     url: "/produkte",

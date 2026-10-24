@@ -125,7 +125,7 @@ test("Produkte sind in Desktop- und Mobile-Navigation erreichbar", async ({ page
 
 test("Rednerpulte sind einzeln mit Preis, Artikelnummer und Bildzuweisung erreichbar", async ({ page }) => {
   const products = [
-    { handle: "rednerpult-typ-a", sku: "D705A", price: "1.249,15 €", image: "Rednerpult_Acrylglas_Plexiglas_TypA_1.png" },
+    { handle: "rednerpult-typ-a", sku: "D705A", price: "1.249,15 €", image: "rednerpult-acrylglas-typ-a.webp" },
     { handle: "rednerpult-typ-e", sku: "D705E", price: "1.743,23 €", image: "Rednerpult_Acrylglas_Plexiglas_TypE_1.png" },
     { handle: "rednerpult-typ-ah", sku: "D705AH", price: "1.048,17 €", image: "Rednerpult_Acrylglas_Plexiglas_TypAH_1.png" },
   ];

@@ -1,9 +1,14 @@
 import "server-only";
 import type { CommerceCollection, CommerceProvider } from "@/lib/commerce/types";
 import { localCollectionRecords, localProducts } from "@/lib/commerce/providers/local-data";
+import { publicCommerceProducts } from "@/lib/commerce/publication";
+
+function availableProducts() {
+  return publicCommerceProducts(localProducts);
+}
 
 function productsForCollection(handle: string) {
-  return localProducts.filter((product) => product.collectionHandles.includes(handle));
+  return availableProducts().filter((product) => product.collectionHandles.includes(handle));
 }
 
 function hydrateCollection(
@@ -26,7 +31,7 @@ export const localCommerceProvider: CommerceProvider = {
   },
 
   async getProducts() {
-    return [...localProducts];
+    return availableProducts();
   },
 
   async getProductsByCollection(collectionHandle) {
@@ -34,6 +39,6 @@ export const localCommerceProvider: CommerceProvider = {
   },
 
   async getProductByHandle(handle) {
-    return localProducts.find((product) => product.handle === handle) ?? null;
+    return availableProducts().find((product) => product.handle === handle) ?? null;
   },
 };

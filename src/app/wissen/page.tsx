@@ -57,7 +57,7 @@ const knowledgeTopicGroups = [
     topics: ["Gleiter & Bodenschutz", "Reihenverbinder & Zubehör", "Buchablagen", "Ersatzteile", "Pflege", "Werterhalt"],
     guideSlugs: ["transport-lagerung-pflege"],
     relatedLinks: [
-      { href: "/produkte/gleiter-finder", label: "Gleiter mit Messhilfe finden" },
+      { href: "/kontakt?anliegen=Gleiter-Beratung", label: "Gleiter persönlich zuordnen" },
       { href: "/produkte/kategorien/transportwagen-zubehoer", label: "Zubehör & Ersatzteile ansehen" },
       { href: "/produkte/artikel/buchablage-nachruesten", label: "Buchablage nachrüsten" },
     ],

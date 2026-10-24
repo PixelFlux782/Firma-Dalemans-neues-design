@@ -10,7 +10,7 @@ export const company = {
   telephoneHref: "tel:+499342915353",
   email: "info@dalemans.de",
   emailHref: "mailto:info@dalemans.de",
-  logoPath: "/Logos/logo_transp.png",
+  logoPath: "/images/branding/dalemans-logo.webp",
   address: {
     streetAddress: "Bollenwaldstraße 108a",
     postalCode: "63743",

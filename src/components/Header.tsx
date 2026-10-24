@@ -32,7 +32,7 @@ const moreGroups = [
     title: "Wissen & Hilfe",
     links: [
       { href: "/beratung/stapelstuehle-kaufen", label: "Kaufberatung Stapelstühle" },
-      { href: "/produkte/gleiter-finder", label: "Gleiter-Finder & Messhilfe" },
+      { href: "/kontakt?anliegen=Gleiter-Beratung", label: "Gleiter persönlich zuordnen" },
       { href: "/wissen/reihenverbinder-fuer-stapelstuehle", label: "Reihenverbinder richtig auswählen" },
       { href: "/raeume-planung/raumplanung", label: "Bestuhlung & Raumplanung" },
       { href: "/wissen/transport-lagerung-pflege", label: "Stapeln, Lagern & Transportieren" },

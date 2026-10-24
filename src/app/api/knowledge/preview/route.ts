@@ -15,7 +15,7 @@ export function GET(request: Request) {
       : undefined;
 
   if (!entry) {
-    return NextResponse.json({ entry: null }, { status: 404 });
+    return NextResponse.json({ entry: null });
   }
 
   return NextResponse.json({ entry });

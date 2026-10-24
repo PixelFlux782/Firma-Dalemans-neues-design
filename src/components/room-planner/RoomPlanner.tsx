@@ -298,7 +298,7 @@ export default function RoomPlanner({ chairs }: { chairs: PlannerChair[] }) {
         <div className={`h-[26rem] sm:h-[34rem] lg:h-[min(62vh,36rem)] lg:min-h-[29rem] ${placementMode ? "cursor-crosshair" : ""}`}><Canvas shadows camera={{ position: [12, 13, 16], fov: 42, near: 0.1, far: 100 }} dpr={[1, 1.5]}><RoomScene values={values} positions={layout.positions} modelPath={selectedChair.modelPath} placementMode={placementMode} onPlaceObstacle={placeObstacle} onPlaceDoor={placeDoor} /></Canvas></div>
         <p className="border-t border-premium-beige bg-white/70 px-4 py-2.5 text-xs text-premium-muted">{placementMode ? "Klicken: Position setzen · Esc: abbrechen" : "Ziehen: drehen · Mausrad: zoomen · Rechtsklick: verschieben"}</p>
       </section>
-      <div className="premium-card mt-3 p-3 sm:p-4" aria-label="Planungsstatus">
+      <div role="status" className="premium-card mt-3 p-3 sm:p-4" aria-label="Planungsstatus">
         <dl className="grid grid-cols-3 gap-2"><StatusItem label="Reihen" value={layout.rows} /><StatusItem label="je Reihe" value={layout.chairsPerRow} /><StatusItem label="Stühle" value={layout.positions.length} testId="chair-count" /></dl>
         {layout.warnings.length ? <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900" role="status"><p className="font-semibold">Planung prüfen</p><ul className="mt-1 list-disc space-y-0.5 pl-4">{layout.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul></div> : null}
         {layout.positions.length === 300 ? <p className="mt-2 text-xs text-premium-muted">Darstellung auf 300 Stühle begrenzt.</p> : null}

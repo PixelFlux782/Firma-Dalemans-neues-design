@@ -694,13 +694,13 @@
   .planner-help-popover { position: fixed; top: 8rem; right: .5rem; left: .5rem; width: auto; margin-top: 0; max-height: calc(100dvh - 8.5rem); overflow-y: auto; }
 }
 @media (min-width: 1200px) {
-  .planner-workspace { height: max(590px, calc(100dvh - 120px)); }
+  .planner-workspace { height: max(560px, calc(100dvh - 180px)); }
   .planner-tools, .planner-properties { overflow-y: auto; }
   .planner-canvas svg { min-height: 0; }
 }
 @media (min-width: 900px) and (max-width: 1199px) {
   .planner-grid { grid-template-columns: minmax(100px, 115px) minmax(0, 1fr) minmax(285px, 320px); }
-  .planner-workspace { height: max(590px, calc(100dvh - 120px)); }
+  .planner-workspace { height: max(560px, calc(100dvh - 180px)); }
   .planner-tools, .planner-properties { overflow-y: auto; }
 }
 @media (max-width: 899px) {

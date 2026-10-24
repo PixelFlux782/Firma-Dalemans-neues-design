@@ -24,7 +24,7 @@ export function legacyDetailData(product: Product): ProductDetailData {
     help: isTable ? roomHelp(product.title) : isGlider ? {
       eyebrow: "Zuordnung & Messhilfe", title: "Passende Ausführung ermitteln.",
       text: product.details?.join(" ") ?? product.shortDescription,
-      href: "/produkte/gleiter-finder", label: "Gleiter-Finder starten",
+      href: "/kontakt?anliegen=Gleiter-Beratung", label: "Gleiter persönlich zuordnen",
     } : isAccessory ? {
       eyebrow: "Kompatibilität & Anwendung", title: "Passung vor der Bestellung prüfen.",
       text: product.details?.join(" ") ?? product.shortDescription,
@@ -53,7 +53,7 @@ export function commerceDetailData(product: CommerceProduct, category: string, c
   const help: ProductDetailData["help"] = chair || table ? roomHelp(product.title) : glider ? {
     eyebrow: "Gleiter-Finder & Messhilfe", title: "Welche Ausführung passt zum Gestell?",
     text: product.measureGuide.join(" ") || "Rohrform, Außenmaß und Boden vor der Auswahl prüfen.",
-    href: "/produkte/gleiter-finder", label: "Gleiter-Finder starten",
+    href: "/kontakt?anliegen=Gleiter-Beratung", label: "Gleiter persönlich zuordnen",
   } : product.compatibility.length || product.measureGuide.length ? {
     eyebrow: "Kompatibilität & Anwendung", title: "Passung vor der Bestellung prüfen.",
     text: [...product.compatibility, ...product.measureGuide].join(" "),

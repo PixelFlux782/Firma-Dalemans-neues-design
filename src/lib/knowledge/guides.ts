@@ -128,7 +128,7 @@ export const guideArticles = [
       { id: "gleiter-bodenschutz", heading: "Gleiter passend zu Gestell und Boden auswählen", paragraphs: [
         "Stuhlgleiter sind Verschleißteile. Rechtzeitig ausgetauscht schützen sie Gestell und Boden; ein unpassender Gleiter kann dagegen schlecht sitzen oder den Boden ungeeignet belasten.",
         "Für die Zuordnung benötigen wir je nach Ausführung Rohrform, Innen- oder Außenmaß, Einbausituation und Bodenart. Fotos und genaue Maße helfen mehr als eine alleinige Modellvermutung.",
-      ], link: { href: "/produkte/gleiter-finder", label: "Gleiter mit Messhilfe auswählen", description: "Bodenart, Rohrform und Maße Schritt für Schritt eingrenzen." } },
+      ], link: { href: "/kontakt?anliegen=Gleiter-Beratung", label: "Gleiter persönlich zuordnen", description: "Foto, Rohrform und genaue Maße gemeinsam prüfen lassen." } },
       { id: "reihenverbinder-und-buchablagen", heading: "Reihenverbinder und Buchablagen modellbezogen nachrüsten", paragraphs: [
         "Reihenverbinder und Buchablagen sind kein universell passendes Zubehör. Entscheidend sind Stuhlmodell, Gestellform, Rohrmaß, benötigter Abstand und die vorhandenen Befestigungsmöglichkeiten.",
         "Eine Buchablage für jeweils zwei Sitzplätze kann in manchen Gemeinderäumen eine wirtschaftliche Lösung sein. Ob das zur Nutzung passt und die Stühle nach der Montage stapelbar bleiben, prüfen wir an der konkreten Bestuhlung.",
@@ -149,7 +149,7 @@ export const guideArticles = [
     ],
     relatedLinks: [
       { href: "/produkte/kategorien/transportwagen-zubehoer", label: "Transport & Zubehör", description: "Wagen, Ersatzteile und Ergänzungen im Sortiment ansehen." },
-      { href: "/produkte/gleiter-finder", label: "Gleiter finden", description: "Passende Ersatzgleiter anhand der Ausführung eingrenzen." },
+      { href: "/kontakt?anliegen=Gleiter-Beratung", label: "Gleiter zuordnen lassen", description: "Passende Ersatzgleiter anhand von Foto und Maß persönlich prüfen lassen." },
       { href: "/produkte/artikel/buchablage-nachruesten", label: "Buchablagen", description: "Nachrüstbare Ablagen für geeignete Stuhlgestelle prüfen." },
       { href: "/kontakt?anliegen=Ersatzteile", label: "Ersatzteil anfragen", description: "Vorhandenes Modell und benötigtes Teil gemeinsam zuordnen." },
     ],

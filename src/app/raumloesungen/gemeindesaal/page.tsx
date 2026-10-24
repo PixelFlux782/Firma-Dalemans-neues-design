@@ -41,7 +41,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     "Raumlösung für Gemeindesäle: Stapelstühle, Gemeindestühle, Klapptische, Zubehör, Transportwagen und Beratung für flexible Nutzung.",
   path: "/raumloesungen/gemeindesaal",
-  image: "/pictures/Über uns/Realisierte-11.jpg",
+  image: "/images/referenzen/gemeindesaal-referenz.webp",
   keywords: [
     "Gemeindesaal einrichten",
     "Gemeindestühle",
@@ -83,7 +83,7 @@ export default function GemeindesaalPage() {
         }
         visual={
           <Image
-            src={encodeURI("/pictures/Über uns/Realisierte-11.jpg")}
+            src={encodeURI("/images/referenzen/gemeindesaal-referenz.webp")}
             alt="Realisierte Bestuhlung für Gemeindesaal"
             width={760}
             height={500}

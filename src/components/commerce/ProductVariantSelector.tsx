@@ -411,7 +411,7 @@ export default function ProductVariantSelector({
         <p className="mt-7 rounded-2xl bg-premium-warm/80 p-4 text-center text-sm font-medium text-premium-charcoal" data-testid="unavailable-product">
           Diese Ausführung ist derzeit nicht verfügbar.
         </p>
-      ) : !isInquiryMode ? (
+      ) : (
         <>
           <Link
             href={`/kontakt?${contactParameters.toString()}`}
@@ -426,7 +426,7 @@ export default function ProductVariantSelector({
             </p>
           ) : null}
         </>
-      ) : null}
+      )}
       {selectedVariant ? (
         <Link href={`/kontakt?${contactParameters.toString()}#anfrage`} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">
           Fragen zu diesem Modell? Persönlich beraten lassen →

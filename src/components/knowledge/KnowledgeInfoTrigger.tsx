@@ -30,6 +30,8 @@ export default function KnowledgeInfoTrigger({
 
   useEffect(() => {
     const controller = new AbortController();
+    setEntry(null);
+    setAvailable(false);
     const query = knowledgeId
       ? `id=${encodeURIComponent(knowledgeId)}`
       : optionId
@@ -38,7 +40,7 @@ export default function KnowledgeInfoTrigger({
     if (!query) return () => controller.abort();
 
     fetch(`/api/knowledge/preview?${query}`, { signal: controller.signal })
-      .then((response) => response.ok ? response.json() as Promise<{ entry: KnowledgeEntry }> : null)
+      .then((response) => response.ok ? response.json() as Promise<{ entry: KnowledgeEntry | null }> : null)
       .then((result) => {
         if (result?.entry) {
           setEntry(result.entry);

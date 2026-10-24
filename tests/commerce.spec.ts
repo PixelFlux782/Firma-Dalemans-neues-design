@@ -97,14 +97,14 @@ test("Collection-Seite zeigt Produkte, Breadcrumb und kanonische Metadaten", asy
   await expect(page).toHaveTitle(/Gleiter & Bodenschutz/);
 });
 
-test("Produktdetailseite wird vollständig aus dem Commerce-Modell gerendert", async ({ page }) => {
+test("Produktdetailseite rendert einen seriösen Anfragepreis aus dem Commerce-Modell", async ({ page }) => {
   await page.goto("/produkte/artikel/kunststoff-gestellgleiter");
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Kunststoffgleiter Standard");
   await expect(page.getByText(/Kunststoff-Stuhlgleiter für 20-mm-Stahlrohr/).first()).toBeVisible();
   await expect(page.getByText("Technische Daten")).toBeVisible();
   await expect(page.getByText("Artikelnummer", { exact: true }).first()).toBeVisible();
-  await expect(page.locator('[data-price-status="fixed"]')).toContainText("1,36 €");
+  await expect(page.locator('[data-price-status="on_request"]')).toContainText("Auf Anfrage");
   await expect(page.locator('[data-availability="on_request"]')).toContainText("Verfügbarkeit auf Anfrage");
   const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
   expect(jsonLd.some((entry) => entry.includes('"@type":"Product"'))).toBe(true);
@@ -123,12 +123,13 @@ test("Klappstühle ohne numerischen Preis werden als nicht verfügbar behandelt"
   await expect(page.getByTestId("unavailable-product")).toBeVisible();
 });
 
-test("Filz-Nagelgleiter zeigt Tabellenpreis und Freigabehinweis", async ({ page }) => {
+test("Filz-Nagelgleiter zeigt keine unveröffentlichten Preise und führt zur Anfrage", async ({ page }) => {
   await page.goto("/produkte/artikel/filzgleiter-mit-stift");
-  await expect(page.locator('[data-price-status="fixed"]')).toContainText("8,00 €");
-  await expect(page.getByText("VK aus der Datentabelle · nicht als Verkaufspreis freigegeben.")).toBeVisible();
+  await expect(page.locator('[data-price-status="on_request"]')).toContainText("Auf Anfrage");
+  await expect(page.getByText("8,00 €", { exact: false })).toHaveCount(0);
   await expect(page.getByText("A1021NG", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Zur Auswahl hinzufügen" })).toBeVisible();
+  await expect(page.getByText("Unverbindlich zusammenstellen · Angebot im Warenkorb anfragen")).toBeVisible();
   await expect(page.getByRole("link", { name: "Angebot anfragen" })).toHaveCount(0);
   await expect(page.getByTestId("unavailable-product")).toHaveCount(0);
 });

@@ -6,7 +6,6 @@ import HomeSection from "@/components/home/HomeSection";
 import PremiumCtaSection from "@/components/home/PremiumCtaSection";
 import SectionHeader from "@/components/home/SectionHeader";
 import HeroCarousel from "@/components/home/HeroCarousel";
-import DevelopmentNotice from "@/components/home/DevelopmentNotice";
 import HomeProductRange from "@/components/home/HomeProductRange";
 import ProductVisual from "@/components/ProductVisual";
 import { absoluteUrl, buildMetadata } from "@/lib/seo";
@@ -17,7 +16,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     "Wir planen Stapelstühle, Klapptische, Raumaufteilung, Transport und langfristige Ausstattung für Gemeinden und flexible Räume – persönlich seit 1994.",
   path: "/",
-  image: "/pictures/Über uns/Realisierte-11.jpg",
+  image: "/images/referenzen/gemeindesaal-referenz.webp",
   keywords: ["Stapelstühle für Gemeinden", "Klapptische für Gemeinden", "Bestuhlungsplanung", "flexible Gemeinderäume"],
 });
 
@@ -73,7 +72,6 @@ export default function HomePage() {
               <Link href="/produkte/stapelstuehle" className="btn-secondary justify-center rounded-xl px-6">Produkte ansehen</Link>
             </div>
             <Link href="/raumplaner" className="mt-4 inline-flex w-fit items-center gap-2 text-xs font-medium text-premium-bronze transition hover:text-premium-forest">Raum digital planen <span aria-hidden="true">→</span> 3D-Raumplaner ausprobieren</Link>
-            <DevelopmentNotice />
             <a href="tel:+499342915353" className="mt-5 inline-flex w-fit items-center gap-3 text-sm font-semibold text-premium-ink transition hover:text-premium-bronze">
               <span className="text-[0.62rem] font-medium uppercase tracking-[0.16em] text-premium-muted">Direktkontakt</span>
               +49 9342 9153-53
@@ -149,7 +147,7 @@ export default function HomePage() {
             <Link href="/raeume-planung" className="btn-primary mt-8 inline-flex">Raumtypen und Planung ansehen</Link>
           </div>
           <div className="relative min-h-72 overflow-hidden border-t border-premium-beige/70 lg:min-h-[430px] lg:border-l lg:border-t-0">
-            <Image src={encodeURI("/neue bilder/raum-im-alltag.png")} alt="Flexibel eingerichteter Gemeinderaum mit Reihenbestuhlung, Cafétisch und Rednerpult" fill sizes="(min-width: 1024px) 54vw, 100vw" className="object-cover" />
+            <Image src={encodeURI("/images/website/gemeinderaum-alltag.webp")} alt="Flexibel eingerichteter Gemeinderaum mit Reihenbestuhlung, Cafétisch und Rednerpult" fill sizes="(min-width: 1024px) 54vw, 100vw" className="object-cover" />
           </div>
         </div>
         <div className="mt-10 border-t border-premium-beige pt-8">
@@ -179,7 +177,7 @@ export default function HomePage() {
         <div className="mt-12">
         <div className="grid gap-8 lg:grid-cols-3">
           <article className="premium-card overflow-hidden lg:col-span-2">
-            <Image src={encodeURI("/neue bilder/Sonderlösungen/Räume-u-Planung.png")} alt="Visualisierung einer Raum- und Bestuhlungsplanung" width={900} height={520} sizes="(min-width: 1024px) 66vw, 100vw" className="h-56 w-full object-cover" />
+            <Image src={encodeURI("/images/raumplaner/raeume-planung.webp")} alt="Visualisierung einer Raum- und Bestuhlungsplanung" width={900} height={520} sizes="(min-width: 1024px) 66vw, 100vw" className="h-56 w-full object-cover" />
             <div className="p-7">
               <p className="section-eyebrow">Raum- und Bestuhlungsplanung</p>
               <h3 className="section-title-functional mt-4">Vor der Bestellung sehen, ob die Lösung im Raum funktioniert.</h3>
@@ -191,7 +189,7 @@ export default function HomePage() {
             </div>
           </article>
           <article id="transport">
-            <ProductVisual src="/neue bilder/Zubehör/Tischtransportwagen_03.png" alt="Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile" sizes="(min-width: 1024px) 33vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
+            <ProductVisual src="/images/produkte/tischtransportwagen.webp" alt="Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile" sizes="(min-width: 1024px) 33vw, 100vw" aspectRatio="3 / 2" imageInset="5%" backgroundTone="canvas" />
             <div className="p-7">
               <p className="section-eyebrow">Transport & Lagerung</p>
               <h3 className="mt-4 font-display text-2xl font-medium text-premium-ink">Gute Abläufe machen Ausstattung wirklich flexibel.</h3>
@@ -246,7 +244,7 @@ export default function HomePage() {
 
       <HomeSection variant="breathing">
         <div id="langfristig" className="grid overflow-hidden rounded-3xl border border-premium-beige bg-premium-warm/55 lg:grid-cols-[.78fr_1.22fr] lg:items-stretch">
-          <Image src={encodeURI("/neue bilder/stefan-dalemans-portrait.png")} alt="Stefan Dalemans, persönlicher Ansprechpartner und Geschäftsführer von Dalemans" width={560} height={640} sizes="(min-width: 1024px) 35vw, 100vw" className="h-[26rem] w-full object-cover object-[50%_18%] lg:h-full lg:min-h-[31rem]" />
+          <Image src={encodeURI("/images/unternehmen/stefan-dalemans.webp")} alt="Stefan Dalemans, persönlicher Ansprechpartner und Geschäftsführer von Dalemans" width={560} height={640} sizes="(min-width: 1024px) 35vw, 100vw" className="h-[26rem] w-full object-cover object-[50%_18%] lg:h-full lg:min-h-[31rem]" />
           <div className="p-7 md:p-10 lg:p-12">
             <p className="section-eyebrow">Familie & Gemeinde</p>
             <h2 className="section-title mt-5">Gemeinde ist für uns nicht nur eine Zielgruppe, sondern Teil unserer eigenen Geschichte.</h2>

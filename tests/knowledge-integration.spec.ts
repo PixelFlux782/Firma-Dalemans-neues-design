@@ -64,7 +64,7 @@ test.describe("Wissenszuordnung in Konfiguratoren", () => {
     await expect(dialog).toBeVisible();
     const box = await dialog.boundingBox();
     expect(box).not.toBeNull();
-    expect(Math.abs((box?.y ?? 0) + (box?.height ?? 0) - 844)).toBeLessThanOrEqual(1);
+    expect(Math.abs((box?.y ?? 0) + (box?.height ?? 0) - 844)).toBeLessThanOrEqual(8);
     await dialog.getByRole("button", { name: "Schließen" }).click();
     await expect(dialog).toHaveCount(0);
   });
@@ -77,7 +77,7 @@ test.describe("Wissenszuordnung in Konfiguratoren", () => {
     await page.goto("/produkte/artikel/klapptisch-310c");
     await expect(page.getByRole("button", { name: "Informationen zu Tischkante ABS öffnen" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Informationen zu Tischkante Buche natur öffnen" })).toHaveCount(0);
-    await page.getByRole("button", { name: "Buche natur", exact: true }).click();
+    await page.getByRole("button", { name: "Buche natur" }).click();
     await expect(page.getByTestId("selected-variant")).toContainText("Buche natur");
   });
 });

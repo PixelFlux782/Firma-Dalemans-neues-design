@@ -21,7 +21,7 @@ export default function FoldingTablesHub({ collection, category }: { collection:
         primaryCta: { label: "Modelle ansehen", href: "#produkte" },
         secondaryCta: { label: "Beratung erhalten", href: "/kontakt?kategorie=Klapptische" },
         metaLine: "Seit 1994 persönlich beraten · Sondermaße auf Anfrage · Raum- und Tischplanung",
-        image: { src: "/neue bilder/Tische/Klapptisch-collage-detail.png", alt: "Klapptisch-Collage mit Details zu Tischplatte und Gestell", inset: "2%", backgroundTone: "#f1ece1" },
+        image: { src: "/images/kategorien/klapptische-collage.webp", alt: "Klapptisch-Collage mit Details zu Tischplatte und Gestell", inset: "2%", backgroundTone: "#f1ece1" },
       }} />
 
       <section id="produkte" aria-labelledby="table-models-heading" className="scroll-mt-28">

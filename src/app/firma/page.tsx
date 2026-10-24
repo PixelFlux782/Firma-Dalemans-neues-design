@@ -78,8 +78,8 @@ const firmaStructuredData = {
     {
       ...organizationStructuredData,
       image: [
-        absoluteUrl("/neue bilder/Hubert_Dalemans_gruender.png"),
-        absoluteUrl("/neue bilder/stefan-dalemans-portrait.png"),
+        absoluteUrl("/images/unternehmen/hubert-dalemans.webp"),
+        absoluteUrl("/images/unternehmen/stefan-dalemans.webp"),
       ],
     },
     {
@@ -106,7 +106,7 @@ const firmaStructuredData = {
       },
       primaryImageOfPage: {
         "@type": "ImageObject",
-        url: absoluteUrl("/neue bilder/Produktion-Lager/Schalenlager-Montage2.png"),
+        url: absoluteUrl("/images/unternehmen/schalenlager-montage.webp"),
       },
     },
   ],
@@ -120,7 +120,7 @@ export default function FirmaPage() {
       <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
         <div className="products-hero-media absolute inset-0">
           <Image
-            src={encodeURI("/neue bilder/Produktion-Lager/Schalenlager-Montage2.png")}
+            src={encodeURI("/images/unternehmen/schalenlager-montage.webp")}
             alt="Stuhlschalen in verschiedenen Holz- und Farbausführungen in der Werkstatt"
             fill
             priority
@@ -193,7 +193,7 @@ export default function FirmaPage() {
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               <div className="image-depth overflow-hidden rounded-4xl shadow-premium">
                 <Image
-                  src={encodeURI("/neue bilder/Sonderlösungen/Räume-u-Planung.png")}
+                  src={encodeURI("/images/raumplaner/raeume-planung.webp")}
                   alt="Planung individueller Räume und Sonderlösungen"
                   width={360}
                   height={240}
@@ -268,7 +268,7 @@ export default function FirmaPage() {
             <div className="grid gap-3 p-3 sm:grid-cols-2 sm:items-center sm:gap-4 sm:p-4 lg:p-5">
               <figure className="overflow-hidden rounded-[1.5rem] bg-premium-warm/10">
                 <Image
-                  src={encodeURI("/neue bilder/Hubert_Dalemans_gruender.png")}
+                  src={encodeURI("/images/unternehmen/hubert-dalemans.webp")}
                   alt="Hubert Dalemans, Gründer von Dalemans"
                   width={1448}
                   height={1086}
@@ -279,7 +279,7 @@ export default function FirmaPage() {
               </figure>
               <figure className="overflow-hidden rounded-[1.5rem] bg-premium-warm/10">
                 <Image
-                  src={encodeURI("/neue bilder/stefan-dalemans-portrait.png")}
+                  src={encodeURI("/images/unternehmen/stefan-dalemans.webp")}
                   alt="Stefan Dalemans, heutiger Geschäftsführer von Dalemans"
                   width={1122}
                   height={1402}
@@ -368,7 +368,7 @@ export default function FirmaPage() {
           <div className="grid gap-5">
             <div className="image-depth overflow-hidden rounded-5xl shadow-premium">
               <Image
-                src={encodeURI("/neue bilder/referenz1.png")}
+                src={encodeURI("/images/referenzen/referenzraum-1.webp")}
                 alt="In eine Bühne integrierter Stauraum für gepolsterte Stühle"
                 width={720}
                 height={360}
@@ -378,7 +378,7 @@ export default function FirmaPage() {
             </div>
             <div className="image-depth overflow-hidden rounded-5xl shadow-premium">
               <Image
-                src={encodeURI("/neue bilder/referenz2.png")}
+                src={encodeURI("/images/referenzen/referenzraum-2.webp")}
                 alt="Kirchenraum mit farbiger Bestuhlung entlang der Seitenwände"
                 width={720}
                 height={360}

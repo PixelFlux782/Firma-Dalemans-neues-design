@@ -126,7 +126,7 @@ const seminarImages = [
 const trapezoidImage = image("/images/curated/Tische/Trapezklapptisch_Klapptische_trapez_klappbar.webp", "Trapez-Klapptisch Modell 310c");
 
 const lecternAImages = [
-  image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA_1.png", "Rednerpult aus Plexiglas und Acrylglas, Typ A"),
+  image("/images/produkte/rednerpult-acrylglas-typ-a.webp", "Rednerpult aus Plexiglas und Acrylglas, Typ A"),
   image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.png", "Rednerpult Typ A aus Plexiglas und Acrylglas, weitere Ansicht"),
 ];
 const lecternEImages = [

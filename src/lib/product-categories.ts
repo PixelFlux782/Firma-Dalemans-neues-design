@@ -31,7 +31,7 @@ export const productCategories: ProductCategory[] = [
   {
     id: "klapptische",
     name: "Klapptische",
-    image: asset("/neue bilder/Tische/hero-klapptische.png"),
+    image: asset("/images/kategorien/klapptische-hero.webp"),
     intro:
       "Schnell aufgebaut, stabil im Einsatz und nach der Veranstaltung wieder kompakt verstaut.",
     description:

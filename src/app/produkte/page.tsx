@@ -22,10 +22,10 @@ export const metadata: Metadata = buildMetadata({
 const featuredHandles = ["klapptisch-310c", "stuhltransportwagen", "buchablage-nachruesten"];
 
 const productGroups = [
-  { title: "Stapelstühle", text: "Fünf Modelle mit verständlicher Auswahl von Polsterung, Stoffgruppe und Reihenverbindung.", href: "/produkte/stapelstuehle", cta: "Stapelstühle ansehen", image: "/neue bilder/Stapelstühle/collage_stapelstuehle.png", alt: "Vollständig sichtbarer Stapel gepolsterter Stapelstühle", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
-  { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und flexibel genutzte Räume.", href: "/produkte/sortiment/klapptische", cta: "Klapptische ansehen", image: "/neue bilder/Tische/Klapptisch-collage-detail.png", alt: "Klapptisch Collage mit Details zu Tischplatte und Gestell", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 50%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
-  { title: "Rednerpulte", text: "Klare und funktionale Lösungen für Gottesdienste, Vorträge und Veranstaltungen.", href: "/produkte/sortiment/rednerpulte", cta: "Rednerpulte ansehen", image: "/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA_1.png", alt: "Vollständig sichtbares Rednerpult aus Acrylglas, Typ A", backgroundTone: "#F8F7F1", imageInset: "1% 3%", imageScale: 1, objectPosition: "50% 50%", aspectRatio: "4 / 3", fadeStrength: 0.78 },
-  { title: "Zubehör & Transport", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und Transportlösungen für den praktischen Alltag.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör & Transport ansehen", image: "/neue bilder/Zubehör/Tischtransportwagen_03.png", alt: "Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.9 },
+  { title: "Stapelstühle", text: "Fünf Modelle mit verständlicher Auswahl von Polsterung, Stoffgruppe und Reihenverbindung.", href: "/produkte/stapelstuehle", cta: "Stapelstühle ansehen", image: "/images/kategorien/stapelstuehle-collage.webp", alt: "Vollständig sichtbarer Stapel gepolsterter Stapelstühle", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
+  { title: "Klapptische", text: "Stabile Tischlösungen für schnelle Umbauten, Veranstaltungen und flexibel genutzte Räume.", href: "/produkte/sortiment/klapptische", cta: "Klapptische ansehen", image: "/images/kategorien/klapptische-collage.webp", alt: "Klapptisch Collage mit Details zu Tischplatte und Gestell", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 50%", aspectRatio: "4 / 3", fadeStrength: 0.88 },
+  { title: "Rednerpulte", text: "Klare und funktionale Lösungen für Gottesdienste, Vorträge und Veranstaltungen.", href: "/produkte/sortiment/rednerpulte", cta: "Rednerpulte ansehen", image: "/images/produkte/rednerpult-acrylglas-typ-a.webp", alt: "Vollständig sichtbares Rednerpult aus Acrylglas, Typ A", backgroundTone: "#F8F7F1", imageInset: "1% 3%", imageScale: 1, objectPosition: "50% 50%", aspectRatio: "4 / 3", fadeStrength: 0.78 },
+  { title: "Zubehör & Transport", text: "Buchablagen, Reihenverbinder, Gleiter, Ersatzteile und Transportlösungen für den praktischen Alltag.", href: "/produkte/kategorien/transportwagen-zubehoer", cta: "Zubehör & Transport ansehen", image: "/images/produkte/tischtransportwagen.webp", alt: "Transportwagen mit Tischen sowie verschiedene Zubehör- und Ersatzteile", backgroundTone: "#F8F7F1", imageInset: "2%", imageScale: 1, objectPosition: "50% 54%", aspectRatio: "4 / 3", fadeStrength: 0.9 },
 ] as const;
 
 export default async function ProductsPage() {
@@ -36,7 +36,7 @@ export default async function ProductsPage() {
     <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
       <div className="products-hero-media absolute inset-0">
         <Image
-          src={encodeURI("/neue bilder/produkte-hero.png")}
+          src={encodeURI("/images/website/produkte-hero.webp")}
           alt="Mitarbeiter bei der Montage gepolsterter Stapelstühle in einer Werkstatt"
           fill
           priority
@@ -67,13 +67,9 @@ export default async function ProductsPage() {
     <HomeSection id="alle-produktbereiche">
       <SectionHeader eyebrow="Gesamtes Sortiment" title="Weitere Produktbereiche" lead="Artikel und Ausführungen auswählen und ein persönliches Angebot anfragen." align="editorial" />
       <div className="section-grid-top grid gap-x-9 gap-y-14 sm:grid-cols-2 xl:grid-cols-3 xl:gap-x-12 xl:gap-y-20">
-        {collections.filter((collection) => ["bistrotische", "klappstuehle", "gleiter-bodenschutz", "reihenverbinder-nachruestung", "muster-beratung"].includes(collection.handle)).map((collection) => (
+        {collections.filter((collection) => collection.image && ["bistrotische", "klappstuehle", "gleiter-bodenschutz", "reihenverbinder-nachruestung", "muster-beratung"].includes(collection.handle)).map((collection) => (
           <Link key={collection.handle} href={`/produkte/sortiment/${collection.handle}`} className="products-editorial-module group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-forest focus-visible:ring-offset-4">
-            {collection.image ? (
-              <ProductVisual src={collection.image.url} alt={collection.image.altText ?? collection.title} aspectRatio={collection.handle === "gleiter-bodenschutz" ? "5 / 4" : "4 / 3"} imageInset="8%" objectPosition="50% 50%" fadeStrength="soft" backgroundTone="canvas" surface="transparent" className="products-editorial-visual" sizes="(min-width: 1280px) 360px, (min-width: 640px) 45vw, calc(100vw - 40px)" />
-            ) : (
-              <div className="products-editorial-placeholder" role="img" aria-label={`${collection.title} – Bild folgt`}><span>Bild folgt</span></div>
-            )}
+            <ProductVisual src={collection.image!.url} alt={collection.image!.altText ?? collection.title} aspectRatio={collection.handle === "gleiter-bodenschutz" ? "5 / 4" : "4 / 3"} imageInset="8%" objectPosition="50% 50%" fadeStrength="soft" backgroundTone="canvas" surface="transparent" className="products-editorial-visual" sizes="(min-width: 1280px) 360px, (min-width: 640px) 45vw, calc(100vw - 40px)" />
             <div className="pt-4 sm:pt-5">
               <h3 className="font-display text-2xl font-medium tracking-[-0.02em] text-premium-ink sm:text-[1.7rem]">{collection.title}<span aria-hidden="true" className="ml-2 inline-block text-premium-bronze transition-transform duration-300 group-hover:translate-x-1">→</span></h3>
               <p className="mt-2 max-w-md text-sm leading-6 text-premium-muted">{collection.shortDescription}</p>

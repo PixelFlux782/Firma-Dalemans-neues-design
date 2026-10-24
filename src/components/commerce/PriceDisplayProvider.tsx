@@ -56,8 +56,8 @@ export function PriceDisplayToggle() {
       <div className="container-premium flex min-h-11 flex-wrap items-center justify-end gap-3 py-1.5">
         <span className="text-xs font-medium text-premium-muted">Preise für</span>
         <div className="inline-flex rounded-full border border-premium-beige bg-premium-canvas p-0.5" role="group" aria-label="Kundenart wählen">
-          <button type="button" aria-pressed={mode === "business"} onClick={() => setMode("business")} className={`min-h-9 rounded-full px-3 text-xs font-semibold ${mode === "business" ? "bg-premium-forest text-white" : "text-premium-muted"}`}>Geschäftskunden · netto</button>
-          <button type="button" aria-pressed={mode === "private"} onClick={() => setMode("private")} className={`min-h-9 rounded-full px-3 text-xs font-semibold ${mode === "private" ? "bg-premium-forest text-white" : "text-premium-muted"}`}>Privatkunden · brutto</button>
+          <button type="button" aria-pressed={mode === "business"} onClick={() => setMode("business")} className={`min-h-11 rounded-full px-3 text-xs font-semibold ${mode === "business" ? "bg-premium-forest text-white" : "text-premium-muted"}`}>Geschäftskunden · netto</button>
+          <button type="button" aria-pressed={mode === "private"} onClick={() => setMode("private")} className={`min-h-11 rounded-full px-3 text-xs font-semibold ${mode === "private" ? "bg-premium-forest text-white" : "text-premium-muted"}`}>Privatkunden · brutto</button>
         </div>
       </div>
     </div>

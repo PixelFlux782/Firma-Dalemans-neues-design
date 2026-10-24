@@ -17,17 +17,17 @@ function image(fileName: string, altText: string): CommerceImage {
   };
 }
 
-function variant(id: string, articleNumber: string, price: number): CommerceProductVariant {
+function variant(id: string, articleNumber: string): CommerceProductVariant {
   return {
     id: `local-variant-glider-${id}`,
     title: setLabel,
     sku: articleNumber,
     erpArticleNumber: articleNumber,
     selectedOptions: [{ name: "Mengeneinheit", value: setLabel }],
-    price: { amount: price.toFixed(2), currencyCode: "EUR" },
+    price: null,
     compareAtPrice: null,
-    priceStatus: "fixed",
-    priceDataStatus: "source_unreleased",
+    priceStatus: "on_request",
+    priceDataStatus: null,
     availableForSale: false,
     availability: "on_request",
     availabilityNote: "Verfügbarkeit, Lieferzeit und Verkaufspreis klären wir persönlich.",
@@ -41,7 +41,6 @@ interface GliderProductInput {
   handle: string;
   title: string;
   articleNumber: string;
-  price: number;
   description: string;
   images: CommerceImage[];
   specifications: CommerceProduct["specifications"];
@@ -52,7 +51,6 @@ interface GliderProductInput {
 }
 
 function gliderProduct(input: GliderProductInput): CommerceProduct {
-  const price = { amount: input.price.toFixed(2), currencyCode: "EUR" };
   return {
     id: `local-product-${input.id}`,
     handle: input.handle,
@@ -63,9 +61,9 @@ function gliderProduct(input: GliderProductInput): CommerceProduct {
     availableForSale: false,
     featuredImage: input.images[0] ?? null,
     images: input.images,
-    variants: [variant(input.id, input.articleNumber, input.price)],
-    priceRange: { min: price, max: price },
-    priceStatus: "fixed",
+    variants: [variant(input.id, input.articleNumber)],
+    priceRange: { min: null, max: null },
+    priceStatus: "on_request",
     availability: "on_request",
     availabilityNote: "Verfügbarkeit, Lieferzeit und Verkaufspreis klären wir persönlich.",
     collectionHandles,
@@ -73,7 +71,7 @@ function gliderProduct(input: GliderProductInput): CommerceProduct {
       { name: "Artikelnummer", value: input.articleNumber },
       ...input.specifications,
       { name: "Mengeneinheit", value: setLabel },
-      { name: "Preisstatus", value: "VK aus Datentabelle; nicht als Verkaufspreis freigegeben" },
+      { name: "Preis und Verfügbarkeit", value: "persönliche Anfrage erforderlich" },
     ],
     compatibility: input.compatibility ?? [],
     suitableFor: input.suitableFor,
@@ -88,7 +86,7 @@ function gliderProduct(input: GliderProductInput): CommerceProduct {
     measureGuide: [],
     applicationNotes: [],
     notes: [
-      "Der angezeigte VK stammt aus der bereitgestellten Datentabelle und ist nicht als Verkaufspreis freigegeben.",
+      "Preis und Verfügbarkeit werden vor einem Angebot persönlich geprüft.",
       ...(input.notes ?? []),
     ],
     accessories: [],
@@ -110,7 +108,6 @@ export const localGliderProducts: CommerceProduct[] = [
     handle: "kunststoff-gestellgleiter",
     title: "Kunststoffgleiter Standard",
     articleNumber: "GSTGL",
-    price: 1.36,
     description: "Kunststoff-Stuhlgleiter für 20-mm-Stahlrohr, 15° abgeschrägt, mit 10 mm Gleiterhöhe in transparenter Ausführung.",
     images: standardImages,
     specifications: [
@@ -128,7 +125,6 @@ export const localGliderProducts: CommerceProduct[] = [
     handle: "filzgelenkgleiter-modell-1021",
     title: "Filzgelenkgleiter",
     articleNumber: "A1021FG",
-    price: 6.9,
     description: "Filzgleiter für Stapelstuhl Modell 1021 mit 20-mm-Gestell.",
     images: [image("gummistopfen-schwarz.png", "Schwarzer Gelenkgleiter mit Filzgleitfläche")],
     specifications: [
@@ -144,7 +140,6 @@ export const localGliderProducts: CommerceProduct[] = [
     handle: "gelenkgleiter-fuer-teppichboden",
     title: "Gelenkgleiter für Teppichboden",
     articleNumber: "A1021FG",
-    price: 6.9,
     description: "Gelenkgleiter mit Metallgleitfläche als Aufpreis-Ausführung für Teppichboden.",
     images: [image("Hochwertiger schwarzer Möbelgleiter auf Steinoberfläche.png", "Schwarzer Gelenkgleiter mit Metallgleitfläche")],
     specifications: [{ name: "Gleitfläche", value: "Metall" }, { name: "Bodeneignung", value: "Teppichboden" }],
@@ -157,7 +152,6 @@ export const localGliderProducts: CommerceProduct[] = [
     handle: "filz-winkelgleiter",
     title: "Filz-Winkelgleiter",
     articleNumber: "ZGGF30",
-    price: 16,
     description: "Filz-Winkelgelenkgleiter für Klapptisch Modell 310, inklusive Blindniete 4,0 × 10,0 AL/ST, zum Austausch.",
     images: [image("Schwarzer Möbelgleiter mit Filzpolster.png", "Schwarzer Filz-Winkelgleiter für Klapptisch Modell 310")],
     specifications: [
@@ -173,7 +167,6 @@ export const localGliderProducts: CommerceProduct[] = [
     handle: "filzgleiter-mit-stift",
     title: "Filz-Nagelgleiter",
     articleNumber: "A1021NG",
-    price: 8,
     description: "Filzgleiter zum Einschlagen mit Dorn, 20 mm Durchmesser, in Natur oder Braun.",
     images: [image("zubehör-filzgleiter.png", "Naturfarbener Filz-Nagelgleiter mit Dorn")],
     specifications: [
@@ -189,7 +182,6 @@ export const localGliderProducts: CommerceProduct[] = [
     handle: "kunststoff-nagelgleiter",
     title: "Kunststoff-Nagelgleiter",
     articleNumber: "A1021NGK",
-    price: 6.4,
     description: "Nagelgleiter zum Einschlagen mit Kunststoff-Gleitfläche und 20 mm Durchmesser.",
     images: [image("Minimalistischer weißer Möbelgleiter auf Naturstein.png", "Weißer Kunststoff-Nagelgleiter mit Dorn")],
     specifications: [

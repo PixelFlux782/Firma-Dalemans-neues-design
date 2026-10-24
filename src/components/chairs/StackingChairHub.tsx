@@ -50,7 +50,7 @@ export default function StackingChairHub({ products }: { products: CommerceProdu
         secondaryCta: { label: "Beratung erhalten", href: "/kontakt?kategorie=Stapelst%C3%BChle" },
         metaLine: "Seit 1994 persönlich beraten · Musterstühle möglich · Raum- und Bestuhlungsplanung",
         image: {
-          src: "/neue bilder/Stapelstühle/hero-bestuhlung.png",
+          src: "/images/kategorien/stapelstuehle-bestuhlung.webp",
           alt: "Bestuhlungsbeispiele für flexible Gemeinde- und Veranstaltungsräume",
           objectPosition: "50% 50%",
           fit: "cover",

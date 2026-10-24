@@ -5,7 +5,7 @@ import type { PlannerChair } from "@/lib/room-planner/chairs";
 
 const RoomPlanner = dynamic(() => import("./RoomPlannerModes"), {
   ssr: false,
-  loading: () => <div className="premium-card min-h-[32rem] animate-pulse bg-premium-warm" aria-label="3D-Raumplaner wird geladen" />,
+  loading: () => <div role="status" className="premium-card min-h-[32rem] animate-pulse bg-premium-warm" aria-label="3D-Raumplaner wird geladen" />,
 });
 
 export default function RoomPlannerLoader({ chairs }: { chairs: PlannerChair[] }) {

@@ -87,7 +87,7 @@ async function selectedFurnitureIds(canvas: Locator) {
   return canvas.locator("[data-table-id], [data-chair-id]").evaluateAll((elements) => elements.flatMap((element) => {
     const tableId = element.getAttribute("data-table-id");
     const chairId = element.getAttribute("data-chair-id");
-    if (element.getAttribute("aria-selected") !== "true") return [];
+    if (element.getAttribute("data-selected") !== "true") return [];
     if (tableId) return [tableId];
     if (chairId) return [chairId];
     return [];
@@ -163,7 +163,7 @@ test("B – ausgewählte Möbel bewegen sich gemeinsam; Bereich, Kontur sowie Un
   const ids = await selectAllFurniture(page, canvas, zone);
   const before = await exportPlan(page);
   const beforeById = furnitureMap(before);
-  const table = canvas.locator("[data-table-id][aria-selected='true']").first();
+  const table = canvas.locator("[data-table-id][data-selected='true']").first();
   const tableBox = await table.boundingBox();
   if (!tableBox) throw new Error("Kein ausgewählter Tisch zum Ziehen gefunden.");
   await drag(page, { x: tableBox.x + tableBox.width / 2, y: tableBox.y + tableBox.height / 2 }, { x: tableBox.x + tableBox.width / 2 + 25, y: tableBox.y + tableBox.height / 2 + 20 });
@@ -205,7 +205,7 @@ test("C – Strg+D erzeugt unabhängige Möbel mit eindeutigen IDs", async ({ pa
   expect(copyIds.every((id) => !sourceIds.includes(id))).toBe(true);
   await screenshot(page, testInfo, "05-nach-duplizieren");
 
-  const selectedTable = canvas.locator("[data-table-id][aria-selected='true']").first();
+  const selectedTable = canvas.locator("[data-table-id][data-selected='true']").first();
   const box = await selectedTable.boundingBox();
   if (!box) throw new Error("Keine ausgewählte Tischkopie zum Ziehen gefunden.");
   await drag(page, { x: box.x + box.width / 2, y: box.y + box.height / 2 }, { x: box.x + box.width / 2 + 230, y: box.y + box.height / 2 });
@@ -261,7 +261,7 @@ test("E – Möbelrahmen verschiebt weder Tischbereich, Raumkontur, Gang noch Hi
   await editor.getByRole("button", { name: "Auswahl", exact: true }).click();
   await selectAllFurniture(page, canvas, zone);
   const before = await exportPlan(page);
-  const selectedTable = canvas.locator("[data-table-id][aria-selected='true']").first();
+  const selectedTable = canvas.locator("[data-table-id][data-selected='true']").first();
   const box = await selectedTable.boundingBox();
   if (!box) throw new Error("Kein ausgewähltes Möbel gefunden.");
   await drag(page, { x: box.x + box.width / 2, y: box.y + box.height / 2 }, { x: box.x + box.width / 2 + 15, y: box.y + box.height / 2 + 10 });
@@ -312,7 +312,7 @@ test("G – Escape verwirft eine laufende Gruppentransformation vollständig", a
   const { canvas, zone } = await createFilledTableZone(page);
   await selectAllFurniture(page, canvas, zone);
   const before = await exportPlan(page);
-  const selectedTable = canvas.locator("[data-table-id][aria-selected='true']").first();
+  const selectedTable = canvas.locator("[data-table-id][data-selected='true']").first();
   const box = await selectedTable.boundingBox();
   if (!box) throw new Error("Kein ausgewählter Tisch zum Abbruchtest gefunden.");
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);

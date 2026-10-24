@@ -31,6 +31,7 @@ import {
 import type { CommerceProduct } from "@/lib/commerce/types";
 import type { CommerceImage } from "@/lib/commerce/types";
 import FabricSelectionDialog, { type FabricSelection } from "@/components/chairs/FabricSelectionDialog";
+import KnowledgeInfoTrigger from "@/components/knowledge/KnowledgeInfoTrigger";
 import { fabricById } from "@/lib/fabrics";
 
 const upholsteryOptions: Array<{ value: ChairUpholstery; label: string; note: string }> = [
@@ -318,6 +319,11 @@ export default function ChairConfigurator({
                       Gruppe {group}
                     </span>
                   </label>
+                  <KnowledgeInfoTrigger
+                    optionId={`fabric-group-${group}`}
+                    label={`Stoffgruppe ${group}`}
+                    className="absolute left-2 top-2"
+                  />
                   <button
                     type="button"
                     aria-label={`Materialberater für Stoffgruppe ${group} öffnen`}

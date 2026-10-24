@@ -7,7 +7,7 @@ test("Dalemans Branding bleibt in 2D, 3D und Druckausgabe sichtbar", async ({ pa
   const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
   const brand = editor.getByLabel("Dalemans Raumplaner");
   await expect(brand).toBeVisible();
-  await expect(brand.locator("img")).toHaveAttribute("src", "/Logos/logo_transp.png");
+  await expect(brand.locator("img")).toHaveAttribute("src", /dalemans-logo\.webp/);
 
   await editor.getByRole("button", { name: "3D", exact: true }).click();
   await expect(editor.getByLabel("3D-Raumansicht").locator("canvas")).toBeVisible();

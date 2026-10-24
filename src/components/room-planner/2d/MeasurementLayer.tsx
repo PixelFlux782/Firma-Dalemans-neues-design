@@ -32,7 +32,7 @@ export default function MeasurementLayer({ plan, seating, selectedId, project, p
     const distance = base + (printing ? 34 : 85);
     return [{ item, a, b, center: { x: (a.x + b.x) / 2 + normal.x * distance, y: (a.y + b.y) / 2 + normal.y * distance }, normal, tangent, distance, textWidth, font }];
   });
-  return <g aria-label="Bemaßungen">{measurements.map(({ item, a, b, center, normal, tangent, distance, textWidth, font }) => {
+  return <g role="group" aria-label="Bemaßungen">{measurements.map(({ item, a, b, center, normal, tangent, distance, textWidth, font }) => {
     const start = { x: a.x + normal.x * distance, y: a.y + normal.y * distance };
     const end = { x: b.x + normal.x * distance, y: b.y + normal.y * distance };
     const color = item.selected ? "#a4572b" : item.kind === "wall" ? "#324b3a" : "#315f65";

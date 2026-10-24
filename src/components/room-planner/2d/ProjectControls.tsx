@@ -29,7 +29,7 @@ export default function ProjectControls({ projects, activeId, status, error, onN
     if (file.size > 4_000_000) { onImportError("Die Projektdatei ist zu groß."); return; }
     try { onImport(await file.text()); } catch { onImportError("Die Projektdatei konnte nicht gelesen werden."); }
   };
-  return <div aria-label="Projektverwaltung" className="border-b border-premium-beige bg-[#f1f5ef] px-2 py-1 text-xs sm:px-3">
+  return <div role="group" aria-label="Projektverwaltung" className="border-b border-premium-beige bg-[#f1f5ef] px-2 py-1 text-xs sm:px-3">
     <div className="flex flex-wrap items-center gap-2">
       <strong className="mr-2">{active?.name ?? "Kein Projekt"}</strong>
       <span role="status" className="mr-auto text-xs text-premium-muted">{{ saved: "Gespeichert", dirty: "Ungespeicherte Änderungen", saving: "Wird gespeichert …" }[status]}</span>

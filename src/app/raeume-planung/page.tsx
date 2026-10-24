@@ -12,7 +12,7 @@ export const metadata: Metadata = buildMetadata({
   title: "Räume & Planung für flexible Gemeinderäume",
   description: "Gemeindesaal, Gottesdienstraum und Mehrzweckraum ganzheitlich planen: Bestuhlung, Tische, Fluchtwege, Umbau, Transport und Lagerung.",
   path: "/raeume-planung",
-  image: "/neue bilder/Sonderlösungen/Räume-u-Planung.png",
+  image: "/images/raumplaner/raeume-planung.webp",
   keywords: ["flexible Gemeinderäume", "Kirchenbestuhlung", "Bestuhlungsplanung", "Ausstattung Gemeindezentrum"],
 });
 
@@ -41,7 +41,7 @@ export default function RaeumePlanungPage() {
       <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
           <div className="products-hero-media absolute inset-0">
           <Image
-            src={encodeURI("/neue bilder/Sonderlösungen/Räume-u-Planung.png")}
+            src={encodeURI("/images/raumplaner/raeume-planung.webp")}
             alt="Vom CAD-Entwurf zum eingerichteten Gemeinderaum mit flexibler Tischbestuhlung"
             fill
             priority
@@ -84,7 +84,7 @@ export default function RaeumePlanungPage() {
       <HomeSection>
         <div className="grid gap-8 lg:grid-cols-2">
           <article className="premium-card overflow-hidden">
-            <Image src={encodeURI("/neue bilder/planung-schritt-3.png")} alt="CAD-Planung für eine individuelle Raumlösung" width={760} height={440} sizes="(min-width: 1024px) 50vw, 100vw" className="h-64 w-full object-cover" />
+            <Image src={encodeURI("/images/raumplaner/planung-cad.webp")} alt="CAD-Planung für eine individuelle Raumlösung" width={760} height={440} sizes="(min-width: 1024px) 50vw, 100vw" className="h-64 w-full object-cover" />
             <div className="p-7"><p className="section-eyebrow">Raum- & Bestuhlungsplanung</p><h2 className="mt-4 font-display text-3xl font-medium text-premium-ink">Nutzungsvarianten vor der Bestellung prüfen.</h2><p className="mt-4 text-sm leading-7 text-premium-muted">Je nach Projekt zeigen wir Stellpläne, Tischanordnungen und schwierige Geometrien in 2D oder 3D.</p><div className="mt-7 flex flex-wrap gap-3"><Link href="/raeume-planung/raumplanung" className="btn-primary">Raumplanung im Detail</Link><Link href="/raumplaner" className="btn-secondary">3D-Raumplaner ausprobieren</Link></div></div>
           </article>
           <article id="transport">

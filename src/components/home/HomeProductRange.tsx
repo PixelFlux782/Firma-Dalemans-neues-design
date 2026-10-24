@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import stackingChairsImage from "../../../public/neue bilder/Stapelstühle/Stapelstuhl_Stahlrohr_1021c_03.png";
-import foldingTableImage from "../../../public/neue bilder/Tische/t210_01.png";
-import lecternImage from "../../../public/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA_1.png";
-import accessoriesImage from "../../../public/neue bilder/Zubehör/Tischtransportwagen_03.png";
+import foldingTableImage from "../../../public/images/produkte/seminarklapptisch-210c.webp";
+import lecternImage from "../../../public/images/produkte/rednerpult-acrylglas-typ-a.webp";
+import accessoriesImage from "../../../public/images/produkte/tischtransportwagen.webp";
 
 const primaryCategories = [
   {

@@ -12,5 +12,8 @@ export default async function RaumplanerPage() {
     const product = chair.productHandle ? products.find((entry) => entry.handle === chair.productHandle) : null;
     return { ...chair, productName: product?.title ?? chair.fallbackName, productUrl: product ? `/produkte/artikel/${product.handle}` : null };
   });
-  return <div className="page-stack planner-page"><RoomPlanner chairs={chairs} /></div>;
+  return <div className="page-stack planner-page">
+    <h1 className="sr-only">Dalemans Raumplaner für Bestuhlungspläne</h1>
+    <RoomPlanner chairs={chairs} />
+  </div>;
 }

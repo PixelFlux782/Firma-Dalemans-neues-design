@@ -25,7 +25,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     "Sprechen Sie mit uns über Stapelstühle, Klapptische, Gemeindestühle, Zubehör und individuelle Lösungen für Ihre Räume und Veranstaltungen.",
   path: "/kontakt",
-  image: "/neue bilder/kontakt-hero.png",
+  image: "/images/website/kontakt-hero.webp",
   keywords: [
     "Kontakt Dalemans",
     "Beratung Stapelstühle",
@@ -40,7 +40,7 @@ export default function KontaktPage() {
       <section className="products-hero relative -mx-5 min-h-[650px] overflow-hidden sm:-mx-6 md:mx-0 md:min-h-[560px]">
         <div className="products-hero-media absolute inset-0">
           <Image
-            src={encodeURI("/neue bilder/kontakt-hero.png")}
+            src={encodeURI("/images/website/kontakt-hero.webp")}
             alt="Persönliches Beratungsgespräch mit Telefon, Notizen und digitaler Anfrage"
             fill
             priority
@@ -153,7 +153,7 @@ export default function KontaktPage() {
 
             <div className="image-depth hidden overflow-hidden rounded-5xl shadow-premium-lg sm:block">
               <Image
-                src={encodeURI("/neue bilder/planung-schritt-3.png")}
+                src={encodeURI("/images/raumplaner/planung-cad.webp")}
                 alt="Planungsarbeitsplatz mit Raumplänen, Bestuhlungsvarianten und Materialmustern"
                 width={720}
                 height={360}

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import LegalDocument from "@/components/legal/LegalDocument";
-import { privacyText } from "@/lib/legal-content";
+import { technicalPrivacyText } from "@/lib/privacy-technical";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -28,7 +28,7 @@ export default function DatenschutzPage() {
       <article className="premium-card p-8 md:p-10 lg:p-12">
         <p className="section-eyebrow">Rechtliches</p>
         <h1 className="section-title mt-5">Datenschutzerklärung</h1>
-        <LegalDocument content={privacyText} />
+        <LegalDocument content={technicalPrivacyText} />
 
         <p className="mt-10 text-sm leading-[1.75] text-premium-subtle">
           <Link

@@ -72,6 +72,7 @@ export function ContactForm() {
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [pending, setPending] = useState(false);
   const statusRef = useRef<HTMLParagraphElement>(null);
+  const submissionIdRef = useRef("");
   const initialSubject = useMemo(
     () =>
       contextKeys
@@ -109,6 +110,8 @@ export function ContactForm() {
     }
 
     const formData = new FormData(form);
+    if (!submissionIdRef.current) submissionIdRef.current = crypto.randomUUID();
+    formData.set("submissionId", submissionIdRef.current);
     setPending(true);
 
     try {
@@ -120,6 +123,7 @@ export function ContactForm() {
       const result = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(result.error || "Die Anfrage konnte nicht gesendet werden.");
       setStatus({ type: "success", message: "Vielen Dank. Ihre Anfrage wurde übermittelt. Wir melden uns persönlich bei Ihnen." });
+      submissionIdRef.current = "";
       form.reset();
       setErrors({});
       setHasAttemptedSubmit(false);

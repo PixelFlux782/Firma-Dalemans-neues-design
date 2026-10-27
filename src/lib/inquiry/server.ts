@@ -288,19 +288,25 @@ function smtpConfig() {
   const missing = required.filter((name) => !process.env[name]?.trim());
   if (missing.length) throw new Error("MAIL_NOT_CONFIGURED");
   const port = Number(process.env.CONTACT_SMTP_PORT);
-  if (!Number.isInteger(port) || port < 1 || port > 65_535) throw new Error("MAIL_NOT_CONFIGURED");
+  const secureValue = process.env.CONTACT_SMTP_SECURE;
+  if (!Number.isInteger(port) || port < 1 || port > 65_535
+    || !["true", "false"].includes(secureValue ?? "")) throw new Error("MAIL_NOT_CONFIGURED");
 
   const testMode = process.env.INQUIRY_MAIL_TEST_MODE === "true";
   const testRecipient = process.env.INQUIRY_TEST_TO_EMAIL?.trim();
   if (testMode && !testRecipient) throw new Error("MAIL_TEST_RECIPIENT_MISSING");
+  const from = process.env.CONTACT_FROM_EMAIL!.trim();
+  const internalTo = testMode ? testRecipient! : (process.env.INQUIRY_TO_EMAIL?.trim() || "info@dalemans.de");
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(from) || !emailPattern.test(internalTo)) throw new Error("MAIL_NOT_CONFIGURED");
   return {
-    from: process.env.CONTACT_FROM_EMAIL!,
-    internalTo: testMode ? testRecipient! : (process.env.INQUIRY_TO_EMAIL?.trim() || "info@dalemans.de"),
+    from,
+    internalTo,
     customerTo: (email: string) => testMode ? testRecipient! : email,
     transporter: nodemailer.createTransport({
       host: process.env.CONTACT_SMTP_HOST,
       port,
-      secure: process.env.CONTACT_SMTP_SECURE === "true",
+      secure: secureValue === "true",
       auth: { user: process.env.CONTACT_SMTP_USER, pass: process.env.CONTACT_SMTP_PASSWORD },
       connectionTimeout: 10_000,
       greetingTimeout: 10_000,

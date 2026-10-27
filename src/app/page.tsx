@@ -69,7 +69,7 @@ export default function HomePage() {
               <Link href="/kontakt?anliegen=Beratung" className="btn-primary group justify-center rounded-xl px-6">
                 Beratung anfragen <span aria-hidden className="ml-2 transition-transform group-hover:translate-x-0.5">→</span>
               </Link>
-              <Link href="/produkte/stapelstuehle" className="btn-secondary justify-center rounded-xl px-6">Produkte ansehen</Link>
+              <Link href="/produkte" className="btn-secondary justify-center rounded-xl px-6">Produkte ansehen</Link>
             </div>
             <Link href="/raumplaner" className="mt-4 inline-flex w-fit items-center gap-2 text-xs font-medium text-premium-bronze transition hover:text-premium-forest">Raum digital planen <span aria-hidden="true">→</span> 3D-Raumplaner ausprobieren</Link>
             <a href="tel:+499342915353" className="mt-5 inline-flex w-fit items-center gap-3 text-sm font-semibold text-premium-ink transition hover:text-premium-bronze">

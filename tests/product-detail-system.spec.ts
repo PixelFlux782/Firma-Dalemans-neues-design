@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { localProducts } from "../src/lib/commerce/providers/local-data";
+import { publicCommerceProducts } from "../src/lib/commerce/publication";
 import { products } from "../src/lib/products";
 import { productPath } from "../src/lib/product-routes";
 
@@ -76,7 +77,7 @@ test("Stuhltransportwagen zeigt Preis und Artikelnummer auf Desktop und bleibt m
 });
 
 test("alle vorhandenen Produktdetailrouten laden mit derselben Grundstruktur", async ({ page }) => {
-  const commerce = localProducts;
+  const commerce = publicCommerceProducts(localProducts, "production");
   const failedImages: string[] = [];
   page.on("response", response => {
     if (response.url().includes("/_next/image") && response.status() >= 400) failedImages.push(response.url());

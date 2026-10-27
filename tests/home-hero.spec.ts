@@ -7,7 +7,7 @@ test("hero layout, links and slider across viewports", async ({ page }) => {
     const hero = page.locator(".hero-architectural");
     await expect(hero.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(hero.getByRole("link", { name: /Beratung anfragen/ })).toHaveAttribute("href", "/kontakt?anliegen=Beratung");
-    await expect(hero.getByRole("link", { name: "Produkte ansehen" })).toHaveAttribute("href", "/produkte/stapelstuehle");
+    await expect(hero.getByRole("link", { name: "Produkte ansehen" })).toHaveAttribute("href", "/produkte");
     await expect(hero.getByRole("link", { name: /3D-Raumplaner ausprobieren/ })).toHaveAttribute("href", "/raumplaner");
     await expect(hero.getByRole("link", { name: /Direktkontakt/ })).toHaveAttribute("href", "tel:+499342915353");
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);

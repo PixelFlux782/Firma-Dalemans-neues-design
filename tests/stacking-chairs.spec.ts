@@ -282,7 +282,7 @@ test.describe("Modell 1021 Konfigurator", () => {
     }).toEqual(["xtreme", "3100"]);
 
     await dialog.getByRole("link", { name: "Stoffmuster anfragen" }).click();
-    await expect(page).toHaveURL(/\/kontakt\?.*#anfrage$/);
+    await expect(page).toHaveURL(/\/kontakt#anfrage$/);
     await expect(page.locator("textarea[name=message]")).toHaveValue(/Modell: 1021[\s\S]*Stoffgruppe: 3[\s\S]*Stoffkollektion: Xtreme[\s\S]*Farbe: Ocean[\s\S]*Farbcode: 3100/);
   });
 
@@ -425,7 +425,7 @@ test.describe("Modell 1021 Konfigurator", () => {
     const quote = page.getByRole("link", { name: "Fragen zu diesem Modell? Persönlich beraten lassen →" });
     await expect(quote).toHaveAttribute("href", /nachricht=.*Menge%3A\+80/);
     await quote.click();
-    await expect(page).toHaveURL(/\/kontakt\?.*#anfrage$/);
+    await expect(page).toHaveURL(/\/kontakt#anfrage$/);
     await expect(page.locator("textarea[name=message]")).toHaveValue(/Modell: 1021[\s\S]*Stoffgruppe: 4[\s\S]*Reihenverbindung: ja[\s\S]*Menge: 80/);
   });
 

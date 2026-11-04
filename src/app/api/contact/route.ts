@@ -2,10 +2,15 @@ import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { createHash } from "node:crypto";
 import {
-  checkLocalRateLimit,
+  checkRateLimit,
+  claimIdempotency,
+  FormProtectionUnavailable,
+  isAllowedFormRequest,
   logFormEvent,
   readJsonBody,
+  releaseIdempotency,
   RequestBodyError,
+  storeIdempotencyResult,
 } from "@/lib/server/form-protection";
 
 export const runtime = "nodejs";
@@ -17,10 +22,13 @@ function text(value: unknown, maxLength = 200) {
 const MAX_REQUEST_BYTES = 10_000;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const IDEMPOTENCY_TTL_MS = 10 * 60 * 1_000;
-const acceptedSubmissions = new Map<string, number>();
-const pendingSubmissions = new Map<string, Promise<void>>();
 
 export async function POST(request: Request) {
+  if (!isAllowedFormRequest(request)) {
+    logFormEvent("contact", "request_origin_rejected", "warn");
+    return NextResponse.json({ error: "Die Anfrage konnte nicht verarbeitet werden." }, { status: 403 });
+  }
+
   let body: Record<string, unknown>;
   try {
     const value = await readJsonBody(request, MAX_REQUEST_BYTES);
@@ -55,27 +63,28 @@ export async function POST(request: Request) {
     );
   }
 
-  const now = Date.now();
-  for (const [key, expiresAt] of acceptedSubmissions) {
-    if (expiresAt <= now) acceptedSubmissions.delete(key);
-  }
   const submissionKey = createHash("sha256").update(submissionId).digest("hex");
-  if (acceptedSubmissions.has(submissionKey)) return NextResponse.json({ ok: true });
-  const pending = pendingSubmissions.get(submissionKey);
-  if (pending) {
-    try {
-      await pending;
-      return NextResponse.json({ ok: true });
-    } catch {
-      return NextResponse.json(
-        { error: "Ihre Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es später erneut oder schreiben Sie an info@dalemans.de." },
-        { status: 502 },
-      );
+  let retryAfter: number | null;
+  try {
+    // Keep an in-flight claim for the full duplicate-suppression window. If a
+    // process disappears after SMTP accepted the message, a retry must not be
+    // able to send the same submission again after only a few seconds.
+    const existing = await claimIdempotency("contact", submissionKey, IDEMPOTENCY_TTL_MS);
+    if (existing === "accepted") return NextResponse.json({ ok: true });
+    if (existing === "pending") {
+      return NextResponse.json({ error: "Diese Anfrage wird bereits verarbeitet." }, { status: 409 });
     }
+    retryAfter = await checkRateLimit(request, "contact");
+  } catch (error) {
+    if (!(error instanceof FormProtectionUnavailable)) throw error;
+    logFormEvent("contact", "form_protection_unavailable");
+    return NextResponse.json(
+      { error: "Die Online-Übermittlung ist derzeit nicht verfügbar. Bitte rufen Sie uns an oder schreiben Sie an info@dalemans.de." },
+      { status: 503 },
+    );
   }
-
-  const retryAfter = checkLocalRateLimit(request, "contact");
   if (retryAfter) {
+    await releaseIdempotency("contact", submissionKey);
     logFormEvent("contact", "rate_limited", "warn");
     return NextResponse.json(
       { error: "Zu viele Sendeversuche. Bitte warten Sie einige Minuten." },
@@ -85,10 +94,11 @@ export async function POST(request: Request) {
 
   const required = [
     "CONTACT_SMTP_HOST", "CONTACT_SMTP_PORT", "CONTACT_SMTP_USER",
-    "CONTACT_SMTP_PASSWORD", "CONTACT_FROM_EMAIL",
+    "CONTACT_SMTP_PASSWORD", "CONTACT_FROM_EMAIL", "CONTACT_TO_EMAIL",
   ] as const;
   const missing = required.filter((key) => !process.env[key]?.trim());
   if (missing.length) {
+    await releaseIdempotency("contact", submissionKey);
     logFormEvent("contact", "mail_not_configured");
     return NextResponse.json(
       { error: "Die Online-Übermittlung ist derzeit nicht eingerichtet. Bitte rufen Sie uns an oder schreiben Sie an info@dalemans.de." },
@@ -106,6 +116,7 @@ export async function POST(request: Request) {
   if (!Number.isInteger(port) || port < 1 || port > 65_535
     || !["true", "false"].includes(secureValue ?? "")
     || !recipient || !emailPattern.test(recipient) || !emailPattern.test(from)) {
+    await releaseIdempotency("contact", submissionKey);
     logFormEvent("contact", testMode && !testRecipient ? "mail_test_recipient_missing" : "mail_config_invalid");
     return NextResponse.json(
       { error: "Die Online-Übermittlung ist derzeit nicht eingerichtet. Bitte rufen Sie uns an oder schreiben Sie an info@dalemans.de." },
@@ -113,11 +124,15 @@ export async function POST(request: Request) {
     );
   }
 
+  const host = process.env.CONTACT_SMTP_HOST!.trim();
+  const secure = secureValue === "true";
   const transporter = nodemailer.createTransport({
-    host: process.env.CONTACT_SMTP_HOST,
+    host,
     port,
-    secure: secureValue === "true",
+    secure,
+    requireTLS: !secure,
     auth: { user: process.env.CONTACT_SMTP_USER, pass: process.env.CONTACT_SMTP_PASSWORD },
+    tls: { minVersion: "TLSv1.2", rejectUnauthorized: true, servername: host },
     connectionTimeout: 10_000,
     greetingTimeout: 10_000,
     socketTimeout: 15_000,
@@ -139,19 +154,23 @@ export async function POST(request: Request) {
     });
     if (!info.accepted?.length) throw new Error("MAIL_NOT_ACCEPTED");
   })();
-  pendingSubmissions.set(submissionKey, delivery);
-
   try {
     await delivery;
-    acceptedSubmissions.set(submissionKey, Date.now() + IDEMPOTENCY_TTL_MS);
-    return NextResponse.json({ ok: true });
   } catch {
+    try { await releaseIdempotency("contact", submissionKey); } catch { /* delivery error remains primary */ }
     logFormEvent("contact", "delivery_failed");
     return NextResponse.json(
       { error: "Ihre Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es später erneut oder schreiben Sie an info@dalemans.de." },
       { status: 502 },
     );
-  } finally {
-    pendingSubmissions.delete(submissionKey);
   }
+
+  try {
+    await storeIdempotencyResult("contact", submissionKey, "accepted", IDEMPOTENCY_TTL_MS);
+  } catch {
+    // SMTP has already accepted the message. Reporting failure would invite a
+    // duplicate retry. The long-lived pending claim remains as the safe state.
+    logFormEvent("contact", "accepted_state_unavailable");
+  }
+  return NextResponse.json({ ok: true });
 }

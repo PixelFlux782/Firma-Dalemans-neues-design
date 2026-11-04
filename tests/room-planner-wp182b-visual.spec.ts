@@ -23,7 +23,7 @@ async function drawPolygon(page: Page, points: { x: number; y: number }[]) {
 
 for (const visualCase of cases) {
   test(`WP18.2b visual ${visualCase.name}`, async ({ page }, testInfo: TestInfo) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.setViewportSize({ width: 1440, height: 1200 });
     await page.goto("/raumplaner");
     await page.locator('[data-help-ready="true"]').waitFor();
     const skipOnboarding = page.getByRole("button", { name: "Überspringen" });

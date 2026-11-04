@@ -6,7 +6,7 @@ import { formatCommerceMoney } from "@/lib/commerce/money";
 
 export type CustomerPriceMode = "business" | "private";
 
-const STORAGE_KEY = "dlmns-customer-price-mode";
+const LEGACY_STORAGE_KEY = "dlmns-customer-price-mode";
 export const GERMAN_VAT_RATE = 0.19;
 
 function displayedMoney(money: CommerceMoney, mode: CustomerPriceMode): CommerceMoney {
@@ -25,13 +25,10 @@ export default function PriceDisplayProvider({ children }: { children: ReactNode
   const [mode, setMode] = useState<CustomerPriceMode>("business");
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === "business" || stored === "private") setMode(stored);
+    // Die Auswahl gilt nur für die aktuelle React-Laufzeit. Einträge älterer
+    // Versionen werden entfernt und ausdrücklich nicht wiederhergestellt.
+    window.localStorage.removeItem(LEGACY_STORAGE_KEY);
   }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, mode);
-  }, [mode]);
 
   const value = useMemo(() => ({
     mode,

@@ -236,10 +236,12 @@ test("Kontaktformular hält Feldfehler und Übermittlungsfehler getrennt", async
 });
 
 test("Kontakt-API weist ungültige und übergroße Anfragen ab", async ({ request }) => {
-  const invalid = await request.post("/api/contact", { data: {} });
+  const headers = { origin: "http://127.0.0.1:3100" };
+  const invalid = await request.post("/api/contact", { data: {}, headers });
   expect(invalid.status()).toBe(422);
 
   const missingContactMethod = await request.post("/api/contact", {
+    headers,
     data: {
       firstName: "Max",
       lastName: "Mustermann",
@@ -250,6 +252,7 @@ test("Kontakt-API weist ungültige und übergroße Anfragen ab", async ({ reques
   expect(missingContactMethod.status()).toBe(422);
 
   const oversized = await request.post("/api/contact", {
+    headers,
     data: { message: "x".repeat(10_001) },
   });
   expect(oversized.status()).toBe(413);

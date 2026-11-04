@@ -2,28 +2,31 @@ import { expect, test } from "@playwright/test";
 
 test("Formular-APIs begrenzen tatsächliche Request-Bodies", async ({ request }) => {
   const oversized = JSON.stringify({ message: "x".repeat(36_000) });
+  const headers = { "content-type": "application/json", origin: "http://127.0.0.1:3100" };
   const contact = await request.post("/api/contact", {
     data: oversized,
-    headers: { "content-type": "application/json" },
+    headers,
   });
   expect(contact.status()).toBe(413);
 
   const inquiry = await request.post("/api/inquiry", {
     data: oversized,
-    headers: { "content-type": "application/json" },
+    headers,
   });
   expect(inquiry.status()).toBe(413);
 });
 
 test("Kontakt-API behandelt ungültiges JSON kontrolliert und Honeypot ohne Versand", async ({ request }) => {
+  const headers = { "content-type": "application/json", origin: "http://127.0.0.1:3100" };
   const invalid = await request.post("/api/contact", {
     data: "{",
-    headers: { "content-type": "application/json" },
+    headers,
   });
   expect(invalid.status()).toBe(400);
 
   const honeypot = await request.post("/api/contact", {
     data: { website: "bot.example" },
+    headers: { origin: "http://127.0.0.1:3100" },
   });
   expect(honeypot.status()).toBe(200);
   await expect(honeypot.json()).resolves.toEqual({ ok: true });

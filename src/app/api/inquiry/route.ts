@@ -8,10 +8,15 @@ import {
   validateInquiryBody,
 } from "@/lib/inquiry/server";
 import {
-  checkLocalRateLimit,
+  checkRateLimit,
+  claimIdempotency,
+  FormProtectionUnavailable,
+  isAllowedFormRequest,
   logFormEvent,
   readJsonBody,
+  releaseIdempotency,
   RequestBodyError,
+  storeIdempotencyResult,
 } from "@/lib/server/form-protection";
 
 export const runtime = "nodejs";
@@ -19,18 +24,13 @@ export const runtime = "nodejs";
 const MAX_REQUEST_BYTES = 35_000;
 const IDEMPOTENCY_TTL_MS = 24 * 60 * 60 * 1_000;
 
-interface CachedResult { expiresAt: number; result: InquirySuccessResponse }
-
-const acceptedResults = new Map<string, CachedResult>();
-const pendingRequests = new Map<string, Promise<InquirySuccessResponse>>();
-
-function prune(now: number) {
-  for (const [key, value] of acceptedResults) if (value.expiresAt <= now) acceptedResults.delete(key);
-}
-
 export async function POST(request: Request) {
-  const now = Date.now();
-  prune(now);
+  if (!isAllowedFormRequest(request)) {
+    logFormEvent("inquiry", "request_origin_rejected", "warn");
+    return NextResponse.json({ accepted: false, error: "Die Anfrage konnte nicht verarbeitet werden." }, { status: 403 });
+  }
+
+  let claimedKey: string | null = null;
 
   try {
     const body = validateInquiryBody(await readJsonBody(request, MAX_REQUEST_BYTES));
@@ -39,14 +39,19 @@ export async function POST(request: Request) {
     }
 
     const key = idempotencyDigest(body.idempotencyKey);
-    const cached = acceptedResults.get(key);
-    if (cached) return NextResponse.json(cached.result);
+    const existing = await claimIdempotency("inquiry", key, IDEMPOTENCY_TTL_MS);
+    if (existing && existing !== "pending") {
+      return NextResponse.json(JSON.parse(existing) as InquirySuccessResponse);
+    }
+    if (existing === "pending") {
+      return NextResponse.json({ accepted: false, error: "Diese Anfrage wird bereits verarbeitet." }, { status: 409 });
+    }
+    claimedKey = key;
 
-    const running = pendingRequests.get(key);
-    if (running) return NextResponse.json(await running);
-
-    const retryAfter = checkLocalRateLimit(request, "inquiry");
+    const retryAfter = await checkRateLimit(request, "inquiry");
     if (retryAfter) {
+      await releaseIdempotency("inquiry", key);
+      claimedKey = null;
       logFormEvent("inquiry", "rate_limited", "warn");
       return NextResponse.json(
         { accepted: false, error: "Zu viele Sendeversuche. Bitte warten Sie einige Minuten." },
@@ -54,20 +59,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const delivery = (async () => {
-      const lines = await resolveInquiryItems(body.items);
-      return deliverInquiry(body, lines);
-    })();
-    pendingRequests.set(key, delivery);
-
+    const lines = await resolveInquiryItems(body.items);
+    const result = await deliverInquiry(body, lines);
     try {
-      const result = await delivery;
-      acceptedResults.set(key, { result, expiresAt: Date.now() + IDEMPOTENCY_TTL_MS });
-      return NextResponse.json(result, { status: 201 });
-    } finally {
-      pendingRequests.delete(key);
+      await storeIdempotencyResult("inquiry", key, JSON.stringify(result), IDEMPOTENCY_TTL_MS);
+    } catch {
+      // Delivery is already accepted. Keep the full-window pending claim and
+      // return success instead of encouraging a duplicate order transmission.
+      logFormEvent("inquiry", "accepted_state_unavailable");
     }
+    claimedKey = null;
+    return NextResponse.json(result, { status: 201 });
   } catch (error) {
+    if (claimedKey) {
+      try { await releaseIdempotency("inquiry", claimedKey); } catch { /* original error remains primary */ }
+    }
     if (error instanceof InquiryInputError) {
       return NextResponse.json(
         { accepted: false, error: error.message, fieldErrors: error.fieldErrors },
@@ -79,6 +85,13 @@ export async function POST(request: Request) {
         accepted: false,
         error: error.status === 413 ? "Die Anfrage ist zu groß." : "Die Anfrage konnte nicht gelesen werden.",
       }, { status: error.status });
+    }
+    if (error instanceof FormProtectionUnavailable) {
+      logFormEvent("inquiry", "form_protection_unavailable");
+      return NextResponse.json({
+        accepted: false,
+        error: "Die Online-Übermittlung ist derzeit nicht verfügbar. Bitte schreiben Sie an info@dalemans.de.",
+      }, { status: 503 });
     }
     const unavailable = error instanceof Error
       && (error.message === "MAIL_NOT_CONFIGURED" || error.message === "MAIL_TEST_RECIPIENT_MISSING");

@@ -8,7 +8,7 @@ const room = (): RoomPlan => ({ ...emptyPlan(), contour: { closed: true, points:
 const zone: PlanningZone = { id: "zone-1", type: "tables", geometry: { kind: "rectangle", x: 0, y: 0, width: 10, depth: 8 }, rotation: 0 };
 
 test("WP17 catalog describes all optimized table GLBs", () => {
-  expect([...new Set(TABLE_MODELS.map(model => model.modelPath))].sort()).toEqual(["/models/dalemans-tisch-210-low.glb", "/models/dalemans-tisch-310-low.glb", "/models/dalemans-tisch-trapez-low.glb"].sort());
+  expect([...new Set(TABLE_MODELS.map(model => model.modelPath))].sort()).toEqual(["/models/dalemans-tisch-210-low-web.glb", "/models/dalemans-tisch-310-low-web.glb", "/models/dalemans-tisch-trapez-low-web.glb"].sort());
   expect(TABLE_MODELS.every(model => model.width > 1 && model.depth > .5 && model.height > .5)).toBe(true);
   expect(TABLE_PRESETS).toHaveLength(14);
 });

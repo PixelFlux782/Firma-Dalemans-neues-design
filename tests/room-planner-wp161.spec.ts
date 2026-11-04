@@ -31,9 +31,12 @@ test("WP16.1 reserve updates the existing inquiry and product handoff", async ({
   await page.getByLabel("Reserve in Prozent").selectOption("10");
   await expect(page.getByLabel("Bedarf")).toContainText("Reserve 0");
   const inquiry = page.getByRole("link", { name: "Angebot für diese Bestuhlung anfordern" });
-  await expect(inquiry).toHaveAttribute("href", /Reserve%3A\+10/);
+  await expect(inquiry).toHaveAttribute("href", "/kontakt#anfrage");
   await expect(page.getByRole("link", { name: "Stuhl konfigurieren / Produkt ansehen" })).toHaveAttribute("href", /produkte/);
-  await expect(page.getByRole("img", { name: "Grundriss Zeichenfläche" })).toBeVisible();
+  await inquiry.click();
+  await expect(page).toHaveURL(/\/kontakt#anfrage$/);
+  await expect(page.getByLabel(/^Nachricht/)).toHaveValue(/Reserve: 10 %/);
+  expect(new URL(page.url()).search).toBe("");
 });
 
 test("WP16.1 tools, history and project actions reuse the existing state", async ({ page }) => {

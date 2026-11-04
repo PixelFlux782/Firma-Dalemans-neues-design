@@ -295,26 +295,26 @@ test.describe("DLMNS Cart Drawer", () => {
   });
 
   test("Produktvariante hinzufügen, Menge ändern und entfernen", async ({ page }) => {
-    await page.goto("/shop/produkt/filzgleiter-fuer-rundrohr?variant=local-variant-rf-20");
+    await page.goto("/produkte/artikel/klapptisch-310c");
     await page.getByRole("button", { name: "Zur Auswahl hinzufügen" }).click();
     const drawer = page.getByTestId("cart-drawer");
     await expect(drawer).toBeVisible();
-    await expect(drawer).toContainText("Gleiter für Rundrohr");
+    await expect(drawer).toContainText("Klapptisch Modell 310c");
     await drawer.getByRole("button", { name: /Menge .* erhöhen/ }).click();
-    await expect(drawer.getByLabel(/Menge für/)).toHaveValue("40");
+    await expect(drawer.getByLabel(/Menge für/)).toHaveValue("2");
     await drawer.getByRole("button", { name: /entfernen/ }).click();
     await expect(drawer).toContainText("Noch nichts ausgewählt.");
   });
 
   test("Anfrage-Modus übernimmt die Auswahl und bietet keinen Kaufabschluss an", async ({ page }) => {
-    await page.goto("/shop/produkt/filzgleiter-fuer-rundrohr?variant=local-variant-rf-20");
+    await page.goto("/produkte/artikel/klapptisch-310c");
     await page.getByRole("button", { name: "Zur Auswahl hinzufügen" }).click();
     const drawer = page.getByTestId("cart-drawer");
     await expect(drawer).toContainText("Ihre Produktauswahl ist noch keine Bestellung");
     await drawer.getByRole("link", { name: "Angebot anfragen →" }).click();
     await expect(page).toHaveURL(/\/anfrage$/);
     await expect(page.getByRole("heading", { name: "Persönliches Angebot anfragen" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Gleiter für Rundrohr" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Klapptisch Modell 310c" })).toBeVisible();
     await expect(page.getByText("Artikelnummer:")).toBeVisible();
     await expect(page.getByText("Keine verbindliche Bestellung", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: /kaufen|bestellung|kasse/i })).toHaveCount(0);
@@ -349,22 +349,23 @@ test.describe("DLMNS Cart Drawer", () => {
     expect(persisted.lines[0]).toMatchObject({ erpArticleNumber: "T310C127N", quantity: 21, unitPrice: { amount: "367.32" } });
   });
 
-  test("Finder legt die bereits berechneten 450 Stück in den Cart", async ({ page }) => {
-    await page.goto("/shop/gleiter-finder?art=chair&form=round&d=20&boden=carpet&anzahl=100&reserve=1&schritt=ergebnis");
-    await page.getByTestId("finder-add-to-cart").click();
+  test("veröffentlichtes Produkt legt 450 Stück unverändert in den Cart", async ({ page }) => {
+    await page.goto("/produkte/artikel/klapptisch-310c");
+    await page.getByLabel("Bestellmenge").fill("450");
+    await page.getByRole("button", { name: "Zur Auswahl hinzufügen" }).click();
     const drawer = page.getByTestId("cart-drawer");
     await expect(drawer.getByLabel(/Menge für/)).toHaveValue("450");
-    await expect(drawer).toContainText("Bedarf 400, mit Reserve 420, bestellbar 450 Stück.");
+    await expect(drawer).toContainText("Klapptisch Modell 310c");
   });
 
   test("Cart bleibt über Navigation und Reload erhalten", async ({ page }) => {
-    await page.goto("/shop/produkt/filzgleiter-fuer-rundrohr?variant=local-variant-rf-20");
+    await page.goto("/produkte/artikel/klapptisch-310c");
     await page.getByRole("button", { name: "Zur Auswahl hinzufügen" }).click();
     await page.getByRole("button", { name: "Warenkorb schließen" }).click();
     await page.goto("/firma");
-    await expect(page.getByTestId("cart-trigger").first()).toContainText("20");
+    await expect(page.getByTestId("cart-trigger").first()).toContainText("1");
     await page.reload();
-    await expect(page.getByTestId("cart-trigger").first()).toContainText("20");
+    await expect(page.getByTestId("cart-trigger").first()).toContainText("1");
   });
 
   test("Drawer ist bei 320 und 375 Pixel ohne horizontalen Überlauf nutzbar", async ({ page }) => {
@@ -386,7 +387,7 @@ test.describe("DLMNS Cart Drawer", () => {
     await expect(page.getByRole("button", { name: "Warenkorb schließen" })).toBeFocused();
     await expect(page.locator("#site-shell")).toHaveAttribute("aria-hidden", "true");
     await page.keyboard.press("Shift+Tab");
-    await expect(page.getByRole("link", { name: "Gleiter-Finder starten" })).toBeFocused();
+    await expect(page.getByRole("link", { name: "Gleiter persönlich zuordnen" })).toBeFocused();
     await page.keyboard.press("Tab");
     await expect(page.getByRole("button", { name: "Warenkorb schließen" })).toBeFocused();
     await page.keyboard.press("Escape");

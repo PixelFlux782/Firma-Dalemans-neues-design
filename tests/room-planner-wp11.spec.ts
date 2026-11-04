@@ -181,6 +181,7 @@ test("Gangbreite wird mit einem Undo-Schritt zurückgesetzt", () => {
 });
 
 test("Übernommener Block lässt sich auswählen, verschieben, kürzen und rückgängig machen", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1200 });
   await page.goto("/raumplaner");
   const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
   const svg = editor.getByRole("img", { name: "Grundriss Zeichenfläche" });

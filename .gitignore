@@ -1,5 +1,6 @@
 node_modules
 .next
+.netlify
 .vercel
 playwright-report
 test-results
@@ -9,3 +10,4 @@ Firma-Dalemans/
 .env
 .env.*
 !.env.example
+!.env.docker.local.example

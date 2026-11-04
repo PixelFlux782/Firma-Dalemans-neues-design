@@ -82,7 +82,7 @@ export const guideArticles = [
       { id: "kunststoff-nachruestung", heading: "Kunststoff-Reihenverbinder – für die Nachrüstung", paragraphs: [
         "Für bereits vorhandene Stapelstühle, die ursprünglich ohne Reihenverbindung bestellt wurden, bieten wir separat erhältliche Reihenverbinder aus Kunststoff zur Nachrüstung an.",
         "Diese Lösung ist sinnvoll, wenn sich Ihre Anforderungen nach dem ursprünglichen Kauf geändert haben. Ob eine Nachrüstung möglich ist, hängt vom jeweiligen Stuhlmodell, der Gestellform, den Rohrmaßen und dem benötigten Stuhlabstand ab. Eine universelle Kompatibilität besteht nicht.",
-      ], link: { href: "/produkte/artikel/reihenverbinder-kunststoff", label: "Kunststoff-Reihenverbinder zur Nachrüstung ansehen", description: "Nachrüstlösung für geeignete vorhandene Stapelstühle." } },
+      ], link: { href: "/produkte/reihenverbinder", label: "Reihenverbinder zur Nachrüstung prüfen", description: "Nachrüstlösung für geeignete vorhandene Stapelstühle." } },
       { id: "unsere-empfehlung", heading: "Welche Lösung empfehlen wir?", paragraphs: [
         "Neubestellung mit Reihenverbindung: Wählen Sie fest montierte Metall-Reihenverbinder möglichst direkt bei der Stuhlkonfiguration.",
         "Vorhandene Stühle nachträglich verbinden: Nutzen Sie passende Kunststoff-Reihenverbinder zur Nachrüstung, nachdem wir die Kompatibilität mit Ihrem Stuhlmodell geprüft haben.",
@@ -98,7 +98,7 @@ export const guideArticles = [
       { question: "Warum gleich bei der Bestellung mitplanen?", answer: "Bei neuen Stapelstühlen empfehlen wir die fest montierte Metall-Reihenverbindung. Sie ist unsere bevorzugte Lösung für regelmäßig genutzte Reihenbestuhlungen und sollte direkt bei der Stuhlkonfiguration ausgewählt werden." },
     ],
     relatedLinks: [
-      { href: "/produkte/artikel/reihenverbinder-kunststoff", label: "Kunststoff-Reihenverbinder zur Nachrüstung", description: "Nachrüstlösung für geeignete vorhandene Stapelstühle ansehen." },
+      { href: "/produkte/reihenverbinder", label: "Reihenverbinder zur Nachrüstung", description: "Nachrüstlösung für geeignete vorhandene Stapelstühle prüfen." },
       { href: "/produkte/stapelstuehle", label: "Stapelstühle", description: "Modelle mit ihren verfügbaren Ausstattungen vergleichen." },
       { href: "/raumplaner", label: "Raumplaner", description: "Eine mögliche Bestuhlung unverbindlich vorbereiten." },
     ],

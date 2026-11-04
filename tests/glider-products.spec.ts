@@ -2,12 +2,12 @@ import { expect, test } from "@playwright/test";
 import { localGliderProducts } from "../src/lib/commerce/providers/local-glider-products";
 
 const expectedRows = [
-  ["GSTGL", "Kunststoffgleiter Standard", "1.36"],
-  ["A1021FG", "Filzgelenkgleiter", "6.90"],
-  ["A1021FG", "Gelenkgleiter für Teppichboden", "6.90"],
-  ["ZGGF30", "Filz-Winkelgleiter", "16.00"],
-  ["A1021NG", "Filz-Nagelgleiter", "8.00"],
-  ["A1021NGK", "Kunststoff-Nagelgleiter", "6.40"],
+  ["GSTGL", "Kunststoffgleiter Standard", null],
+  ["A1021FG", "Filzgelenkgleiter", null],
+  ["A1021FG", "Gelenkgleiter für Teppichboden", null],
+  ["ZGGF30", "Filz-Winkelgleiter", null],
+  ["A1021NG", "Filz-Nagelgleiter", null],
+  ["A1021NGK", "Kunststoff-Nagelgleiter", null],
 ] as const;
 
 test("übernimmt alle sechs ODS-Zeilen ohne doppelte Produkt-IDs oder Handles", () => {
@@ -18,9 +18,9 @@ test("übernimmt alle sechs ODS-Zeilen ohne doppelte Produkt-IDs oder Handles", 
   expect(localGliderProducts.map((product) => [
     product.variants[0]?.erpArticleNumber,
     product.title,
-    product.variants[0]?.price?.amount,
+    product.variants[0]?.price,
   ])).toEqual(expectedRows);
-  expect(localGliderProducts.every((product) => product.variants[0]?.priceDataStatus === "source_unreleased")).toBe(true);
+  expect(localGliderProducts.every((product) => product.variants[0]?.priceStatus === "on_request")).toBe(true);
   expect(localGliderProducts.every((product) => product.featuredImage?.url)).toBe(true);
 });
 

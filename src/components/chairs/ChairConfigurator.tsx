@@ -180,7 +180,15 @@ export default function ChairConfigurator({
     if (fabricSelection?.colorCode) params.set("farbe", fabricSelection.colorCode);
     else params.delete("farbe");
     params.set("reihe", configuration.rowConnector ? "ja" : "nein");
-    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
+    // Keep the shareable configurator state in the URL without asking the App
+    // Router to re-render route metadata. A router-aware replace accumulated a
+    // second canonical link after hydration on product pages.
+    History.prototype.replaceState.call(
+      window.history,
+      null,
+      "",
+      `${window.location.pathname}?${params.toString()}${window.location.hash}`,
+    );
 
     if (firstVariantEffect.current) {
       firstVariantEffect.current = false;

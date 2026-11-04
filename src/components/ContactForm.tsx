@@ -2,6 +2,10 @@
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import {
+  clearRoomPlannerContactHandoff,
+  readRoomPlannerContactHandoff,
+} from "@/lib/room-planner/contactHandoff";
 
 type FormStatus = { type: "success" | "error"; message: string } | null;
 type FormField = "firstName" | "lastName" | "organization" | "email" | "phone" | "subject" | "message";
@@ -73,7 +77,7 @@ export function ContactForm() {
   const [pending, setPending] = useState(false);
   const statusRef = useRef<HTMLParagraphElement>(null);
   const submissionIdRef = useRef("");
-  const initialSubject = useMemo(
+  const querySubject = useMemo(
     () =>
       contextKeys
         .map((key) => searchParams.get(key))
@@ -81,7 +85,21 @@ export function ContactForm() {
         .join(" – ") || "Allgemeine Beratung",
     [searchParams],
   );
-  const initialMessage = searchParams.get("nachricht") ?? "";
+  const queryMessage = searchParams.get("nachricht") ?? "";
+  const [initialSubject, setInitialSubject] = useState(querySubject);
+  const [initialMessage, setInitialMessage] = useState(queryMessage);
+
+  useEffect(() => {
+    const handoff = readRoomPlannerContactHandoff();
+    if (handoff) {
+      setInitialSubject(handoff.subject || querySubject);
+      setInitialMessage(handoff.message || queryMessage);
+    }
+
+    // Bestehende Links mit Planungsdetails bleiben lesbar. Nach dem Laden
+    // werden die Detailparameter aber aus der sichtbaren Historie entfernt.
+    if (searchParams.has("nachricht")) window.history.replaceState(null, "", "/kontakt#anfrage");
+  }, [queryMessage, querySubject, searchParams]);
 
   useEffect(() => {
     if (status) statusRef.current?.focus();
@@ -123,6 +141,7 @@ export function ContactForm() {
       const result = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(result.error || "Die Anfrage konnte nicht gesendet werden.");
       setStatus({ type: "success", message: "Vielen Dank. Ihre Anfrage wurde übermittelt. Wir melden uns persönlich bei Ihnen." });
+      clearRoomPlannerContactHandoff();
       submissionIdRef.current = "";
       form.reset();
       setErrors({});
@@ -174,13 +193,13 @@ export function ContactForm() {
         <label className="block text-sm font-medium text-premium-charcoal sm:col-span-2">
           Anliegen oder gewünschter Bereich
           <span aria-hidden="true"> *</span>
-          <input name="subject" type="text" className={inputClass} defaultValue={initialSubject} maxLength={200} required onChange={handleFieldChange} {...errorAttributes("subject", errors)} />
+          <input key={initialSubject} name="subject" type="text" className={inputClass} defaultValue={initialSubject} maxLength={200} required onChange={handleFieldChange} {...errorAttributes("subject", errors)} />
           <FieldError field="subject" errors={errors} />
         </label>
         <label className="block text-sm font-medium text-premium-charcoal sm:col-span-2">
           Nachricht
           <span aria-hidden="true"> *</span>
-          <textarea name="message" className={`${inputClass} min-h-[180px] resize-y`} defaultValue={initialMessage} minLength={10} maxLength={5000} required onChange={handleFieldChange} {...errorAttributes("message", errors)} />
+          <textarea key={initialMessage} name="message" className={`${inputClass} min-h-[180px] resize-y`} defaultValue={initialMessage} minLength={10} maxLength={5000} required onChange={handleFieldChange} {...errorAttributes("message", errors)} />
           <FieldError field="message" errors={errors} />
         </label>
         <label className="absolute -left-[9999px]" aria-hidden="true">

@@ -1,0 +1,29 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Netlify enforces these limits at the edge on every current plan. The
+# application-level atomic TTL store remains mandatory for cross-host
+# idempotency and provides the equivalent protection on Vercel and a VPS.
+[[redirects]]
+  from = "/api/contact"
+  to = "/api/contact"
+  status = 200
+  force = true
+  [redirects.rate_limit]
+    window_limit = 5
+    window_size = 180
+    aggregate_by = ["ip", "domain"]
+
+[[redirects]]
+  from = "/api/inquiry"
+  to = "/api/inquiry"
+  status = 200
+  force = true
+  [redirects.rate_limit]
+    window_limit = 5
+    window_size = 180
+    aggregate_by = ["ip", "domain"]

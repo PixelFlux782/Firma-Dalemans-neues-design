@@ -32,9 +32,6 @@ export const metadata: Metadata = {
     "Gemeindemobiliar",
     "Dalemans",
   ],
-  alternates: {
-    canonical: absoluteUrl("/"),
-  },
   openGraph: {
     type: "website",
     locale: "de_DE",

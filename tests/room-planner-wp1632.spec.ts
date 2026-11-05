@@ -24,7 +24,7 @@ test("WP16.3.2 3D chair offset changes display angle without changing plan rotat
 });
 
 test("WP16.3.2 wall labels edit one geometry step, reject invalid lengths and support Escape", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.setViewportSize({ width: 1440, height: 1200 });
   await page.goto("/raumplaner");
   const canvas = page.getByRole("img", { name: "Grundriss Zeichenfläche" });
   await canvas.click({ position: { x: 200, y: 180 } });
@@ -83,8 +83,8 @@ test("automatische Bestuhlung wird nach Geometrieänderungen wirklich neu berech
   const canvas = editor.getByRole("img", { name: "Grundriss Zeichenfläche" });
   await canvas.click({ position: { x: 180, y: 140 } });
   await canvas.click({ position: { x: 630, y: 140 } });
-  await canvas.click({ position: { x: 630, y: 500 } });
-  await canvas.click({ position: { x: 180, y: 500 } });
+  await canvas.click({ position: { x: 630, y: 420 } });
+  await canvas.click({ position: { x: 180, y: 420 } });
   await canvas.locator("[data-point-id]").first().click();
 
   await editor.getByRole("button", { name: "Stühle", exact: true }).click();

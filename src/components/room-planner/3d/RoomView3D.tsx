@@ -12,7 +12,7 @@ import { TABLE_MODELS, tableFootprintDepth, zonePolygon, type PlanningZone, type
 import PlannerBrand from "../PlannerBrand";
 
 const DEFAULT_WALL_HEIGHT = 2.9;
-const CHAIR_MODEL = "/models/dalemans-chair-low.glb";
+const CHAIR_MODEL = "/models/dalemans-chair-low-web.glb";
 const chairGeometry = new THREE.BoxGeometry(1, 1, 1);
 const seatMaterial = new THREE.MeshStandardMaterial({ color: "#64776c", roughness: 0.82 });
 const frameMaterial = new THREE.MeshStandardMaterial({ color: "#514f49", roughness: 0.76 });

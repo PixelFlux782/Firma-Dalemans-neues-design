@@ -12,7 +12,7 @@ test("WP16.4 model is genuinely simplified and retains a single textured mesh", 
     return { triangles: model.accessors[primitive.indices].count / 3, meshes: model.meshes.length, textures: model.textures.length };
   };
   const original = inspect("dalemans-chair.glb");
-  const runtime = inspect("dalemans-chair-low.glb");
+  const runtime = inspect("dalemans-chair-low-web.glb");
   expect(runtime.triangles).toBeLessThan(original.triangles / 5);
   expect(runtime.meshes).toBe(1);
   expect(runtime.textures).toBe(original.textures);
@@ -28,7 +28,7 @@ test("WP16.4 bounds and chair display rotation leave the plan intact", () => {
 });
 
 async function prepareRoomWithSeats(page: Page) {
-  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.setViewportSize({ width: 1440, height: 1200 });
   await page.goto("/raumplaner");
   const canvas = page.getByRole("img", { name: "Grundriss Zeichenfläche" });
   await canvas.click({ position: { x: 180, y: 140 } });
@@ -45,7 +45,7 @@ async function prepareRoomWithSeats(page: Page) {
 
 test("WP16.4 loads the optimized chair in the 3D view", async ({ page }) => {
   const canvas = await prepareRoomWithSeats(page);
-  const modelResponse = page.waitForResponse(response => response.url().endsWith("/models/dalemans-chair-low.glb"));
+  const modelResponse = page.waitForResponse(response => response.url().endsWith("/models/dalemans-chair-low-web.glb"));
   await page.getByRole("button", { name: "3D", exact: true }).click();
   expect((await modelResponse).status()).toBe(200);
   await expect(page.getByLabel("3D-Raumansicht").locator("canvas")).toBeVisible();
@@ -56,7 +56,7 @@ test("WP16.4 loads the optimized chair in the 3D view", async ({ page }) => {
 
 test("WP16.4 failed chair download preserves the editable 2D plan", async ({ page }) => {
   let modelRequested = false;
-  await page.route("**/models/dalemans-chair-low.glb", route => { modelRequested = true; return route.abort(); });
+  await page.route("**/models/dalemans-chair-low-web.glb", route => { modelRequested = true; return route.abort(); });
   const canvas = await prepareRoomWithSeats(page);
   const count = await canvas.locator("[data-point-id]").count();
   await page.getByRole("button", { name: "3D", exact: true }).click();

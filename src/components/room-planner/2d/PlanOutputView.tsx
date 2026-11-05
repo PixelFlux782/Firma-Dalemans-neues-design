@@ -11,10 +11,10 @@ import PlannerBrand from "../PlannerBrand";
 import PlannerWatermark from "../PlannerWatermark";
 
 type ReturnTypeAnalysis = ReturnType<typeof analyzeCurrentPlan>;
-type Props = { plan: RoomPlan; name: string; issuedAt: Date; profileName: string; analysis: ReturnTypeAnalysis | null; reservePercent: number; inquiryHref: string; shopHref?: string; onClose: () => void };
+type Props = { plan: RoomPlan; name: string; issuedAt: Date; profileName: string; analysis: ReturnTypeAnalysis | null; reservePercent: number; inquiryHref: string; onInquiry: () => void; shopHref?: string; onClose: () => void };
 const polygon = (points: Position[]) => points.map((p) => `${p.x},${p.y}`).join(" ");
 
-export default function PlanOutputView({ plan, name, issuedAt, profileName, analysis, reservePercent, inquiryHref, shopHref, onClose }: Props) {
+export default function PlanOutputView({ plan, name, issuedAt, profileName, analysis, reservePercent, inquiryHref, onInquiry, shopHref, onClose }: Props) {
   const seating = plan.seating;
   const demand = calculatePlanDemand(plan);
   const recommended = calculateRecommendedDemand(plan, reservePercent);
@@ -38,7 +38,7 @@ export default function PlanOutputView({ plan, name, issuedAt, profileName, anal
     window.print();
   };
   return <section className="plan-output" aria-label="Plan-Ausgabe">
-    <div className="plan-output-actions"><button type="button" onClick={onClose}>Zurück zum Editor</button><button type="button" onClick={printPlan}>Drucken / als PDF speichern</button><a href={inquiryHref}>Angebot für Stühle und Tische anfordern</a>{shopHref && <a href={shopHref}>Stuhl konfigurieren</a>}</div>
+    <div className="plan-output-actions"><button type="button" onClick={onClose}>Zurück zum Editor</button><button type="button" onClick={printPlan}>Drucken / als PDF speichern</button><a href={inquiryHref} onClick={onInquiry}>Angebot für Stühle und Tische anfordern</a>{shopHref && <a href={shopHref}>Stuhl konfigurieren</a>}</div>
     <header><PlannerBrand variant="print" /><div><p>Raum- und Bestuhlungsplan</p><h1>{name}</h1><p>Planausgabe vom {issuedAt.toLocaleDateString("de-DE")} · {capacity.total} Sitzplätze · {(plan.tables ?? []).length} Tische</p></div></header>
     <div className="plan-output-sheet"><div className="plan-output-drawing">
       <svg role="img" aria-label="Grundriss mit Sitzen, Gängen, Objekten und Ausgängen" viewBox={`${minX - margin} ${minY - margin} ${width + 2 * margin} ${height + 2 * margin}`} preserveAspectRatio="xMidYMid meet">

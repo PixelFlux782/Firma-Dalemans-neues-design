@@ -16,6 +16,7 @@ import type {
 const MAX_ITEMS = 50;
 const MAX_QUANTITY = 100_000;
 const VAT_RATE = 0.19;
+const PRODUCTION_RECIPIENT = "anfrage@dalemans.de";
 
 export class InquiryInputError extends Error {
   constructor(
@@ -283,7 +284,7 @@ function emailDocument(title: string, content: string) {
 function smtpConfig() {
   const required = [
     "CONTACT_SMTP_HOST", "CONTACT_SMTP_PORT", "CONTACT_SMTP_USER",
-    "CONTACT_SMTP_PASSWORD", "CONTACT_FROM_EMAIL",
+    "CONTACT_SMTP_PASSWORD", "CONTACT_FROM_EMAIL", "INQUIRY_TO_EMAIL",
   ] as const;
   const missing = required.filter((name) => !process.env[name]?.trim());
   if (missing.length) throw new Error("MAIL_NOT_CONFIGURED");
@@ -296,18 +297,26 @@ function smtpConfig() {
   const testRecipient = process.env.INQUIRY_TEST_TO_EMAIL?.trim();
   if (testMode && !testRecipient) throw new Error("MAIL_TEST_RECIPIENT_MISSING");
   const from = process.env.CONTACT_FROM_EMAIL!.trim();
-  const internalTo = testMode ? testRecipient! : (process.env.INQUIRY_TO_EMAIL?.trim() || "info@dalemans.de");
+  const configuredInternalTo = process.env.INQUIRY_TO_EMAIL!.trim();
+  const internalTo = testMode ? testRecipient! : PRODUCTION_RECIPIENT;
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailPattern.test(from) || !emailPattern.test(internalTo)) throw new Error("MAIL_NOT_CONFIGURED");
+  if (!emailPattern.test(from) || !emailPattern.test(internalTo)
+    || (!testMode && configuredInternalTo.toLowerCase() !== PRODUCTION_RECIPIENT)) {
+    throw new Error("MAIL_NOT_CONFIGURED");
+  }
+  const host = process.env.CONTACT_SMTP_HOST!.trim();
+  const secure = secureValue === "true";
   return {
     from,
     internalTo,
     customerTo: (email: string) => testMode ? testRecipient! : email,
     transporter: nodemailer.createTransport({
-      host: process.env.CONTACT_SMTP_HOST,
+      host,
       port,
-      secure: secureValue === "true",
+      secure,
+      requireTLS: !secure,
       auth: { user: process.env.CONTACT_SMTP_USER, pass: process.env.CONTACT_SMTP_PASSWORD },
+      tls: { minVersion: "TLSv1.2", rejectUnauthorized: true, servername: host },
       connectionTimeout: 10_000,
       greetingTimeout: 10_000,
       socketTimeout: 20_000,

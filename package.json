@@ -2,11 +2,15 @@
   "name": "my-company-website",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "optimize:glb": "node scripts/optimize-glb-textures.mjs public/models/dalemans-chair-low.glb public/models/dalemans-tisch-210-low.glb public/models/dalemans-tisch-310-low.glb public/models/dalemans-tisch-trapez-low.glb",
     "sync:fabric-cards:check": "node --use-system-ca scripts/sync-fabric-cards.mjs --check",
     "sync:fabric-cards:apply": "node --use-system-ca scripts/sync-fabric-cards.mjs --apply",
     "test:fabric-cards": "node --test tests/fabric-card-sync.test.mjs",

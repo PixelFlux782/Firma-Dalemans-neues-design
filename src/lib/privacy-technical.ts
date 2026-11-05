@@ -1,4 +1,4 @@
-export const technicalPrivacyText = `Datenschutzhinweise - technischer Stand vom 23. Oktober 2026
+export const technicalPrivacyText = `Datenschutzhinweise - technischer Stand vom 28. Oktober 2026
 
 Hinweis zum Freigabestatus
 
@@ -28,15 +28,16 @@ Die aktuell geprüfte Anwendung setzt selbst keine Cookies und enthält keine ak
 Die Website verwendet LocalStorage des Browsers. Diese Daten bleiben grundsätzlich auf dem verwendeten Gerät und werden nicht allein durch die lokale Speicherung an Dalemans übertragen. Gespeichert werden:
 
 - dlmns-commerce-cart: Produktauswahl, Varianten, Mengen und gegebenenfalls Finder-Kontext des lokalen Anfragekorbs;
-- dlmns-customer-price-mode: gewählte Darstellung für Geschäfts- oder Privatkundenpreise;
 - dalemans-room-planner-projects-v1: lokal angelegte Raumplaner-Projekte einschließlich Projektname, Raumgeometrie, Möbeln, Einstellungen und Zeitangaben;
 - dlmns-room-planner-help-v1: Einstellungen der Raumplaner-Hilfe.
 
-Die Einträge bleiben bestehen, bis sie durch Funktionen der Anwendung, durch Löschen der Website-Daten oder durch Einstellungen des Browsers entfernt werden. Raumplaner-Projekte werden nur bei einer ausdrücklichen Export- oder Anfragehandlung weitergegeben.
+Die Preisansicht für Geschäfts- oder Privatkunden wird nur im laufenden React-Zustand gehalten und nicht dauerhaft gespeichert; ein alter Eintrag mit dem Namen dlmns-customer-price-mode wird entfernt. Die übrigen Einträge bleiben bestehen, bis sie durch Funktionen der Anwendung, durch Löschen der Website-Daten oder durch Einstellungen des Browsers entfernt werden.
+
+Beim ausdrücklichen Wechsel vom Raumplaner zum Kontaktformular wird eine Zusammenfassung vorübergehend im SessionStorage des aktuellen Tabs abgelegt. Dadurch erscheinen Projektname und Planungskennzahlen nicht in der Kontakt-URL. Das Kontaktformular übernimmt die Zusammenfassung; nach erfolgreichem Versand wird sie gelöscht, spätestens mit Ende der Tabsitzung entfällt sie. Die vollständige Raumgeometrie wird dadurch nicht an das Kontaktformular übergeben.
 
 5. Kontaktformular
 
-Beim Absenden des Kontaktformulars verarbeitet die Anwendung Vorname, Nachname, Organisation, E-Mail-Adresse und/oder Telefonnummer, Betreff und Nachricht. Ein verborgenes Honeypot-Feld, eine technische Anfragekennung und ein temporärer, pseudonymisierter Ratenzähler dienen der Spam- und Doppelübermittlungsbegrenzung. Die Angaben werden serverseitig validiert und über den konfigurierten SMTP-Dienst an die konfigurierte interne Empfängeradresse gesendet. Ohne vollständige SMTP-Konfiguration findet kein Versand statt. SMTP-Anbieter, Empfängerkreis, Rechtsgrundlage sowie Aufbewahrungs- und Löschfristen sind organisatorisch festzulegen und juristisch freizugeben.
+Beim Absenden des Kontaktformulars verarbeitet die Anwendung Vorname, Nachname, Organisation, E-Mail-Adresse und/oder Telefonnummer, Betreff und Nachricht. Ein verborgenes Honeypot-Feld, eine technische Anfragekennung und ein temporärer, pseudonymisierter Ratenzähler dienen der Spam- und Doppelübermittlungsbegrenzung. Im Produktivbetrieb setzt der technische Schutz einen zentralen atomaren TTL-Speicher voraus; ohne dessen Konfiguration wird keine Anfrage versendet. Die Angaben werden serverseitig validiert und über den konfigurierten SMTP-Dienst an die konfigurierte interne Empfängeradresse gesendet. Ohne vollständige SMTP-Konfiguration findet kein Versand statt. SMTP-Anbieter, Empfängerkreis, Rechtsgrundlage sowie Aufbewahrungs- und Löschfristen sind organisatorisch festzulegen und juristisch freizugeben.
 
 6. Produkt- und Angebotsanfragen
 

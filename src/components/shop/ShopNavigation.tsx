@@ -48,7 +48,7 @@ const shopItems: readonly ShopItem[] = [
         title: "Passend dazu",
         links: [
           { label: "Buchablagen", href: product("buchablage-nachruesten") },
-          { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") },
+          { label: "Reihenverbinder", href: "/produkte/reihenverbinder" },
           { label: "Gleiter", href: "/produkte/sortiment/gleiter-bodenschutz" },
         ],
       },
@@ -104,7 +104,7 @@ const shopItems: readonly ShopItem[] = [
         title: "Nachrüstung & Zubehör",
         links: [
           { label: "Buchablagen", href: product("buchablage-nachruesten") },
-          { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") },
+          { label: "Reihenverbinder", href: "/produkte/reihenverbinder" },
           { label: "Ersatzteile & Zubehör", href: "/produkte/kategorien/transportwagen-zubehoer" },
         ],
       },
@@ -131,7 +131,7 @@ const mobileGroups: readonly ShopGroup[] = [
   { title: "Stühle", links: [{ label: "Stapelstühle", href: "/produkte/stapelstuehle" }, { label: "Klappstühle", href: "/produkte/sortiment/klappstuehle" }] },
   { title: "Tische", links: [{ label: "Klapptische", href: "/produkte/sortiment/klapptische" }, { label: "Bistrotische", href: "/produkte/sortiment/bistrotische" }, { label: "Seminarklapptische", href: product("seminarklapptisch-210c") }, { label: "Trapeztische", href: product("trapez-klapptisch-310c") }] },
   { title: "Gleiter", links: [{ label: "Gleiter & Bodenschutz", href: "/produkte/sortiment/gleiter-bodenschutz" }, { label: "Gleiter-Beratung", href: "/kontakt?anliegen=Gleiter-Beratung" }] },
-  { title: "Zubehör", links: [{ label: "Alle Zubehörbereiche", href: "/produkte/kategorien/transportwagen-zubehoer" }, { label: "Buchablagen", href: product("buchablage-nachruesten") }, { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") }] },
+  { title: "Zubehör", links: [{ label: "Alle Zubehörbereiche", href: "/produkte/kategorien/transportwagen-zubehoer" }, { label: "Buchablagen", href: product("buchablage-nachruesten") }, { label: "Reihenverbinder", href: "/produkte/reihenverbinder" }] },
   { title: "Transport", links: [{ label: "Stuhltransportwagen", href: product("stuhltransportwagen") }, { label: "Tischtransportwagen", href: product("tischtransportwagen") }, { label: "Transport & Lagerung", href: "/produkte/sortiment/transport-lagerung" }] },
   { title: "Rednerpulte", links: [{ label: "Rednerpulte ansehen", href: "/produkte/sortiment/rednerpulte" }] },
   { title: "Muster & Beratung", links: [{ label: "Muster & Beratung", href: "/produkte/sortiment/muster-beratung" }] },

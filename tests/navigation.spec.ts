@@ -18,7 +18,7 @@ test.describe("Premium-Navigation", () => {
     await expect(megaMenu).toBeVisible();
     await expect(megaMenu.getByRole("link", { name: "Unternehmen & Geschichte" })).toHaveAttribute("href", "/firma");
     await expect(megaMenu.getByRole("link", { name: "Kaufberatung Stapelstühle" })).toHaveAttribute("href", "/beratung/stapelstuehle-kaufen");
-    await expect(megaMenu.getByRole("link", { name: "Gleiter-Finder & Messhilfe" })).toHaveAttribute("href", "/produkte/gleiter-finder");
+    await expect(megaMenu.getByRole("link", { name: "Gleiter persönlich zuordnen" })).toHaveAttribute("href", "/kontakt?anliegen=Gleiter-Beratung");
     await expect(megaMenu.getByRole("link", { name: "Reihenverbinder richtig auswählen" })).toHaveAttribute("href", "/wissen/reihenverbinder-fuer-stapelstuehle");
     await expect(megaMenu.getByRole("link", { name: "Bestuhlung & Raumplanung" })).toHaveAttribute("href", "/raeume-planung/raumplanung");
     await expect(megaMenu.getByRole("link", { name: "Stapeln, Lagern & Transportieren" })).toHaveAttribute("href", "/wissen/transport-lagerung-pflege");

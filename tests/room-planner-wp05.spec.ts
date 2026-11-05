@@ -71,6 +71,7 @@ test("Editor zeigt bei fehlendem Ausgang eine technische Annäherung ohne Übern
 });
 
 test("Variantenübernahme und Undo stellen Bestuhlungsparameter gemeinsam wieder her", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1200 });
   await page.goto("/raumplaner");
   const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
   const svg = editor.getByRole("img", { name: "Grundriss Zeichenfläche" });

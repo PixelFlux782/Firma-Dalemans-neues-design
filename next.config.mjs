@@ -24,6 +24,7 @@ const imageRedirects = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: "standalone",
   async headers() {
     const contentSecurityPolicy = [
       "default-src 'self'",
@@ -39,18 +40,26 @@ const nextConfig = {
       "worker-src 'self' blob:",
     ].join("; ");
 
-    return [{
-      source: "/:path*",
-      headers: [
-        { key: "Content-Security-Policy-Report-Only", value: contentSecurityPolicy },
-        { key: "Strict-Transport-Security", value: "max-age=31536000" },
-        { key: "X-Content-Type-Options", value: "nosniff" },
-        { key: "X-Frame-Options", value: "DENY" },
-        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-        { key: "Permissions-Policy", value: "camera=(), geolocation=(), microphone=()" },
-        { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-      ],
-    }];
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Content-Security-Policy-Report-Only", value: contentSecurityPolicy },
+          { key: "Strict-Transport-Security", value: "max-age=31536000" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), geolocation=(), microphone=()" },
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+        ],
+      },
+      {
+        source: "/models/:path*.glb",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" },
+        ],
+      },
+    ];
   },
   async redirects() {
     return [

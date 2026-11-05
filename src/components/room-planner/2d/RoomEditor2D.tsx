@@ -29,6 +29,7 @@ import { calculateTableDemand, DEFAULT_TABLE_MODEL_ID, TABLE_MODELS, TABLE_PRESE
 import { planTableZone, type TableZonePlanningResult } from "@/lib/room-planner/tableZonePlanning";
 import { generateFreeAreaSeating, replanningImpact } from "@/lib/room-planner/planning";
 import { deleteFurnitureSelection, duplicateFurnitureSelection, furnitureSelectionBounds, furnitureSelectionConflicts, normalizeFurnitureSelection, selectFurnitureInMarquee, transformFurnitureSelection } from "@/lib/room-planner/furnitureSelection";
+import { storeRoomPlannerContactHandoff } from "@/lib/room-planner/contactHandoff";
 
 const INITIAL_SCALE = 45;
 const MIN_SCALE = 12;
@@ -147,7 +148,9 @@ export default function RoomEditor2D() {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const projectName = projects.find((project) => project.id === activeProjectId)?.name ?? "Unbenanntes Projekt";
   const tableDemandText = tableDemand.length ? tableDemand.map(({ model, quantity }) => `${quantity} × ${model.name}`).join("\n") : "Keine Tische geplant";
-  const inquiryHref = `/kontakt?${new URLSearchParams({ anliegen: "Raumplaner-Bedarf", produkt: demand.product?.title ?? "", variante: demand.variant?.title ?? "", nachricht: `Anfrage aus dem Raumplaner\nProjekt: ${projectName}\nStuhlmodell: ${demand.product?.title ?? ""}\nVariante: ${demand.variant?.title ?? ""}\nStuhlbedarf: ${demand.quantity} Stück (${demand.rowQuantity} Reihenbestuhlung, ${demand.tableQuantity} an Tischen)\nReserve: ${reservePercent} % (${recommended.reserveQuantity} Stück)\nEmpfohlene Gesamtmenge Stühle: ${recommended.recommendedQuantity} Stück\nTischbedarf:\n${tableDemandText}\nSitzblöcke: ${demand.blocks}\nGänge: ${plan.objects.filter((object) => object.type === "aisle").length}\nAusgänge: ${plan.objects.filter((object) => object.type === "door" && (object.role === "exit" || object.role === "emergency_exit")).length}\nRaumfläche: ${plan.contour.closed ? formatMeters(polygonArea(plan.contour.points)) + " m²" : "nicht bestimmt"}\nStuhlmaße: ${formatMeters(chairSelection.width)} × ${formatMeters(chairSelection.depth)} m (Planungsannahme)\nRegel-/Referenzprofil: ${RULE_PROFILES.find((item) => item.id === profileId)?.name ?? "nicht gewählt"}; keine behördliche Freigabe.` })}#anfrage`;
+  const inquiryHref = "/kontakt#anfrage";
+  const inquiryMessage = `Anfrage aus dem Raumplaner\nProjekt: ${projectName}\nStuhlmodell: ${demand.product?.title ?? ""}\nVariante: ${demand.variant?.title ?? ""}\nStuhlbedarf: ${demand.quantity} Stück (${demand.rowQuantity} Reihenbestuhlung, ${demand.tableQuantity} an Tischen)\nReserve: ${reservePercent} % (${recommended.reserveQuantity} Stück)\nEmpfohlene Gesamtmenge Stühle: ${recommended.recommendedQuantity} Stück\nTischbedarf:\n${tableDemandText}\nSitzblöcke: ${demand.blocks}\nGänge: ${plan.objects.filter((object) => object.type === "aisle").length}\nAusgänge: ${plan.objects.filter((object) => object.type === "door" && (object.role === "exit" || object.role === "emergency_exit")).length}\nRaumfläche: ${plan.contour.closed ? formatMeters(polygonArea(plan.contour.points)) + " m²" : "nicht bestimmt"}\nStuhlmaße: ${formatMeters(chairSelection.width)} × ${formatMeters(chairSelection.depth)} m (Planungsannahme)\nRegel-/Referenzprofil: ${RULE_PROFILES.find((item) => item.id === profileId)?.name ?? "nicht gewählt"}; keine behördliche Freigabe.`;
+  const handoffInquiry = () => storeRoomPlannerContactHandoff({ subject: "Raumplaner-Bedarf", message: inquiryMessage });
   const [storageReady, setStorageReady] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"saved" | "dirty" | "saving">("saved");
   const [projectError, setProjectError] = useState("");
@@ -1078,7 +1081,7 @@ export default function RoomEditor2D() {
   };
   const replanSummary = replanningImpact(plan);
 
-  if (outputIssuedAt) return <PlanOutputView plan={plan} name={projects.find((project) => project.id === activeProjectId)?.name ?? "Unbenanntes Projekt"} issuedAt={outputIssuedAt} profileName={profile.name} analysis={currentAnalysis} reservePercent={reservePercent} inquiryHref={inquiryHref} shopHref={shopTarget?.href} onClose={() => setOutputIssuedAt(null)} />;
+  if (outputIssuedAt) return <PlanOutputView plan={plan} name={projects.find((project) => project.id === activeProjectId)?.name ?? "Unbenanntes Projekt"} issuedAt={outputIssuedAt} profileName={profile.name} analysis={currentAnalysis} reservePercent={reservePercent} inquiryHref={inquiryHref} onInquiry={handoffInquiry} shopHref={shopTarget?.href} onClose={() => setOutputIssuedAt(null)} />;
 
   return <section aria-label="2D-Grundrisseditor" className="premium-card planner-workspace overflow-hidden">
     {storageReady && <ProjectControls projects={projects} activeId={activeProjectId} status={saveStatus} error={projectError} onNew={newProject} onSave={saveProject} onSaveAs={saveAsProject} onOpen={openProject} onRename={renameProject} onDuplicate={duplicateProject} onDelete={deleteProject} onExport={exportProject} onImport={importProject} onImportError={setProjectError} />}
@@ -1302,7 +1305,7 @@ export default function RoomEditor2D() {
         </div>}
         <p className="text-xs text-premium-muted">Die automatische Planung unterstützt die Raum- und Bestuhlungsplanung. Sie ersetzt keine erforderliche behördliche, brandschutztechnische oder fachplanerische Prüfung.</p>
       </div></>}
-      <div className="planner-conversion mt-auto grid gap-1 border-t border-premium-beige bg-white py-2"><a className="btn-primary text-center text-xs" href={inquiryHref}>Angebot für diese Bestuhlung anfordern</a>{shopTarget && <a className="btn-secondary text-center text-xs" href={shopTarget.href}>Stuhl konfigurieren / Produkt ansehen</a>}</div>
+      <div className="planner-conversion mt-auto grid gap-1 border-t border-premium-beige bg-white py-2"><a className="btn-primary text-center text-xs" href={inquiryHref} onClick={handoffInquiry}>Angebot für diese Bestuhlung anfordern</a>{shopTarget && <a className="btn-secondary text-center text-xs" href={shopTarget.href}>Stuhl konfigurieren / Produkt ansehen</a>}</div>
     </aside></div>
     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-premium-beige bg-white/80 px-4 py-3 text-sm text-premium-charcoal">
       <span>{help}</span>

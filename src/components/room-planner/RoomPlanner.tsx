@@ -5,6 +5,7 @@ import { Canvas, type ThreeEvent } from "@react-three/fiber";
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import type { PlannerChair } from "@/lib/room-planner/chairs";
+import { storeRoomPlannerContactHandoff } from "@/lib/room-planner/contactHandoff";
 
 type PlannerValues = {
   roomWidth: number; roomLength: number; stageWidth: number; stageDepth: number;
@@ -309,7 +310,16 @@ export default function RoomPlanner({ chairs }: { chairs: PlannerChair[] }) {
         <p className="mt-3 text-sm text-premium-muted">Benötigte Menge: <strong data-testid="required-quantity" className="text-premium-ink">{layout.positions.length} Stühle</strong></p>
         <div className="mt-4 flex flex-wrap gap-2">
           {selectedChair.productUrl ? <a href={selectedChair.productUrl} className="btn-primary text-center">Produkt ansehen</a> : <span className="inline-flex min-h-10 items-center rounded-full border border-premium-beige px-4 text-xs text-premium-muted">Produktzuordnung ausstehend</span>}
-          <a href={`/kontakt?source=raumplaner&product=${encodeURIComponent(selectedChair.productHandle ?? selectedChair.id)}&quantity=${layout.positions.length}`} className="btn-secondary text-center">Angebot für diese Planung anfragen</a>
+          <a
+            href="/kontakt#anfrage"
+            className="btn-secondary text-center"
+            onClick={() => storeRoomPlannerContactHandoff({
+              subject: "Raumplaner-Bedarf",
+              message: `Anfrage aus dem Raumplaner\nStuhlmodell: ${selectedChair.productName}\nBenötigte Menge: ${layout.positions.length} Stühle`,
+            })}
+          >
+            Angebot für diese Planung anfragen
+          </a>
         </div>
       </section>
     </div>

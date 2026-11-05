@@ -2,28 +2,31 @@ import { expect, test } from "@playwright/test";
 
 test("Formular-APIs begrenzen tatsächliche Request-Bodies", async ({ request }) => {
   const oversized = JSON.stringify({ message: "x".repeat(36_000) });
+  const headers = { "content-type": "application/json", origin: "http://127.0.0.1:3100" };
   const contact = await request.post("/api/contact", {
     data: oversized,
-    headers: { "content-type": "application/json" },
+    headers,
   });
   expect(contact.status()).toBe(413);
 
   const inquiry = await request.post("/api/inquiry", {
     data: oversized,
-    headers: { "content-type": "application/json" },
+    headers,
   });
   expect(inquiry.status()).toBe(413);
 });
 
 test("Kontakt-API behandelt ungültiges JSON kontrolliert und Honeypot ohne Versand", async ({ request }) => {
+  const headers = { "content-type": "application/json", origin: "http://127.0.0.1:3100" };
   const invalid = await request.post("/api/contact", {
     data: "{",
-    headers: { "content-type": "application/json" },
+    headers,
   });
   expect(invalid.status()).toBe(400);
 
   const honeypot = await request.post("/api/contact", {
     data: { website: "bot.example" },
+    headers: { origin: "http://127.0.0.1:3100" },
   });
   expect(honeypot.status()).toBe(200);
   await expect(honeypot.json()).resolves.toEqual({ ok: true });
@@ -55,4 +58,20 @@ test("Kontaktformular sendet eine technische Anfragekennung und sperrt Doppelkli
   await expect(page.getByText(/Vielen Dank/)).toBeVisible();
   expect(submissions).toHaveLength(1);
   expect(submissions[0].submissionId).toMatch(/^[a-zA-Z0-9_-]{16,100}$/);
+});
+
+test("Kontaktformular zeigt Erfolg nur bei explizit bestaetigter Verarbeitung", async ({ page }) => {
+  await page.route("**/api/contact", async (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ ok: false }),
+  }));
+  await page.goto("/kontakt");
+  await page.getByLabel(/^Vorname/).fill("Erika");
+  await page.getByLabel(/^Nachname/).fill("Musterfrau");
+  await page.getByLabel(/^E-Mail/).fill("erika@example.test");
+  await page.getByLabel(/^Nachricht/).fill("Nicht versendete WP07-Testanfrage.");
+  await page.getByRole("button", { name: "Anfrage senden" }).click();
+  await expect(page.getByText("Die Anfrage konnte nicht gesendet werden.")).toBeVisible();
+  await expect(page.getByText(/Vielen Dank/)).toHaveCount(0);
 });

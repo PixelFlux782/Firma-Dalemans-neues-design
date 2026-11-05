@@ -1,0 +1,16 @@
+.git
+.github
+.next
+.netlify
+.vercel
+node_modules
+audit
+test-results
+playwright-report
+*.log
+.env
+.env.*
+!.env.example
+Firma-Dalemans
+DLMNS-3D
+tmp

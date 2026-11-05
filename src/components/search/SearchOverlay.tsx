@@ -8,6 +8,21 @@ import { recordSearchAction } from "@/lib/search/actions";
 import type { SearchResponse, SearchResult } from "@/lib/search/types";
 
 const focusableSelector = "a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex='-1'])";
+const responseCache = new Map<string, SearchResponse>();
+
+function cacheKey(query: string) {
+  return query.trim().toLocaleLowerCase("de-DE");
+}
+
+function tooShortResponse(query: string): SearchResponse {
+  return {
+    query,
+    normalizedQuery: cacheKey(query),
+    total: 0,
+    tooShort: true,
+    groups: { products: [], collections: [], help: [], knowledge: [] },
+  };
+}
 
 function visibleResults(response: SearchResponse | null): SearchResult[] {
   if (!response) return [];
@@ -93,6 +108,21 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
 
   useEffect(() => {
     if (!open) return;
+    const key = cacheKey(query);
+    if (key.length === 1) {
+      setResponse(tooShortResponse(query));
+      setLoading(false);
+      setSearchError(false);
+      return;
+    }
+    const cached = responseCache.get(key);
+    if (cached) {
+      setResponse({ ...cached, query });
+      setLoading(false);
+      setSearchError(false);
+      setActiveIndex(-1);
+      return;
+    }
     const controller = new AbortController();
     setLoading(true);
     setSearchError(false);
@@ -101,6 +131,8 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
         const request = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal: controller.signal });
         if (!request.ok) throw new Error("Search request failed");
         const nextResponse = await request.json() as SearchResponse;
+        if (responseCache.size >= 50) responseCache.delete(responseCache.keys().next().value ?? "");
+        responseCache.set(key, nextResponse);
         setResponse(nextResponse);
         setActiveIndex(-1);
         if (query.trim().length >= 2) {
@@ -115,7 +147,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
-    }, query ? 90 : 0);
+    }, query ? 180 : 0);
     return () => {
       window.clearTimeout(delay);
       controller.abort();

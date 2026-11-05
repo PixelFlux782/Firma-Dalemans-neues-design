@@ -1,11 +1,14 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import { createHash } from "node:crypto";
 import {
-  checkLocalRateLimit,
+  checkRateLimit,
+  FormProtectionError,
   logFormEvent,
+  RateLimitError,
   readJsonBody,
   RequestBodyError,
+  runIdempotent,
 } from "@/lib/server/form-protection";
 import { logSmtpFailure } from "@/lib/server/smtp-diagnostics";
 
@@ -18,8 +21,8 @@ function text(value: unknown, maxLength = 200) {
 const MAX_REQUEST_BYTES = 10_000;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const IDEMPOTENCY_TTL_MS = 10 * 60 * 1_000;
-const acceptedSubmissions = new Map<string, number>();
-const pendingSubmissions = new Map<string, Promise<void>>();
+
+class MailConfigurationError extends Error {}
 
 export async function POST(request: Request) {
   let body: Record<string, unknown>;
@@ -56,103 +59,83 @@ export async function POST(request: Request) {
     );
   }
 
-  const now = Date.now();
-  for (const [key, expiresAt] of acceptedSubmissions) {
-    if (expiresAt <= now) acceptedSubmissions.delete(key);
-  }
   const submissionKey = createHash("sha256").update(submissionId).digest("hex");
-  if (acceptedSubmissions.has(submissionKey)) return NextResponse.json({ ok: true });
-  const pending = pendingSubmissions.get(submissionKey);
-  if (pending) {
-    try {
-      await pending;
-      return NextResponse.json({ ok: true });
-    } catch {
+  try {
+    const result = await runIdempotent("contact", submissionKey, IDEMPOTENCY_TTL_MS, async () => {
+      const retryAfter = await checkRateLimit(request, "contact");
+      if (retryAfter) throw new RateLimitError(retryAfter);
+
+      const required = [
+        "CONTACT_SMTP_HOST", "CONTACT_SMTP_PORT", "CONTACT_SMTP_USER",
+        "CONTACT_SMTP_PASSWORD", "CONTACT_FROM_EMAIL",
+      ] as const;
+      if (required.some((key) => !process.env[key]?.trim())) throw new MailConfigurationError();
+
+      const port = Number(process.env.CONTACT_SMTP_PORT);
+      const secureValue = process.env.CONTACT_SMTP_SECURE;
+      const testMode = process.env.CONTACT_MAIL_TEST_MODE === "true";
+      const testRecipient = process.env.CONTACT_TEST_TO_EMAIL?.trim();
+      const configuredRecipient = process.env.CONTACT_TO_EMAIL?.trim();
+      const recipient = testMode ? testRecipient : configuredRecipient;
+      const from = process.env.CONTACT_FROM_EMAIL!.trim();
+      if (!Number.isInteger(port) || port < 1 || port > 65_535
+        || !["true", "false"].includes(secureValue ?? "")
+        || !recipient || !emailPattern.test(recipient) || !emailPattern.test(from)) {
+        throw new MailConfigurationError();
+      }
+
+      const transporter = nodemailer.createTransport({
+        host: process.env.CONTACT_SMTP_HOST,
+        port,
+        secure: secureValue === "true",
+        auth: { user: process.env.CONTACT_SMTP_USER, pass: process.env.CONTACT_SMTP_PASSWORD },
+        connectionTimeout: 10_000,
+        greetingTimeout: 10_000,
+        socketTimeout: 15_000,
+      });
+      const info = await transporter.sendMail({
+        from,
+        to: recipient,
+        replyTo: validEmail ? email : undefined,
+        subject: `Website-Anfrage: ${subject}`,
+        text: [
+          `Vorname: ${firstName}`,
+          `Nachname: ${lastName}`,
+          `Gemeinde / Organisation: ${organization || "nicht angegeben"}`,
+          `E-Mail: ${email || "nicht angegeben"}`, `Telefon: ${phone || "nicht angegeben"}`,
+          `Anliegen: ${subject}`, "", message,
+        ].join("\n"),
+      });
+      if (!info.accepted?.length) throw new Error("MAIL_NOT_ACCEPTED");
+      return { ok: true as const };
+    });
+    return NextResponse.json(result);
+  } catch (error) {
+    if (error instanceof RateLimitError) {
+      logFormEvent("contact", "rate_limited", "warn");
       return NextResponse.json(
-        { error: "Ihre Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es später erneut oder schreiben Sie an info@dalemans.de." },
-        { status: 502 },
+        { error: "Zu viele Sendeversuche. Bitte warten Sie einige Minuten." },
+        { status: 429, headers: { "Retry-After": String(error.retryAfter) } },
       );
     }
-  }
-
-  const retryAfter = checkLocalRateLimit(request, "contact");
-  if (retryAfter) {
-    logFormEvent("contact", "rate_limited", "warn");
-    return NextResponse.json(
-      { error: "Zu viele Sendeversuche. Bitte warten Sie einige Minuten." },
-      { status: 429, headers: { "Retry-After": String(retryAfter) } },
-    );
-  }
-
-  const required = [
-    "CONTACT_SMTP_HOST", "CONTACT_SMTP_PORT", "CONTACT_SMTP_USER",
-    "CONTACT_SMTP_PASSWORD", "CONTACT_FROM_EMAIL",
-  ] as const;
-  const missing = required.filter((key) => !process.env[key]?.trim());
-  if (missing.length) {
-    logFormEvent("contact", "mail_not_configured");
-    return NextResponse.json(
-      { error: "Die Online-Übermittlung ist derzeit nicht eingerichtet. Bitte rufen Sie uns an oder schreiben Sie an info@dalemans.de." },
-      { status: 503 },
-    );
-  }
-
-  const port = Number(process.env.CONTACT_SMTP_PORT);
-  const secureValue = process.env.CONTACT_SMTP_SECURE;
-  const testMode = process.env.CONTACT_MAIL_TEST_MODE === "true";
-  const testRecipient = process.env.CONTACT_TEST_TO_EMAIL?.trim();
-  const configuredRecipient = process.env.CONTACT_TO_EMAIL!.trim();
-  const recipient = testMode ? testRecipient : configuredRecipient;
-  const from = process.env.CONTACT_FROM_EMAIL!.trim();
-  if (!Number.isInteger(port) || port < 1 || port > 65_535
-    || !["true", "false"].includes(secureValue ?? "")
-    || !recipient || !emailPattern.test(recipient) || !emailPattern.test(from)) {
-    logFormEvent("contact", testMode && !testRecipient ? "mail_test_recipient_missing" : "mail_config_invalid");
-    return NextResponse.json(
-      { error: "Die Online-Übermittlung ist derzeit nicht eingerichtet. Bitte rufen Sie uns an oder schreiben Sie an info@dalemans.de." },
-      { status: 503 },
-    );
-  }
-
-  const transporter = nodemailer.createTransport({
-    host: process.env.CONTACT_SMTP_HOST,
-    port,
-    secure: secureValue === "true",
-    auth: { user: process.env.CONTACT_SMTP_USER, pass: process.env.CONTACT_SMTP_PASSWORD },
-    connectionTimeout: 10_000,
-    greetingTimeout: 10_000,
-    socketTimeout: 15_000,
-  });
-
-  const delivery = (async () => {
-    const info = await transporter.sendMail({
-      from,
-      to: recipient,
-      replyTo: validEmail ? email : undefined,
-      subject: `Website-Anfrage: ${subject}`,
-      text: [
-        `Vorname: ${firstName}`,
-        `Nachname: ${lastName}`,
-        `Gemeinde / Organisation: ${organization || "nicht angegeben"}`,
-        `E-Mail: ${email || "nicht angegeben"}`, `Telefon: ${phone || "nicht angegeben"}`,
-        `Anliegen: ${subject}`, "", message,
-      ].join("\n"),
-    });
-    if (!info.accepted?.length) throw new Error("MAIL_NOT_ACCEPTED");
-  })();
-  pendingSubmissions.set(submissionKey, delivery);
-
-  try {
-    await delivery;
-    acceptedSubmissions.set(submissionKey, Date.now() + IDEMPOTENCY_TTL_MS);
-    return NextResponse.json({ ok: true });
-  } catch (error) {
+    if (error instanceof FormProtectionError) {
+      logFormEvent("contact", "form_protection_failed", "error", error.errorType);
+      return NextResponse.json(
+        { error: "Die Online-Übermittlung ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut." },
+        { status: 503 },
+      );
+    }
+    if (error instanceof MailConfigurationError) {
+      logFormEvent("contact", "mail_not_configured", "error", "configuration");
+      return NextResponse.json(
+        { error: "Die Online-Übermittlung ist derzeit nicht eingerichtet. Bitte rufen Sie uns an oder schreiben Sie an info@dalemans.de." },
+        { status: 503 },
+      );
+    }
     logSmtpFailure("contact", "delivery_failed", error);
     return NextResponse.json(
       { error: "Ihre Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es später erneut oder schreiben Sie an info@dalemans.de." },
       { status: 502 },
     );
-  } finally {
-    pendingSubmissions.delete(submissionKey);
   }
 }

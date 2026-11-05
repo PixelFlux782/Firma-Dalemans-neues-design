@@ -8,10 +8,13 @@ import {
   validateInquiryBody,
 } from "@/lib/inquiry/server";
 import {
-  checkLocalRateLimit,
+  checkRateLimit,
+  FormProtectionError,
   logFormEvent,
+  RateLimitError,
   readJsonBody,
   RequestBodyError,
+  runIdempotentResult,
 } from "@/lib/server/form-protection";
 import { logSmtpFailure } from "@/lib/server/smtp-diagnostics";
 
@@ -20,19 +23,7 @@ export const runtime = "nodejs";
 const MAX_REQUEST_BYTES = 35_000;
 const IDEMPOTENCY_TTL_MS = 24 * 60 * 60 * 1_000;
 
-interface CachedResult { expiresAt: number; result: InquirySuccessResponse }
-
-const acceptedResults = new Map<string, CachedResult>();
-const pendingRequests = new Map<string, Promise<InquirySuccessResponse>>();
-
-function prune(now: number) {
-  for (const [key, value] of acceptedResults) if (value.expiresAt <= now) acceptedResults.delete(key);
-}
-
 export async function POST(request: Request) {
-  const now = Date.now();
-  prune(now);
-
   try {
     const body = validateInquiryBody(await readJsonBody(request, MAX_REQUEST_BYTES));
     if (body.website) {
@@ -40,34 +31,13 @@ export async function POST(request: Request) {
     }
 
     const key = idempotencyDigest(body.idempotencyKey);
-    const cached = acceptedResults.get(key);
-    if (cached) return NextResponse.json(cached.result);
-
-    const running = pendingRequests.get(key);
-    if (running) return NextResponse.json(await running);
-
-    const retryAfter = checkLocalRateLimit(request, "inquiry");
-    if (retryAfter) {
-      logFormEvent("inquiry", "rate_limited", "warn");
-      return NextResponse.json(
-        { accepted: false, error: "Zu viele Sendeversuche. Bitte warten Sie einige Minuten." },
-        { status: 429, headers: { "Retry-After": String(retryAfter) } },
-      );
-    }
-
-    const delivery = (async () => {
+    const delivery = await runIdempotentResult<InquirySuccessResponse>("inquiry", key, IDEMPOTENCY_TTL_MS, async () => {
+      const retryAfter = await checkRateLimit(request, "inquiry");
+      if (retryAfter) throw new RateLimitError(retryAfter);
       const lines = await resolveInquiryItems(body.items);
       return deliverInquiry(body, lines);
-    })();
-    pendingRequests.set(key, delivery);
-
-    try {
-      const result = await delivery;
-      acceptedResults.set(key, { result, expiresAt: Date.now() + IDEMPOTENCY_TTL_MS });
-      return NextResponse.json(result, { status: 201 });
-    } finally {
-      pendingRequests.delete(key);
-    }
+    });
+    return NextResponse.json(delivery.result, { status: delivery.replayed ? 200 : 201 });
   } catch (error) {
     if (error instanceof InquiryInputError) {
       return NextResponse.json(
@@ -80,6 +50,20 @@ export async function POST(request: Request) {
         accepted: false,
         error: error.status === 413 ? "Die Anfrage ist zu groß." : "Die Anfrage konnte nicht gelesen werden.",
       }, { status: error.status });
+    }
+    if (error instanceof RateLimitError) {
+      logFormEvent("inquiry", "rate_limited", "warn");
+      return NextResponse.json(
+        { accepted: false, error: "Zu viele Sendeversuche. Bitte warten Sie einige Minuten." },
+        { status: 429, headers: { "Retry-After": String(error.retryAfter) } },
+      );
+    }
+    if (error instanceof FormProtectionError) {
+      logFormEvent("inquiry", "form_protection_failed", "error", error.errorType);
+      return NextResponse.json({
+        accepted: false,
+        error: "Die Online-Übermittlung ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.",
+      }, { status: 503 });
     }
     const unavailable = error instanceof Error
       && (error.message === "MAIL_NOT_CONFIGURED" || error.message === "MAIL_TEST_RECIPIENT_MISSING");

@@ -11,9 +11,24 @@ In Netlify müssen beide Werte eines der folgenden Variablenpaare gesetzt sein:
 - `FORM_PROTECTION_REST_URL` und `FORM_PROTECTION_REST_TOKEN` (bevorzugt), oder
 - `UPSTASH_REDIS_REST_URL` und `UPSTASH_REDIS_REST_TOKEN` (kompatibler Fallback).
 
-`FORM_CLIENT_IP_HEADER` darf nur den Namen eines von Netlify normalisierten
-Headers enthalten, dessen Wert exakt eine IP-Adresse ist. Weiterleitungsketten
-werden nicht akzeptiert. Die IP wird mit SHA-256 und
+In Netlify Serverless Functions ist `x-nf-client-connection-ip` der von Netlify
+bereitgestellte Einzelwert für die IP, die sich mit dem CDN verbunden hat. Der
+Next.js-Netlify-Adapter reicht den eingehenden `Request` und damit diesen Header
+an die API-Route weiter. Die Anwendung verwendet ausschließlich diesen festen
+Header und nur, wenn die reservierte, schreibgeschützte Netlify-Laufzeitvariable
+`SITE_ID` vorhanden ist. Frei wählbare Headernamen, `Forwarded`,
+`x-forwarded-for` und `x-real-ip` werden nie ausgewertet. Listen und ungültige
+IP-Werte werden verworfen. Außerhalb der Netlify-Vertrauensgrenze wird auch ein
+vom Client mitgesendeter `x-nf-client-connection-ip` ignoriert.
+
+Netlify entfernt beziehungsweise setzt seine internen `X-Nf-*`-Header am Edge;
+der spezielle `X-Nf-Client-Connection-Ip` gehört zu den bewusst an Functions
+weitergereichten Plattform-Headern. Daher kann eine beliebige Client-Angabe den
+in Produktion gelesenen Wert nicht ersetzen. Diese Garantie gilt nur, solange
+die API ausschließlich über Netlify erreichbar ist und kein vorgeschalteter
+Proxy die Plattform-Vertrauensgrenze verändert.
+
+Die IP wird mit SHA-256 und
 `FORM_RATE_LIMIT_HASH_SALT` gehasht; falls kein eigenes Salt gesetzt ist, dient
 das Redis-Token als stabiles geheimes Salt. Weder IP noch Secret werden in Redis
 oder Logs im Klartext gespeichert.
@@ -25,9 +40,8 @@ oder Logs im Klartext gespeichert.
 - Umsetzung: atomarer Redis-Zähler mit TTL; alle Netlify-Instanzen teilen das Limit
 - Der sechste Versuch erhält HTTP 429 und einen `Retry-After`-Header.
 
-Ohne konfigurierten vertrauenswürdigen IP-Header fallen Anfragen auf einen
-gemeinsamen anonymen Digest zurück. Für die Produktion sollte daher der von
-Netlify garantierte Einzel-IP-Header explizit konfiguriert werden.
+Fehlen Netlifys `SITE_ID` oder ein gültiger Einzel-IP-Wert, fallen Anfragen auf
+einen gemeinsamen anonymen Digest zurück (fail-closed statt Header-Vertrauen).
 
 ## Idempotenz
 

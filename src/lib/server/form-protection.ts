@@ -9,6 +9,7 @@ export const RATE_LIMIT = 5;
 const REDIS_TIMEOUT_MS = 4_000;
 const PENDING_WAIT_MS = 30_000;
 const KEY_PREFIX = "dalemans:forms:v1";
+const NETLIFY_CLIENT_IP_HEADER = "x-nf-client-connection-ip";
 
 type FormRoute = "contact" | "inquiry";
 type ErrorType = "configuration" | "timeout" | "unavailable" | "pending" | "finalization";
@@ -146,11 +147,13 @@ function protectionError(error: unknown, fallback: Exclude<ErrorType, "configura
 
 function clientDigest(request: Request, route: FormRoute) {
   const config = redisConfiguration();
-  const configuredHeader = process.env.FORM_CLIENT_IP_HEADER?.trim().toLowerCase();
   let address = "unattributed";
 
-  if (configuredHeader && /^[a-z0-9-]+$/.test(configuredHeader)) {
-    const candidate = request.headers.get(configuredHeader)?.trim() ?? "";
+  // SITE_ID is a reserved, read-only Netlify runtime variable. Only inside
+  // that trust boundary may the CDN-owned connection header identify a client.
+  // On local or non-Netlify runtimes even a forged X-Nf-* header is ignored.
+  if (process.env.SITE_ID?.trim()) {
+    const candidate = request.headers.get(NETLIFY_CLIENT_IP_HEADER)?.trim() ?? "";
     if (!candidate.includes(",") && isIP(candidate)) address = candidate;
   }
 

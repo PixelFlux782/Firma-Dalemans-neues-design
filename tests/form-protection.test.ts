@@ -72,6 +72,7 @@ describe("Redis-Formularschutz", () => {
     delete process.env.FORM_PROTECTION_REST_TOKEN;
     delete process.env.UPSTASH_REDIS_REST_URL;
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    delete process.env.SITE_ID;
   });
 
   it.each(["contact", "inquiry"])("begrenzt %s atomar auf fünf Versuche pro Zeitfenster", async (route) => {
@@ -143,5 +144,46 @@ describe("Redis-Formularschutz", () => {
     const request = new Request("https://dalemans.de/api/contact", { method: "POST" });
     await expect(checkRateLimit(request, "contact"))
       .rejects.toMatchObject({ errorType: "configuration" });
+  });
+
+  it("verwendet auf Netlify ausschließlich die bereinigte Verbindungs-IP", async () => {
+    process.env.FORM_PROTECTION_REST_URL = "https://redis.invalid";
+    process.env.FORM_PROTECTION_REST_TOKEN = "test-token";
+    process.env.SITE_ID = "00000000-0000-0000-0000-000000000000";
+    const { redis, protection } = store();
+
+    await checkRateLimit(new Request("https://dalemans.de/api/contact", { headers: {
+      "x-nf-client-connection-ip": "203.0.113.10",
+      "x-forwarded-for": "198.51.100.1",
+      "x-real-ip": "198.51.100.2",
+    } }), "contact", protection);
+    await checkRateLimit(new Request("https://dalemans.de/api/contact", { headers: {
+      "x-nf-client-connection-ip": "203.0.113.10",
+      "x-forwarded-for": "192.0.2.1",
+      "x-real-ip": "192.0.2.2",
+    } }), "contact", protection);
+    await checkRateLimit(new Request("https://dalemans.de/api/contact", { headers: {
+      "x-nf-client-connection-ip": "203.0.113.11",
+    } }), "contact", protection);
+
+    expect(redis.entries.size).toBe(2);
+    expect([...redis.entries.values()].map((entry) => entry.value).sort()).toEqual(["1", "2"]);
+  });
+
+  it("ignoriert Client-IP-Header außerhalb der Netlify-Vertrauensgrenze", async () => {
+    process.env.FORM_PROTECTION_REST_URL = "https://redis.invalid";
+    process.env.FORM_PROTECTION_REST_TOKEN = "test-token";
+    const { redis, protection } = store();
+
+    for (const address of ["203.0.113.20", "203.0.113.21"]) {
+      await checkRateLimit(new Request("https://dalemans.de/api/contact", { headers: {
+        "x-nf-client-connection-ip": address,
+        "x-forwarded-for": address,
+        "x-real-ip": address,
+      } }), "contact", protection);
+    }
+
+    expect(redis.entries.size).toBe(1);
+    expect([...redis.entries.values()][0].value).toBe("2");
   });
 });

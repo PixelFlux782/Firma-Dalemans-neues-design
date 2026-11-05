@@ -12,6 +12,7 @@ import type {
   InquiryRequestBody,
   InquirySuccessResponse,
 } from "@/lib/inquiry/types";
+import { logSmtpFailure } from "@/lib/server/smtp-diagnostics";
 
 const MAX_ITEMS = 50;
 const MAX_QUANTITY = 100_000;
@@ -400,7 +401,8 @@ export async function deliverInquiry(
         <p>Dalemans Sitzmöbel &amp; Tische<br><a href="mailto:info@dalemans.de">info@dalemans.de</a></p>`),
     });
     if (!customerInfo.accepted?.length) customerConfirmation = "failed";
-  } catch {
+  } catch (error) {
+    logSmtpFailure("inquiry", "customer_confirmation_failed", error);
     customerConfirmation = "failed";
   }
 

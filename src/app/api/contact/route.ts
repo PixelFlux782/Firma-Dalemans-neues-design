@@ -7,6 +7,7 @@ import {
   readJsonBody,
   RequestBodyError,
 } from "@/lib/server/form-protection";
+import { logSmtpFailure } from "@/lib/server/smtp-diagnostics";
 
 export const runtime = "nodejs";
 
@@ -145,8 +146,8 @@ export async function POST(request: Request) {
     await delivery;
     acceptedSubmissions.set(submissionKey, Date.now() + IDEMPOTENCY_TTL_MS);
     return NextResponse.json({ ok: true });
-  } catch {
-    logFormEvent("contact", "delivery_failed");
+  } catch (error) {
+    logSmtpFailure("contact", "delivery_failed", error);
     return NextResponse.json(
       { error: "Ihre Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es später erneut oder schreiben Sie an info@dalemans.de." },
       { status: 502 },

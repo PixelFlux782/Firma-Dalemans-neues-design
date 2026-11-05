@@ -13,6 +13,7 @@ import {
   readJsonBody,
   RequestBodyError,
 } from "@/lib/server/form-protection";
+import { logSmtpFailure } from "@/lib/server/smtp-diagnostics";
 
 export const runtime = "nodejs";
 
@@ -82,7 +83,8 @@ export async function POST(request: Request) {
     }
     const unavailable = error instanceof Error
       && (error.message === "MAIL_NOT_CONFIGURED" || error.message === "MAIL_TEST_RECIPIENT_MISSING");
-    logFormEvent("inquiry", unavailable ? "mail_not_configured" : "delivery_failed");
+    if (unavailable) logFormEvent("inquiry", "mail_not_configured");
+    else logSmtpFailure("inquiry", "delivery_failed", error);
     return NextResponse.json({
       accepted: false,
       error: unavailable

@@ -1,6 +1,7 @@
 node_modules
 .next
 .vercel
+.netlify
 playwright-report
 test-results
 *.log

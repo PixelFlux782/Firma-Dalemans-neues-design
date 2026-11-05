@@ -141,7 +141,9 @@ export async function checkRateLimit(request: Request, route: "contact" | "inqui
   // the edge. OpenNext route handlers do not expose Netlify's trusted
   // `context.ip`, so do not collapse all visitors into the "unattributed"
   // application key when no verified header contract was configured.
-  if (process.env.NETLIFY === "true" && !process.env.FORM_CLIENT_IP_HEADER?.trim()) return null;
+  const isNetlifyRuntime = process.env.NETLIFY === "true"
+    || Boolean(process.env.URL && process.env.SITE_NAME && process.env.SITE_ID);
+  if (isNetlifyRuntime && !process.env.FORM_CLIENT_IP_HEADER?.trim()) return null;
   const config = distributedConfig();
   if (!config) return localRateLimit(request, route);
   const result = await redisCommand<[number, number]>([

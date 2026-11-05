@@ -16,6 +16,7 @@ import type {
 const MAX_ITEMS = 50;
 const MAX_QUANTITY = 100_000;
 const VAT_RATE = 0.19;
+const PRODUCTION_RECIPIENT = "anfrage@dalemans.de";
 
 export class InquiryInputError extends Error {
   constructor(
@@ -296,9 +297,13 @@ function smtpConfig() {
   const testRecipient = process.env.INQUIRY_TEST_TO_EMAIL?.trim();
   if (testMode && !testRecipient) throw new Error("MAIL_TEST_RECIPIENT_MISSING");
   const from = process.env.CONTACT_FROM_EMAIL!.trim();
-  const internalTo = testMode ? testRecipient! : process.env.INQUIRY_TO_EMAIL!.trim();
+  const configuredInternalTo = process.env.INQUIRY_TO_EMAIL!.trim();
+  const internalTo = testMode ? testRecipient! : PRODUCTION_RECIPIENT;
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailPattern.test(from) || !emailPattern.test(internalTo)) throw new Error("MAIL_NOT_CONFIGURED");
+  if (!emailPattern.test(from) || !emailPattern.test(internalTo)
+    || (!testMode && configuredInternalTo.toLowerCase() !== PRODUCTION_RECIPIENT)) {
+    throw new Error("MAIL_NOT_CONFIGURED");
+  }
   const host = process.env.CONTACT_SMTP_HOST!.trim();
   const secure = secureValue === "true";
   return {

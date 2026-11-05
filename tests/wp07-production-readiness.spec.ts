@@ -59,3 +59,19 @@ test("Kontaktformular sendet eine technische Anfragekennung und sperrt Doppelkli
   expect(submissions).toHaveLength(1);
   expect(submissions[0].submissionId).toMatch(/^[a-zA-Z0-9_-]{16,100}$/);
 });
+
+test("Kontaktformular zeigt Erfolg nur bei explizit bestaetigter Verarbeitung", async ({ page }) => {
+  await page.route("**/api/contact", async (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ ok: false }),
+  }));
+  await page.goto("/kontakt");
+  await page.getByLabel(/^Vorname/).fill("Erika");
+  await page.getByLabel(/^Nachname/).fill("Musterfrau");
+  await page.getByLabel(/^E-Mail/).fill("erika@example.test");
+  await page.getByLabel(/^Nachricht/).fill("Nicht versendete WP07-Testanfrage.");
+  await page.getByRole("button", { name: "Anfrage senden" }).click();
+  await expect(page.getByText("Die Anfrage konnte nicht gesendet werden.")).toBeVisible();
+  await expect(page.getByText(/Vielen Dank/)).toHaveCount(0);
+});

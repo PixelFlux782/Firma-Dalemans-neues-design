@@ -138,8 +138,10 @@ export function ContactForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(Object.fromEntries(formData.entries())),
       });
-      const result = (await response.json()) as { error?: string };
-      if (!response.ok) throw new Error(result.error || "Die Anfrage konnte nicht gesendet werden.");
+      const result = (await response.json()) as { ok?: boolean; error?: string };
+      if (!response.ok || result.ok !== true) {
+        throw new Error(result.error || "Die Anfrage konnte nicht gesendet werden.");
+      }
       setStatus({ type: "success", message: "Vielen Dank. Ihre Anfrage wurde übermittelt. Wir melden uns persönlich bei Ihnen." });
       clearRoomPlannerContactHandoff();
       submissionIdRef.current = "";

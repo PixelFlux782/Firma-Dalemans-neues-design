@@ -22,6 +22,7 @@ function text(value: unknown, maxLength = 200) {
 const MAX_REQUEST_BYTES = 10_000;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const IDEMPOTENCY_TTL_MS = 10 * 60 * 1_000;
+const PRODUCTION_RECIPIENT = "anfrage@dalemans.de";
 
 export async function POST(request: Request) {
   if (!isAllowedFormRequest(request)) {
@@ -111,11 +112,12 @@ export async function POST(request: Request) {
   const testMode = process.env.CONTACT_MAIL_TEST_MODE === "true";
   const testRecipient = process.env.CONTACT_TEST_TO_EMAIL?.trim();
   const configuredRecipient = process.env.CONTACT_TO_EMAIL!.trim();
-  const recipient = testMode ? testRecipient : configuredRecipient;
+  const recipient = testMode ? testRecipient : PRODUCTION_RECIPIENT;
   const from = process.env.CONTACT_FROM_EMAIL!.trim();
   if (!Number.isInteger(port) || port < 1 || port > 65_535
     || !["true", "false"].includes(secureValue ?? "")
-    || !recipient || !emailPattern.test(recipient) || !emailPattern.test(from)) {
+    || !recipient || !emailPattern.test(recipient) || !emailPattern.test(from)
+    || (!testMode && configuredRecipient.toLowerCase() !== PRODUCTION_RECIPIENT)) {
     await releaseIdempotency("contact", submissionKey);
     logFormEvent("contact", testMode && !testRecipient ? "mail_test_recipient_missing" : "mail_config_invalid");
     return NextResponse.json(

@@ -4,18 +4,14 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import type { CommerceMoney } from "@/lib/commerce/types";
 import { formatCommerceMoney } from "@/lib/commerce/money";
 
-export type CustomerPriceMode = "business" | "private";
+import { displayedMoney, type CustomerPriceMode } from "@/lib/commerce/price-display";
+export { GERMAN_VAT_RATE, type CustomerPriceMode } from "@/lib/commerce/price-display";
 
 const STORAGE_KEY = "dlmns-customer-price-mode";
-export const GERMAN_VAT_RATE = 0.19;
-
-function displayedMoney(money: CommerceMoney, mode: CustomerPriceMode): CommerceMoney {
-  if (mode === "business") return money;
-  return { ...money, amount: (Number(money.amount) * (1 + GERMAN_VAT_RATE)).toFixed(2) };
-}
 
 const PriceDisplayContext = createContext<{
   mode: CustomerPriceMode;
+  preferenceLoaded: boolean;
   setMode: (mode: CustomerPriceMode) => void;
   formatPrice: (money: CommerceMoney) => string;
   priceLabel: string;
@@ -24,21 +20,36 @@ const PriceDisplayContext = createContext<{
 export default function PriceDisplayProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<CustomerPriceMode>("business");
 
+  const [preferenceLoaded, setPreferenceLoaded] = useState(false);
+
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === "business" || stored === "private") setMode(stored);
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (stored === "business" || stored === "private") setMode(stored);
+    } catch {
+      // Price selection still works when browser storage is unavailable.
+    }
+    setPreferenceLoaded(true);
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, mode);
-  }, [mode]);
+    if (preferenceLoaded) {
+      try {
+        window.localStorage.setItem(STORAGE_KEY, mode);
+      } catch {
+        // Keep the selection in memory for this visit.
+      }
+    }
+  }, [mode, preferenceLoaded]);
 
   const value = useMemo(() => ({
     mode,
+    preferenceLoaded,
     setMode,
-    formatPrice: (money: CommerceMoney) => formatCommerceMoney(displayedMoney(money, mode)) ?? "–",
-    priceLabel: mode === "business" ? "netto zzgl. MwSt." : "brutto inkl. 19 % MwSt.",
-  }), [mode]);
+    // Keep SSR and hydration identical without flashing prices in the wrong mode.
+    formatPrice: (money: CommerceMoney) => preferenceLoaded ? formatCommerceMoney(displayedMoney(money, mode)) ?? "–" : "–",
+    priceLabel: preferenceLoaded ? (mode === "business" ? "netto zzgl. MwSt." : "brutto inkl. 19 % MwSt.") : "",
+  }), [mode, preferenceLoaded]);
 
   return <PriceDisplayContext.Provider value={value}>{children}</PriceDisplayContext.Provider>;
 }
@@ -50,9 +61,9 @@ export function usePriceDisplay() {
 }
 
 export function PriceDisplayToggle() {
-  const { mode, setMode } = usePriceDisplay();
+  const { mode, setMode, preferenceLoaded } = usePriceDisplay();
   return (
-    <div className="border-b border-premium-beige/70 bg-white/60" data-testid="price-display-toggle">
+    <div className="border-b border-premium-beige/70 bg-white/60" data-testid="price-display-toggle" style={{ visibility: preferenceLoaded ? "visible" : "hidden" }}>
       <div className="container-premium flex min-h-11 flex-wrap items-center justify-end gap-3 py-1.5">
         <span className="text-xs font-medium text-premium-muted">Preise für</span>
         <div className="inline-flex rounded-full border border-premium-beige bg-premium-canvas p-0.5" role="group" aria-label="Kundenart wählen">

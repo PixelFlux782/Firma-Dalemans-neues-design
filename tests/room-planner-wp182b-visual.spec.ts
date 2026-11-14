@@ -23,17 +23,18 @@ async function drawPolygon(page: Page, points: { x: number; y: number }[]) {
 
 for (const visualCase of cases) {
   test(`WP18.2b visual ${visualCase.name}`, async ({ page }, testInfo: TestInfo) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.setViewportSize({ width: 1440, height: 1000 });
     await page.goto("/raumplaner");
     await page.locator('[data-help-ready="true"]').waitFor();
     const skipOnboarding = page.getByRole("button", { name: "Überspringen" });
     if (await skipOnboarding.isVisible()) await skipOnboarding.click();
-    const { editor, canvas } = await drawPolygon(page, [{ x: 70, y: 55 }, { x: 690, y: 55 }, { x: 690, y: 485 }, { x: 70, y: 485 }]);
+    const { editor, canvas } = await drawPolygon(page, [{ x: 70, y: 100 }, { x: 690, y: 100 }, { x: 690, y: 485 }, { x: 70, y: 485 }]);
     await canvas.locator("[data-point-id]").first().click();
     await editor.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Tische", exact: true }).click();
     await page.getByLabel("Tischwerkzeug").selectOption("tables");
+    await page.getByRole("button", { name: "Werkzeugoptionen schließen" }).click();
     for (const position of visualCase.zone) await canvas.click({ position });
-    await page.getByRole("button", { name: "Tischbereich abschließen" }).click();
+    await canvas.click({ position: visualCase.zone[0] });
     await page.getByRole("button", { name: "Bereich einrichten", exact: true }).first().click();
     await page.getByLabel("Tischmodell für Tischbereich").selectOption(visualCase.modelId);
     await expect(page.getByLabel("Anordnung im Tischbereich").locator('option[value="trapezoid-auto"]')).toHaveCount(1);

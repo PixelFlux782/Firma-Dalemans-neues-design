@@ -1,3 +1,4 @@
+import { shippingNotice } from "@/lib/consumer-information";
 import "server-only";
 
 import { createHash, randomUUID } from "node:crypto";
@@ -7,12 +8,13 @@ import { chairAddonBySku, isChairAddonCompatible } from "@/lib/commerce/chair-ad
 import { getProductByHandle } from "@/lib/commerce/service";
 import type { CommerceMoney, CommercePriceTier } from "@/lib/commerce/types";
 import type {
-  InquiryContactInput,
   InquiryItemInput,
   InquiryRequestBody,
   InquirySuccessResponse,
 } from "@/lib/inquiry/types";
 import { logSmtpFailure } from "@/lib/server/smtp-diagnostics";
+
+import { parseInquiryContact } from "@/lib/inquiry/contact";
 
 const MAX_ITEMS = 50;
 const MAX_QUANTITY = 100_000;
@@ -31,10 +33,6 @@ function cleanString(value: unknown, maxLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
-function cleanSingleLine(value: unknown, maxLength: number) {
-  return cleanString(value, maxLength).replace(/[\r\n\t]+/g, " ");
-}
-
 export function validateInquiryBody(value: unknown): InquiryRequestBody {
   if (!value || typeof value !== "object") {
     throw new InquiryInputError("Die Anfrage konnte nicht gelesen werden.");
@@ -44,42 +42,8 @@ export function validateInquiryBody(value: unknown): InquiryRequestBody {
   const rawContact = body.contact && typeof body.contact === "object"
     ? body.contact as Record<string, unknown>
     : {};
-  const contact: InquiryContactInput = {
-    firstName: cleanSingleLine(rawContact.firstName, 80),
-    lastName: cleanSingleLine(rawContact.lastName, 80),
-    organization: cleanSingleLine(rawContact.organization, 120),
-    email: cleanSingleLine(rawContact.email, 254).toLowerCase(),
-    phone: cleanSingleLine(rawContact.phone, 40),
-    postalCode: cleanSingleLine(rawContact.postalCode, 10),
-    message: cleanString(rawContact.message, 2_000),
-    privacyAccepted: rawContact.privacyAccepted === true,
-  };
-  const fieldErrors: Record<string, string> = {};
-
-  const maximumLengths: Array<[keyof InquiryContactInput, number]> = [
-    ["firstName", 80], ["lastName", 80], ["organization", 120], ["email", 254],
-    ["phone", 40], ["postalCode", 10], ["message", 2_000],
-  ];
-  for (const [field, maximum] of maximumLengths) {
-    if (typeof rawContact[field] === "string" && rawContact[field].length > maximum) {
-      fieldErrors[field] = `Bitte verwenden Sie höchstens ${maximum} Zeichen.`;
-    }
-  }
-
-  if (contact.firstName.length < 2) fieldErrors.firstName = "Bitte geben Sie Ihren Vornamen ein.";
-  if (contact.lastName.length < 2) fieldErrors.lastName = "Bitte geben Sie Ihren Nachnamen ein.";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)) {
-    fieldErrors.email = "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
-  }
-  if (contact.phone && !/^[+()0-9\s./-]{5,40}$/.test(contact.phone)) {
-    fieldErrors.phone = "Bitte prüfen Sie die Telefonnummer.";
-  }
-  if (contact.postalCode && !/^\d{5}$/.test(contact.postalCode)) {
-    fieldErrors.postalCode = "Bitte geben Sie eine fünfstellige Liefer-PLZ ein.";
-  }
-  if (!contact.privacyAccepted) {
-    fieldErrors.privacyAccepted = "Bitte bestätigen Sie die Datenschutzhinweise.";
-  }
+  const { contact, errors } = parseInquiryContact(rawContact);
+  const fieldErrors: Record<string, string> = { ...errors };
 
   const customerType = body.customerType === "private" || body.customerType === "business"
     ? body.customerType
@@ -104,6 +68,7 @@ export function validateInquiryBody(value: unknown): InquiryRequestBody {
       productHandle: cleanString(item.productHandle, 160),
       variantId: cleanString(item.variantId, 240),
       quantity: typeof item.quantity === "number" ? item.quantity : Number.NaN,
+      technicalInquiry: cleanString(item.technicalInquiry, 4000),
       selectedAddons: Array.isArray(item.selectedAddons)
         ? item.selectedAddons.map((entry) => cleanString(entry, 80)).filter(Boolean).slice(0, 20)
         : [],
@@ -129,6 +94,7 @@ export function validateInquiryBody(value: unknown): InquiryRequestBody {
 }
 
 export interface ResolvedInquiryLine {
+  technicalInquiry?: string;
   productName: string;
   articleNumber: string;
   variant: string;
@@ -137,8 +103,8 @@ export interface ResolvedInquiryLine {
   quantity: number;
   unitLabel: string;
   tier: string;
-  unitNet: CommerceMoney;
-  totalNet: CommerceMoney;
+  unitNet: CommerceMoney | null;
+  totalNet: CommerceMoney | null;
 }
 
 function matchingTier(tiers: CommercePriceTier[] | undefined, quantity: number) {
@@ -159,7 +125,8 @@ export async function resolveInquiryItems(items: InquiryItemInput[]) {
         items: "Bitte prüfen Sie die Produktauswahl und versuchen Sie es erneut.",
       });
     }
-    if (variant.priceDataStatus !== "verified" || !variant.price
+    const requestOnly = variant.priceStatus === "on_request" && variant.price === null;
+    if ((!requestOnly && (variant.priceDataStatus !== "verified" || !variant.price || !(variant.erpArticleNumber ?? variant.sku)))
       || variant.priceStatus === "unavailable" || variant.availability === "out_of_stock") {
       throw new InquiryInputError("Eine Position kann serverseitig nicht zuverlässig berechnet werden.", {
         items: `${product.title}: Bitte lassen Sie diese Konfiguration persönlich prüfen.`,
@@ -167,7 +134,7 @@ export async function resolveInquiryItems(items: InquiryItemInput[]) {
     }
 
     const rules = cartQuantityRules(product, variant);
-    if (item.quantity < rules.minimumQuantity
+    if (!Number.isInteger(item.quantity) || item.quantity > MAX_QUANTITY || item.quantity < rules.minimumQuantity
       || (item.quantity - rules.minimumQuantity) % rules.quantityStep !== 0) {
       throw new InquiryInputError("Eine Produktmenge entspricht nicht den zulässigen Mengenschritten.", {
         items: `${product.title}: Mindestmenge ${rules.minimumQuantity}, Schrittweite ${rules.quantityStep}.`,
@@ -188,7 +155,7 @@ export async function resolveInquiryItems(items: InquiryItemInput[]) {
       }
     }
 
-    const signature = `${product.handle}\0${variant.id}\0${uniqueAddonSkus.join(",")}`;
+    const signature = `${product.handle}\0${variant.id}\0${uniqueAddonSkus.join(",")}\0${cleanString(item.technicalInquiry, 4000)}`;
     if (seen.has(signature)) {
       throw new InquiryInputError("Eine identische Produktkonfiguration ist mehrfach enthalten.", {
         items: "Bitte fassen Sie identische Positionen im Warenkorb zusammen.",
@@ -202,25 +169,31 @@ export async function resolveInquiryItems(items: InquiryItemInput[]) {
       quantity: item.quantity,
       selectedAddonSkus: uniqueAddonSkus,
     });
-    if (!trusted.unitPrice || trusted.unitPrice.currencyCode !== "EUR") {
+    if (!requestOnly && (!trusted.unitPrice || trusted.unitPrice.currencyCode !== "EUR")) {
       throw new InquiryInputError("Eine Position kann serverseitig nicht zuverlässig berechnet werden.", {
         items: product.title,
       });
     }
-    const totalNet = {
+    const totalNet = trusted.unitPrice ? {
       amount: (Number(trusted.unitPrice.amount) * item.quantity).toFixed(2),
       currencyCode: "EUR",
-    };
+    } : null;
     const tier = matchingTier(trusted.priceTiers, item.quantity);
     resolved.push({
+      technicalInquiry: cleanString(item.technicalInquiry, 4000),
       productName: product.title,
       articleNumber: variant.erpArticleNumber ?? variant.sku ?? "nicht hinterlegt",
       variant: variant.title,
-      options: variant.selectedOptions.map((option) => `${option.name}: ${option.value}`),
+      options: [
+        ...variant.selectedOptions.map((option) => `${option.name}: ${option.value}`),
+        ...(requestOnly ? product.specifications
+          .filter((spec) => !variant.selectedOptions.some((option) => option.name === spec.name))
+          .map((spec) => `${spec.name}: ${spec.value}`) : []),
+      ],
       addons: uniqueAddonSkus.map((sku) => `${chairAddonBySku(sku)!.name} (${sku})`),
       quantity: item.quantity,
       unitLabel: product.quantity.unitLabel,
-      tier: tier?.label ?? `ab ${rules.minimumQuantity} ${product.quantity.unitLabel}`,
+      tier: tier?.label ?? "",
       unitNet: trusted.unitPrice,
       totalNet,
     });
@@ -247,18 +220,19 @@ function lineText(line: ResolvedInquiryLine, customerType: InquiryRequestBody["c
   const priceSuffix = customerType === "private" ? "brutto inkl. 19 % MwSt." : "netto zzgl. 19 % MwSt.";
   return [
     `${line.productName} — ${line.variant}`,
+    ...(line.technicalInquiry ? [`Technische Kundenangaben:\n${line.technicalInquiry}`] : []),
     `Artikelnummer: ${line.articleNumber}`,
     ...(line.options.length ? [`Ausführung: ${line.options.join(", ")}`] : []),
     ...(line.addons.length ? [`Ausstattung: ${line.addons.join(", ")}`] : []),
-    `Menge: ${line.quantity} ${line.unitLabel}`,
-    `Mengenstaffel: ${line.tier}`,
-    `Stückpreis: ${euro(displayed(Number(line.unitNet.amount), customerType))} ${priceSuffix}`,
-    `Positionssumme: ${euro(displayed(Number(line.totalNet.amount), customerType))} ${priceSuffix}`,
+    `Menge: ${line.quantity} ${line.unitLabel}${line.unitLabel.startsWith("Garnitur") ? ` = ${line.quantity * 4} Stück` : ""}`,
+    ...(line.tier ? [`Mengenstaffel: ${line.tier}`] : []),
+    line.unitNet ? `Preis je ${line.unitLabel}: ${euro(displayed(Number(line.unitNet.amount), customerType))} ${priceSuffix}` : "Preis auf Anfrage",
+    line.totalNet ? `Positionssumme: ${euro(displayed(Number(line.totalNet?.amount), customerType))} ${priceSuffix}` : "Positionssumme auf Anfrage",
   ].join("\n");
 }
 
 function totals(lines: ResolvedInquiryLine[]) {
-  const net = lines.reduce((sum, line) => sum + Number(line.totalNet.amount), 0);
+  const net = lines.reduce((sum, line) => sum + Number(line.totalNet?.amount ?? 0), 0);
   const vat = net * VAT_RATE;
   return { net, vat, gross: net + vat };
 }
@@ -268,12 +242,13 @@ function linesHtml(lines: ResolvedInquiryLine[], customerType: InquiryRequestBod
   return lines.map((line) => `
     <div style="padding:18px 0;border-bottom:1px solid #ddd7c8">
       <h3 style="margin:0 0 8px;color:#18382a">${escapeHtml(line.productName)}</h3>
+      ${line.technicalInquiry ? `<p style="white-space:pre-wrap"><strong>Technische Kundenangaben:</strong><br>${escapeHtml(line.technicalInquiry)}</p>` : ""}
       <p style="margin:0 0 4px"><strong>${escapeHtml(line.variant)}</strong></p>
       <p style="margin:0 0 4px">Artikelnummer: ${escapeHtml(line.articleNumber)}</p>
-      ${line.options.length ? `<p style="margin:0 0 4px">Ausführung: ${escapeHtml(line.options.join(", "))}</p>` : ""}
+      ${line.options.length ? `<p style="margin:0 0 4px"><strong>Ausführung: ${escapeHtml(line.options.join(", "))}</strong></p>` : ""}
       ${line.addons.length ? `<p style="margin:0 0 4px">Ausstattung: ${escapeHtml(line.addons.join(", "))}</p>` : ""}
-      <p style="margin:0 0 4px">Menge: ${line.quantity} ${escapeHtml(line.unitLabel)} · Staffel: ${escapeHtml(line.tier)}</p>
-      <p style="margin:0">Stückpreis: ${euro(displayed(Number(line.unitNet.amount), customerType))} ${suffix} · <strong>Position: ${euro(displayed(Number(line.totalNet.amount), customerType))} ${suffix}</strong></p>
+      <p style="margin:0 0 4px">Menge: ${line.quantity} ${escapeHtml(line.unitLabel)}${line.unitLabel.startsWith("Garnitur") ? ` = ${line.quantity * 4} Stück` : ""}${line.tier ? ` - Staffel: ${escapeHtml(line.tier)}` : ""}</p>
+      <p style="margin:0">${line.unitNet ? `Preis je ${escapeHtml(line.unitLabel)}: ${euro(displayed(Number(line.unitNet.amount), customerType))} ${suffix} - Position: ${euro(displayed(Number(line.totalNet?.amount), customerType))} ${suffix}` : "Preis auf Anfrage"}</p>
     </div>`).join("");
 }
 
@@ -308,6 +283,7 @@ function smtpConfig() {
       host: process.env.CONTACT_SMTP_HOST,
       port,
       secure: secureValue === "true",
+      requireTLS: secureValue !== "true",
       auth: { user: process.env.CONTACT_SMTP_USER, pass: process.env.CONTACT_SMTP_PASSWORD },
       connectionTimeout: 10_000,
       greetingTimeout: 10_000,
@@ -341,14 +317,27 @@ export async function deliverInquiry(
     `E-Mail: ${body.contact.email}`,
     `Telefon: ${body.contact.phone || "nicht angegeben"}`,
     `Organisation: ${body.contact.organization || "nicht angegeben"}`,
-    `Liefer-PLZ: ${body.contact.postalCode || "nicht angegeben"}`,
+    "",
+    "Rechnungsanschrift:",
+    `${body.contact.firstName} ${body.contact.lastName}`,
+    `${body.contact.street} ${body.contact.houseNumber}`,
+    `${body.contact.postalCode} ${body.contact.city}`,
+    "",
+    ...(body.contact.differentDeliveryAddress ? [
+      "Lieferanschrift:",
+      `${body.contact.deliveryFirstName} ${body.contact.deliveryLastName}`,
+      `${body.contact.deliveryStreet} ${body.contact.deliveryHouseNumber}`,
+      `${body.contact.deliveryPostalCode} ${body.contact.deliveryCity}`,
+    ] : ["Lieferanschrift: wie Rechnungsanschrift"]),
   ].join("\n");
-  const totalText = [
-    `Nettowarenwert: ${euro(summary.net)}`,
-    `Umsatzsteuer (19 %): ${euro(summary.vat)}`,
-    `Bruttowarenwert: ${euro(summary.gross)}`,
+  const allPriced = lines.every((line) => line.totalNet !== null);
+  const totalText = allPriced ? [
+    `Nettowarenwert: ${allPriced ? euro(summary.net) : "auf Anfrage"}`,
+    `Umsatzsteuer (19 %): ${allPriced ? euro(summary.vat) : "auf Anfrage"}`,
+    `Bruttowarenwert: ${allPriced ? euro(summary.gross) : "auf Anfrage"}`,
     `Dargestellte Preise: ${priceLabel}`,
-  ].join("\n");
+    shippingNotice,
+  ].join("\n") : "Gesamtpreis auf Anfrage; unbepreiste Positionen sind enthalten.";
   const messageIdDomain = mail.from.split("@")[1]?.replace(/[>\s]/g, "") || "dalemans.de";
   const messageBase = idempotencyDigest(body.idempotencyKey).slice(0, 32);
 
@@ -370,8 +359,8 @@ export async function deliverInquiry(
       <h2 style="color:#18382a;font-size:19px">Persönliche Nachricht</h2>
       <p style="white-space:pre-wrap">${escapeHtml(body.contact.message || "keine Nachricht")}</p>
       <h2 style="color:#18382a;font-size:19px">Produktauswahl</h2>${linesHtml(lines, body.customerType)}
-      <p style="line-height:1.7"><strong>Nettowarenwert:</strong> ${euro(summary.net)}<br><strong>Umsatzsteuer (19 %):</strong> ${euro(summary.vat)}<br><strong>Bruttowarenwert:</strong> ${euro(summary.gross)}<br>Dargestellte Preise: ${escapeHtml(priceLabel)}</p>
-      <p style="padding:14px;background:#f4f1e9"><strong>Unverbindliche Angebotsanfrage.</strong> Es wurde keine Bestellung und keine Zahlung ausgelöst.</p>`),
+      <p style="line-height:1.7"><strong>Nettowarenwert:</strong> ${allPriced ? euro(summary.net) : "auf Anfrage"}<br><strong>Umsatzsteuer (19 %):</strong> ${allPriced ? euro(summary.vat) : "auf Anfrage"}<br><strong>Bruttowarenwert:</strong> ${allPriced ? euro(summary.gross) : "auf Anfrage"}<br>Dargestellte Preise: ${escapeHtml(priceLabel)}</p>
+      <p style="padding:14px;background:#f4f1e9">${escapeHtml(shippingNotice)}</p><p><strong>Unverbindliche Angebotsanfrage.</strong> Es wurde keine Bestellung und keine Zahlung ausgelöst.</p>`),
   });
   if (!internalInfo.accepted?.length) throw new Error("INTERNAL_MAIL_NOT_ACCEPTED");
 
@@ -386,18 +375,19 @@ export async function deliverInquiry(
       text: [
         `Guten Tag ${body.contact.firstName} ${body.contact.lastName},`, "",
         "vielen Dank für Ihre Anfrage. Wir bearbeiten Ihre Produktauswahl persönlich.",
-        `Ihre Anfrage-ID: ${inquiryId}`, "", "Zusammenfassung", "",
+        `Ihre Anfrage-ID: ${inquiryId}`, "", contactText, "", "Zusammenfassung", "",
         lines.map((line) => lineText(line, body.customerType)).join("\n\n"), "", totalText, "",
-        "Dies ist eine Eingangsbestätigung. Ihre Anfrage ist keine Bestellung und löst keine Zahlungsverpflichtung aus.",
+        "Dies ist eine Eingangsbestätigung. Ihre Anfrage ist keine Bestellung und löst keine Zahlungsverpflichtung aus. Ein Vertrag kommt erst durch ausdrückliche Bestätigung von Dalemans zustande.",
         "", "Dalemans Sitzmöbel & Tische", "E-Mail: info@dalemans.de",
       ].join("\n"),
       html: emailDocument(`Vielen Dank für Ihre Anfrage`, `
         <p>Guten Tag ${escapeHtml(body.contact.firstName)} ${escapeHtml(body.contact.lastName)},</p>
         <p>wir haben Ihre Anfrage erhalten und bearbeiten Ihre Produktauswahl persönlich.</p>
         <p><strong>Ihre Anfrage-ID: ${escapeHtml(inquiryId)}</strong></p>
+        <p>${escapeHtml(contactText).replace(/\n/g, "<br>")}</p>
         <h2 style="color:#18382a;font-size:19px">Zusammenfassung</h2>${linesHtml(lines, body.customerType)}
-        <p style="line-height:1.7"><strong>Nettowarenwert:</strong> ${euro(summary.net)}<br><strong>Umsatzsteuer (19 %):</strong> ${euro(summary.vat)}<br><strong>Bruttowarenwert:</strong> ${euro(summary.gross)}</p>
-        <p style="padding:14px;background:#f4f1e9"><strong>Dies ist keine Bestellung.</strong> Die Anfrage löst keine Zahlungsverpflichtung aus.</p>
+        <p style="line-height:1.7"><strong>Nettowarenwert:</strong> ${allPriced ? euro(summary.net) : "auf Anfrage"}<br><strong>Umsatzsteuer (19 %):</strong> ${allPriced ? euro(summary.vat) : "auf Anfrage"}<br><strong>Bruttowarenwert:</strong> ${allPriced ? euro(summary.gross) : "auf Anfrage"}</p>
+        <p style="padding:14px;background:#f4f1e9">${escapeHtml(shippingNotice)}</p><p><strong>Dies ist keine Bestellung.</strong> Die Anfrage löst keine Zahlungsverpflichtung aus. Ein Vertrag kommt erst durch ausdrückliche Bestätigung von Dalemans zustande.</p>
         <p>Dalemans Sitzmöbel &amp; Tische<br><a href="mailto:info@dalemans.de">info@dalemans.de</a></p>`),
     });
     if (!customerInfo.accepted?.length) customerConfirmation = "failed";

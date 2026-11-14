@@ -135,7 +135,7 @@ export function recommendGliders(
     };
   }
 
-  const dataPolicy = options.dataPolicy ?? "development_and_verified";
+  const dataPolicy = options.dataPolicy ?? "verified_only";
   const shapeCandidates = allCandidates(products).filter(
     ({ attributes }) =>
       allowedByPolicy(attributes.dataStatus, dataPolicy) &&

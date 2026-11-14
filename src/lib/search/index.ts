@@ -1,3 +1,5 @@
+import { lowestProductUnitPrice } from "@/lib/commerce/money";
+import { displayedMoney } from "@/lib/commerce/price-display";
 import type {
   CommerceCollection,
   CommerceFinderAttributes,
@@ -33,8 +35,8 @@ function priceLabel(status: CommerceProduct["priceStatus"], money: CommerceMoney
   const formatted = new Intl.NumberFormat("de-DE", {
     style: "currency",
     currency: money.currencyCode,
-  }).format(Number(money.amount));
-  return status === "from" ? `ab ${formatted}` : formatted;
+  }).format(Number(displayedMoney(money, "private").amount));
+  return `${status === "from" ? `ab ${formatted}` : formatted} brutto inkl. 19 % MwSt., zzgl. Versand`;
 }
 
 const frameShapeLabels: Record<CommerceFinderAttributes["frameShape"], string> = {
@@ -85,6 +87,7 @@ function variantSearchable(variant: CommerceProductVariant): string {
 
 function productDocument(product: CommerceProduct): SearchDocument {
   const aliases = product.searchAliases ?? [];
+  const lowest = lowestProductUnitPrice(product);
   const variantLabels = product.variants.map((variant) => ({
     id: variant.id,
     title: variant.title,
@@ -106,7 +109,9 @@ function productDocument(product: CommerceProduct): SearchDocument {
     description: product.shortDescription,
     image: product.featuredImage,
     priceStatus: product.priceStatus,
-    priceLabel: priceLabel(product.priceStatus, product.priceRange.min),
+    priceLabel: priceLabel(product.priceStatus, lowest?.price ?? null),
+    priceMoney: lowest?.price ?? null,
+    priceMinimumQuantity: lowest?.minimumQuantity,
     aliases,
     variantLabels,
     dataStatus: hasDevelopmentData ? "development" : null,

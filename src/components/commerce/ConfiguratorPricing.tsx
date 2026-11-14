@@ -1,5 +1,6 @@
 "use client";
 
+import { shippingNotice } from "@/lib/consumer-information";
 import type { CommerceMoney, CommercePriceStatus, CommercePriceTier } from "@/lib/commerce/types";
 import { usePriceDisplay } from "@/components/commerce/PriceDisplayProvider";
 
@@ -26,7 +27,9 @@ export function CurrentUnitPrice({
   price,
   compareAtPrice,
   testId,
+  unitLabel = "St\u00fcck",
 }: {
+  unitLabel?: string;
   status: CommercePriceStatus;
   price: CommerceMoney | null;
   compareAtPrice?: CommerceMoney | null;
@@ -44,14 +47,14 @@ export function CurrentUnitPrice({
       data-testid={testId}
       data-price-status={status}
     >
-      <p className="text-xs uppercase tracking-[.14em] text-premium-subtle">Aktueller Stückpreis</p>
+      <p className="text-xs uppercase tracking-[.14em] text-premium-subtle">Preis je {unitLabel}</p>
       <div className="mt-1 flex flex-wrap items-baseline justify-end gap-x-2">
         <p className="text-2xl font-semibold tabular-nums text-premium-forest">
           {status === "on_request" ? "Auf Anfrage" : showNumericPrice ? formatted : "Nicht verfügbar"}
         </p>
         {compareAt && showNumericPrice ? <span className="text-sm text-premium-muted line-through">{compareAt}</span> : null}
       </div>
-      {showNumericPrice ? <p className="mt-1 text-xs text-premium-muted">{priceLabel}</p> : null}
+      {showNumericPrice ? <p className="mt-1 text-xs text-premium-muted">{priceLabel} · {shippingNotice}</p> : null}
     </div>
   );
 }
@@ -125,7 +128,7 @@ export function ConfiguratorPriceSummary({
   return (
     <div className="mt-7 rounded-2xl border border-premium-beige/80 bg-white/55 p-5" data-testid={testId}>
       <div className="flex items-center justify-between gap-4 text-sm">
-        <span className="text-premium-muted">{simple ? "Stückpreis" : "Basispreis"}</span>
+        <span className="text-premium-muted">{simple ? `Preis je ${unitLabel}` : "Basispreis"}</span>
         <span className="font-semibold tabular-nums text-premium-ink">{formatPrice(basePrice)} / {unitLabel}</span>
       </div>
       {!simple ? adjustments.map((adjustment) => (
@@ -138,7 +141,7 @@ export function ConfiguratorPriceSummary({
       )) : null}
       {!simple ? (
         <div className="mt-4 flex items-center justify-between gap-4 border-t border-premium-beige/80 pt-4">
-          <span className="font-semibold text-premium-ink">Konfigurierter Stückpreis</span>
+          <span className="font-semibold text-premium-ink">Konfigurierter Preis je {unitLabel}</span>
           <span className="font-semibold tabular-nums text-premium-forest">{formatPrice(configuredPrice)} / {unitLabel}</span>
         </div>
       ) : null}

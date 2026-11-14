@@ -1,6 +1,6 @@
 ﻿import type { Metadata } from "next";
 
-const FALLBACK_SITE_URL = "https://stapelstuhl-klapptisch.de";
+const FALLBACK_SITE_URL = "https://dalemans.de";
 
 export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL;
 export const siteName = "Dalemans Stapelstühle & Klapptische";
@@ -47,8 +47,6 @@ export function buildMetadata({
         ? [
             {
               url: imageUrl,
-              width: 1200,
-              height: 630,
               alt: title,
             },
           ]

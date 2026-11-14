@@ -25,7 +25,7 @@ function image(url: string, altText: string): CommerceImage {
 function requestVariant(
   id: string,
   title: string,
-  sku: string,
+  sku: string | null,
   selectedOptions: CommerceProductVariant["selectedOptions"],
   finderAttributes: CommerceFinderAttributes | null = null,
 ): CommerceProductVariant {
@@ -73,7 +73,7 @@ function priceListVariant(
 }
 
 const feltGliderImage = image(
-  "/neue bilder/Zubehör/stopfen-sortiment.png",
+  "/neue bilder/Zubehör/stopfen-sortiment.webp",
   "Sortiment verschiedener Möbelgleiter und Gestellstopfen",
 );
 
@@ -371,12 +371,7 @@ const localProductsBase: CommerceProduct[] = [
     featuredImage: rowConnectorImage,
     images: [rowConnectorImage],
     variants: [
-      requestVariant("connector-standard", "Standardausführung", "DEV-RV-STD", [
-        { name: "Ausführung", value: "Standard" },
-      ]),
-      requestVariant("connector-wide", "Ausführung für größeren Abstand", "DEV-RV-WEIT", [
-        { name: "Ausführung", value: "Größerer Abstand" },
-      ]),
+      requestVariant("connector-request", "Nach Maß- und Gestellprüfung", null, []),
     ],
     priceRange: { min: null, max: null },
     priceStatus: "on_request",
@@ -402,7 +397,7 @@ const localProductsBase: CommerceProduct[] = [
       "Foto von Gestell und gewünschter Verbindungssituation aufnehmen.",
     ],
     applicationNotes: ["Vor dem Einsatz ist die sichere Verbindung am konkreten Stuhlmodell zu prüfen."],
-    notes: ["Ausführungsnamen sind lokale Entwicklungsdaten."],
+    notes: ["Ausführung, Preis und Verfügbarkeit werden nach Prüfung des Stuhlgestells persönlich bestätigt."],
     accessories: [{ handle: "buchablage-nachruesten", title: "Buchablage zum Nachrüsten" }],
     consultationNote: "Senden Sie uns ein Foto der Stühle und die relevanten Gestellmaße.",
     faq: [],
@@ -691,7 +686,7 @@ export const localCollectionRecords: Array<Omit<CommerceCollection, "products">>
     shortDescription: "Wenn Maß, Material oder Kompatibilität noch nicht sicher sind, klären wir den Bedarf gemeinsam.",
     description:
       "Mustersets werden vorbereitet. Bis dahin unterstützen wir persönlich bei der Zuordnung vorhandener Modelle und Maße.",
-    image: image("/neue bilder/Stoffe-Farben/Textilproben.png", "Textilproben für die Auswahl von Stoffen und Farben"),
+    image: image("/images/curated/Stoffe-Farben/Textilproben.webp", "Textilproben für die Auswahl von Stoffen und Farben"),
     seo: {
       title: "Muster & persönliche Produktberatung",
       description: "Persönliche Hilfe bei unklaren Maßen, Materialien und der Kompatibilität von Ersatzteilen und Zubehör.",

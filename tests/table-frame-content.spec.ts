@@ -36,8 +36,8 @@ test("Klapptisch 310c verwendet eindeutige K3-Produktbilder, andere Tische bleib
   expect(table310.featuredImage).toEqual(table310.images[0]);
   expect(new Set(table310.images.map((item) => item.url)).size).toBe(table310.images.length);
   expect(seminar210.images.map((item) => item.url)).toEqual([
+    "/neue%20bilder/Tische/t210.webp",
     "/images/curated/Tische/T210cdetail.webp",
-    "/neue%20bilder/Tische/t210.png",
   ]);
   expect(seminar210.featuredImage).toEqual(seminar210.images[0]);
   expect(trapezoid310.images).toHaveLength(1);
@@ -94,7 +94,8 @@ test("Ratgeberanker und 310c-Galerie zeigen die korrekten Gestellinhalte", async
 
   await page.goto("/produkte/artikel/seminarklapptisch-210c");
   const seminarGallery = page.getByLabel("Weitere Produktbilder");
-  await expect(seminarGallery.getByRole("button", { name: /Bild 2: Seminarklapptisch Modell 210c in einer weiteren Ansicht/ })).toBeVisible();
+  await expect(seminarGallery.getByRole("button")).toHaveCount(2);
+  await expect(seminarGallery.getByRole("button").first().locator("img")).toHaveAttribute("src", /t210.webp/);
   expect((await request.get("/neue%20bilder/Tische/t210.png")).status()).toBe(200);
 
   await page.goto("/produkte/artikel/trapez-klapptisch-310c");

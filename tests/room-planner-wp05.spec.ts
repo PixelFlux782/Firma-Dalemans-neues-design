@@ -49,6 +49,7 @@ test("Varianten sind begrenzt, reproduzierbar und bewahren Benutzervorgaben", ()
 });
 
 test("Editor zeigt bei fehlendem Ausgang eine technische Annäherung ohne Übernahme", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/raumplaner");
   const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
   const svg = editor.getByRole("img", { name: "Grundriss Zeichenfläche" });
@@ -71,6 +72,7 @@ test("Editor zeigt bei fehlendem Ausgang eine technische Annäherung ohne Übern
 });
 
 test("Variantenübernahme und Undo stellen Bestuhlungsparameter gemeinsam wieder her", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/raumplaner");
   const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
   const svg = editor.getByRole("img", { name: "Grundriss Zeichenfläche" });
@@ -81,11 +83,13 @@ test("Variantenübernahme und Undo stellen Bestuhlungsparameter gemeinsam wieder
   const left = w / 2 - 225, top = h / 2 - 180;
   await click(left, top); await click(left + 450, top); await click(left + 450, top + 360); await click(left, top + 360); await click(left, top);
   await editor.getByRole("button", { name: "Türen", exact: true }).click();
+  await page.getByRole("button", { name: "Werkzeugoptionen schließen" }).click();
   await click(left + 45, top);
   await editor.getByLabel("Türrolle").selectOption("exit");
   await editor.getByLabel("Breite (m)", { exact: true }).fill("1.2");
   await editor.getByLabel("Lichte Breite (m)").fill("1.2");
   await editor.getByRole("button", { name: "Gänge", exact: true }).click();
+  await page.getByRole("button", { name: "Werkzeugoptionen schließen" }).click();
   await click(left + 45, top + 32); await click(left + 45, top + 328);
   await page.keyboard.press("Escape");
   await editor.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();

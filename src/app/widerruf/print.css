@@ -1,0 +1,54 @@
+@media print {
+  @page withdrawal {
+    size: A4 portrait;
+    margin: 16mm;
+  }
+
+  html:has(.withdrawal-page),
+  body:has(.withdrawal-page) {
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  body:has(.withdrawal-page) {
+    page: withdrawal;
+  }
+
+  .withdrawal-page {
+    max-width: none !important;
+    color: #111 !important;
+  }
+
+  .withdrawal-page article {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: white !important;
+  }
+
+  .withdrawal-page nav,
+  .withdrawal-page .section-eyebrow {
+    display: none !important;
+  }
+
+  .withdrawal-page p,
+  .withdrawal-page li {
+    color: #111 !important;
+    orphans: 3;
+    widows: 3;
+  }
+
+  .withdrawal-page h2 {
+    break-after: avoid;
+  }
+
+  .withdrawal-page #\35 -muster-widerrufsformular {
+    break-before: page;
+  }
+
+  .withdrawal-page p {
+    break-inside: avoid;
+  }
+}

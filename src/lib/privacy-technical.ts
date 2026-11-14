@@ -1,55 +1,106 @@
-export const technicalPrivacyText = `Datenschutzhinweise - technischer Stand vom 23. Oktober 2026
+import { company } from "@/lib/company";
 
-Hinweis zum Freigabestatus
+export const technicalPrivacyText = `
+## 1. Verantwortlicher
 
-Diese Fassung beschreibt den aktuell im Quellcode festgestellten technischen Stand der Website. Sie ist noch nicht fachjuristisch freigegeben. Insbesondere Rechtsgrundlagen, Aufbewahrungs- und Löschfristen, eingesetzte Hosting- und E-Mail-Dienstleister, Verträge zur Auftragsverarbeitung sowie gegebenenfalls erforderliche Pflichtangaben müssen vor einer Veröffentlichung durch eine fachkundige Stelle ergänzt und bestätigt werden.
+${company.legalName}
+${company.address.streetAddress}
+${company.address.postalCode} ${company.address.addressLocality}, Deutschland
+Telefon: ${company.telephone}
+Mobil: ${company.mobile}
+E-Mail: ${company.email}
 
-1. Kontakt
+## 2. Bereitstellung der Website und Hosting
 
-Dalemans Sitzmöbel und Tische
-Bollenwaldstraße 108a
-63743 Aschaffenburg
-Deutschland
-Telefon: +49 9342 9153-53
-E-Mail: info@dalemans.de
+Wir nutzen Netlify für die Bereitstellung dieser Website und die serverseitige Bearbeitung unserer Online-Formulare. Dabei werden technisch erforderliche Verbindungs- und Protokolldaten verarbeitet, insbesondere IP-Adresse, Zeitpunkt und Ziel einer Serveranfrage sowie technische Angaben zu Browser, Betriebssystem und Status- oder Fehlerdaten. Beim Absenden eines Formulars werden auch dessen Inhalte auf der Hosting-Infrastruktur verarbeitet.
 
-Die rechtliche Bezeichnung und Verantwortlichkeit sind vor der Freigabe mit dem Impressum fachjuristisch abzugleichen.
+Dies dient der sicheren, stabilen Bereitstellung der Website, der Fehleranalyse und der Abwehr von Missbrauch. Rechtsgrundlage für den sicheren Betrieb ist Art. 6 Abs. 1 Buchst. f DSGVO. Für Formularinhalte gelten ergänzend die nachfolgend genannten Rechtsgrundlagen.
 
-2. Bereitstellung der Website und Server-Protokolle
+Netlify, Inc., USA, verarbeitet Website- und Formulardaten als Auftragsverarbeiter für uns. Davon zu unterscheiden ist Netlifys eigene Verarbeitung etwa von Vertrags- und Kontodaten seiner Kunden. Die eigene Datenschutzerklärung von Netlify ersetzt daher nicht die Auftragsverarbeitungsbedingungen. Protokolldaten unterliegen je nach Protokollart unterschiedlichen Speicherzeiten; eine einheitliche Löschfrist besteht nicht. Weitere Angaben enthalten die unten verlinkten Anbieterunterlagen.
 
-Beim Abruf einer Website werden technisch erforderliche Verbindungsdaten an den ausliefernden Server übertragen. Dazu können insbesondere IP-Adresse, Zeitpunkt, angeforderte Adresse, Referrer, Browser und Betriebssystem gehören. Welcher Hostinganbieter eingesetzt wird, an welchen Standorten verarbeitet wird und wie lange Protokolle gespeichert werden, ist in der Deployment-Konfiguration zu bestätigen und vor der Freigabe zu ergänzen.
+## 3. Kontakt- und Produktanfragen
 
-3. Cookies, Reichweitenmessung und Marketing
+Beim Absenden des Kontaktformulars verarbeiten wir Vorname, Nachname, gegebenenfalls Organisation, E-Mail-Adresse und/oder Telefonnummer, Betreff und Nachricht. Bei produktbezogenen Anfragen können Produkt, Variante, Menge und weitere von Ihnen übernommene Angaben hinzukommen. Zur Erkennung unerwünschter und doppelter Übermittlungen werden außerdem eine technische Anfragekennung und ein verborgenes Prüffeld verarbeitet.
 
-Die aktuell geprüfte Anwendung setzt selbst keine Cookies und enthält keine aktive Integration von Google Analytics, Google Ads, Wordfence, iThemes oder einem anderen Tracking- oder Marketingdienst. Ein technischer Consent-Banner für solche Dienste ist deshalb im derzeitigen Stand nicht implementiert. Werden später Tracking-, Marketing- oder andere einwilligungspflichtige Dienste hinzugefügt, müssen diese vor ihrer Aktivierung technisch und rechtlich neu bewertet werden.
+Die Daten dienen der Zuordnung und Beantwortung Ihrer Anfrage und der Vorbereitung eines Angebots. Rechtsgrundlage ist Art. 6 Abs. 1 Buchst. b DSGVO bei vorvertraglichen Maßnahmen oder einem Vertrag mit Ihnen. Sonstige Anfragen und die Kommunikation mit Ansprechpartnern von Organisationen bearbeiten wir nach Art. 6 Abs. 1 Buchst. f DSGVO aufgrund unseres berechtigten Interesses an der Beantwortung eingehender Nachrichten und der geschäftlichen Kommunikation. Pflichtangaben sind erforderlich, damit wir Ihre Anfrage bearbeiten können.
 
-4. Lokale Speicherung im Browser
+## 4. Warenkorb, Gleiter-Finder und Raumplanung
 
-Die Website verwendet LocalStorage des Browsers. Diese Daten bleiben grundsätzlich auf dem verwendeten Gerät und werden nicht allein durch die lokale Speicherung an Dalemans übertragen. Gespeichert werden:
+Der Anfragekorb dient ausschließlich der Vorbereitung einer unverbindlichen Angebotsanfrage. Er löst keine Bestellung und keine Zahlung aus. Beim Absenden verarbeiten wir Kundenart, Vorname, Nachname, E-Mail-Adresse, gegebenenfalls Organisation, Telefonnummer, Liefer-Postleitzahl und Nachricht sowie ausgewählte Produkte, Varianten, Mengen, Ausstattungen und Preisangaben.
 
-- dlmns-commerce-cart: Produktauswahl, Varianten, Mengen und gegebenenfalls Finder-Kontext des lokalen Anfragekorbs;
-- dlmns-customer-price-mode: gewählte Darstellung für Geschäfts- oder Privatkundenpreise;
-- dalemans-room-planner-projects-v1: lokal angelegte Raumplaner-Projekte einschließlich Projektname, Raumgeometrie, Möbeln, Einstellungen und Zeitangaben;
+Der Gleiter-Finder verwendet Ihre Auswahl und Angaben zum Produkteinsatz zur Ermittlung geeigneter Produkte. Soweit Sie diese Angaben in den Anfragekorb oder eine Kontaktanfrage übernehmen und absenden, werden sie zusammen mit der Anfrage verarbeitet. Beim Öffnen einer weiterführenden Produkt- oder Kontaktseite können auch technische Angaben und Ihre Freitextangaben in deren Adresse übernommen werden und dadurch in Browserchronik und Serverprotokollen erscheinen.
+
+Raumplaner-Projekte werden im Browser Ihres Geräts gespeichert. Wenn Sie die Anfragefunktion nutzen, werden Projektname, Möbelbedarf und Angaben zur Planung in das Kontaktformular übernommen. Diese Angaben stehen dabei auch in der aufgerufenen Kontaktadresse und können dadurch in Browserchronik und Serverprotokollen erscheinen. Die Nachricht an Dalemans senden Sie anschließend über das Formular. Ein lokaler Export oder Ausdruck übermittelt für sich genommen keine Planungsdaten an Dalemans.
+
+Zweck ist die Beratung, Bedarfsplanung und Angebotserstellung. Rechtsgrundlage ist Art. 6 Abs. 1 Buchst. b DSGVO bei vorvertraglichen Maßnahmen oder der Vertragserfüllung und Art. 6 Abs. 1 Buchst. f DSGVO bei der Kommunikation mit Ansprechpartnern von Organisationen. Für Sicherheitsmaßnahmen gilt ebenfalls Art. 6 Abs. 1 Buchst. f DSGVO.
+
+## 5. E-Mail-Versand über IONOS
+
+Für die E-Mail-Kommunikation nutzen wir IONOS SE, Elgendorfer Straße 57, 56410 Montabaur, Deutschland. Kontakt- und Warenkorbanfragen werden über eine verschlüsselte Verbindung an den E-Mail-Versanddienst übermittelt. Bei Warenkorbanfragen versucht das System zusätzlich, eine Eingangsbestätigung an Ihre E-Mail-Adresse zu senden. Dabei werden Absender- und Empfängeradressen, Betreff, Nachrichteninhalt, Anfrage- und Produktangaben sowie technisch erforderliche Versanddaten verarbeitet. An der Zustellung sind auch die E-Mail-Anbieter der Empfänger beteiligt.
+
+IONOS verarbeitet Nachrichten im Rahmen der Bereitstellung des E-Mail-Dienstes für uns. Die Rechtsgrundlagen entsprechen denen der jeweiligen Anfrage; für gesetzlich erforderliche Aufbewahrungen gilt Art. 6 Abs. 1 Buchst. c DSGVO. Die eigene Vertrags- und Kundenverwaltung von IONOS ist davon zu unterscheiden. Die Auftragsverarbeitung ist Gegenstand gesonderter Vertragsbedingungen. Das Hosting dieser Website erfolgt über Netlify.
+
+## 6. Schutz vor Missbrauch und doppelten Übermittlungen
+
+Wir nutzen Upstash Redis, einen Dienst von Upstash, Inc., USA, um automatisierte Massenanfragen und doppelte E-Mails zu verhindern. Dazu wird die über die Hosting-Plattform ermittelte IP-Adresse auf unserem Server mit einem geheimen Zusatz in eine Kennung umgewandelt. Die ungekürzte IP-Adresse wird von unserer Anwendung nicht in dieser Datenbank gespeichert. Die Kennung ist pseudonym und nicht automatisch anonym.
+
+Gespeichert werden technische Kennungen, Zähler und Bearbeitungsergebnisse. Zähler zur Begrenzung von Sendeversuchen verfallen nach 15 Minuten. Einträge zur Vermeidung doppelter Kontaktanfragen verfallen nach 10 Minuten, solche zu Warenkorbanfragen nach 24 Stunden. Bei Warenkorbanfragen umfasst das Ergebnis die Anfrage-ID und den Status der Eingangsbestätigung. Auch Reservierungen für laufende Übermittlungen unterliegen der jeweiligen Ablaufzeit. Namen, E-Mail-Adressen und Nachrichtentexte werden von unserer Anwendung nicht in Redis gespeichert.
+
+Upstash verarbeitet diese Daten als Auftragsverarbeiter. Rechtsgrundlage ist Art. 6 Abs. 1 Buchst. f DSGVO; unser berechtigtes Interesse liegt im Schutz der Website und der zuverlässigen Bearbeitung Ihrer Anfragen. Die genannten Fristen betreffen unsere Datenbankeinträge, nicht sämtliche Betriebsprotokolle oder Sicherungen des Dienstleisters.
+
+## 7. Speicherung von Kunden- und Anfragedaten
+
+Übermittelte Formulardaten werden als E-Mail in den für die Bearbeitung vorgesehenen Postfächern verarbeitet. Wir speichern Anfragen so lange, wie dies für ihre Bearbeitung und gegebenenfalls die anschließende Vertragsabwicklung erforderlich ist. Danach werden die Daten gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten oder berechtigten Gründe, etwa die Geltendmachung, Ausübung oder Verteidigung von Rechtsansprüchen, entgegenstehen. Für aufbewahrungspflichtige Geschäfts- und Vertragsunterlagen richtet sich die Dauer nach den anwendbaren handels- und steuerrechtlichen Vorschriften. Besondere Ablaufzeiten für den Formularschutz sind in Abschnitt 6 beschrieben.
+
+## 8. Speicherung im Browser
+
+Die Website verwendet lokalen Browserspeicher, um den Anfragekorb, die Preisansicht und Funktionen des Raumplaners bereitzustellen. Die gespeicherten Angaben werden nicht allein durch ihre lokale Speicherung an uns übermittelt. Wir setzen keine eigenen Cookies zur Reichweitenmessung oder Werbung ein.
+
+- dlmns-commerce-cart: Produkte, Varianten, Mengen und gegebenenfalls Angaben aus dem Gleiter-Finder;
+- dlmns-customer-price-mode: Darstellung für Privat- oder Geschäftskunden; diese Einstellung wird bereits beim Laden der Website gelesen und gespeichert;
+- dalemans-room-planner-projects-v1: Projektname, Raumgeometrie, Möbel, Einstellungen und Zeitangaben;
 - dlmns-room-planner-help-v1: Einstellungen der Raumplaner-Hilfe.
 
-Die Einträge bleiben bestehen, bis sie durch Funktionen der Anwendung, durch Löschen der Website-Daten oder durch Einstellungen des Browsers entfernt werden. Raumplaner-Projekte werden nur bei einer ausdrücklichen Export- oder Anfragehandlung weitergegeben.
+Diese Einträge haben keine automatische Ablaufzeit. Sie bleiben gespeichert, bis sie über die jeweilige Funktion oder durch Löschen der Browserdaten entfernt werden. Auf gemeinsam genutzten Geräten können andere Nutzer desselben Browserprofils darauf zugreifen. Für ausdrücklich gewünschte, technisch erforderliche Speicherfunktionen gilt § 25 Abs. 2 Nr. 2 TDDDG. Soweit dabei personenbezogene Daten verarbeitet werden, dient dies der Bereitstellung der jeweiligen Funktion auf Grundlage von Art. 6 Abs. 1 Buchst. b oder f DSGVO.
 
-5. Kontaktformular
+## 9. Reichweitenmessung und externe Inhalte
 
-Beim Absenden des Kontaktformulars verarbeitet die Anwendung Vorname, Nachname, Organisation, E-Mail-Adresse und/oder Telefonnummer, Betreff und Nachricht. Ein verborgenes Honeypot-Feld, eine technische Anfragekennung und ein temporärer, pseudonymisierter Ratenzähler dienen der Spam- und Doppelübermittlungsbegrenzung. Die Angaben werden serverseitig validiert und über den konfigurierten SMTP-Dienst an die konfigurierte interne Empfängeradresse gesendet. Ohne vollständige SMTP-Konfiguration findet kein Versand statt. SMTP-Anbieter, Empfängerkreis, Rechtsgrundlage sowie Aufbewahrungs- und Löschfristen sind organisatorisch festzulegen und juristisch freizugeben.
+Wir verwenden keine Analyse-, Werbe- oder Social-Media-Trackingdienste. Schriftarten, Bilder, Produktmedien und 3D-Modelle werden mit der Website ausgeliefert. Externe Links, etwa zu Kartenangeboten oder unserer bisherigen Website, öffnen das jeweilige Angebot erst bei Betätigung des Links. Für die dortige Verarbeitung gelten die Datenschutzhinweise des jeweiligen Anbieters.
 
-6. Produkt- und Angebotsanfragen
+## 10. Empfänger und internationale Verarbeitung
 
-Bei einer Angebotsanfrage verarbeitet die Anwendung Vorname, Nachname, E-Mail-Adresse, optional Organisation, Telefonnummer, Liefer-Postleitzahl und Nachricht sowie Kundenart und die ausgewählten Produkte, Varianten, Mengen und Ausstattungen. Zur Missbrauchsbegrenzung wird nur bei konfiguriertem Vertrauen aus einer vom Hosting-Edge bereinigten einzelnen IP-Adresse eine gesalzene technische Kennung gebildet und vorübergehend für die Ratenbegrenzung verwendet; ohne diese Freigabe werden eingehende Forwarded-Header nicht ausgewertet. Eine technische Anfragekennung dient dazu, doppelte Sendungen zu vermeiden. Die Anfrage wird per SMTP intern versendet; zusätzlich versucht die Anwendung, eine Eingangsbestätigung an die angegebene E-Mail-Adresse zu senden. Dienstleister, Rechtsgrundlage und Speicherfristen sind vor der Freigabe zu dokumentieren.
+Zugriff erhalten die mit der Bearbeitung befassten Personen bei Dalemans sowie die für die jeweiligen Zwecke eingesetzten Dienstleister: Netlify für Websitehosting und Formularverarbeitung, IONOS und beteiligte E-Mail-Anbieter für die Kommunikation und Upstash für den Formularschutz. Weitere Übermittlungen erfolgen, soweit eine gesetzliche Pflicht, eine Einwilligung oder die Durchsetzung beziehungsweise Abwehr von Rechtsansprüchen dies erfordert.
 
-7. Externe Inhalte, Schriftarten und Links
+Bei Netlify und Upstash kann eine Verarbeitung außerhalb des Europäischen Wirtschaftsraums, insbesondere in den USA, stattfinden. Die veröffentlichten Auftragsverarbeitungsbedingungen der Anbieter sehen für internationale Übermittlungen die jeweils einschlägigen Mechanismen nach Kapitel V DSGVO vor, darunter EU-Standardvertragsklauseln und, soweit dessen Voraussetzungen erfüllt sind, das EU-US Data Privacy Framework. Eine ausschließliche Speicherung in Deutschland oder der EU wird damit nicht zugesichert. Informationen zu den Garantien finden Sie in den verlinkten Auftragsverarbeitungsbedingungen. Ergänzende Auskünfte und eine Kopie der einschlägigen Garantien können Sie über unsere oben genannten Kontaktdaten anfordern.
 
-Schriftarten, Bilder, Produktmedien und 3D-Modelle werden im geprüften Stand aus der Anwendung selbst ausgeliefert. Der Browsercrawl des Pre-Launch-Audits stellte keine automatischen Drittanbieter-Requests fest. Externe Links, beispielsweise zu Karten- oder Gesetzesangeboten, werden erst durch Anklicken aufgerufen; ab diesem Zeitpunkt gelten die Hinweise des jeweiligen Anbieters.
+## 11. Rechtsgrundlagen und erforderliche Angaben
 
-8. Shop-Schnittstellen
+Die jeweils einschlägigen Rechtsgrundlagen sind bei den Verarbeitungsvorgängen genannt. Unsere berechtigten Interessen bestehen in einer sicheren, stabilen Website, der Bearbeitung eingehender Anfragen und der Abwehr von Missbrauch und Doppelübermittlungen.
 
-Die vorhandene Shopify-Konfiguration ist reserviert, aber derzeit nicht als Commerce-Provider aktiv. Produktdaten und Anfragekorb stammen im geprüften Stand aus lokalen Daten. Eine Aktivierung externer Shop-, Zahlungs- oder Kundendienste erfordert vorab eine neue technische und rechtliche Prüfung sowie eine Aktualisierung dieser Hinweise.
+Sie können die Website ohne Formularangaben nutzen. Für Anfragen benötigen wir die als Pflichtfelder gekennzeichneten Daten, um sie zuzuordnen und zu beantworten. Ohne diese Angaben ist die jeweilige Online-Übermittlung nicht möglich. Es findet keine ausschließlich automatisierte Entscheidung mit rechtlicher oder ähnlich erheblicher Wirkung und kein Profiling statt.
 
-9. Betroffenenrechte und weitere Pflichtangaben
+## 12. Ihre Rechte
 
-Auskunfts-, Berichtigungs-, Löschungs-, Einschränkungs-, Widerspruchs- und Beschwerderechte sowie die zuständige Aufsichtsbehörde, einschlägige Rechtsgrundlagen und Kontaktwege müssen in der juristisch freigegebenen Endfassung korrekt und vollständig beschrieben werden. Bis zu dieser Freigabe bleibt die Veröffentlichung der Website ausgesetzt.`;
+Nach Maßgabe der gesetzlichen Voraussetzungen haben Sie das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18) und Datenübertragbarkeit (Art. 20). Eine erteilte Einwilligung können Sie jederzeit mit Wirkung für die Zukunft widerrufen, ohne dass die Rechtmäßigkeit der vorherigen Verarbeitung berührt wird.
+
+Sie können einer Verarbeitung auf Grundlage von Art. 6 Abs. 1 Buchst. e oder f DSGVO aus Gründen widersprechen, die sich aus Ihrer besonderen Situation ergeben (Art. 21 DSGVO). Wir verarbeiten die Daten dann nicht weiter, es sei denn, wir weisen zwingende schutzwürdige Gründe nach, die Ihre Interessen, Rechte und Freiheiten überwiegen, oder die Verarbeitung dient Rechtsansprüchen. Gegen Direktwerbung können Sie jederzeit ohne Angabe von Gründen widersprechen.
+
+Zur Ausübung Ihrer Rechte genügt eine Nachricht an ${company.email}. Gesetzliche Aufbewahrungspflichten und Rechte Dritter können einer sofortigen Löschung entgegenstehen.
+
+## 13. Beschwerderecht
+
+Sie haben nach Art. 77 DSGVO das Recht, sich bei einer Datenschutzaufsichtsbehörde zu beschweren, insbesondere am Ort Ihres gewöhnlichen Aufenthalts, Ihres Arbeitsplatzes oder des vermuteten Verstoßes. Für private Unternehmen in Bayern ist das Bayerische Landesamt für Datenschutzaufsicht zuständig, Promenade 18, 91522 Ansbach.
+
+## 14. Anbieterinformationen
+
+- [IONOS: Datenschutzhinweise](https://www.ionos.de/datenschutzerklaerung)
+- [IONOS: Auftragsverarbeitung](https://www.ionos.de/terms-gtc/avv/)
+- [Netlify: Datenschutzerklärung](https://www.netlify.com/privacy/)
+- [Netlify: Auftragsverarbeitungsbedingungen](https://www.netlify.com/pdf/netlify-dpa.pdf)
+- [Upstash: Datenschutzerklärung](https://upstash.com/trust/privacy.pdf)
+- [Upstash: Auftragsverarbeitungsbedingungen](https://upstash.com/static/trust/dpa.pdf)
+
+## 15. Stand
+
+Stand: 14. November 2026.
+`;

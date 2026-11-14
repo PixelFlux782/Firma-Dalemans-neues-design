@@ -441,7 +441,7 @@ const productCatalog: Product[] = [
     slug: "seminar-klapptisch",
     categoryId: "klapptische",
     categoryName: "Klapptische",
-    image: asset("/neue bilder/Tische/t210.png"),
+    image: asset("/neue bilder/Tische/t210.webp"),
     imageAlt: "Seminar-Klapptisch Modell T210",
     shortDescription:
       "Funktionaler Seminartisch für Unterricht, Besprechung und Schulung.",
@@ -565,7 +565,7 @@ const productCatalog: Product[] = [
     slug: "stuhlgleiter",
     categoryId: "transportwagen-zubehoer",
     categoryName: "Transportwagen & Zubehör",
-    image: asset("/neue bilder/Zubehör/stopfen-sortiment.png"),
+    image: asset("/neue bilder/Zubehör/stopfen-sortiment.webp"),
     imageAlt: "Sortiment verschiedener Möbelgleiter und Gestellstopfen",
     overviewGroup: "chair-accessories",
     shortDescription:

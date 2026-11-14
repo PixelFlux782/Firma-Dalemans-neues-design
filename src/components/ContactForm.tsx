@@ -188,12 +188,14 @@ export function ContactForm() {
           <input name="website" type="text" tabIndex={-1} autoComplete="off" />
         </label>
         <div className="sm:col-span-2">
+          <p className="mb-4 text-sm leading-6 text-premium-muted">Sie senden eine unverbindliche Anfrage. Es entsteht keine Bestellung oder Zahlungsverpflichtung. Ein Vertrag kommt erst durch ausdrückliche Bestätigung von Dalemans zustande.</p>
           <button type="submit" disabled={pending} className="btn-primary w-full disabled:cursor-wait disabled:opacity-60 sm:w-auto">
             {pending ? "Wird gesendet …" : "Anfrage senden"}
           </button>
           <p className="mt-4 text-xs leading-6 text-premium-muted">
             Hinweise zur Verarbeitung finden Sie in unserer{" "}
             <a href="/datenschutz" className="underline underline-offset-4">Datenschutzerklärung</a>.
+            {" "}<a href="/widerruf" className="underline underline-offset-4">Widerruf und Muster-Widerrufsformular</a>
           </p>
         </div>
         {status ? (

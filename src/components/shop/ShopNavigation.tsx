@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import CartTrigger from "@/components/commerce/cart/CartTrigger";
-import SearchTrigger from "@/components/search/SearchTrigger";
 
 type ShopSection = "chairs" | "tables" | "gliders" | "retrofit" | "transport" | "lecterns" | "advice";
 
@@ -48,7 +46,7 @@ const shopItems: readonly ShopItem[] = [
         title: "Passend dazu",
         links: [
           { label: "Buchablagen", href: product("buchablage-nachruesten") },
-          { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") },
+          { label: "Reihenverbinder", href: "/produkte/reihenverbinder" },
           { label: "Gleiter", href: "/produkte/sortiment/gleiter-bodenschutz" },
         ],
       },
@@ -83,17 +81,6 @@ const shopItems: readonly ShopItem[] = [
     id: "gliders",
     label: "Gleiter",
     href: "/produkte/sortiment/gleiter-bodenschutz",
-    groups: [
-      {
-        title: "Gleiter & Bodenschutz",
-        links: [
-          { label: "Filz-Nagelgleiter", href: product("filzgleiter-mit-stift") },
-          { label: "Kunststoffgleiter Standard", href: product("kunststoff-gestellgleiter") },
-          { label: "Gleiter-Beratung", href: "/kontakt?anliegen=Gleiter-Beratung" },
-        ],
-      },
-    ],
-    cta: { label: "Gleiter ansehen", href: "/produkte/sortiment/gleiter-bodenschutz" },
   },
   {
     id: "retrofit",
@@ -104,7 +91,7 @@ const shopItems: readonly ShopItem[] = [
         title: "Nachrüstung & Zubehör",
         links: [
           { label: "Buchablagen", href: product("buchablage-nachruesten") },
-          { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") },
+          { label: "Reihenverbinder", href: "/produkte/reihenverbinder" },
           { label: "Ersatzteile & Zubehör", href: "/produkte/kategorien/transportwagen-zubehoer" },
         ],
       },
@@ -130,14 +117,13 @@ const shopItems: readonly ShopItem[] = [
 const mobileGroups: readonly ShopGroup[] = [
   { title: "Stühle", links: [{ label: "Stapelstühle", href: "/produkte/stapelstuehle" }, { label: "Klappstühle", href: "/produkte/sortiment/klappstuehle" }] },
   { title: "Tische", links: [{ label: "Klapptische", href: "/produkte/sortiment/klapptische" }, { label: "Bistrotische", href: "/produkte/sortiment/bistrotische" }, { label: "Seminarklapptische", href: product("seminarklapptisch-210c") }, { label: "Trapeztische", href: product("trapez-klapptisch-310c") }] },
-  { title: "Gleiter", links: [{ label: "Gleiter & Bodenschutz", href: "/produkte/sortiment/gleiter-bodenschutz" }, { label: "Gleiter-Beratung", href: "/kontakt?anliegen=Gleiter-Beratung" }] },
-  { title: "Zubehör", links: [{ label: "Alle Zubehörbereiche", href: "/produkte/kategorien/transportwagen-zubehoer" }, { label: "Buchablagen", href: product("buchablage-nachruesten") }, { label: "Reihenverbinder", href: product("reihenverbinder-kunststoff") }] },
+  { title: "Zubehör", links: [{ label: "Alle Zubehörbereiche", href: "/produkte/kategorien/transportwagen-zubehoer" }, { label: "Buchablagen", href: product("buchablage-nachruesten") }, { label: "Reihenverbinder", href: "/produkte/reihenverbinder" }] },
   { title: "Transport", links: [{ label: "Stuhltransportwagen", href: product("stuhltransportwagen") }, { label: "Tischtransportwagen", href: product("tischtransportwagen") }, { label: "Transport & Lagerung", href: "/produkte/sortiment/transport-lagerung" }] },
   { title: "Rednerpulte", links: [{ label: "Rednerpulte ansehen", href: "/produkte/sortiment/rednerpulte" }] },
   { title: "Muster & Beratung", links: [{ label: "Muster & Beratung", href: "/produkte/sortiment/muster-beratung" }] },
 ] as const;
 
-const focusableSelector = "a[href], button:not([disabled]), [tabindex]:not([tabindex='-1'])";
+const focusableSelector = "a[href], button:not([disabled]), summary, [tabindex]:not([tabindex='-1'])";
 
 function activeSection(pathname: string): ShopSection | null {
   if (/\/(stapelstuehle|klappstuehle)$/.test(pathname) || /\/artikel\/(1021|buende|coburg|nuernberg|erfurt|klappstuehle)$/.test(pathname)) return "chairs";
@@ -149,8 +135,19 @@ function activeSection(pathname: string): ShopSection | null {
   return null;
 }
 
-export default function ShopNavigation() {
+export default function ShopNavigation({ gliderLinks }: { gliderLinks: readonly ShopLink[] }) {
+  const gliderGroup: ShopGroup = {
+    title: "Gleiter",
+    links: [
+      { label: "Alle Gleiter ansehen", href: "/produkte/sortiment/gleiter-bodenschutz" },
+      ...gliderLinks,
+      { label: "Passenden Gleiter finden", href: "/produkte/gleiter-finder" },
+    ],
+  };
+  const navigationItems = shopItems.map(item => item.id === "gliders" ? { ...item, groups: [gliderGroup] } : item);
+  const navigationMobileGroups = [...mobileGroups.slice(0, 2), gliderGroup, ...mobileGroups.slice(2)];
   const pathname = usePathname();
+  const previousPathname = useRef(pathname);
   const [openMenu, setOpenMenu] = useState<ShopSection | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -168,6 +165,8 @@ export default function ShopNavigation() {
   };
 
   useEffect(() => {
+    if (previousPathname.current === pathname) return;
+    previousPathname.current = pathname;
     setOpenMenu(null);
     setDrawerOpen(false);
   }, [pathname]);
@@ -232,9 +231,9 @@ export default function ShopNavigation() {
         className="sticky top-[4.25rem] z-40 -mx-[max(1rem,calc((100vw-80rem)/2))] -mt-6 mb-6 border-b border-premium-beige/80 bg-premium-canvas/95 shadow-[0_4px_14px_rgba(23,37,29,.04)] backdrop-blur-xl md:-mt-10 md:mb-8 lg:-mt-12"
         data-testid="shop-navigation"
       >
-        <div className="container-premium hidden min-h-12 items-stretch justify-between gap-4 xl:flex">
+        <div className="container-premium hidden min-h-12 items-stretch justify-start xl:flex">
           <div className="flex min-w-0 items-stretch">
-            {shopItems.map((item) => {
+            {navigationItems.map((item) => {
               const isActive = active === item.id;
               const isOpen = openMenu === item.id;
               if (!item.groups) {
@@ -282,19 +281,13 @@ export default function ShopNavigation() {
             })}
             <Link href="/produkte" className="relative inline-flex items-center whitespace-nowrap px-3 text-[0.76rem] font-medium text-premium-muted transition hover:bg-white/60 hover:text-premium-ink">Alle Produkte</Link>
           </div>
-          <div className="flex shrink-0 items-center border-l border-premium-beige/80 pl-2">
-            <SearchTrigger label="Suche" onOpen={() => setOpenMenu(null)} />
-            <CartTrigger onOpen={() => setOpenMenu(null)} />
-          </div>
         </div>
 
-        <div className="container-premium grid min-h-14 grid-cols-3 items-center xl:hidden">
+        <div className="container-premium flex min-h-14 items-center xl:hidden">
           <button ref={drawerButtonRef} type="button" onClick={() => setDrawerOpen(true)} aria-expanded={drawerOpen} aria-controls="shop-assortment-drawer" className="inline-flex min-h-11 items-center justify-start gap-2 rounded-lg px-2 text-sm font-semibold text-premium-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">
             <span aria-hidden className="grid gap-1"><span className="h-px w-4 bg-current" /><span className="h-px w-4 bg-current" /><span className="h-px w-4 bg-current" /></span>
             Sortiment
           </button>
-          <div className="justify-self-center"><SearchTrigger compact showCompactLabel label="Suche" onOpen={() => setDrawerOpen(false)} /></div>
-          <div className="justify-self-end"><CartTrigger compact showCompactLabel onOpen={() => setDrawerOpen(false)} /></div>
         </div>
       </nav>
 
@@ -307,8 +300,13 @@ export default function ShopNavigation() {
               <button type="button" onClick={() => { setDrawerOpen(false); drawerButtonRef.current?.focus(); }} aria-label="Sortiment schließen" className="inline-flex size-11 items-center justify-center rounded-full border border-premium-beige text-xl text-premium-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">×</button>
             </div>
             <nav aria-label="Mobiles Sortiment" className="grid gap-7 py-6 sm:grid-cols-2">
-              {mobileGroups.map((group) => (
-                <section key={group.title}>
+              {navigationMobileGroups.map((group) => (
+                group.title === "Gleiter" ? <details key={group.title}>
+                  <summary className="flex min-h-11 cursor-pointer items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-premium-bronze">Gleiter<span aria-hidden>⌄</span></summary>
+                  <div className="mt-2 grid">
+                    {group.links.map(link => <Link key={link.href} href={link.href} className="flex min-h-11 items-center border-b border-premium-beige/60 py-2.5 text-sm text-premium-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">{link.label}</Link>)}
+                  </div>
+                </details> : <section key={group.title}>
                   <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-premium-bronze">{group.title}</h3>
                   <div className="mt-2 grid">
                     {group.links.map((link) => <Link key={link.href + link.label} href={link.href} className="flex min-h-11 items-center justify-between border-b border-premium-beige/60 py-2.5 text-sm text-premium-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">{link.label}<span aria-hidden className="text-premium-subtle">→</span></Link>)}

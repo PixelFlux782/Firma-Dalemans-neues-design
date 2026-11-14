@@ -245,6 +245,8 @@ export interface CommerceFinderCartContext {
 export type CommerceCartLineSource = "product" | "glider_finder";
 
 export interface CartInputLine {
+  /** Customer-provided technical context; never authoritative product data. */
+  technicalInquiry?: string;
   productId: string;
   productHandle: string;
   productTitle: string;

@@ -83,8 +83,8 @@ test("automatische Bestuhlung wird nach Geometrieänderungen wirklich neu berech
   const canvas = editor.getByRole("img", { name: "Grundriss Zeichenfläche" });
   await canvas.click({ position: { x: 180, y: 140 } });
   await canvas.click({ position: { x: 630, y: 140 } });
-  await canvas.click({ position: { x: 630, y: 500 } });
-  await canvas.click({ position: { x: 180, y: 500 } });
+  await canvas.click({ position: { x: 630, y: 440 } });
+  await canvas.click({ position: { x: 180, y: 440 } });
   await canvas.locator("[data-point-id]").first().click();
 
   await editor.getByRole("button", { name: "Stühle", exact: true }).click();
@@ -94,6 +94,7 @@ test("automatische Bestuhlung wird nach Geometrieänderungen wirklich neu berech
   await editor.getByRole("button", { name: "Hindernisse", exact: true }).click();
   await editor.getByLabel("Hindernisbreite am Werkzeug").fill("2");
   await editor.getByLabel("Hindernistiefe am Werkzeug").fill("2");
+  await page.getByRole("button", { name: "Werkzeugoptionen schließen" }).click();
   await canvas.click({ position: { x: 405, y: 320 } });
 
   await editor.getByRole("button", { name: "Stühle", exact: true }).click();

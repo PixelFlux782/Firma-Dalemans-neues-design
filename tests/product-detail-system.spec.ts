@@ -114,6 +114,10 @@ test("alle vorhandenen Produktdetailrouten laden mit derselben Grundstruktur", a
     if (purchaseState === "unavailable") {
       await expect(page.getByTestId("unavailable-product"), path).toBeVisible();
     } else if (purchaseState === "cart") {
+      if (path === "/produkte/artikel/filzgleiter-mit-stift") {
+        await expect(page.getByRole("button", { name: "Zur Auswahl hinzufügen", exact: true }), path).toHaveCount(0);
+        await page.getByRole("button", { name: /^Natur/ }).click();
+      }
       await expect(page.getByRole("button", { name: "Zur Auswahl hinzufügen", exact: true }), path).toBeVisible();
       await expect(page.getByRole("link", { name: "Angebot anfragen", exact: true }), path).toHaveCount(0);
       await expect(page.getByRole("link", { name: "Fragen zu diesem Modell? Persönlich beraten lassen →" }), path).toBeVisible();
@@ -161,6 +165,14 @@ test("alte Produktadressen liefern 301 und die Reihenverbinder-Beratung bleibt e
   }
   await page.goto("/produkte/reihenverbinder");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/produkte\/reihenverbinder$/);
-  await expect(page.getByRole("link", { name: "Nachrüstprodukt ansehen" })).toHaveAttribute("href", "/produkte/artikel/reihenverbinder-kunststoff");
+  await expect(page.getByRole("link", { name: "Reihenverbinder anfragen" })).toHaveCount(2);
+  for (const link of await page.getByRole("link", { name: "Reihenverbinder anfragen" }).all()) {
+    await expect(link).toHaveAttribute("href", /\/kontakt\?produkt=.*variante=.*nachricht=/);
+  }
   await expect(page.getByRole("link", { name: /Stapelstuhl Modell 1021/ })).toHaveAttribute("href", "/produkte/stapelstuehle/1021?reihe=ja");
+});
+
+// Net price assertions below use an explicitly chosen business price view.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("dlmns-customer-price-mode", "business"));
 });

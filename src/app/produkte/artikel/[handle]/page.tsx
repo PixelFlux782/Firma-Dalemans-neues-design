@@ -8,9 +8,10 @@ import { StructuredData } from "@/components/StructuredData";
 import { getCollectionByHandle, getProductByHandle, getProducts } from "@/lib/commerce/service";
 import { commerceDetailData } from "@/lib/product-detail-data";
 import { getRelatedGuidesForProduct } from "@/lib/knowledge/advisory-integration";
-import { absoluteUrl, buildMetadata } from "@/lib/seo";
+import { buildCommerceProductStructuredData } from "@/lib/commerce/product-structured-data";
+import { buildMetadata } from "@/lib/seo";
 
-interface Props { params: Promise<{ handle: string }>; searchParams: Promise<{ variant?: string | string[] }> }
+interface Props { params: Promise<{ handle: string }>; searchParams: Promise<{ variant?: string | string[]; technik?: string | string[]; garnituren?: string }> }
 export async function generateStaticParams() {
   return (await getProducts()).filter(product => !product.stackingChair).map(product => ({ handle: product.handle }));
 }
@@ -31,13 +32,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const path = `/produkte/artikel/${product.handle}`;
   const data = commerceDetailData(product, collection?.title ?? "Produkt", collection ? `/produkte/sortiment/${collection.handle}` : "/produkte", path);
   const relatedGuides = getRelatedGuidesForProduct({ handle: product.handle, collectionHandles: product.collectionHandles });
-  const structuredData = { "@context": "https://schema.org", "@type": "Product", "@id": absoluteUrl(`${path}#product`),
-    name: product.title, description: product.description, url: absoluteUrl(path),
-    ...(product.images.length ? { image: product.images.map(image => absoluteUrl(image.url)) } : {}),
-    ...(collection ? { category: collection.title } : {}),
-    additionalProperty: product.specifications.map(item => ({ "@type": "PropertyValue", name: item.name, value: item.value })) };
-  return <><StructuredData data={structuredData} /><ProductDetailPage data={data} relatedGuides={relatedGuides}
-    media={<CommerceMedia image={product.featuredImage} images={product.images} fallbackLabel={product.title} priority sizes="(min-width: 1024px) 54vw, 100vw" aspectRatio="5 / 4" imageInset={product.handle === "stuhltransportwagen" ? "2%" : "6%"} className="min-h-[330px] rounded-[2.25rem] sm:min-h-[500px] lg:min-h-[620px]" />}
-    purchase={<ProductVariantSelector product={product} initialVariantId={Array.isArray(query.variant) ? query.variant[0] : query.variant} />}
+  const productStructuredData = buildCommerceProductStructuredData(product, path, collection?.title);
+  return <>{productStructuredData ? <StructuredData data={{ "@context": "https://schema.org", ...productStructuredData }} /> : null}<ProductDetailPage data={data} relatedGuides={relatedGuides}
+    media={<CommerceMedia zoomable={product.handle === "buchablage-nachruesten"} image={product.featuredImage} images={product.images} fallbackLabel={product.title} priority sizes="(min-width: 1024px) 54vw, 100vw" aspectRatio="5 / 4" imageInset={product.handle === "stuhltransportwagen" ? "2%" : "6%"} className="min-h-[330px] rounded-[2.25rem] sm:min-h-[500px] lg:min-h-[620px]" />}
+    purchase={<ProductVariantSelector initialQuantity={product.collectionHandles.includes("gleiter-bodenschutz") && Number.isInteger(Number(query.garnituren)) && Number(query.garnituren) > 0 && Number(query.garnituren) <= 100000 ? Number(query.garnituren) : undefined} technicalInquiry={typeof query.technik === "string" ? query.technik.slice(0, 4000) : undefined} product={product} initialVariantId={Array.isArray(query.variant) ? query.variant[0] : query.variant} />}
   >{product.handle === "klapptisch-310c" ? <Table310FrameAdvice /> : null}</ProductDetailPage></>;
 }

@@ -1,4 +1,4 @@
-import type { CommerceDataStatus, CommerceImage, CommercePriceStatus } from "@/lib/commerce/types";
+import type { CommerceDataStatus, CommerceImage, CommerceMoney, CommercePriceStatus } from "@/lib/commerce/types";
 
 export type SearchEntityType = "product" | "collection" | "help" | "knowledge";
 
@@ -30,6 +30,8 @@ export interface SearchDocument {
   image: CommerceImage | null;
   priceStatus: CommercePriceStatus | null;
   priceLabel: string | null;
+  priceMoney?: CommerceMoney | null;
+  priceMinimumQuantity?: number;
   fields: SearchField[];
   aliases: string[];
   variantLabels: Array<{ id: string; title: string; sku: string | null; searchable: string }>;

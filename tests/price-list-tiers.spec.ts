@@ -37,10 +37,10 @@ test("Seminarklapptisch 210c nutzt Stückpreis, Staffel, Preisübersicht und gem
   await page.goto("/produkte/artikel/seminarklapptisch-210c");
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Seminarklapptisch Modell 210c");
-  await expect(page.getByText("Aktueller Stückpreis", { exact: true })).toBeVisible();
+  await expect(page.getByText("Preis je Stück", { exact: true })).toBeVisible();
   const summary = page.getByTestId("price-breakdown");
   await expect(summary).toContainText("Basispreis");
-  await expect(summary).toContainText("Konfigurierter Stückpreis");
+  await expect(summary).toContainText("Konfigurierter Preis je Stück");
   await expect(summary).toContainText("Gesamtpreis");
 
   const quantity = page.getByLabel("Bestellmenge", { exact: true });
@@ -52,4 +52,9 @@ test("Seminarklapptisch 210c nutzt Stückpreis, Staffel, Preisübersicht und gem
   await page.getByRole("button", { name: "Privatkunden · brutto" }).click();
   await expect(page.locator('[data-price-status="fixed"]')).toContainText("291,75");
   await expect(page.getByTestId("total-price")).toContainText("4.376,28");
+});
+
+// Net price assertions below use an explicitly chosen business price view.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("dlmns-customer-price-mode", "business"));
 });

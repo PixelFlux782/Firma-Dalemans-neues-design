@@ -7,7 +7,8 @@ import { chairConfigurationFromSearchParams, isStackingChairProduct } from "@/li
 import { commerceDetailData } from "@/lib/product-detail-data";
 import { chairGliderCompatibility } from "@/lib/commerce/providers/local-glider-products";
 import { getRelatedGuidesForProduct } from "@/lib/knowledge/advisory-integration";
-import { absoluteUrl, buildMetadata } from "@/lib/seo";
+import { buildCommerceProductStructuredData } from "@/lib/commerce/product-structured-data";
+import { buildMetadata } from "@/lib/seo";
 
 interface Props { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }
 const modelPath = (slug: string) => `/produkte/stapelstuehle/${slug}`;
@@ -42,15 +43,9 @@ export default async function StackingChairModelPage({ params, searchParams }: P
     data.editorialTitle = "Für Räume, die regelmäßig wechseln.";
     data.faq = [...product.faq, ...referenceFaq];
   }
+  const productStructuredData = buildCommerceProductStructuredData(product, path, "Stapelstühle");
   const structuredData = { "@context": "https://schema.org", "@graph": [
-    { "@type": "Product", "@id": absoluteUrl(`${path}#product`), name: product.title, description: product.description,
-      url: absoluteUrl(path), ...(product.images.length ? { image: product.images.map(image => absoluteUrl(image.url)) } : {}),
-      category: "Stapelstühle", additionalProperty: product.specifications.map(item => ({ "@type": "PropertyValue", name: item.name, value: item.value })) },
-    { "@type": "BreadcrumbList", itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Start", item: absoluteUrl("/") },
-      { "@type": "ListItem", position: 2, name: "Produkte", item: absoluteUrl("/produkte") },
-      { "@type": "ListItem", position: 3, name: "Stapelstühle", item: absoluteUrl("/produkte/stapelstuehle") },
-      { "@type": "ListItem", position: 4, name: product.title, item: absoluteUrl(path) }] },
+    ...(productStructuredData ? [productStructuredData] : []),
     ...(data.faq?.length ? [{ "@type": "FAQPage", mainEntity: data.faq.map(item => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) }] : []),
   ] };
   return <><StructuredData data={structuredData} /><ChairDetail product={product} data={data} relatedGuides={relatedGuides}

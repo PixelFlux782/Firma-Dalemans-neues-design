@@ -210,16 +210,29 @@ export function createLocalCartProvider({
   storage: CartStorage;
   idFactory?: () => string;
 }): LocalCartProvider {
+  let memoryCart: CommerceCart | null = null;
+  let storageUnavailable = false;
   function read() {
-    const raw = storage.getItem(LOCAL_CART_STORAGE_KEY);
-    const cart = parsePersistedCart(raw);
-    if (cart) return cart;
-    if (raw !== null) storage.removeItem(LOCAL_CART_STORAGE_KEY);
-    return createEmptyCart(idFactory());
+    if (storageUnavailable) return memoryCart ??= createEmptyCart(idFactory());
+    try {
+      const raw = storage.getItem(LOCAL_CART_STORAGE_KEY);
+      const cart = parsePersistedCart(raw);
+      if (cart) return memoryCart = cart;
+      if (raw !== null) storage.removeItem(LOCAL_CART_STORAGE_KEY);
+      return memoryCart = createEmptyCart(idFactory());
+    } catch {
+      storageUnavailable = true;
+      return memoryCart ??= createEmptyCart(idFactory());
+    }
   }
 
   function write(cart: CommerceCart) {
-    storage.setItem(LOCAL_CART_STORAGE_KEY, JSON.stringify(persisted(cart)));
+    memoryCart = cart;
+    try {
+      if (!storageUnavailable) storage.setItem(LOCAL_CART_STORAGE_KEY, JSON.stringify(persisted(cart)));
+    } catch {
+      storageUnavailable = true;
+    }
     return cart;
   }
 
@@ -233,6 +246,7 @@ export function createLocalCartProvider({
         if (!canAddLine(input)) continue;
         const existingIndex = lines.findIndex((line) =>
           line.variantId === input.variantId
+            && (line.technicalInquiry ?? "") === (input.technicalInquiry ?? "")
             && line.variantTitle === input.variantTitle
             && sameAddons(line.selectedAddons, input.selectedAddons),
         );

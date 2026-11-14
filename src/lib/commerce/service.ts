@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import type { CommerceProvider } from "@/lib/commerce/types";
 import { localCommerceProvider } from "@/lib/commerce/providers/local";
 
@@ -36,7 +37,8 @@ export const commerceService: CommerceProvider = {
 };
 
 export const getCollections = commerceService.getCollections;
-export const getCollectionByHandle = commerceService.getCollectionByHandle;
+// Request-scoped only: template and category share one public catalog snapshot.
+export const getCollectionByHandle = cache(commerceService.getCollectionByHandle);
 export const getProducts = commerceService.getProducts;
 export const getProductsByCollection = commerceService.getProductsByCollection;
 export const getProductByHandle = commerceService.getProductByHandle;

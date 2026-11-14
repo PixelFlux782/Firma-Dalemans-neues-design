@@ -6,12 +6,23 @@ export interface InquiryContactInput {
   organization: string;
   email: string;
   phone: string;
+  street: string;
+  houseNumber: string;
   postalCode: string;
+  city: string;
+  differentDeliveryAddress: boolean;
+  deliveryFirstName: string;
+  deliveryLastName: string;
+  deliveryStreet: string;
+  deliveryHouseNumber: string;
+  deliveryPostalCode: string;
+  deliveryCity: string;
   message: string;
   privacyAccepted: boolean;
 }
 
 export interface InquiryItemInput {
+  technicalInquiry?: string;
   productHandle: string;
   variantId: string;
   quantity: number;

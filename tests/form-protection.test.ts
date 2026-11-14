@@ -146,6 +146,16 @@ describe("Redis-Formularschutz", () => {
       .rejects.toMatchObject({ errorType: "configuration" });
   });
 
+  it.each(["URL", "TOKEN"])("vermischt unvollständige Redis-Paare nicht (%s)", async (part) => {
+    process.env[`FORM_PROTECTION_REST_${part}`] = part === "URL" ? "https://custom.invalid" : "custom-token";
+    process.env.UPSTASH_REDIS_REST_URL = "https://official.invalid";
+    process.env.UPSTASH_REDIS_REST_TOKEN = "official-token";
+    const { redis, protection } = store();
+    await expect(checkRateLimit(new Request("https://dalemans.de/api/contact"), "contact", protection))
+      .rejects.toMatchObject({ errorType: "configuration" });
+    expect(redis.entries.size).toBe(0);
+  });
+
   it("verwendet auf Netlify ausschließlich die bereinigte Verbindungs-IP", async () => {
     process.env.FORM_PROTECTION_REST_URL = "https://redis.invalid";
     process.env.FORM_PROTECTION_REST_TOKEN = "test-token";

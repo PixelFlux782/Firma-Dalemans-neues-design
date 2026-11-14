@@ -37,5 +37,5 @@ test("WP16 shop target keeps the selected product and variant with recommended q
   const target = resolveChairShopTarget(selected, calculateRecommendedDemand(selected, 5).recommendedQuantity)!;
   expect(target.href).toContain(`/produkte/stapelstuehle/${product.handle}?`);
   expect(target.href).toContain("menge=23");
-  expect(target.canAddToCart).toBe(false);
+  expect(target.canAddToCart).toBe(true);
 });

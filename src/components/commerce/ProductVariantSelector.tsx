@@ -34,9 +34,13 @@ function matchesSelection(variant: CommerceProductVariant, selection: Record<str
 export default function ProductVariantSelector({
   product,
   initialVariantId,
+  technicalInquiry,
+  initialQuantity,
 }: {
   product: CommerceProduct;
   initialVariantId?: string;
+  technicalInquiry?: string;
+  initialQuantity?: number;
 }) {
   const { addLines, pending } = useCart();
   const { formatPrice } = usePriceDisplay();
@@ -54,6 +58,8 @@ export default function ProductVariantSelector({
         ),
     [product.variants, productUnavailable],
   );
+  const requiresColor = product.handle === "filzgleiter-mit-stift";
+  const [colorChosen, setColorChosen] = useState(false);
   const [selection, setSelection] = useState<Record<string, string>>(() =>
     selectableVariants[0]
       ? selectionFromVariant(
@@ -83,14 +89,15 @@ export default function ProductVariantSelector({
   const selectedRules = selectedVariant ? cartQuantityRules(product, selectedVariant) : null;
   const lowestPrice = useMemo(() => lowestProductUnitPrice(product), [product]);
   const selectedMinimumQuantity = selectedRules?.minimumQuantity;
-  const [quantity, setQuantity] = useState(product.quantity.minimum);
+  const [quantity, setQuantity] = useState(initialQuantity ?? product.quantity.minimum);
   const [requestedAccessories, setRequestedAccessories] = useState<string[]>([]);
 
   useEffect(() => {
-    if (selectedMinimumQuantity) setQuantity(selectedMinimumQuantity);
-  }, [selectedMinimumQuantity, selectedVariant?.id]);
+    if (selectedMinimumQuantity) setQuantity(Math.max(initialQuantity ?? selectedMinimumQuantity, selectedMinimumQuantity));
+  }, [initialQuantity, selectedMinimumQuantity, selectedVariant?.id]);
 
   function selectOption(name: string, value: string) {
+    if (name === "Farbe") setColorChosen(true);
     const nextSelection = { ...selection, [name]: value };
     const exactMatch = selectableVariants.find((variant) => matchesSelection(variant, nextSelection));
     const compatibleFallback = selectableVariants.find((variant) =>
@@ -122,7 +129,7 @@ export default function ProductVariantSelector({
     : null;
   const availability = selectedVariant?.availability ?? product.availability;
   const availabilityNote = selectedVariant?.availabilityNote ?? product.availabilityNote;
-  const cartable = canAddVariantToCart(selectedVariant);
+  const cartable = canAddVariantToCart(selectedVariant) && (!requiresColor || colorChosen);
   const selectedAdvisory = product.variantAdvisories?.find((item) => item.variantId === selectedVariant?.id);
   const compatibleAccessories = product.optionalAccessories?.filter((item) =>
     selectedVariant ? item.compatibleVariantIds.includes(selectedVariant.id) : false,
@@ -133,6 +140,7 @@ export default function ProductVariantSelector({
   const inquiryMessage = selectedVariant
     ? [
         `Produkt: ${product.title}`,
+        ...(technicalInquiry ? [`Technische Kundenangaben:\n${technicalInquiry}`] : []),
         `Wagenvariante: ${selectedVariant.title}`,
         ...(selectedVariant.erpArticleNumber ? [`Artikelnummer: ${selectedVariant.erpArticleNumber}`] : []),
         ...(selectedAccessoryTitles.length ? [`Zubehörwunsch: ${selectedAccessoryTitles.join(", ")} (auf Anfrage)`] : []),
@@ -144,7 +152,7 @@ export default function ProductVariantSelector({
     menge: String(quantity),
     ...(selectedVariant ? { variante: selectedVariant.title } : {}),
     ...(selectedVariant?.erpArticleNumber ? { artikelnummer: selectedVariant.erpArticleNumber } : {}),
-    ...(selectedVariant ? { nachricht: `${inquiryMessage}\nMenge: ${quantity}` } : {}),
+    ...(selectedVariant ? { nachricht: `${inquiryMessage}\nMenge: ${quantity} ${product.quantity.unitLabel}${product.quantity.unit === "set" ? ` = ${quantity * 4} Stück` : ""}` } : {}),
   });
 
   return (
@@ -157,11 +165,13 @@ export default function ProductVariantSelector({
           </p>
         </div>
         <CurrentUnitPrice
+          unitLabel={product.quantity.unitLabel}
           status={priceStatus}
           price={price ?? null}
           compareAtPrice={selectedVariant?.compareAtPrice}
         />
       </div>
+      {product.quantity.unit === "set" ? <p className="mt-2 text-sm font-semibold">Preis je Garnitur (4 Stück)</p> : null}
       {lowestPrice?.priceTierId && lowestPrice.minimumQuantity > 1 ? (
         <div className="mt-3 text-right" data-testid="lowest-tier-price">
           <p className="text-sm font-semibold tabular-nums text-premium-forest">ab {formatPrice(lowestPrice.price)} / Stück</p>
@@ -201,7 +211,7 @@ export default function ProductVariantSelector({
                 ? "mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4"
                 : "mt-3 flex flex-wrap gap-2"}>
                 {group.values.map((value) => {
-                  const active = selection[group.name] === value;
+                  const active = selection[group.name] === value && (group.name !== "Farbe" || !requiresColor || colorChosen);
                   const optionSelection = { ...selection, [group.name]: value };
                   const optionVariant = selectableVariants.find((variant) => matchesSelection(variant, optionSelection))
                     ?? selectableVariants.find((variant) => variant.selectedOptions.some((option) => option.name === group.name && option.value === value));
@@ -245,7 +255,8 @@ export default function ProductVariantSelector({
         </div>
       ) : null}
 
-      {selectedVariant ? (
+      {requiresColor ? <p className="mt-5 font-semibold text-premium-forest" role="status">{colorChosen ? `Gewählte Farbe: ${selection.Farbe.toUpperCase()}` : "Bitte vor dem Hinzufügen die Farbe Natur oder Braun auswählen (Pflichtauswahl)."}</p> : null}
+      {selectedVariant && (!requiresColor || colorChosen) ? (
         <div className={`${isTableConfigurator ? "mt-7 rounded-2xl bg-premium-warm/65 px-5 py-4" : "mt-6"}`}>
           <p className="text-sm leading-6 text-premium-muted" aria-live="polite" data-testid="selected-variant">
             {isTableConfigurator ? "Ihre Auswahl: " : "Gewählt: "}<span className="font-medium text-premium-charcoal">{selectedVariant.title}</span>
@@ -389,6 +400,7 @@ export default function ProductVariantSelector({
               product,
               variant: selectedVariant,
               quantity,
+              technicalInquiry,
               variantTitle: [selectedVariant.title, ...selectedAccessoryTitles.map((title) => `Zubehörwunsch: ${title}`)].join(" · "),
             })])}
             className="btn-primary mt-7 w-full text-center disabled:cursor-wait disabled:opacity-60"
@@ -407,7 +419,7 @@ export default function ProductVariantSelector({
             </p>
           ) : null}
         </>
-      ) : priceStatus === "unavailable" || availability === "out_of_stock" ? (
+      ) : requiresColor && !colorChosen ? <p className="mt-7 font-semibold">Bitte zuerst die Farbe auswählen.</p> : priceStatus === "unavailable" || availability === "out_of_stock" ? (
         <p className="mt-7 rounded-2xl bg-premium-warm/80 p-4 text-center text-sm font-medium text-premium-charcoal" data-testid="unavailable-product">
           Diese Ausführung ist derzeit nicht verfügbar.
         </p>
@@ -427,7 +439,7 @@ export default function ProductVariantSelector({
           ) : null}
         </>
       )}
-      {selectedVariant ? (
+      {selectedVariant && (!requiresColor || colorChosen) ? (
         <Link href={`/kontakt?${contactParameters.toString()}#anfrage`} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-premium-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-sand">
           Fragen zu diesem Modell? Persönlich beraten lassen →
         </Link>

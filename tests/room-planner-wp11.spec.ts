@@ -181,6 +181,7 @@ test("Gangbreite wird mit einem Undo-Schritt zurückgesetzt", () => {
 });
 
 test("Übernommener Block lässt sich auswählen, verschieben, kürzen und rückgängig machen", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/raumplaner");
   const editor = page.getByRole("region", { name: "2D-Grundrisseditor" });
   const svg = editor.getByRole("img", { name: "Grundriss Zeichenfläche" });
@@ -190,11 +191,13 @@ test("Übernommener Block lässt sich auswählen, verschieben, kürzen und rück
   const click = (x: number, y: number) => svg.click({ position: { x, y } });
   await click(left, top); await click(left + 450, top); await click(left + 450, top + 360); await click(left, top + 360); await click(left, top);
   await editor.getByRole("button", { name: "Türen", exact: true }).click();
+  await page.getByRole("button", { name: "Werkzeugoptionen schließen" }).click();
   await click(left + 45, top);
   await editor.getByLabel("Türrolle").selectOption("exit");
   await editor.getByLabel("Breite (m)", { exact: true }).fill("1.2");
   await editor.getByLabel("Lichte Breite (m)").fill("1.2");
   await editor.getByRole("button", { name: "Gänge", exact: true }).click();
+  await page.getByRole("button", { name: "Werkzeugoptionen schließen" }).click();
   await click(left + 45, top + 32); await click(left + 45, top + 328);
   await page.keyboard.press("Escape");
   await editor.getByRole("button", { name: "Erweiterte Planung", exact: true }).click();

@@ -53,7 +53,11 @@ export default function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const provider = createCommerceCartService(
-      createLocalCartProvider({ storage: window.localStorage }),
+      createLocalCartProvider({ storage: {
+        getItem: (key) => window.localStorage.getItem(key),
+        setItem: (key, value) => window.localStorage.setItem(key, value),
+        removeItem: (key) => window.localStorage.removeItem(key),
+      } }),
     );
     providerRef.current = provider;
     Promise.resolve(provider.getCart()).then((nextCart) => {

@@ -25,20 +25,21 @@ async function drawPolygon(page: Page, points: { x: number; y: number }[]) {
 
 for (const visualCase of cases) {
   test(`WP18.2a visual ${visualCase.name}`, async ({ page }, testInfo: TestInfo) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.setViewportSize({ width: 1440, height: 1000 });
     await page.goto("/raumplaner");
     await page.locator('[data-help-ready="true"]').waitFor();
     const skipOnboarding = page.getByRole("button", { name: "Überspringen" });
     if (await skipOnboarding.isVisible()) await skipOnboarding.click();
-    const { editor, canvas } = await drawPolygon(page, [{ x: 80, y: 60 }, { x: 680, y: 60 }, { x: 680, y: 470 }, { x: 80, y: 470 }]);
+    const { editor, canvas } = await drawPolygon(page, [{ x: 80, y: 100 }, { x: 680, y: 100 }, { x: 680, y: 470 }, { x: 80, y: 470 }]);
     await canvas.locator("[data-point-id]").first().click();
     await editor.getByLabel("Werkzeuge", { exact: true }).getByRole("button", { name: "Tische", exact: true }).click();
     await page.getByLabel("Tischwerkzeug").selectOption("tables");
     const zonePoints = visualCase.size === "small"
       ? [{ x: 245, y: 145 }, { x: 515, y: 145 }, { x: 515, y: 370 }, { x: 245, y: 370 }]
       : [{ x: 150, y: 115 }, { x: 610, y: 115 }, { x: 610, y: 410 }, { x: 150, y: 410 }];
+    await page.getByRole("button", { name: "Werkzeugoptionen schließen" }).click();
     for (const position of zonePoints) await canvas.click({ position });
-    await page.getByRole("button", { name: "Tischbereich abschließen" }).click();
+    await canvas.click({ position: zonePoints[0] });
     await page.getByRole("button", { name: "Bereich einrichten", exact: true }).first().click();
     await page.getByLabel("Anordnung im Tischbereich").selectOption(visualCase.mode);
     await page.getByLabel("Planungsziel im Tischbereich").selectOption("capacity");

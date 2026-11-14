@@ -23,7 +23,7 @@ test("WP15 demand, selection, shop mapping and project roundtrip", () => {
   const target = resolveChairShopTarget(selected)!;
   expect(target.href).toContain(`/produkte/stapelstuehle/${product.handle}?`);
   expect(target.href).toContain("menge=3");
-  expect(target.canAddToCart).toBe(false);
+  expect(target.canAddToCart).toBe(true);
   const points = [[0, 0], [12, 0], [12, 10], [0, 10]].map(([x, y], index) => ({ id: `point-${index}`, x, y }));
   selected.contour = { closed: true, points, walls: points.map((point, index) => ({ id: `wall-${index}`, startPointId: point.id, endPointId: points[(index + 1) % 4].id })) };
   const loaded = parseProject(JSON.stringify(createProject("WP15", selected)));

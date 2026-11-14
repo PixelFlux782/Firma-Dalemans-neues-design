@@ -1,5 +1,8 @@
 "use client";
 
+import ConsumerGuaranteeNotice from "@/components/legal/ConsumerGuaranteeNotice";
+import { shippingNotice } from "@/lib/consumer-information";
+
 import Link from "next/link";
 import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
 import { useCart } from "@/components/commerce/cart/CartProvider";
@@ -7,36 +10,18 @@ import { usePriceDisplay } from "@/components/commerce/PriceDisplayProvider";
 import { chairAddonBySku } from "@/lib/commerce/chair-addons";
 import type { InquiryErrorResponse, InquirySuccessResponse } from "@/lib/inquiry/types";
 
-type FieldName = "firstName" | "lastName" | "organization" | "email" | "phone" | "postalCode" | "message" | "privacyAccepted" | "items";
+import { addressFields, deliveryFields, parseInquiryContact } from "@/lib/inquiry/contact";
+import type { InquiryContactInput } from "@/lib/inquiry/types";
+
+type FieldName = keyof InquiryContactInput | "items";
 type FieldErrors = Partial<Record<FieldName, string>>;
-const fieldOrder: FieldName[] = ["firstName", "lastName", "email", "phone", "postalCode", "privacyAccepted"];
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const fieldOrder: FieldName[] = [...addressFields.map(([name]) => name), ...deliveryFields, "organization", "email", "phone", "message", "privacyAccepted"];
 
-function values(form: HTMLFormElement) {
+function parsedValues(form: HTMLFormElement) {
   const data = new FormData(form);
-  return {
-    firstName: String(data.get("firstName") ?? "").trim(),
-    lastName: String(data.get("lastName") ?? "").trim(),
-    organization: String(data.get("organization") ?? "").trim(),
-    email: String(data.get("email") ?? "").trim(),
-    phone: String(data.get("phone") ?? "").trim(),
-    postalCode: String(data.get("postalCode") ?? "").trim(),
-    message: String(data.get("message") ?? "").trim(),
-    privacyAccepted: data.get("privacyAccepted") === "on",
-  };
+  return parseInquiryContact({ ...Object.fromEntries(data), differentDeliveryAddress: data.get("differentDeliveryAddress") === "on", privacyAccepted: data.get("privacyAccepted") === "on" });
 }
-
-function validate(form: HTMLFormElement): FieldErrors {
-  const input = values(form);
-  const errors: FieldErrors = {};
-  if (input.firstName.length < 2) errors.firstName = "Bitte geben Sie Ihren Vornamen ein.";
-  if (input.lastName.length < 2) errors.lastName = "Bitte geben Sie Ihren Nachnamen ein.";
-  if (!emailPattern.test(input.email)) errors.email = "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
-  if (input.phone && !/^[+()0-9\s./-]{5,40}$/.test(input.phone)) errors.phone = "Bitte prüfen Sie die Telefonnummer.";
-  if (input.postalCode && !/^\d{5}$/.test(input.postalCode)) errors.postalCode = "Bitte geben Sie eine fünfstellige Liefer-PLZ ein.";
-  if (!input.privacyAccepted) errors.privacyAccepted = "Bitte bestätigen Sie die Datenschutzhinweise.";
-  return errors;
-}
+function validate(form: HTMLFormElement): FieldErrors { return parsedValues(form).errors; }
 
 function FieldError({ name, errors }: { name: FieldName; errors: FieldErrors }) {
   if (!errors[name]) return null;
@@ -51,6 +36,7 @@ export default function InquiryCartSummary() {
   const { cart, hydrated, clearCart } = useCart();
   const { mode, setMode, formatPrice, priceLabel } = usePriceDisplay();
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [differentDeliveryAddress, setDifferentDeliveryAddress] = useState(false);
   const [attempted, setAttempted] = useState(false);
   const [pending, setPending] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -85,7 +71,7 @@ export default function InquiryCartSummary() {
       return;
     }
 
-    const contact = values(form);
+    const contact = parsedValues(form).contact;
     setPending(true);
     try {
       const response = await fetch("/api/inquiry", {
@@ -100,6 +86,7 @@ export default function InquiryCartSummary() {
             productHandle: line.productHandle,
             variantId: line.variantId,
             quantity: line.quantity,
+            technicalInquiry: line.technicalInquiry,
             selectedAddons: line.selectedAddons ?? [],
           })),
         }),
@@ -161,22 +148,40 @@ export default function InquiryCartSummary() {
               </label>
             </div>
           </fieldset>
+          <fieldset className="mt-6">
+            <legend className="text-base font-semibold text-premium-ink">Rechnungsanschrift</legend>
+            <div className="mt-4 grid gap-5 sm:grid-cols-2">
+              {addressFields.map(([name, label, maximum, autocomplete]) => (
+                <label key={name} className="block text-sm font-medium text-premium-charcoal">{label} <span aria-hidden="true">*</span>
+                  <input name={name} type="text" autoComplete={`billing ${autocomplete}`} maxLength={maximum} required className={inputClass} onChange={handleChange} {...invalidProps(name, errors)} />
+                  <FieldError name={name} errors={errors} />
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <label className="mt-6 flex cursor-pointer items-start gap-3 text-sm leading-6 text-premium-charcoal">
+            <input name="differentDeliveryAddress" type="checkbox" checked={differentDeliveryAddress} aria-controls="delivery-address" aria-expanded={differentDeliveryAddress} onChange={(event) => { setDifferentDeliveryAddress(event.target.checked); handleChange(event); }} className="mt-1 h-4 w-4 shrink-0 accent-premium-forest" />
+            Lieferadresse weicht von Rechnungsadresse ab
+          </label>
+          <fieldset id="delivery-address" hidden={!differentDeliveryAddress} disabled={!differentDeliveryAddress} className="mt-6">
+            <legend className="text-base font-semibold text-premium-ink">Lieferanschrift</legend>
+            <div className="mt-4 grid gap-5 sm:grid-cols-2">
+              {addressFields.map(([, label, maximum, autocomplete], index) => {
+                const name = deliveryFields[index];
+                return <label key={name} className="block text-sm font-medium text-premium-charcoal">{label} <span aria-hidden="true">*</span>
+                  <input name={name} type="text" autoComplete={`shipping ${autocomplete}`} maxLength={maximum} required={differentDeliveryAddress} className={inputClass} onChange={handleChange} {...invalidProps(name, errors)} />
+                  <FieldError name={name} errors={errors} />
+                </label>;
+              })}
+            </div>
+          </fieldset>
           <div className="mt-6 grid gap-5 sm:grid-cols-2">
-            <label className="block text-sm font-medium text-premium-charcoal">Vorname <span aria-hidden="true">*</span>
-              <input name="firstName" autoComplete="given-name" maxLength={80} required className={inputClass} onChange={handleChange} {...invalidProps("firstName", errors)} /><FieldError name="firstName" errors={errors} />
-            </label>
-            <label className="block text-sm font-medium text-premium-charcoal">Nachname <span aria-hidden="true">*</span>
-              <input name="lastName" autoComplete="family-name" maxLength={80} required className={inputClass} onChange={handleChange} {...invalidProps("lastName", errors)} /><FieldError name="lastName" errors={errors} />
-            </label>
             <label className="block text-sm font-medium text-premium-charcoal sm:col-span-2">Gemeinde / Verein / Unternehmen <span className="font-normal text-premium-muted">(optional)</span><input name="organization" autoComplete="organization" maxLength={120} className={inputClass} /></label>
             <label className="block text-sm font-medium text-premium-charcoal">E-Mail-Adresse <span aria-hidden="true">*</span>
               <input name="email" type="email" autoComplete="email" maxLength={254} required className={inputClass} onChange={handleChange} {...invalidProps("email", errors)} /><FieldError name="email" errors={errors} />
             </label>
             <label className="block text-sm font-medium text-premium-charcoal">Telefonnummer <span className="font-normal text-premium-muted">(optional)</span>
               <input name="phone" type="tel" autoComplete="tel" maxLength={40} className={inputClass} onChange={handleChange} {...invalidProps("phone", errors)} /><FieldError name="phone" errors={errors} />
-            </label>
-            <label className="block text-sm font-medium text-premium-charcoal">Liefer-PLZ <span className="font-normal text-premium-muted">(optional)</span>
-              <input name="postalCode" inputMode="numeric" autoComplete="postal-code" maxLength={5} className={inputClass} onChange={handleChange} {...invalidProps("postalCode", errors)} /><FieldError name="postalCode" errors={errors} />
             </label>
             <label className="block text-sm font-medium text-premium-charcoal sm:col-span-2">Persönliche Nachricht <span className="font-normal text-premium-muted">(optional)</span><textarea name="message" maxLength={2000} className={`${inputClass} min-h-32 resize-y`} /></label>
           </div>
@@ -187,9 +192,10 @@ export default function InquiryCartSummary() {
             const tier = line.priceTiers?.find((candidate) => (candidate.minimumQuantity === null || line.quantity >= candidate.minimumQuantity) && (candidate.maximumQuantity === null || line.quantity <= candidate.maximumQuantity));
             return (
               <article key={line.id} className="premium-card p-6 sm:p-7">
+                {line.technicalInquiry ? <p className="mb-4 whitespace-pre-wrap rounded-xl bg-premium-warm p-4 text-sm"><strong>Technische Kundenangaben:</strong>{"\n"}{line.technicalInquiry}</p> : null}
                 <div className="flex flex-col justify-between gap-5 sm:flex-row">
                   <div><h3 className="font-display text-2xl font-medium text-premium-ink">{line.productTitle}</h3><p className="mt-2 text-sm font-medium text-premium-charcoal">{line.variantTitle}</p><p className="mt-1 text-xs text-premium-subtle">Artikelnummer: {line.erpArticleNumber ?? "nicht hinterlegt"}</p>{line.selectedAddons?.length ? <p className="mt-3 text-xs leading-5 text-premium-muted">Ausstattung: {line.selectedAddons.map((sku) => `${chairAddonBySku(sku)?.name ?? sku} (${sku})`).join(", ")}</p> : null}</div>
-                  <dl className="shrink-0 space-y-2 text-sm sm:min-w-56 sm:text-right"><div><dt className="inline text-premium-muted">Menge: </dt><dd className="inline font-semibold text-premium-ink">{line.quantity} {line.unitLabel}</dd></div><div><dt className="inline text-premium-muted">Mengenstaffel: </dt><dd className="inline font-semibold text-premium-ink">{tier?.label ?? `ab ${line.minimumQuantity} ${line.unitLabel}`}</dd></div><div><dt className="inline text-premium-muted">Stückpreis: </dt><dd className="inline font-semibold text-premium-ink">{line.unitPrice ? formatPrice(line.unitPrice) : "nicht berechenbar"}</dd></div><div><dt className="inline text-premium-muted">Positionssumme: </dt><dd className="inline font-semibold text-premium-ink">{line.lineTotal ? formatPrice(line.lineTotal) : "nicht berechenbar"}</dd></div></dl>
+                  <dl className="shrink-0 space-y-2 text-sm sm:min-w-56 sm:text-right"><div><dt className="inline text-premium-muted">Menge: </dt><dd className="inline font-semibold text-premium-ink">{line.quantity} {line.unitLabel}{line.unitLabel.startsWith("Garnitur") ? ` = ${line.quantity * 4} Stück` : ""}</dd></div>{tier ? <div><dt className="inline text-premium-muted">Mengenstaffel: </dt><dd className="inline font-semibold text-premium-ink">{tier.label}</dd></div> : null}<div><dt className="inline text-premium-muted">Preis je {line.unitLabel}: </dt><dd className="inline font-semibold text-premium-ink">{line.unitPrice ? formatPrice(line.unitPrice) : "Preis auf Anfrage"}</dd></div><div><dt className="inline text-premium-muted">Positionssumme: </dt><dd className="inline font-semibold text-premium-ink">{line.lineTotal ? formatPrice(line.lineTotal) : "Preis auf Anfrage"}</dd></div></dl>
                 </div>
               </article>
             );
@@ -198,11 +204,14 @@ export default function InquiryCartSummary() {
       </div>
       <aside className="h-fit rounded-[1.75rem] border border-premium-beige/70 bg-premium-warm/80 p-6 lg:sticky lg:top-6">
         <p className="section-eyebrow">Anfrage prüfen</p>
-        <dl className="mt-5 space-y-3 text-sm"><div className="flex justify-between gap-4"><dt>Positionen</dt><dd className="font-semibold">{cart.lines.length}</dd></div><div className="flex justify-between gap-4"><dt>Gesamtmenge</dt><dd className="font-semibold">{cart.totalQuantity}</dd></div><div className="flex justify-between gap-4 text-base"><dt>Gesamtsumme</dt><dd className="font-semibold text-right">{cart.totals.subtotalAmount ? formatPrice(cart.totals.subtotalAmount) : "Nicht berechenbar"}</dd></div><div className="flex justify-between gap-4 text-xs text-premium-muted"><dt>Preisdarstellung</dt><dd className="text-right">{priceLabel}</dd></div></dl>
+        <dl className="mt-5 space-y-3 text-sm"><div className="flex justify-between gap-4"><dt>Positionen</dt><dd className="font-semibold">{cart.lines.length}</dd></div><div className="flex justify-between gap-4"><dt>Verkaufseinheiten gesamt</dt><dd className="font-semibold">{cart.totalQuantity}</dd></div><div className="flex justify-between gap-4 text-base"><dt>Warenwert</dt><dd className="font-semibold text-right">{cart.totals.subtotalAmount ? formatPrice(cart.totals.subtotalAmount) : "Nicht berechenbar"}</dd></div><div className="flex justify-between gap-4 text-xs text-premium-muted"><dt>Preisdarstellung</dt><dd className="text-right">{priceLabel}</dd></div></dl>
+        <p className="mt-4 text-xs leading-5 text-premium-muted">{shippingNotice}</p>
         <label className="mt-6 flex items-start gap-3 border-t border-premium-beige pt-5 text-sm leading-6 text-premium-charcoal"><input name="privacyAccepted" type="checkbox" required onChange={handleChange} className="mt-1 h-4 w-4 shrink-0 accent-premium-forest" {...invalidProps("privacyAccepted", errors)} /><span>Ich habe die <Link href="/datenschutz" target="_blank" className="underline underline-offset-4">Datenschutzhinweise</Link> zur Verarbeitung meiner Anfrage zur Kenntnis genommen. <span aria-hidden="true">*</span></span></label>
         <FieldError name="privacyAccepted" errors={errors} />
         <label className="absolute -left-[9999px]" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
-        <p className="mt-5 text-sm leading-6 text-premium-muted">Mit dem Absenden bitten Sie um ein persönliches Angebot. Es wird keine zahlungspflichtige Bestellung ausgelöst.</p>
+        <p className="mt-5 text-sm leading-6 text-premium-muted">Mit dem Absenden bitten Sie um ein persönliches Angebot. Es wird keine zahlungspflichtige Bestellung ausgelöst. Ein Vertrag kommt erst durch ausdrückliche Bestätigung von Dalemans zustande. Zahlung grundsätzlich auf Rechnung; Lieferzeiten und Lieferbedingungen werden individuell vereinbart.</p>
+        <p className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm underline underline-offset-4"><Link href="/agb" target="_blank">AGB</Link><Link href="/widerruf" target="_blank">Widerruf und Muster-Widerrufsformular</Link></p>
+        {mode === "private" ? <ConsumerGuaranteeNotice /> : null}
         <p className="mt-3 text-sm font-semibold text-premium-forest">Keine verbindliche Bestellung</p>
         <button type="submit" disabled={pending} className="btn-primary mt-6 w-full disabled:cursor-wait disabled:opacity-60">{pending ? "Anfrage wird sicher gesendet …" : "Unverbindliche Anfrage senden →"}</button>
         {status ? <div ref={statusRef} tabIndex={-1} role="alert" className="mt-5 rounded-2xl border border-red-700/30 bg-red-50 px-4 py-3 text-sm leading-6 text-red-900">{status}</div> : null}

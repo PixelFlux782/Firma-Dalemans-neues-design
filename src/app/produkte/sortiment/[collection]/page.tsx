@@ -78,6 +78,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
         <ul className="mt-6 grid gap-3 text-sm leading-7 text-premium-muted md:grid-cols-3"><li><strong>Typ A:</strong> klare Linienführung und großzügige Ablage für Manuskript und Unterlagen.</li><li><strong>Typ E:</strong> eigenständige Acrylglas-Ausführung mit offener Raumwirkung.</li><li><strong>Typ AH:</strong> Ausführung mit massiver Furnierplatte.</li></ul>
       </section> : null}
 
+      {handle === "gleiter-bodenschutz" ? <aside className="premium-card p-6"><h2 className="section-title">Gleiter-Finder und Sondergleiter</h2><p className="my-4">Passende Standardartikel finden oder weitere Gestellformen und Maße anfragen.</p><Link className="btn-primary inline-flex" href="/produkte/gleiter-finder">Zum Gleiter-Finder</Link></aside> : null}
       <section id="produkte">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function DatenschutzPage() {
   return (
-    <div className="page-stack max-w-3xl">
+    <div className="page-stack max-w-4xl">
       <Breadcrumbs
         items={[
           { label: "Start", href: "/" },
@@ -25,9 +25,9 @@ export default function DatenschutzPage() {
         currentPath="/datenschutz"
       />
 
-      <article className="premium-card p-8 md:p-10 lg:p-12">
+      <article className="premium-card p-6 sm:p-8 md:p-10 lg:p-12">
         <p className="section-eyebrow">Rechtliches</p>
-        <h1 className="section-title mt-5">Datenschutzerklärung</h1>
+        <h1 lang="de" className="section-title mt-5 hyphens-auto max-sm:!text-[clamp(1.25rem,6.5vw,1.65rem)]">Datenschutzerklärung</h1>
         <LegalDocument content={technicalPrivacyText} />
 
         <p className="mt-10 text-sm leading-[1.75] text-premium-subtle">
@@ -37,6 +37,8 @@ export default function DatenschutzPage() {
           >
             Zum Impressum
           </Link>
+          <span aria-hidden="true"> · </span>
+          <Link href="/agb" className="font-medium text-premium-charcoal underline-offset-4 transition hover:text-premium-bronze hover:underline">Zu den AGB</Link>
         </p>
       </article>
     </div>

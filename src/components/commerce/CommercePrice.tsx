@@ -1,5 +1,7 @@
 "use client";
 
+import { shippingNotice } from "@/lib/consumer-information";
+
 import type { CommerceMoney, CommercePriceStatus } from "@/lib/commerce/types";
 import { usePriceDisplay } from "@/components/commerce/PriceDisplayProvider";
 
@@ -51,7 +53,7 @@ export default function CommercePrice({
           {formattedCompareAt}
         </span>
       ) : null}
-      {formattedPrice ? <span className="basis-full text-xs font-normal text-premium-muted">{priceLabel}</span> : null}
+      {formattedPrice ? <span className="basis-full text-xs font-normal text-premium-muted">{priceLabel} · {shippingNotice}</span> : null}
     </div>
   );
 }

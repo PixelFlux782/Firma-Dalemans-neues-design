@@ -115,35 +115,35 @@ test.describe("provider-neutrales Stapelstuhlmodell", () => {
 
   test("ordnet Variantenbilder über die ERP-Artikelnummern aus Export_Flo zu", () => {
     const expectedImages: Record<string, string | null> = {
-      A1021ACO: "Stapelstuhl_1021_ungepolstert.png",
+      A1021ACO: "Stapelstuhl_1021_ungepolstert.webp",
       A1021BCO2: "Stapelstuhl_1021_sitzpolster.png",
       A1021BCO3: "Stapelstuhl_1021_sitzpolster.png",
       A1021BCO4: "Stapelstuhl_1021_sitzpolster.png",
       A1021CCO2: "Stapelstuhl_1021_c_lila-stuhl.png",
       A1021CCO3: "Stapelstuhl_1021_c_lila-stuhl.png",
       A1021CCO4: "Stapelstuhl_1021_c_lila-stuhl.png",
-      ABUNDACO: "Stapelstuhl_Buende_a.png",
+      ABUNDACO: "Stapelstuhl_Buende_a.webp",
       ABUNDBCO2: "Stapelstuhl_buende_sitzpolster.png",
       ABUNDBCO3: "Stapelstuhl_buende_sitzpolster.png",
       ABUNDBCO4: "Stapelstuhl_buende_sitzpolster.png",
       ABUNDCCO2: "Stapelstuhl_buende_c.png",
       ABUNDCCO3: "Stapelstuhl_buende_c.png",
       ABUNDCCO4: "Stapelstuhl_buende_c.png",
-      ACOBUACO: "Stapelstuhl_Coburg_ungepolstert.png",
+      ACOBUACO: "Stapelstuhl_Coburg_ungepolstert.webp",
       ACOBUBCO2: "Stapelstuhl_Coburg_a.png",
       ACOBUBCO3: "Stapelstuhl_Coburg_a_mehrere-löcher.png",
       ACOBUBCO4: "Stapelstuhl_Coburg_a_ovales-griffloch.png",
       ACOBUCCO2: "Stapelstuhl_Coburg_sitz_rueckenpolster.png",
       ACOBUCCO3: "Stapelstuhl_Coburg_sitz_rueckenpolster.png",
       ACOBUCCO4: "Stapelstuhl_Coburg_sitz_rueckenpolster.png",
-      ANURNACO: "Stapelstuhl_Nuernberg_a.png",
+      ANURNACO: "Stapelstuhl_Nuernberg_a.webp",
       ANURNBCO2: "Stapelstuhl_Nuernberg_a_GL.png",
       ANURNBCO3: "Stapelstuhl_Nuernberg_a_GL.png",
       ANURNBCO4: "Stapelstuhl_Nuernberg_a_GL.png",
       ANURNCCO2: "Stapelstuhl_Nuernberg_c.png",
       ANURNCCO3: "Stapelstuhl_Nuernberg_c_2.png",
       ANURNCCO4: "Stapelstuhl_Nuernberg_c_02.png",
-      AERFUACO: "Stapelstuhl_Erfurt_a.png",
+      AERFUACO: "Stapelstuhl_Erfurt_a.webp",
       AERFUBCO2: "Stapelstuhl_Erfurt_b.png",
       AERFUBCO3: "Stapelstuhl_Erfurt_b.png",
       AERFUBCO4: "Stapelstuhl_Erfurt_b.png",
@@ -468,4 +468,9 @@ test("alte Stapelstuhl-URLs leiten auf die neue kanonische Struktur", async ({ r
   const model = await request.get("/produkte/stapelstuhl-mod-1021c", { maxRedirects: 0 });
   expect(model.status()).toBe(308);
   expect(model.headers().location).toBe("/produkte/stapelstuehle/1021");
+});
+
+// These legacy numeric assertions intentionally verify the net price view.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("dlmns-customer-price-mode", "business"));
 });

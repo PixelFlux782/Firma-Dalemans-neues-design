@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { localProducts } from "../src/lib/commerce/providers/local-data";
 import { developmentFinderFixtures } from "../src/lib/finder/development-fixtures";
-import { recommendGliders } from "../src/lib/finder/recommend";
+import { recommendGliders as recommendWithPolicy } from "../src/lib/finder/recommend";
 import {
   calculateFinderQuantity,
   calculateRequiredPieces,
@@ -29,7 +29,9 @@ function expectVariant(result: ReturnType<typeof recommendGliders>, sku: string)
   return result.matches[0];
 }
 
-test.describe("deterministische Finder-Businesslogik", () => {
+const recommendGliders: typeof recommendWithPolicy = (products, value, options) => recommendWithPolicy(products, value, options ?? { dataPolicy: "development_and_verified" });
+
+test.describe("isolierte unveröffentlichte Finder-Businesslogik", () => {
   test("bevorzugt bei Rundrohr 20 mm auf Parkett Filz", () => {
     const match = expectVariant(recommendGliders(localProducts, input()), "DEV-RF-20");
     expect(match.floorMatch).toBe("preferred");
@@ -110,68 +112,26 @@ test.describe("deterministische Finder-Businesslogik", () => {
   });
 });
 
-test.describe("Gleiter-Finder im Browser", () => {
-  test("führt vorwärts, zurück und zeigt verständliche Validierung", async ({ page }) => {
-    await page.goto("/shop/gleiter-finder");
-    await page.getByRole("button", { name: "Gleiter finden" }).click();
-    await page.getByRole("button", { name: "Weiter" }).click();
-    await expect(page.locator("#finder-error")).toHaveText("Bitte wählen Sie Stuhl oder Tisch aus.");
-    await page.getByLabel("Stuhl", { exact: true }).check();
-    await page.getByRole("button", { name: "Weiter" }).click();
-    await expect(page.getByText("2 von 5", { exact: true })).toBeVisible();
-    await page.getByRole("button", { name: "Zurück" }).click();
-    await expect(page.getByText("1 von 5", { exact: true })).toBeVisible();
-    await expect(page.getByLabel("Stuhl", { exact: true })).toBeChecked();
-  });
-
-  test("zeigt Filzempfehlung und transparente Packungsmenge", async ({ page }) => {
-    await page.goto("/shop/gleiter-finder?art=chair&form=round&d=20&boden=parquet&anzahl=100&reserve=1&schritt=ergebnis");
-    const result = page.getByTestId("finder-result");
-    await expect(result).toHaveAttribute("data-status", "unique");
-    await expect(result.getByRole("heading", { name: "Gleiter für Rundrohr" })).toBeVisible();
-    await expect(result).toContainText("18,7–20,4 mm");
-    await expect(result).toContainText("21 × 20");
-    await expect(result).toContainText("Gesamt");
-    await result.getByRole("link", { name: "Produkt ansehen" }).click();
-    await expect(page).toHaveURL(/\/produkte\/artikel\/filzgleiter-fuer-rundrohr\?variant=local-variant-rf-20/);
-    await expect(page.getByTestId("selected-variant")).toContainText("Rundrohr 20 mm");
-  });
-
-  test("zeigt Teppich-Eingabe als Kunststoffempfehlung", async ({ page }) => {
-    await page.goto("/shop/gleiter-finder?art=chair&form=round&d=20&boden=carpet&anzahl=100&reserve=1&schritt=ergebnis");
-    const result = page.getByTestId("finder-result");
-    await expect(result).toHaveAttribute("data-status", "unique");
-    await expect(result.getByRole("heading", { name: "Kunststoffgleiter für Rundrohr" })).toBeVisible();
-    await expect(result).toContainText("9 × 50");
-    await expect(result).toContainText("450 Stück");
-  });
-
-  test("erklärt Multiple Match ohne automatische Auswahl", async ({ page }) => {
-    await page.goto("/shop/gleiter-finder?art=chair&form=round&d=18.75&boden=parquet&anzahl=10&reserve=1&schritt=ergebnis");
-    const result = page.getByTestId("finder-result");
-    await expect(result).toHaveAttribute("data-status", "multiple");
-    await expect(result).toContainText("Dieses Maß liegt im Übergangsbereich. Zwei Varianten kommen infrage.");
-    await expect(result.getByRole("link", { name: "Produkt ansehen" })).toHaveCount(2);
-  });
-
-  test("stellt uncertain und no_match ohne Fake-Empfehlung dar", async ({ page }) => {
-    await page.goto("/shop/gleiter-finder?art=chair&form=unknown&boden=unknown&anzahl=1&reserve=1&schritt=ergebnis");
-    await expect(page.getByTestId("finder-result")).toHaveAttribute("data-status", "uncertain");
-    await expect(page.getByRole("link", { name: "Persönlich fragen" }).first()).toBeVisible();
-    await page.goto("/shop/gleiter-finder?art=chair&form=round&d=26&boden=tile_stone&anzahl=1&reserve=1&schritt=ergebnis");
-    await expect(page.getByTestId("finder-result")).toHaveAttribute("data-status", "no_match");
-    await expect(page.getByText("keine eindeutige Shop-Lösung", { exact: false }).first()).toBeVisible();
-  });
-
-  test("bleibt mobil in Mess- und Ergebnisansicht ohne horizontalen Überlauf", async ({ page }) => {
+test.describe("Finder und historische Weiterleitungen", () => {
+  for (const route of [
+    "/shop/gleiter-finder",
+    "/shop/gleiter-finder?art=chair&form=round&d=20&boden=parquet&anzahl=100&reserve=1&schritt=ergebnis",
+    "/shop/gleiter-finder?art=chair&form=round&d=18.75&boden=parquet&schritt=ergebnis",
+    "/shop/gleiter-finder?art=chair&form=unknown&boden=unknown&schritt=ergebnis",
+  ]) {
+    test(`keine DEV-Empfehlungen: ${route}`, async ({ page }) => {
+      const response = await page.goto(route);
+      expect(response?.status()).toBe(200);
+      await expect(page.getByRole("heading", { name: "Gleiter-Finder", exact: true })).toBeVisible();
+      await expect(page.getByText(/DEV-/)).toHaveCount(0);
+      await expect(page.getByTestId("finder-result")).toHaveCount(0);
+      await expect(page.getByTestId("finder-add-to-cart")).toHaveCount(0);
+    });
+  }
+  test("veröffentlichte Gleiterberatung bleibt mobil erreichbar", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
-    for (const route of [
-      "/shop/gleiter-finder?art=chair&form=round&schritt=3",
-      "/shop/gleiter-finder?art=chair&form=round&d=20&boden=parquet&anzahl=10&reserve=1&schritt=ergebnis",
-    ]) {
-      await page.goto(route);
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-      expect(overflow, route).toBeLessThanOrEqual(1);
-    }
+    await page.goto("/kontakt?anliegen=Gleiter-Beratung");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   });
 });

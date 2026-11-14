@@ -70,10 +70,18 @@ const MANUAL_PAUSE = 11000;
 
 export default function HeroCarousel() {
   const [active, setActive] = useState(0);
+  const [requested, setRequested] = useState(0);
+  const [loaded, setLoaded] = useState<number[]>([]);
   const [interactionPaused, setInteractionPaused] = useState(false);
   const [manualPaused, setManualPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const requestSlide = useCallback((next: number) => {
+    const index = (next + slides.length) % slides.length;
+    setRequested(index);
+    if (loaded.includes(index)) setActive(index);
+  }, [loaded]);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -86,24 +94,24 @@ export default function HeroCarousel() {
   useEffect(() => {
     if (interactionPaused || manualPaused || reducedMotion) return;
     const timer = window.setInterval(
-      () => setActive((current) => (current + 1) % slides.length),
+      () => requestSlide(active + 1),
       AUTOPLAY_DELAY,
     );
     return () => window.clearInterval(timer);
-  }, [interactionPaused, manualPaused, reducedMotion]);
+  }, [active, interactionPaused, manualPaused, reducedMotion, requestSlide]);
 
   useEffect(() => () => {
     if (resumeTimer.current) clearTimeout(resumeTimer.current);
   }, []);
 
   const selectSlide = useCallback((next: number) => {
-    setActive((next + slides.length) % slides.length);
+    requestSlide(next);
     setManualPaused(true);
     if (resumeTimer.current) clearTimeout(resumeTimer.current);
     if (!reducedMotion) {
       resumeTimer.current = setTimeout(() => setManualPaused(false), MANUAL_PAUSE);
     }
-  }, [reducedMotion]);
+  }, [reducedMotion, requestSlide]);
 
   return (
     <div
@@ -135,12 +143,16 @@ export default function HeroCarousel() {
           className={`hero-carousel-slide absolute inset-0 overflow-hidden transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${index === active ? "z-0 opacity-100" : "pointer-events-none opacity-0"}`}
           aria-hidden={index !== active}
         >
-          <Image
+          {requested === index || loaded.includes(index) ? <Image
             src={slide.src}
             alt={index === active ? slide.alt : ""}
             fill
             priority={index === 0}
             fetchPriority={index === 0 ? "high" : "low"}
+            onLoad={() => {
+              setLoaded((current) => current.includes(index) ? current : [...current, index]);
+              if (requested === index) setActive(index);
+            }}
             quality={85}
             sizes="(min-width: 1024px) 56vw, 100vw"
             className="hero-slide-main object-cover"
@@ -149,7 +161,7 @@ export default function HeroCarousel() {
               objectPosition: `var(--hero-mobile-position, ${slide.mobileObjectPosition})`,
               ["--hero-desktop-position" as string]: slide.objectPosition,
             }}
-          />
+          /> : null}
         </div>
       ))}
 

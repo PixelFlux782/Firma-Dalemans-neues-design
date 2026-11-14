@@ -1,3 +1,4 @@
+import { company } from "@/lib/company";
 ﻿import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -94,24 +95,26 @@ export default function KontaktPage() {
             <article className="premium-card animate-fade-up animate-fade-up-delay-1 overflow-hidden rounded-4xl bg-premium-ink p-7 text-premium-canvas md:p-8">
               <p className="section-eyebrow text-premium-sand">Direkt erreichbar</p>
               <div className="mt-5 space-y-5 text-sm leading-[1.75] text-white/75">
+                <p>{company.name}<br />{company.address.streetAddress}<br />{company.address.postalCode} {company.address.addressLocality}</p>
+                <p>Mobil<br /><a href={company.mobileHref} className="font-medium text-white transition hover:text-premium-sand">{company.mobile}</a></p>
                 <p>
                   Telefon
                   <br />
                   <a
-                    href="tel:+499342915353"
+                    href={company.telephoneHref}
                     className="font-medium text-white transition hover:text-premium-sand"
                   >
-                    +49 9342 9153-53
+                    {company.telephone}
                   </a>
                 </p>
                 <p>
                   E-Mail
                   <br />
                   <a
-                    href="mailto:info@dalemans.de"
+                    href={company.emailHref}
                     className="font-medium text-white transition hover:text-premium-sand"
                   >
-                    info@dalemans.de
+                    {company.email}
                   </a>
                 </p>
                 <p>

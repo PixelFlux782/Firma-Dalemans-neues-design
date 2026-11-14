@@ -18,6 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/produkte",
     "/produkte/stapelstuehle",
     "/produkte/reihenverbinder",
+    "/produkte/gleiter-finder",
     "/raeume-planung",
     "/raeume-planung/raumplanung",
     "/raumplaner",

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePriceDisplay } from "@/components/commerce/PriceDisplayProvider";
 import Image from "next/image";
 import Link from "next/link";
 import type { SearchResponse, SearchResult } from "@/lib/search/types";
@@ -28,6 +29,7 @@ function ResultLink({
 }) {
   const { document, matchedVariant } = result;
   const isProduct = document.type === "product";
+  const { formatPrice, priceLabel } = usePriceDisplay();
 
   return (
     <Link
@@ -62,7 +64,7 @@ function ResultLink({
             {document.title}
           </span>
           {isProduct && document.priceLabel ? (
-            <span className="shrink-0 text-xs font-medium text-premium-muted">{document.priceLabel}</span>
+            <span className="shrink-0 text-xs font-medium text-premium-muted">{document.priceMoney ? <>{document.priceStatus === "from" ? "ab " : ""}{formatPrice(document.priceMoney)} · {priceLabel}{document.priceMinimumQuantity && document.priceMinimumQuantity > 1 ? ` bei ${document.priceMinimumQuantity} Stück` : ""} · zzgl. Versand</> : document.priceLabel}</span>
           ) : null}
         </span>
         {matchedVariant ? (

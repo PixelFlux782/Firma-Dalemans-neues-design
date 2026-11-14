@@ -67,6 +67,7 @@ export default function CartLine({ line }: { line: CommerceCartLineModel }) {
             Bedarf {line.finderContext.requiredQuantity}, mit Reserve {line.finderContext.recommendedQuantity}, bestellbar {line.finderContext.orderQuantity} Stück.
           </p>
         ) : null}
+        {line.technicalInquiry ? <p className="mt-3 whitespace-pre-wrap text-xs text-premium-muted">{line.technicalInquiry}</p> : null}
 
         <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
           <div>

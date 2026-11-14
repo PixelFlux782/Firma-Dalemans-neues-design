@@ -1,8 +1,7 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
+import { company } from "@/lib/company";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
-import LegalDocument from "@/components/legal/LegalDocument";
-import { agbText } from "@/lib/legal-content";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -25,62 +24,55 @@ export default function ImpressumPage() {
         currentPath="/impressum"
       />
 
-      <article className="premium-card p-8 md:p-10 lg:p-12">
+      <article className="premium-card p-6 sm:p-8 md:p-10 lg:p-12">
         <p className="section-eyebrow">Kontaktinformationen</p>
-        <h1 className="section-title mt-5">Impressum und Rechtliches</h1>
+        <h1 className="section-title mt-5">Impressum</h1>
 
         <div className="mt-8 space-y-6 text-sm leading-[1.8] text-premium-muted">
           <p>
             <span className="font-medium text-premium-charcoal">Anschrift</span>
             <br />
-            <a href="https://goo.gl/maps/wfVuLYysaqfAGWLR6" className="text-premium-ink transition hover:text-premium-bronze">Dalemans Sitzmöbel und Tische</a>
+            <a href="https://goo.gl/maps/wfVuLYysaqfAGWLR6" className="text-premium-ink transition hover:text-premium-bronze">{company.legalName}</a>
             <br />
-            <a href="https://goo.gl/maps/wfVuLYysaqfAGWLR6" className="text-premium-ink transition hover:text-premium-bronze">Bollenwaldstraße 108a</a>
+            <a href="https://goo.gl/maps/wfVuLYysaqfAGWLR6" className="text-premium-ink transition hover:text-premium-bronze">{company.address.streetAddress}</a>
             <br />
-            <a href="https://goo.gl/maps/wfVuLYysaqfAGWLR6" className="text-premium-ink transition hover:text-premium-bronze">63743 Aschaffenburg</a>
+            <a href="https://goo.gl/maps/wfVuLYysaqfAGWLR6" className="text-premium-ink transition hover:text-premium-bronze">{company.address.postalCode} {company.address.addressLocality}</a>
           </p>
 
           <p>
-            <span className="font-medium text-premium-charcoal">Email</span>
+            <span className="font-medium text-premium-charcoal">E-Mail</span>
             <br />
             <a
-              href="mailto:info@dalemans.de"
+              href={company.emailHref}
               className="text-premium-ink transition hover:text-premium-bronze"
             >
-              info@dalemans.de
+              {company.email}
             </a>
           </p>
 
           <p>
             <span className="font-medium text-premium-charcoal">Telefon:</span>
             <br />
-            +49 9342 9153-53
+            <a href={company.telephoneHref}>{company.telephone}</a>
             <br />
-            +49 170 5555331
+            <a href={company.mobileHref}>{company.mobile}</a>
           </p>
 
           <p>
-            <span className="font-medium text-premium-charcoal">Ust.-ID:</span>
+            <span className="font-medium text-premium-charcoal">Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG</span>
             <br />
-            DE161952944
+            {company.vatId}
           </p>
         </div>
 
-        <section className="mt-12 border-t border-premium-ink/10 pt-8">
-          <p className="section-eyebrow">AGB</p>
-          <h2 className="section-title mt-4 text-2xl md:text-3xl">
-            Verkaufs-, Lieferungs- und Zahlungsbedingungen
-          </h2>
-          <LegalDocument content={agbText.split(/\r?\n/).slice(1).join("\n")} />
-        </section>
-
-        <p className="mt-10 text-sm leading-[1.75] text-premium-subtle">
+        <p className="mt-10 flex flex-wrap gap-x-6 gap-y-3 border-t border-premium-beige pt-6 text-sm leading-[1.75] text-premium-subtle">
           <Link
             href="/datenschutz"
             className="font-medium text-premium-charcoal underline-offset-4 transition hover:text-premium-bronze hover:underline"
           >
             Datenschutzerklärung
           </Link>
+          <Link href="/agb" className="font-medium text-premium-charcoal underline-offset-4 transition hover:text-premium-bronze hover:underline">Allgemeine Geschäftsbedingungen</Link>
         </p>
       </article>
     </div>

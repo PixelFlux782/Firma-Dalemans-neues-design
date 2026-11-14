@@ -2,7 +2,7 @@ import type { CommerceProduct } from "@/lib/commerce/types";
 
 /**
  * Unverified fixtures may remain available to isolated development tests, but
- * they must never cross the production commerce-provider boundary.
+ * they must never cross the public commerce-provider boundary in any environment.
  */
 export function hasUnverifiedDevelopmentData(product: CommerceProduct) {
   return product.variants.some((variant) =>
@@ -13,7 +13,6 @@ export function hasUnverifiedDevelopmentData(product: CommerceProduct) {
 }
 
 export function publicCommerceProducts(products: readonly CommerceProduct[], environment = process.env.NODE_ENV) {
-  return environment === "production"
-    ? products.filter((product) => !hasUnverifiedDevelopmentData(product))
-    : [...products];
+  void environment;
+  return products.filter((product) => !hasUnverifiedDevelopmentData(product));
 }

@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { localCollectionRecords, localProducts } from "../src/lib/commerce/providers/local-data";
+import { publicCommerceProducts } from "../src/lib/commerce/publication";
 import { buildSearchIndex } from "../src/lib/search/index";
 import { normalizeSearchText } from "../src/lib/search/normalize";
 import { searchIndex } from "../src/lib/search/search";
@@ -12,17 +13,17 @@ function search(query: string) {
   });
 }
 
-test.describe("deterministische Search-Logik", () => {
+test.describe("deterministische Search-Logik einschließlich isolierter DEV-Fixtures", () => {
   test("rankt einen exakten Produkttitel am höchsten", () => {
-    const result = search("Kunststoffstopfen weiß").groups.products[0];
-    expect(result.document.id).toBe("local-product-filzgleiter-mit-stift");
+    const result = search("Filzgelenkgleiter").groups.products[0];
+    expect(result.document.id).toBe("local-product-felt-joint-1021");
     expect(result.matchKind).toBe("exact_title");
   });
 
   test("unterscheidet Titel-Prefix und Titel-Partial", () => {
-    expect(search("Filzgleiter für").groups.products[0].matchKind).toBe("title_prefix");
-    expect(search("Gestellgleiter").groups.products[0].document.url).toBe("/produkte/artikel/kunststoff-gestellgleiter");
-    expect(search("Gestellgleiter").groups.products[0].matchKind).toBe("title_partial");
+    expect(search("Kunststoffgleiter").groups.products[0].matchKind).toBe("title_prefix");
+    expect(search("Winkelgleiter").groups.products[0].document.url).toBe("/produkte/artikel/filz-winkelgleiter");
+    expect(search("Winkelgleiter").groups.products[0].matchKind).toBe("title_partial");
   });
 
   test("rankt eine exakte SKU vor allen anderen Treffern", () => {
@@ -70,7 +71,7 @@ test.describe("deterministische Search-Logik", () => {
   });
 
   test("toleriert eine einfache Tippvariante", () => {
-    expect(search("Filzgleitr").groups.products[0].document.title).toContain("Filzgleiter");
+    expect(search("Filzgelenkgleitr").groups.products[0].document.title).toBe("Filzgelenkgleiter");
   });
 
   test("liefert bei absurden Suchbegriffen deterministisch keine Treffer", () => {
@@ -79,9 +80,11 @@ test.describe("deterministische Search-Logik", () => {
     expect(result.groups).toEqual({ products: [], collections: [], help: [], knowledge: [] });
   });
 
-  test("promotet den Finder bei beratungsnahen Suchanfragen", () => {
-    expect(search("welcher gleiter").groups.help[0].document.id).toBe("help-glider-finder");
-    expect(search("stuhl messen").groups.help[0].document.url).toBe("/produkte/gleiter-finder");
+  test("veröffentlicht Beratung und keine Finder-Hilfe", () => {
+    const published = buildSearchIndex(publicCommerceProducts(localProducts, "production"), localCollectionRecords);
+    expect(published.some((entry) => entry.url.includes("gleiter-finder"))).toBe(false);
+    expect(searchIndex(published, "Beratung").groups.help.some((entry) => entry.document.url.startsWith("/kontakt"))).toBe(true);
+    expect(searchIndex(published, "DEV-RF-20").groups.products).toHaveLength(0);
   });
 
   test("kann Development-Dokumente für verified_only ausfiltern", () => {
@@ -97,24 +100,24 @@ test.describe("DLMNS Predictive Search", () => {
     await expect(input).toBeFocused();
     await input.fill("gleiter");
     await expect(page.getByRole("heading", { name: "Produkte", exact: true })).toBeVisible();
-    await page.locator("[data-search-result='local-product-filzgleiter-fuer-rundrohr']").click();
-    await expect(page).toHaveURL(/\/produkte\/artikel\/filzgleiter-fuer-rundrohr$/);
+    await page.locator("[data-search-result='local-product-felt-joint-1021']").click();
+    await expect(page).toHaveURL(/\/produkte\/artikel\/filzgelenkgleiter-modell-1021$/);
   });
 
   test("zeigt bei exakter SKU den richtigen Variantentreffer zuerst", async ({ page }) => {
     await page.goto("/produkte");
     await page.getByRole("button", { name: "Suchen", exact: true }).click();
-    await page.getByRole("combobox", { name: "Shop durchsuchen" }).fill("DEV-RF-20");
+    await page.getByRole("combobox", { name: "Shop durchsuchen" }).fill("A1021FG");
     const firstResult = page.locator("[data-search-result]").first();
-    await expect(firstResult).toHaveAttribute("data-search-result", "local-product-filzgleiter-fuer-rundrohr");
-    await expect(firstResult).toContainText("DEV-RF-20");
+    await expect(firstResult).toHaveAttribute("data-search-result", "local-product-felt-joint-1021");
+    await expect(firstResult).toContainText("A1021FG");
   });
 
-  test("führt bei Finder-Suche prominent zum Gleiter-Finder", async ({ page }) => {
+  test("führt bei Beratungsbedarf zur persönlichen Beratung", async ({ page }) => {
     await page.goto("/produkte");
     await page.getByRole("button", { name: "Suchen", exact: true }).click();
-    await page.getByRole("combobox", { name: "Shop durchsuchen" }).fill("welcher gleiter");
-    await expect(page.locator("[data-search-result='help-glider-finder']")).toBeVisible();
+    await page.getByRole("combobox", { name: "Shop durchsuchen" }).fill("Beratung");
+    await expect(page.locator("[data-search-result='help-personal-consultation']")).toBeVisible();
   });
 
   test("macht aus null Treffern keine Sackgasse", async ({ page }) => {
@@ -123,7 +126,7 @@ test.describe("DLMNS Predictive Search", () => {
     await page.getByRole("combobox", { name: "Shop durchsuchen" }).fill("qxzv-991-niemals");
     const emptyState = page.getByTestId("search-no-results");
     await expect(emptyState).toContainText("Nichts Passendes gefunden?");
-    await expect(emptyState.getByRole("link", { name: "Gleiter-Finder starten" })).toBeVisible();
+    await expect(emptyState.getByRole("link", { name: "Gleiter persönlich zuordnen" })).toBeVisible();
     await expect(emptyState.getByRole("link", { name: "Persönlich fragen" })).toBeVisible();
   });
 
@@ -142,8 +145,8 @@ test.describe("DLMNS Predictive Search", () => {
     test(`bleibt bei ${width}px ohne horizontalen Overflow nutzbar`, async ({ page }) => {
       await page.setViewportSize({ width, height: 720 });
       await page.goto("/produkte");
-      await page.getByRole("button", { name: "Suche öffnen" }).click();
-      await page.getByRole("combobox", { name: "Shop durchsuchen" }).fill("20 mm rund");
+      await page.getByRole("button", { name: "Suchen öffnen", exact: true }).click();
+      await page.getByRole("combobox", { name: "Shop durchsuchen" }).fill("Filzgelenkgleiter");
       await expect(page.getByTestId("search-overlay")).toBeVisible();
       await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       await expect(page.locator("[data-search-result]").first()).toBeVisible();
@@ -155,7 +158,7 @@ test.describe("DLMNS Predictive Search", () => {
     const trigger = page.getByRole("button", { name: "Suchen", exact: true });
     await trigger.click();
     const input = page.getByRole("combobox", { name: "Shop durchsuchen" });
-    await input.fill("DEV-RF-20");
+    await input.fill("A1021FG");
     await expect(page.locator("[data-search-result]").first()).toBeVisible();
     await input.press("ArrowDown");
     await expect(input).toHaveAttribute("aria-activedescendant", /search-option-/);
@@ -165,10 +168,10 @@ test.describe("DLMNS Predictive Search", () => {
 
     await trigger.click();
     const reopenedInput = page.getByRole("combobox", { name: "Shop durchsuchen" });
-    await reopenedInput.fill("DEV-RF-20");
+    await reopenedInput.fill("A1021FG");
     await expect(page.locator("[data-search-result]").first()).toBeVisible();
     await reopenedInput.press("ArrowDown");
     await reopenedInput.press("Enter");
-    await expect(page).toHaveURL(/\/produkte\/artikel\/filzgleiter-fuer-rundrohr$/);
+    await expect(page).toHaveURL(/\/produkte\/artikel\/filzgelenkgleiter-modell-1021$/);
   });
 });

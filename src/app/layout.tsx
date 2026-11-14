@@ -22,6 +22,7 @@ export const metadata: Metadata = {
   },
   description: defaultDescription,
   applicationName: siteName,
+  icons: { icon: [{ url: "/favicon.png", type: "image/png", sizes: "96x96" }] },
   keywords: [
     "Stapelstühle",
     "Klapptische",
@@ -45,8 +46,6 @@ export const metadata: Metadata = {
     images: [
       {
         url: absoluteUrl(defaultOgImage),
-        width: 1200,
-        height: 630,
         alt: defaultTitle,
       },
     ],
@@ -60,6 +59,7 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    "max-image-preview": "large",
   },
 };
 

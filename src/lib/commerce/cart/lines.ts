@@ -52,6 +52,7 @@ export function cartLineFromProduct({
   finderContext,
   selectedAddonSkus = [],
   variantTitle,
+  technicalInquiry,
 }: {
   product: CommerceProduct;
   variant: CommerceProductVariant;
@@ -60,6 +61,7 @@ export function cartLineFromProduct({
   finderContext?: CommerceFinderCartContext;
   selectedAddonSkus?: string[];
   variantTitle?: string;
+  technicalInquiry?: string;
 }): CartInputLine {
   const rules = cartQuantityRules(product, variant);
   const compatibleAddonSkus = product.stackingChair
@@ -76,6 +78,7 @@ export function cartLineFromProduct({
       && (tier.maximumQuantity === null || quantity <= tier.maximumQuantity),
   )?.price ?? priceForQuantity(variant, quantity);
   return {
+    ...(technicalInquiry ? { technicalInquiry } : {}),
     productId: product.id,
     productHandle: product.handle,
     productTitle: product.title,

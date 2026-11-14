@@ -114,10 +114,12 @@ export async function readJsonBody(request: Request, maximumBytes: number): Prom
 }
 
 function redisConfiguration() {
-  const url = process.env.FORM_PROTECTION_REST_URL?.trim()
-    || process.env.UPSTASH_REDIS_REST_URL?.trim();
-  const token = process.env.FORM_PROTECTION_REST_TOKEN?.trim()
-    || process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+  // Never combine a URL from one configuration pair with another pair's token.
+  const customUrl = process.env.FORM_PROTECTION_REST_URL?.trim();
+  const customToken = process.env.FORM_PROTECTION_REST_TOKEN?.trim();
+  const customSelected = Boolean(customUrl || customToken);
+  const url = customSelected ? customUrl : process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const token = customSelected ? customToken : process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
   if (!url || !token) {
     throw new FormProtectionError("configuration", "REDIS_NOT_CONFIGURED");
   }

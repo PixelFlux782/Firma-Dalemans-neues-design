@@ -118,10 +118,10 @@ const table310Images = [
   image("/neue bilder/Tische/klapptisch-310c/310c-02-perspektive.webp", "Klapptisch Modell 310c mit Gestell K3 aus erhöhter Perspektive"),
   image("/neue bilder/Tische/klapptisch-310c/310c-03-seitenansicht.webp", "Klapptisch Modell 310c mit Gestell K3 in seitlicher Perspektive"),
 ];
-const seminarImage = image("/images/curated/Tische/T210cdetail.webp", "Seminarklapptisch Modell 210c");
+const seminarImage = image("/neue bilder/Tische/t210.webp", "Seminarklapptisch Modell 210c mit heller Tischplatte und zwei Metallkufen");
 const seminarImages = [
   seminarImage,
-  image("/neue bilder/Tische/t210.png", "Seminarklapptisch Modell 210c in einer weiteren Ansicht"),
+  image("/images/curated/Tische/T210cdetail.webp", "Seminarklapptisch Modell 210c – Detail gestapelter Tischplatten"),
 ];
 const trapezoidImage = image("/images/curated/Tische/Trapezklapptisch_Klapptische_trapez_klappbar.webp", "Trapez-Klapptisch Modell 310c");
 
@@ -130,11 +130,11 @@ const lecternAImages = [
   image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypA.png", "Rednerpult Typ A aus Plexiglas und Acrylglas, weitere Ansicht"),
 ];
 const lecternEImages = [
-  image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypE_1.png", "Rednerpult aus Plexiglas und Acrylglas, Typ E"),
+  image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypE_1.webp", "Rednerpult aus Plexiglas und Acrylglas, Typ E"),
   image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypE.png", "Rednerpult Typ E aus Plexiglas und Acrylglas, weitere Ansicht"),
 ];
 const lecternAhImages = [
-  image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypAH_1.png", "Rednerpult Typ AH aus massiver Furnierplatte"),
+  image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypAH_1.webp", "Rednerpult Typ AH aus massiver Furnierplatte"),
   image("/neue bilder/Rednerpulte/Rednerpult_Acrylglas_Plexiglas_TypAH_2.png", "Rednerpult Typ AH aus massiver Furnierplatte, weitere Ansicht"),
 ];
 

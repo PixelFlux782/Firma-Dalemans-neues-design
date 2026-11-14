@@ -45,11 +45,11 @@ test.describe("Shop-Schnellnavigation", () => {
     await tables.click();
     await expect(nav.getByRole("link", { name: "Modell 310" })).toBeVisible();
 
-    await nav.getByRole("button", { name: "Suche" }).click();
+    await page.locator("header").getByTestId("search-trigger").filter({ visible: true }).click();
     await expect(page.getByTestId("search-overlay")).toBeVisible();
     await page.getByRole("button", { name: "Suche schließen" }).click();
 
-    await nav.locator("[data-testid='cart-trigger']:visible").click();
+    await page.locator("header").getByTestId("cart-trigger").filter({ visible: true }).click();
     await expect(page.getByTestId("cart-drawer")).toBeVisible();
     await page.getByRole("button", { name: "Warenkorb schließen" }).click();
 
@@ -73,7 +73,8 @@ test.describe("Shop-Schnellnavigation", () => {
     await nav.getByRole("button", { name: "Sortiment" }).click();
     const drawer = page.getByRole("dialog", { name: "Sortiment" });
     await expect(drawer).toBeVisible();
-    await drawer.getByRole("link", { name: "Gleiter & Bodenschutz" }).click();
+    await drawer.locator("summary").filter({ hasText: "Gleiter" }).click();
+    await drawer.getByRole("link", { name: "Alle Gleiter ansehen" }).click();
     await expect(page).toHaveURL(/\/produkte\/sortiment\/gleiter-bodenschutz$/);
     await expect(drawer).toHaveCount(0);
   });

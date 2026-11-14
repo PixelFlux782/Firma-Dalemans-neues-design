@@ -88,6 +88,7 @@ export async function POST(request: Request) {
         host: process.env.CONTACT_SMTP_HOST,
         port,
         secure: secureValue === "true",
+        requireTLS: secureValue !== "true",
         auth: { user: process.env.CONTACT_SMTP_USER, pass: process.env.CONTACT_SMTP_PASSWORD },
         connectionTimeout: 10_000,
         greetingTimeout: 10_000,

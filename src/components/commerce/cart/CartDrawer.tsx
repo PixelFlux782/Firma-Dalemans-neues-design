@@ -1,5 +1,7 @@
 "use client";
 
+import { shippingNotice } from "@/lib/consumer-information";
+
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -149,6 +151,7 @@ export default function CartDrawer() {
                   <dd>{priceLabel}</dd>
                 </div>
               </dl>
+              <p className="mt-3 text-xs leading-5 text-premium-muted">{shippingNotice}</p>
               {isInquiryMode ? (
                 <p className="mt-4 rounded-2xl bg-white/65 px-4 py-3 text-xs leading-5 text-premium-muted">
                   Ihre Produktauswahl ist noch keine Bestellung. Sie können daraus unverbindlich ein persönliches Angebot bei Dalemans anfragen.
@@ -177,7 +180,7 @@ export default function CartDrawer() {
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center px-7 py-10 text-center">
             <p className="font-display text-3xl font-medium text-premium-ink">Noch nichts ausgewählt.</p>
-            <p className="mt-4 max-w-sm text-sm leading-7 text-premium-muted">Entdecken Sie in Ruhe das Sortiment oder lassen Sie sich vom Gleiter-Finder zur passenden Ausführung führen.</p>
+            <p className="mt-4 max-w-sm text-sm leading-7 text-premium-muted">Entdecken Sie in Ruhe das Sortiment oder lassen Sie sich persönlich zur passenden Ausführung beraten.</p>
             <div className="mt-8 flex w-full max-w-sm flex-col gap-3">
               <Link href="/produkte" onClick={closeCart} className="btn-primary">Produkte entdecken</Link>
               <Link href="/kontakt?anliegen=Gleiter-Beratung" onClick={closeCart} className="btn-secondary">Gleiter persönlich zuordnen</Link>

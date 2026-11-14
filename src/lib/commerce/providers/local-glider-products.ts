@@ -102,18 +102,18 @@ const standardImages = [
   image("zubehör-stopfen-weiß.png", "Kunststoffgleiter Standard in zweiter Ansicht"),
 ];
 
-export const localGliderProducts: CommerceProduct[] = [
+const gliderRecords: CommerceProduct[] = [
   gliderProduct({
     id: "plastic-standard",
     handle: "kunststoff-gestellgleiter",
     title: "Kunststoffgleiter Standard",
     articleNumber: "GSTGL",
-    description: "Kunststoff-Stuhlgleiter für 20-mm-Stahlrohr, 15° abgeschrägt, mit 10 mm Gleiterhöhe in transparenter Ausführung.",
+    description: "Kunststoff-Stuhlgleiter für 20-mm-Stahlrohr, 12° abgeschrägt, mit 10 mm Gleiterhöhe in transparenter Ausführung.",
     images: standardImages,
     specifications: [
       { name: "Material", value: "Kunststoff" },
       { name: "Rohr", value: "Stahlrohr, 20 mm" },
-      { name: "Winkel", value: "15° abgeschrägt" },
+      { name: "Winkel", value: "12° abgeschrägt" },
       { name: "Gleiterhöhe", value: "10 mm" },
       { name: "Farbe", value: "transparent" },
     ],
@@ -133,7 +133,6 @@ export const localGliderProducts: CommerceProduct[] = [
     ],
     compatibility: ["Stapelstuhl Modell 1021"],
     suitableFor: ["Stapelstuhl Modell 1021", "empfindliche Hartböden"],
-    notes: ["Die Artikelnummer A1021FG ist in der Datentabelle auch dem Gelenkgleiter für Teppichboden zugeordnet."],
   }),
   gliderProduct({
     id: "carpet-joint-1021",
@@ -145,7 +144,6 @@ export const localGliderProducts: CommerceProduct[] = [
     specifications: [{ name: "Gleitfläche", value: "Metall" }, { name: "Bodeneignung", value: "Teppichboden" }],
     compatibility: [],
     suitableFor: ["Teppichboden"],
-    notes: ["Die Artikelnummer A1021FG ist in der Datentabelle auch dem Filzgelenkgleiter für Modell 1021 zugeordnet."],
   }),
   gliderProduct({
     id: "felt-angle-310",
@@ -196,3 +194,23 @@ export const localGliderProducts: CommerceProduct[] = [
 export const chairGliderCompatibility: Record<string, readonly string[]> = {
   "1021": ["filzgelenkgleiter-modell-1021"],
 };
+
+// Keep the historical surcharge record above for references, never as an offer.
+export const localGliderProducts: CommerceProduct[] = gliderRecords
+  .filter((product) => product.id !== "local-product-carpet-joint-1021")
+  .map((product) => {
+    const prices: Record<string, string> = { GSTGL: "1.36", A1021FG: "6.90", ZGGF30: "16.00", A1021NG: "8.00", A1021NGK: "6.40" };
+    const base = product.variants[0];
+    const price = { amount: prices[base.sku!], currencyCode: "EUR" };
+    const priced = { ...base, price, priceStatus: "fixed" as const, priceDataStatus: "verified" as const,
+      availabilityNote: "Verfügbarkeit und Lieferzeit klären wir persönlich." };
+    return { ...product, priceRange: { min: price, max: price }, priceStatus: "fixed" as const,
+      availabilityNote: priced.availabilityNote,
+      specifications: product.specifications.filter((spec) => spec.name !== "Preis und Verfügbarkeit"),
+      notes: product.notes.filter((note) => !note.startsWith("Preis und Verfügbarkeit")),
+      variants: base.sku === "A1021NG" ? ["Natur", "Braun"].map((color) => ({ ...priced,
+        id: `${base.id}-${color.toLowerCase()}`, title: `${setLabel} - Farbe: ${color.toUpperCase()}`,
+        selectedOptions: [...base.selectedOptions, { name: "Farbe", value: color }],
+      })) : [priced],
+    };
+  });

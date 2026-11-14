@@ -46,9 +46,11 @@ export function Footer() {
           <p className="mt-5 max-w-sm text-sm leading-7 text-white/55">
             Persönlich geplante Ausstattung für Gemeinden, Säle und flexible Räume – seit 1994.
           </p>
+          <p className="mt-5 text-sm leading-7">{company.name}<br />{company.address.streetAddress}<br />{company.address.postalCode} {company.address.addressLocality}</p>
           <div className="mt-5 grid gap-2 text-sm">
-            <a href="tel:+499342915353" className="font-medium text-white transition hover:text-premium-sand">+49 9342 9153-53</a>
-            <a href="mailto:info@dalemans.de" className="font-medium text-white transition hover:text-premium-sand">info@dalemans.de</a>
+            <a href={company.mobileHref} className="font-medium text-white transition hover:text-premium-sand">{company.mobile}</a>
+            <a href={company.telephoneHref} className="font-medium text-white transition hover:text-premium-sand">{company.telephone}</a>
+            <a href={company.emailHref} className="font-medium text-white transition hover:text-premium-sand">{company.email}</a>
           </div>
         </div>
 
@@ -60,6 +62,8 @@ export function Footer() {
           <div className="mt-4 grid gap-3 text-sm">
             <FooterLink href="/impressum" label="Impressum" />
             <FooterLink href="/datenschutz" label="Datenschutz" />
+            <FooterLink href="/agb" label="AGB" />
+            <FooterLink href="/widerruf" label="Widerruf" />
           </div>
         </div>
       </div>
@@ -67,7 +71,9 @@ export function Footer() {
       <div className="border-t border-white/10">
         <div className="container-premium flex flex-col gap-2 py-5 text-xs text-white/60 md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} Dalemans. Alle Rechte vorbehalten.</p>
-          <p>Familienbetrieb für Gemeinde-, Saal- und Veranstaltungsmobiliar.</p>
+          <a href="https://stapelstuhl-klapptisch.de/" className="transition hover:text-white focus-visible:outline-none focus-visible:text-white focus-visible:underline focus-visible:underline-offset-4">
+            Unsere bisherige Webseite
+          </a>
         </div>
       </div>
     </footer>

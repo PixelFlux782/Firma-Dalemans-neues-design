@@ -11,7 +11,7 @@ export const metadata: Metadata = buildMetadata({
   title: "Stapelstühle für flexible Räume",
   description: "Fünf Stapelstuhlmodelle vergleichen, Polsterung und Reihenverbindung wählen und persönlich zu Menge, Musterstuhl und Raumplanung beraten lassen.",
   path,
-  image: "/images/curated/Stapelstühle/1021c.webp",
+  image: "/images/kategorien/stapelstuehle-bestuhlung.webp",
   keywords: ["Stapelstühle", "Stapelstühle Gemeinden", "Stapelstühle Kirchen", "Reihenverbindung", "gepolsterte Stapelstühle"],
 });
 
@@ -25,6 +25,7 @@ export default async function StackingChairsPage() {
         "@type": "ItemList",
         "@id": absoluteUrl(`${path}#modelle`),
         name: "DLMNS Stapelstuhlmodelle",
+        image: absoluteUrl("/images/kategorien/stapelstuehle-bestuhlung.webp"),
         url: absoluteUrl(path),
         numberOfItems: products.length,
         itemListElement: products.map((product, index) => ({
@@ -33,14 +34,6 @@ export default async function StackingChairsPage() {
           name: product.title,
           url: absoluteUrl(`${path}/${product.handle}`),
         })),
-      },
-      {
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Start", item: absoluteUrl("/") },
-          { "@type": "ListItem", position: 2, name: "Produkte", item: absoluteUrl("/produkte") },
-          { "@type": "ListItem", position: 3, name: "Stapelstühle", item: absoluteUrl(path) },
-        ],
       },
       {
         "@type": "FAQPage",

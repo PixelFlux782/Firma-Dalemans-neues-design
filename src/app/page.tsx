@@ -9,16 +9,21 @@ import HeroCarousel from "@/components/home/HeroCarousel";
 import HomeProductRange from "@/components/home/HomeProductRange";
 import ProductVisual from "@/components/ProductVisual";
 import { absoluteUrl, buildMetadata } from "@/lib/seo";
-import { organizationStructuredData } from "@/lib/company";
+import { company, organizationStructuredData } from "@/lib/company";
 
-export const metadata: Metadata = buildMetadata({
-  title: "Flexible Ausstattung für Gemeinderäume",
+const homeTitle = "Dalemans – Stapelstühle & Klapptische seit 1994";
+
+export const metadata: Metadata = {
+  ...buildMetadata({
+  title: homeTitle,
   description:
-    "Wir planen Stapelstühle, Klapptische, Raumaufteilung, Transport und langfristige Ausstattung für Gemeinden und flexible Räume – persönlich seit 1994.",
+    "Stapelstühle, Klapptische und Raumplanung für Gemeinden, Kirchen und Vereine. Seit 1994 Ihr Partner für langlebige Ausstattung und persönliche Beratung.",
   path: "/",
-  image: "/images/referenzen/gemeindesaal-referenz.webp",
+  image: "/images/optimized/hero/klapptische-hero.webp",
   keywords: ["Stapelstühle für Gemeinden", "Klapptische für Gemeinden", "Bestuhlungsplanung", "flexible Gemeinderäume"],
-});
+  }),
+  title: { absolute: homeTitle },
+};
 
 const entries = [
   { title: "Produkte auswählen", text: "Sie wissen schon, ob Stühle, Tische oder Zubehör fehlen.", href: "/produkte", label: "Produktgruppen öffnen" },
@@ -47,7 +52,7 @@ const process = [
 export default function HomePage() {
   return (
     <div className="page-stack">
-      <StructuredData data={{ "@context": "https://schema.org", "@graph": [organizationStructuredData, { "@type": "WebSite", name: "Dalemans Stapelstühle & Klapptische", url: absoluteUrl("/") }] }} />
+      <StructuredData data={{ "@context": "https://schema.org", "@graph": [organizationStructuredData, { "@type": "WebSite", "@id": company.websiteId, publisher: { "@id": company.organizationId }, name: "Dalemans Stapelstühle & Klapptische", url: absoluteUrl("/") }] }} />
 
       <section className="hero-architectural relative -mx-5 bg-premium-highlight sm:-mx-6 md:mx-0">
         <div className="grid lg:min-h-[min(72vh,720px)] lg:grid-cols-[.88fr_1.12fr]">
